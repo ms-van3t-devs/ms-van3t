@@ -1,0 +1,418 @@
+ASN_MODULE_SOURCES=	\
+	CAM.c	\
+	CoopAwareness.c	\
+	CamParameters.c	\
+	HighFrequencyContainer.c	\
+	LowFrequencyContainer.c	\
+	SpecialVehicleContainer.c	\
+	BasicContainer.c	\
+	BasicVehicleContainerHighFrequency.c	\
+	BasicVehicleContainerLowFrequency.c	\
+	PublicTransportContainer.c	\
+	SpecialTransportContainer.c	\
+	DangerousGoodsContainer.c	\
+	RoadWorksContainerBasic.c	\
+	RescueContainer.c	\
+	EmergencyContainer.c	\
+	SafetyCarContainer.c	\
+	RSUContainerHighFrequency.c	\
+	GenerationDeltaTime.c	\
+	ItsPduHeader.c	\
+	StationID.c	\
+	ReferencePosition.c	\
+	DeltaReferencePosition.c	\
+	Longitude.c	\
+	Latitude.c	\
+	Altitude.c	\
+	AltitudeValue.c	\
+	AltitudeConfidence.c	\
+	DeltaLongitude.c	\
+	DeltaLatitude.c	\
+	DeltaAltitude.c	\
+	PosConfidenceEllipse.c	\
+	PathPoint.c	\
+	PathDeltaTime.c	\
+	PtActivation.c	\
+	PtActivationType.c	\
+	PtActivationData.c	\
+	AccelerationControl.c	\
+	SemiAxisLength.c	\
+	CauseCode.c	\
+	CauseCodeType.c	\
+	SubCauseCodeType.c	\
+	TrafficConditionSubCauseCode.c	\
+	AccidentSubCauseCode.c	\
+	RoadworksSubCauseCode.c	\
+	HumanPresenceOnTheRoadSubCauseCode.c	\
+	WrongWayDrivingSubCauseCode.c	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.c	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.c	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.c	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.c	\
+	SlowVehicleSubCauseCode.c	\
+	StationaryVehicleSubCauseCode.c	\
+	HumanProblemSubCauseCode.c	\
+	EmergencyVehicleApproachingSubCauseCode.c	\
+	HazardousLocation-DangerousCurveSubCauseCode.c	\
+	HazardousLocation-SurfaceConditionSubCauseCode.c	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.c	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.c	\
+	CollisionRiskSubCauseCode.c	\
+	SignalViolationSubCauseCode.c	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.c	\
+	DangerousEndOfQueueSubCauseCode.c	\
+	DangerousSituationSubCauseCode.c	\
+	VehicleBreakdownSubCauseCode.c	\
+	PostCrashSubCauseCode.c	\
+	Curvature.c	\
+	CurvatureValue.c	\
+	CurvatureConfidence.c	\
+	CurvatureCalculationMode.c	\
+	Heading.c	\
+	HeadingValue.c	\
+	HeadingConfidence.c	\
+	LanePosition.c	\
+	ClosedLanes.c	\
+	HardShoulderStatus.c	\
+	DrivingLaneStatus.c	\
+	PerformanceClass.c	\
+	SpeedValue.c	\
+	SpeedConfidence.c	\
+	VehicleMass.c	\
+	Speed.c	\
+	DriveDirection.c	\
+	EmbarkationStatus.c	\
+	LongitudinalAcceleration.c	\
+	LongitudinalAccelerationValue.c	\
+	AccelerationConfidence.c	\
+	LateralAcceleration.c	\
+	LateralAccelerationValue.c	\
+	VerticalAcceleration.c	\
+	VerticalAccelerationValue.c	\
+	StationType.c	\
+	ExteriorLights.c	\
+	DangerousGoodsBasic.c	\
+	DangerousGoodsExtended.c	\
+	SpecialTransportType.c	\
+	LightBarSirenInUse.c	\
+	HeightLonCarr.c	\
+	PosLonCarr.c	\
+	PosPillar.c	\
+	PosCentMass.c	\
+	RequestResponseIndication.c	\
+	SpeedLimit.c	\
+	StationarySince.c	\
+	Temperature.c	\
+	TrafficRule.c	\
+	WheelBaseVehicle.c	\
+	TurningRadius.c	\
+	PosFrontAx.c	\
+	PositionOfOccupants.c	\
+	PositioningSolutionType.c	\
+	VehicleIdentification.c	\
+	WMInumber.c	\
+	VDS.c	\
+	EnergyStorageType.c	\
+	VehicleLength.c	\
+	VehicleLengthValue.c	\
+	VehicleLengthConfidenceIndication.c	\
+	VehicleWidth.c	\
+	PathHistory.c	\
+	EmergencyPriority.c	\
+	InformationQuality.c	\
+	RoadType.c	\
+	SteeringWheelAngle.c	\
+	SteeringWheelAngleValue.c	\
+	SteeringWheelAngleConfidence.c	\
+	TimestampIts.c	\
+	VehicleRole.c	\
+	YawRate.c	\
+	YawRateValue.c	\
+	YawRateConfidence.c	\
+	ProtectedZoneType.c	\
+	RelevanceDistance.c	\
+	RelevanceTrafficDirection.c	\
+	TransmissionInterval.c	\
+	ValidityDuration.c	\
+	ActionID.c	\
+	ItineraryPath.c	\
+	ProtectedCommunicationZone.c	\
+	Traces.c	\
+	NumberOfOccupants.c	\
+	SequenceNumber.c	\
+	PositionOfPillars.c	\
+	RestrictedTypes.c	\
+	EventHistory.c	\
+	EventPoint.c	\
+	ProtectedCommunicationZonesRSU.c	\
+	CenDsrcTollingZone.c	\
+	ProtectedZoneRadius.c	\
+	ProtectedZoneID.c	\
+	CenDsrcTollingZoneID.c	\
+	DENM.c	\
+	DecentralizedEnvironmentalNotificationMessage.c	\
+	ManagementContainer.c	\
+	SituationContainer.c	\
+	LocationContainer.c	\
+	ImpactReductionContainer.c	\
+	RoadWorksContainerExtended.c	\
+	StationaryVehicleContainer.c	\
+	AlacarteContainer.c	\
+	Termination.c	\
+	ReferenceDenms.c
+
+ASN_MODULE_HEADERS=	\
+	CAM.h	\
+	CoopAwareness.h	\
+	CamParameters.h	\
+	HighFrequencyContainer.h	\
+	LowFrequencyContainer.h	\
+	SpecialVehicleContainer.h	\
+	BasicContainer.h	\
+	BasicVehicleContainerHighFrequency.h	\
+	BasicVehicleContainerLowFrequency.h	\
+	PublicTransportContainer.h	\
+	SpecialTransportContainer.h	\
+	DangerousGoodsContainer.h	\
+	RoadWorksContainerBasic.h	\
+	RescueContainer.h	\
+	EmergencyContainer.h	\
+	SafetyCarContainer.h	\
+	RSUContainerHighFrequency.h	\
+	GenerationDeltaTime.h	\
+	ItsPduHeader.h	\
+	StationID.h	\
+	ReferencePosition.h	\
+	DeltaReferencePosition.h	\
+	Longitude.h	\
+	Latitude.h	\
+	Altitude.h	\
+	AltitudeValue.h	\
+	AltitudeConfidence.h	\
+	DeltaLongitude.h	\
+	DeltaLatitude.h	\
+	DeltaAltitude.h	\
+	PosConfidenceEllipse.h	\
+	PathPoint.h	\
+	PathDeltaTime.h	\
+	PtActivation.h	\
+	PtActivationType.h	\
+	PtActivationData.h	\
+	AccelerationControl.h	\
+	SemiAxisLength.h	\
+	CauseCode.h	\
+	CauseCodeType.h	\
+	SubCauseCodeType.h	\
+	TrafficConditionSubCauseCode.h	\
+	AccidentSubCauseCode.h	\
+	RoadworksSubCauseCode.h	\
+	HumanPresenceOnTheRoadSubCauseCode.h	\
+	WrongWayDrivingSubCauseCode.h	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.h	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.h	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.h	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.h	\
+	SlowVehicleSubCauseCode.h	\
+	StationaryVehicleSubCauseCode.h	\
+	HumanProblemSubCauseCode.h	\
+	EmergencyVehicleApproachingSubCauseCode.h	\
+	HazardousLocation-DangerousCurveSubCauseCode.h	\
+	HazardousLocation-SurfaceConditionSubCauseCode.h	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.h	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.h	\
+	CollisionRiskSubCauseCode.h	\
+	SignalViolationSubCauseCode.h	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.h	\
+	DangerousEndOfQueueSubCauseCode.h	\
+	DangerousSituationSubCauseCode.h	\
+	VehicleBreakdownSubCauseCode.h	\
+	PostCrashSubCauseCode.h	\
+	Curvature.h	\
+	CurvatureValue.h	\
+	CurvatureConfidence.h	\
+	CurvatureCalculationMode.h	\
+	Heading.h	\
+	HeadingValue.h	\
+	HeadingConfidence.h	\
+	LanePosition.h	\
+	ClosedLanes.h	\
+	HardShoulderStatus.h	\
+	DrivingLaneStatus.h	\
+	PerformanceClass.h	\
+	SpeedValue.h	\
+	SpeedConfidence.h	\
+	VehicleMass.h	\
+	Speed.h	\
+	DriveDirection.h	\
+	EmbarkationStatus.h	\
+	LongitudinalAcceleration.h	\
+	LongitudinalAccelerationValue.h	\
+	AccelerationConfidence.h	\
+	LateralAcceleration.h	\
+	LateralAccelerationValue.h	\
+	VerticalAcceleration.h	\
+	VerticalAccelerationValue.h	\
+	StationType.h	\
+	ExteriorLights.h	\
+	DangerousGoodsBasic.h	\
+	DangerousGoodsExtended.h	\
+	SpecialTransportType.h	\
+	LightBarSirenInUse.h	\
+	HeightLonCarr.h	\
+	PosLonCarr.h	\
+	PosPillar.h	\
+	PosCentMass.h	\
+	RequestResponseIndication.h	\
+	SpeedLimit.h	\
+	StationarySince.h	\
+	Temperature.h	\
+	TrafficRule.h	\
+	WheelBaseVehicle.h	\
+	TurningRadius.h	\
+	PosFrontAx.h	\
+	PositionOfOccupants.h	\
+	PositioningSolutionType.h	\
+	VehicleIdentification.h	\
+	WMInumber.h	\
+	VDS.h	\
+	EnergyStorageType.h	\
+	VehicleLength.h	\
+	VehicleLengthValue.h	\
+	VehicleLengthConfidenceIndication.h	\
+	VehicleWidth.h	\
+	PathHistory.h	\
+	EmergencyPriority.h	\
+	InformationQuality.h	\
+	RoadType.h	\
+	SteeringWheelAngle.h	\
+	SteeringWheelAngleValue.h	\
+	SteeringWheelAngleConfidence.h	\
+	TimestampIts.h	\
+	VehicleRole.h	\
+	YawRate.h	\
+	YawRateValue.h	\
+	YawRateConfidence.h	\
+	ProtectedZoneType.h	\
+	RelevanceDistance.h	\
+	RelevanceTrafficDirection.h	\
+	TransmissionInterval.h	\
+	ValidityDuration.h	\
+	ActionID.h	\
+	ItineraryPath.h	\
+	ProtectedCommunicationZone.h	\
+	Traces.h	\
+	NumberOfOccupants.h	\
+	SequenceNumber.h	\
+	PositionOfPillars.h	\
+	RestrictedTypes.h	\
+	EventHistory.h	\
+	EventPoint.h	\
+	ProtectedCommunicationZonesRSU.h	\
+	CenDsrcTollingZone.h	\
+	ProtectedZoneRadius.h	\
+	ProtectedZoneID.h	\
+	CenDsrcTollingZoneID.h	\
+	DENM.h	\
+	DecentralizedEnvironmentalNotificationMessage.h	\
+	ManagementContainer.h	\
+	SituationContainer.h	\
+	LocationContainer.h	\
+	ImpactReductionContainer.h	\
+	RoadWorksContainerExtended.h	\
+	StationaryVehicleContainer.h	\
+	AlacarteContainer.h	\
+	Termination.h	\
+	ReferenceDenms.h
+
+ASN_MODULE_HEADERS+=UTF8String.h
+ASN_MODULE_HEADERS+=BOOLEAN.h
+ASN_MODULE_SOURCES+=BOOLEAN.c
+ASN_MODULE_HEADERS+=INTEGER.h
+ASN_MODULE_HEADERS+=NativeEnumerated.h
+ASN_MODULE_HEADERS+=IA5String.h
+ASN_MODULE_SOURCES+=IA5String.c
+ASN_MODULE_SOURCES+=INTEGER.c
+ASN_MODULE_SOURCES+=NativeEnumerated.c
+ASN_MODULE_HEADERS+=NativeInteger.h
+ASN_MODULE_SOURCES+=NativeInteger.c
+ASN_MODULE_SOURCES+=UTF8String.c
+ASN_MODULE_HEADERS+=asn_SEQUENCE_OF.h
+ASN_MODULE_SOURCES+=asn_SEQUENCE_OF.c
+ASN_MODULE_HEADERS+=asn_SET_OF.h
+ASN_MODULE_SOURCES+=asn_SET_OF.c
+ASN_MODULE_HEADERS+=constr_CHOICE.h
+ASN_MODULE_SOURCES+=constr_CHOICE.c
+ASN_MODULE_HEADERS+=constr_SEQUENCE.h
+ASN_MODULE_SOURCES+=constr_SEQUENCE.c
+ASN_MODULE_HEADERS+=constr_SEQUENCE_OF.h
+ASN_MODULE_SOURCES+=constr_SEQUENCE_OF.c
+ASN_MODULE_HEADERS+=constr_SET_OF.h
+ASN_MODULE_SOURCES+=constr_SET_OF.c
+ASN_MODULE_HEADERS+=asn_application.h
+ASN_MODULE_HEADERS+=asn_system.h
+ASN_MODULE_HEADERS+=asn_codecs.h
+ASN_MODULE_HEADERS+=asn_internal.h
+ASN_MODULE_HEADERS+=OCTET_STRING.h
+ASN_MODULE_SOURCES+=OCTET_STRING.c
+ASN_MODULE_HEADERS+=BIT_STRING.h
+ASN_MODULE_SOURCES+=BIT_STRING.c
+ASN_MODULE_SOURCES+=asn_codecs_prim.c
+ASN_MODULE_HEADERS+=asn_codecs_prim.h
+ASN_MODULE_HEADERS+=ber_tlv_length.h
+ASN_MODULE_SOURCES+=ber_tlv_length.c
+ASN_MODULE_HEADERS+=ber_tlv_tag.h
+ASN_MODULE_SOURCES+=ber_tlv_tag.c
+ASN_MODULE_HEADERS+=ber_decoder.h
+ASN_MODULE_SOURCES+=ber_decoder.c
+ASN_MODULE_HEADERS+=der_encoder.h
+ASN_MODULE_SOURCES+=der_encoder.c
+ASN_MODULE_HEADERS+=constr_TYPE.h
+ASN_MODULE_SOURCES+=constr_TYPE.c
+ASN_MODULE_HEADERS+=constraints.h
+ASN_MODULE_SOURCES+=constraints.c
+ASN_MODULE_HEADERS+=xer_support.h
+ASN_MODULE_SOURCES+=xer_support.c
+ASN_MODULE_HEADERS+=xer_decoder.h
+ASN_MODULE_SOURCES+=xer_decoder.c
+ASN_MODULE_HEADERS+=xer_encoder.h
+ASN_MODULE_SOURCES+=xer_encoder.c
+ASN_MODULE_HEADERS+=per_support.h
+ASN_MODULE_SOURCES+=per_support.c
+ASN_MODULE_HEADERS+=per_decoder.h
+ASN_MODULE_SOURCES+=per_decoder.c
+ASN_MODULE_HEADERS+=per_encoder.h
+ASN_MODULE_SOURCES+=per_encoder.c
+ASN_MODULE_HEADERS+=per_opentype.h
+ASN_MODULE_SOURCES+=per_opentype.c
+ASN_CONVERTER_SOURCES+=converter-sample.c
+
+
+lib_LTLIBRARIES=libsomething.la
+libsomething_la_SOURCES=$(ASN_MODULE_SOURCES) $(ASN_MODULE_HEADERS)
+
+# This file may be used as an input for make(3)
+# Remove the lines below to convert it into a pure .am file
+TARGET = progname
+CFLAGS += -I.
+OBJS=${ASN_MODULE_SOURCES:.c=.o} ${ASN_CONVERTER_SOURCES:.c=.o}
+
+all: $(TARGET)
+
+$(TARGET): ${OBJS}
+	$(CC) $(CFLAGS) -o $(TARGET) ${OBJS} $(LDFLAGS) $(LIBS)
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+clean:
+	rm -f $(TARGET)
+	rm -f $(OBJS)
+
+regen: regenerate-from-asn1-source
+
+regenerate-from-asn1-source:
+	asn1c -fincludes-quoted -gen-PER CAMdef.asn1 ITS_Container.asn1 DENMdef.asn1
+
