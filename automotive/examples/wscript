@@ -1,9 +1,6 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-    obj = bld.create_ns3_program('v2i-80211p-sandbox', ['automotive', 'wave', 'netanim', 'traci'])
-    obj.source = 'v2i-80211p-sandbox.cc'
-
     obj = bld.create_ns3_program('v2i-lte-sandbox', ['automotive', 'lte', 'netanim', 'traci'])
     obj.source = 'v2i-lte-sandbox.cc'    
 

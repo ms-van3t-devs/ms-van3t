@@ -57,9 +57,19 @@ namespace ns3
   std::pair <double, double> XY2LongLat(double x, double y)
   {
      /* TODO: convert from xy to lonlat */
-    x=0;
-    y=0;
-     return std::pair <double, double> (x, y);
+    double z = 0; //altitude
+    double r = 6371000; //Earth radius in mt
+    double lat = asin(z/r);
+    double lon = 0;
+    if (x>0)
+      {
+        lon=2*atan(y/(sqrt(pow(x,2)+pow(y,2))+x));
+      }
+    else
+      {
+        lon=2*atan((sqrt(pow(x,2)+pow(y,2))-x)/y);
+      }
+     return std::pair <double, double> (lon, lat);
   }
 
   long setConfidence(double confidence, const int defConfidence, double value, const int defValue)
