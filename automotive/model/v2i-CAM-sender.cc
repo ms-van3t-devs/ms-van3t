@@ -136,6 +136,11 @@ namespace ns3
             StringValue("10.0.0.1"),
             MakeStringAccessor (&CAMSender::m_server_addr),
             MakeStringChecker ())
+        .AddAttribute ("CAMIntertime",
+            "Time between two consecutive CAMs",
+            DoubleValue(0.1),
+            MakeDoubleAccessor (&CAMSender::m_cam_intertime),
+            MakeDoubleChecker<double> ())
         .AddAttribute ("ASN",
             "If true, it uses ASN.1 to encode and decode CAMs and DENMs",
             BooleanValue(false),
@@ -232,8 +237,6 @@ namespace ns3
   CAMSender::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
-    Simulator::Remove(m_sendCamEvent);
-
     StopApplication ();
   }
 
@@ -265,7 +268,7 @@ namespace ns3
       CAMSender::Populate_and_send_normal_cam(tv);
 
     // Schedule next CAM
-    m_sendCamEvent = Simulator::Schedule (Seconds (0.1), &CAMSender::SendCam, this);
+    m_sendCamEvent = Simulator::Schedule (Seconds (m_cam_intertime), &CAMSender::SendCam, this);
     m_cam_sent++;
   }
 

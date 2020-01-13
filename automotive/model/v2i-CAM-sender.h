@@ -136,6 +136,7 @@ private:
   u_int16_t m_cam_seq;
   std::map <u_int16_t,struct timespec> m_cam_times;
   bool m_send_cam;
+  double m_cam_intertime;
 
   long long m_start_ms; /*To save the base time of simulation*/
 

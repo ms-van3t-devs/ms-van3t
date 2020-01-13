@@ -29,6 +29,7 @@ main (int argc, char *argv[])
   double sumo_updates = 0.01;
   bool send_cam = true;
   bool asn = false;
+  double cam_intertime = 0.1;
   std::string sumo_folder = "src/automotive/examples/sumo-files/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
@@ -52,6 +53,8 @@ main (int argc, char *argv[])
   cmd.AddValue ("asn", "Use ASN.1 or plain-text to send message", asn);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
+  cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
+
 
 
   /* Cmd Line option for Lena */
@@ -224,6 +227,7 @@ main (int argc, char *argv[])
       CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
       CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(false));
       CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
+      CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
 
       std::ostringstream oss;
       std::ostream &os = oss;
