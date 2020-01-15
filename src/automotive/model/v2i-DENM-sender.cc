@@ -93,6 +93,8 @@ namespace ns3
     m_sendEvent = EventId ();
     m_port = 0;
     m_socket = 0;
+    m_cam_received = 0;
+    m_denm_sent = 0;
     m_client = nullptr;
   }
 
@@ -116,9 +118,6 @@ namespace ns3
 
     if (m_socket == 0)
       {
-        /* Initialize value for aggregate output */
-        m_cam_received = 0;
-        m_denm_sent = 0;
 
         //Create the UDP socket for the server
         TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
@@ -134,6 +133,7 @@ namespace ns3
         m_socket->SetRecvCallback (MakeCallback (&DENMSender::HandleRead, this));
       }
 
+    /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
       m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &DENMSender::aggregateOutput, this);
 

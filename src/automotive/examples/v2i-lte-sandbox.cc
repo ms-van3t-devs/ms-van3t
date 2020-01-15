@@ -55,8 +55,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
 
-
-
   /* Cmd Line option for Lena */
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
@@ -263,7 +261,7 @@ main (int argc, char *argv[])
   /* To enable statistics collection of LTE module */
   //lteHelper->EnableTraces ();
 
-  /*** 10. Start Simulation ***/
+  /*** 9. Start Simulation ***/
   Simulator::Stop (simulationTime);
 
   Simulator::Run ();

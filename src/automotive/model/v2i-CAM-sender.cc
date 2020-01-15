@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright 2007 University of Washington
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+
+ * Edited by Marco Malinverno, Politecnico di Torino (name.surname@polito.it)
+*/
 #include "ns3/log.h"
 #include "ns3/ipv4.h"
 #include "ns3/ipv4-address.h"
@@ -56,7 +58,7 @@ namespace ns3
 
   std::pair <double, double> XY2LongLat(double x, double y)
   {
-     /* TODO: convert from xy to lonlat */
+    /*TODO: check this formula */
     double z = 0; //altitude
     double r = 6371000; //Earth radius in mt
     double lat = asin(z/r);
@@ -200,7 +202,7 @@ namespace ns3
       }
     m_socket->Connect(remote);
 
-    m_id = m_client->GetVehicleId (this->GetNode ());
+    m_id = m_client->GetVehicleId (this->GetNode ());    
     // Schedule CAM dissemination
     if (m_send_cam)
        m_sendCamEvent = Simulator::Schedule (Seconds (1.0), &CAMSender::SendCam, this);
@@ -285,7 +287,7 @@ namespace ns3
     std::pair<double,double> lonlat = XY2LongLat (x,y);
 
     /* Create the message to be sent in plain text */
-    msg << m_id << ","
+    msg << "CAM," << m_id << ","
         << lonlat.first << ","
         << lonlat.second << ","
         << m_client->TraCIAPI::vehicle.getSpeed(m_id) << ","
@@ -308,7 +310,6 @@ namespace ns3
   void
   CAMSender::Populate_and_send_asn_cam(struct timespec tv)
   {
-    /* All the operation done here try to follow ETSI EN 302 637-2*/
     CAM_t *cam = (CAM_t*) calloc(1, sizeof(CAM_t));
 
     /* Install the high freq container */
@@ -395,6 +396,7 @@ namespace ns3
     m_socket->Send (packet);
     m_cam_seq++;
     m_cam_sent++;
+
     ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
@@ -420,7 +422,7 @@ namespace ns3
 
         DENM_t *decoded = (DENM_t *) decoded_;
 
-        std::cout << "DENM in ASN.1 format received!" << std::endl;
+        std::cout << "DENM in ASN.1 format received by " << m_id << std::endl;
 
         /* Now in "decoded" you have the DENM */
         ASN_STRUCT_FREE(asn_DEF_DENM,decoded);
@@ -437,7 +439,7 @@ namespace ns3
 //        while (std::getline(ss, element, ',')) {
 //            values.push_back (element);
 //          }
-        std::cout << "DENM in plain text received!" << std::endl;
+        std::cout << "DENM in plain text received by " << m_id << std::endl;
         m_denm_received++;
       }
 

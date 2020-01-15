@@ -217,7 +217,7 @@ main (int argc, char *argv[])
   // start traci client with given function pointers
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
-  /*** 10. Start Simulation ***/
+  /*** 8. Start Simulation ***/
   Simulator::Stop (simulationTime);
 
   Simulator::Run ();

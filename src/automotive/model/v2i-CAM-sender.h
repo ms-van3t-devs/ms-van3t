@@ -32,29 +32,14 @@
 #define DEF_HEADING_CONF    127
 #define DEF_HEADING         3601
 
-
-
 //unit measure CAM
 #define CENTI               100
 #define DOT_ONE_MICRO       10000000
-
 
 namespace ns3 {
 
 class Socket;
 class Packet;
-
-/**
- * \ingroup applications 
- * \defgroup TrafficInfo TrafficInfo
- */
-
-/**
- * \ingroup TrafficInfo
- * \brief A Traffic Info server
- *
- * Traffic information is broadcasted
- */
 
 class CAMSender : public Application
 {
@@ -94,12 +79,6 @@ private:
   void HandleRead (Ptr<Socket> socket);
 
   /**
-   * @brief This function is used to print the DENM and call the logic after a Denm reception
-   * @param The vector containing an element for each value received
-   */
-  void HandleDenm (std::vector<std::string> values);
-
-  /**
    * @brief This function is to encode and send a CAM using ASN.1
   */
   void Populate_and_send_asn_cam(struct timespec tv);
@@ -114,38 +93,35 @@ private:
   */
   double time_diff(double sec1, double usec1, double sec2, double usec2);
 
-
-  bool m_asn;
-
-  double m_sumo_update;//!< SUMO granularity
   Ptr<Socket> m_socket; //!< Socket
   uint16_t m_port; //!< Port on which client will listen for traffic information
-  Ptr<TraciClient> m_client;
-  bool m_real_time;
+  Ptr<TraciClient> m_client; //!< TraCI client
 
+  bool m_real_time; //!< To decide wheter to use realtime scheduler
+  bool m_asn; //!< To decide if ASN.1 is used
+  double m_sumo_update; //!< SUMO granularity
+  bool m_print_summary; //!< To print a small summary when vehicle leaves the simulation
+  std::string m_server_addr; //!< Remote addr
+  bool m_already_print; //!< To avoid printing two summary
+  bool m_send_cam; //!< To decide if CAM dissemination is active or not
+  double m_cam_intertime; //!< Time between two consecutives CAMs
+
+  /* Counters */
   int m_cam_sent;
   int m_denm_received;
-  bool m_print_summary;
-  std::string m_server_addr;
-  bool m_already_print;
+  u_int16_t m_cam_seq; //!< CAM sequence
 
-  /* This part is only used when we have one client per process*/
-  int m_index;
-  std::string m_id;
-  std::string m_veh_prefix;
+  int m_index;  //!< vehicle index
+  std::string m_id; //!< vehicle id
+  std::string m_veh_prefix; //!< prefix used in SUMO
 
-  u_int16_t m_cam_seq;
-  std::map <u_int16_t,struct timespec> m_cam_times;
-  bool m_send_cam;
-  double m_cam_intertime;
+  long long m_start_ms; //!< To save the base time of simulation*/
 
-  long long m_start_ms; /*To save the base time of simulation*/
-
-  EventId m_sendCamEvent; //!< Event to print the position
+  EventId m_sendCamEvent; //!< Event to send the CAM
 
 };
 
 } // namespace ns3
 
-#endif /* TRAFFIC_INFO_SERVER_H */
+#endif /* V2I_CAM_SENDER_H */
 

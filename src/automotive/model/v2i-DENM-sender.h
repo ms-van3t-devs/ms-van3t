@@ -22,18 +22,6 @@ namespace ns3 {
 class Socket;
 class Packet;
 
-/**
- * \ingroup applications 
- * \defgroup TrafficInfo TrafficInfo
- */
-
-/**
- * \ingroup TrafficInfo
- * \brief A Traffic Info server
- *
- * Traffic information is broadcasted
- */
-
 class DENMSender : public Application
 {
 public:
@@ -42,7 +30,9 @@ public:
    * \return the object TypeId
    */
   static TypeId GetTypeId (void);
+
   DENMSender ();
+
   virtual ~DENMSender ();
 
 protected:
@@ -60,19 +50,11 @@ private:
    *
    * \param socket the socket the packet was received to.
    */
-
   void HandleRead (Ptr<Socket> socket);
 
-
-   /**
-   * @brief CollisionMapFill - used to fill the collision map when a collision vetween two vehicles is identified by the collision detector
-   * @param vehicle_id1
-   * @param vehicle_id2
-   * @param t2c_s2c
-   * @param cam_seq_num
-   * @param is_responsible
-   */
-
+  /**
+   * @brief Used to print a report on number of msg received each second
+  */
   void aggregateOutput(void);
 
   /**
@@ -90,26 +72,26 @@ private:
   */
   double time_diff(double sec1, double usec1, double sec2, double usec2);
 
-  bool m_aggregate_output;
+  Ptr<TraciClient> m_client; //!< TraCI client
+  uint16_t m_port; //!< Port on which traffic is sent
+  Ptr<Socket> m_socket; //!< Socket
 
-  Ptr<TraciClient> m_client;
-  uint16_t m_port; //!< Port on which traffic information is sent
-  Ptr<Socket> m_socket; //!< IPv4 Socket
-  EventId m_aggegateOutputEvent; //!< Event to create aggregate output
-  bool m_real_time;
-  EventId m_sendEvent; //!< Event to send the next packet
+  bool m_real_time; //!< To decide wheter to use realtime scheduler
+  bool m_asn; //!< To decide if ASN.1 is used
+  bool m_aggregate_output; //!< To decide wheter to print the report each second or not
 
-  //Value used to create aggregate output
+  /* Counters */
   u_int m_cam_received;
   u_int m_denm_sent;
 
-  long long m_start_ms; /*To save the base time of simulation*/
+  long long m_start_ms; //!< To save the base time of simulation*/
 
-  bool m_asn;
+  EventId m_aggegateOutputEvent; //!< Event to create aggregate output
+  EventId m_sendEvent; //!< Event to send the next packet
 
 };
 
 } // namespace ns3
 
-#endif /* TRAFFIC_INFO_SERVER_H */
+#endif /* V2I_DENM_SENDER_H */
 
