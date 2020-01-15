@@ -1,0 +1,3 @@
+Waf: Entering directory `/home/marco/ns-allinone-3.29/ns-3.29/build'
+Waf: Leaving directory `/home/marco/ns-allinone-3.29/ns-3.29/build'
+[01;31mInterrupted[0m 

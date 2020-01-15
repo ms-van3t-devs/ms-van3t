@@ -1,0 +1,148 @@
+syntax = "proto2";
+
+package ClientServerChannelSpace;
+
+option java_package = "com.dcaiti.vsimrti.rti.coupling";
+option java_outer_classname = "ClientServerChannelProtos";
+
+//--> Commands
+//TODO: tag numbers from 1 to 15 take only one byte in protobuf. maybe optimize here?
+message CommandMessage {
+	enum CommandType {
+		UNDEF = -1;
+//--> Federation management
+        INIT = 1;
+		SHUT_DOWN = 2;
+//--> Update messages
+		UPDATE_NODE = 10;
+		REMOVE_NODE = 11;
+//--> Advance Time
+        ADVANCE_TIME = 20;
+        NEXT_EVENT = 21;
+		MSG_RECV = 22;
+//--> Communication
+        MSG_SEND = 30;        
+        CONF_RADIO = 31;		
+//--> General
+		END = 40;
+		SUCCESS = 41;		
+	}	
+	required CommandType command_type = 1;
+}
+//Commands <--
+
+//--> Update messages
+message UpdateNode {
+	enum UpdateType {
+		ADD_RSU = 1;
+		ADD_VEHICLE = 2;
+		MOVE_NODE = 3;
+		REMOVE_NODE = 4;
+	}
+	required UpdateType update_type = 1;
+	required int64	time = 2;
+	message NodeData {
+		required int32 id = 1;
+		required double x = 2;
+		required double y = 3;
+	}	
+	repeated NodeData properties = 3;
+}
+//Update messages <--
+
+//--> Initialization process
+message InitMessage {
+	required int64 start_time = 1;
+	required int64 end_time = 2;
+}
+
+message PortExchange {
+	required uint32 port_number = 1;
+}
+//Initialization process <--
+
+//--> Time advance
+message TimeMessage {
+	required int64 time = 1;
+}
+
+message ReceiveMessage {
+	required int64 time = 1;
+	required uint32 node_id = 2;
+	required RadioChannel channel_id = 3;
+	required uint32 message_id = 4;
+	required float rssi = 5;
+}
+//Time advance <--
+
+//--> Communication
+enum RadioChannel {
+	PROTO_SCH1 = 0;
+	PROTO_SCH2 = 1;
+	PROTO_SCH3 = 2;
+	PROTO_CCH = 3;
+	PROTO_SCH4 = 4;
+	PROTO_SCH5 = 5;
+	PROTO_SCH6 = 6;
+	PROTO_UNDEF = 7;
+}
+
+message ConfigureRadioMessage {
+	required int64 time = 1;
+	required uint32 message_id = 2;
+	required uint32 external_id = 3;
+	enum RadioNumber {
+		NO_RADIO = 0;
+		SINGLE_RADIO = 1;
+		DUAL_RADIO = 2;
+	}
+	required RadioNumber radio_number = 4;
+	message RadioConfiguration {
+		required bool receiving_messages = 1; //Determines whether the radio receives messages or only routes
+		required uint32 ip_address = 2;
+		required uint32 subnet_address = 3;
+		required uint32 transmission_power = 4;
+		enum RadioMode {
+			SINGLE_CHANNEL = 1;
+			DUAL_CHANNEL = 2;
+		}
+		required RadioMode radio_mode = 5;
+		required RadioChannel primary_radio_channel = 6;
+		optional RadioChannel secondary_radio_channel = 7;
+	}
+	required RadioConfiguration primary_radio_configuration = 5;
+	optional RadioConfiguration secondary_radio_configuration = 6;
+}
+
+message SendMessageMessage {
+	required int64 time = 1;
+	required uint32 node_id = 2;
+	required RadioChannel channel_id = 3;
+	required uint32 message_id = 4;
+	required uint64 length = 5;
+	
+	message TopoAddress {
+		required uint32 ip_address = 1;
+		required uint32 ttl = 2;
+	}
+	message GeoRectangleAddress {
+		required uint32 ip_address = 1;
+		required double a_X = 2;
+		required double a_Y = 3;
+		required double b_X = 4;
+		required double b_Y = 5;
+	}
+	message GeoCircleAddress {
+		required uint32 ip_address = 1;
+		required double center_X = 2;
+		required double center_Y = 3;
+		required double radius = 4;
+	}
+	oneof address {
+		TopoAddress topo_address = 6;
+		GeoRectangleAddress rectangle_address = 7;
+		GeoCircleAddress circle_address = 8;
+	}	
+}
+//Communication <--
+
