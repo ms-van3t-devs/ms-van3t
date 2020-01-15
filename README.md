@@ -12,11 +12,11 @@ To build the project:
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
     * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested wit **v-1.2.0**)
-* Install ns-3.29 following the guide at [https://www.nsnam.org/releases/ns-3-29/](https://www.nsnam.org/releases/ns-3-29/)
-* Clone this repository in your pc. Then move all the files inside <your-ns3-path>/src/ (including the hidden .git folder, if you want to push and pull)
+
+* Clone this repository in your pc.
     
-* Configure waf to build the new modules with "./waf configure --build-profile=optimized --enable-examples --enable-tests --enable-sudo" (add here what you want to enable) - Using the optimized profile allows to speed up the simulation time
-* Build ns3 with "./waf build"
+* Configure waf to build the new modules with "<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests --enable-sudo" (add here what you want to enable) - Using the optimized profile allows to speed up the simulation time
+* Build ns3 with "<ns3-folder>./waf build"
 
 **Important**
 The final project path-tree should be like:

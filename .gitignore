@@ -37,3 +37,8 @@ build/
 *.user
 *.files
 *.includes
+
+error-log.csv
+fcd.xml
+simulation_log.txt
+summary.csv
