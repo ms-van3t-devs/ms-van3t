@@ -37,6 +37,8 @@ build/
 *.user
 *.files
 *.includes
+*.creator
+*.config
 
 error-log.csv
 fcd.xml
