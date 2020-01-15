@@ -128,7 +128,7 @@ namespace ns3
             MakeBooleanChecker ())
         .AddAttribute ("PrintSummary",
             "To print summary at the end of simulation",
-            BooleanValue(false),
+            BooleanValue(true),
             MakeBooleanAccessor (&CAMSender::m_print_summary),
             MakeBooleanChecker ())
         .AddAttribute ("ServerAddr",
@@ -160,7 +160,8 @@ namespace ns3
     m_cam_seq = 0;
     m_cam_sent = 0;
     m_denm_received = 0;
-    m_print_summary = false;
+    m_print_summary = true;
+    m_already_print = false;
   }
 
   CAMSender::~CAMSender ()
@@ -229,8 +230,11 @@ namespace ns3
       }
     Simulator::Remove(m_sendCamEvent);
 
-    if (m_print_summary)
-      std::cout << "INFO-" << m_id << ",CAM-SENT:" << m_cam_sent << ",DENM-RECEIVED:" << m_denm_received << std::endl;
+    if (m_print_summary && !m_already_print)
+      {
+        std::cout << "INFO-" << m_id << ",CAM-SENT:" << m_cam_sent << ",DENM-RECEIVED:" << m_denm_received << std::endl;
+        m_already_print=true;
+      }
   }
 
   void
@@ -245,8 +249,8 @@ namespace ns3
   {
     /*DEBUG: Print position*/
 //    Ptr<MobilityModel> mob = this->GetNode ()->GetObject<MobilityModel> ();
-//    NS_LOG_INFO("x:"<<mob->GetPosition ().x);
-//    NS_LOG_INFO("y:"<<mob->GetPosition ().y);
+//    std::cout << "x:" << mob->GetPosition ().x << std::endl;
+//    std::cout << "y:" << mob->GetPosition ().y << std::endl;
 
     /* This block computes the timestamp. If realtime-> use system time. Else, depending on if it is multi client or not, use ns3 or sumo sim time */
     struct timespec tv;
@@ -269,7 +273,6 @@ namespace ns3
 
     // Schedule next CAM
     m_sendCamEvent = Simulator::Schedule (Seconds (m_cam_intertime), &CAMSender::SendCam, this);
-    m_cam_sent++;
   }
 
   void
@@ -296,6 +299,7 @@ namespace ns3
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), packetSize);
 
     m_cam_seq++;
+    m_cam_sent++;
     // Send packet through the interface
     m_socket->Send(packet);
   }
@@ -390,7 +394,7 @@ namespace ns3
 
     m_socket->Send (packet);
     m_cam_seq++;
-
+    m_cam_sent++;
     ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
@@ -402,8 +406,6 @@ namespace ns3
     Ptr<Packet> packet;
     Address from;
     packet = socket->RecvFrom (from);
-
-
 
     uint8_t *buffer = new uint8_t[packet->GetSize ()];
     packet->CopyData (buffer, packet->GetSize ()-1);

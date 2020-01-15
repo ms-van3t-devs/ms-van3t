@@ -127,6 +127,7 @@ private:
   int m_denm_received;
   bool m_print_summary;
   std::string m_server_addr;
+  bool m_already_print;
 
   /* This part is only used when we have one client per process*/
   int m_index;

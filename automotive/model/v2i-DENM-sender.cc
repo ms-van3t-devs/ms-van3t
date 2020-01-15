@@ -168,7 +168,8 @@ namespace ns3
     Simulator::Cancel (m_sendEvent);
     Simulator::Cancel (m_aggegateOutputEvent);
 
-    std::cout << Simulator::Now () << "," << m_cam_received  << "," << m_denm_sent << std::endl;
+    if (m_aggregate_output)
+      std::cout << Simulator::Now () << "," << m_cam_received  << "," << m_denm_sent << std::endl;
   }
 
   void
