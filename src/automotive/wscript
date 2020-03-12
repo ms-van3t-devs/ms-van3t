@@ -10,10 +10,6 @@ def configure(conf):
     conf.env.append_value("CPPFLAGS", "-fPIC")
     conf.env.append_value('INCLUDES', ['/usr/local/include'])
     conf.env.append_value('LIBPATH', ["/usr/local/lib"])
-    #conf.env.append_value("CPPFLAGS", "-DPDU=CAM")
-    #conf.env.append_value("CPPFLAGS", "-DPDU=DENM")
-    #conf.env.append_value("CPPFLAGS", "-DEMIT_ASN_DEBUG=1")
-
 
 def build(bld):
     module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci'])

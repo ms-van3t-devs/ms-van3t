@@ -72,6 +72,11 @@ private:
   */
   double time_diff(double sec1, double usec1, double sec2, double usec2);
 
+  /**
+   * @brief This function compute the timestamps
+  */
+  struct timespec compute_timestamp();
+
   Ptr<TraciClient> m_client; //!< TraCI client
   uint16_t m_port; //!< Port on which traffic is sent
   Ptr<Socket> m_socket; //!< Socket

@@ -91,6 +91,7 @@ public:
     double getDouble(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
     libsumo::TraCIPositionVector getPolygon(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
     libsumo::TraCIPosition getPosition(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
+    libsumo::TraCIPosition getPositionLonLat(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
     libsumo::TraCIPosition getPosition3D(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
     std::string getString(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
     std::vector<std::string> getStringVector(int cmd, int var, const std::string& id, tcpip::Storage* add = 0);
@@ -515,6 +516,7 @@ public:
         libsumo::TraCIPositionVector getNetBoundary() const;
         int getMinExpectedNumber() const;
         double getDistance2D(double x1, double y1, double x2, double y2, bool isGeo = false, bool isDriving = false);
+        libsumo::TraCIPosition convertXYtoLonLat(double x, double y);
         double getDistanceRoad(const std::string& edgeID1, double pos1, const std::string& edgeID2, double pos2, bool isDriving = false);
 
 

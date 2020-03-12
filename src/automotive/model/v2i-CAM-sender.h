@@ -81,17 +81,22 @@ private:
   /**
    * @brief This function is to encode and send a CAM using ASN.1
   */
-  void Populate_and_send_asn_cam(struct timespec tv);
+  void Populate_and_send_asn_cam();
 
   /**
    * @brief This function is to send a CAM in plain text
   */
-  void Populate_and_send_normal_cam(struct timespec tv);
+  void Populate_and_send_normal_cam();
 
   /**
    * @brief This function is to eventually compute the time diff between two timestamps
   */
   double time_diff(double sec1, double usec1, double sec2, double usec2);
+
+  /**
+   * @brief This function compute the timestamps
+  */
+  struct timespec compute_timestamp();
 
   Ptr<Socket> m_socket; //!< Socket
   uint16_t m_port; //!< Port on which client will listen for traffic information

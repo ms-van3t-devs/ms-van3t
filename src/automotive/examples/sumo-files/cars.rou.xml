@@ -34,9 +34,9 @@
 
   <vType accel="4" decel="7.5" emergencyDecel="10" minGap="5.0" speedDev="0.5" speedFactor="1.5" id="Car0" maxSpeed="13.89" />
 
-      <vehicle id="veh1" type="Car0" depart="4.13769369709" route="5">
+      <vehicle id="veh1" type="Car0" depart="4.13769369709" route="15">
     </vehicle>
-      <vehicle id="veh2" type="Car0" depart="5.71730675752" route="21">
+      <!--<vehicle id="veh2" type="Car0" depart="5.71730675752" route="21">
     </vehicle>
       <vehicle id="veh3" type="Car0" depart="9.24165789334" route="25">
     </vehicle>
@@ -73,5 +73,5 @@
       <vehicle id="veh19" type="Car0" depart="45.9031896322" route="7">
     </vehicle>
       <vehicle id="veh20" type="Car0" depart="46.7557985314" route="5">
-    </vehicle>
+    </vehicle>-->
 </routes>

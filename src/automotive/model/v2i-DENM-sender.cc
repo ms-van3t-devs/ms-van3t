@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
- * Edited by Marco Malinverno, Politecnico di Torino (name.surname@polito.it)
+ * Edited by Marco Malinverno, Politecnico di Torino (marco.malinverno@polito.it)
  */
 #include "ns3/log.h"
 #include "ns3/ipv4.h"
@@ -232,19 +232,7 @@ namespace ns3
     // Generate the packet
     std::ostringstream msg;
 
-    /* This block computes the timestamp. If realtime-> use system time. Else, depending on if it is multi client or not, use ns3 or sumo sim time */
-    struct timespec tv;
-    if (!m_real_time)
-      {
-        double nanosec =  Simulator::Now ().GetNanoSeconds ();
-        tv.tv_sec = 0;
-        tv.tv_nsec = nanosec;
-      }
-    else
-      {
-        clock_gettime (CLOCK_MONOTONIC, &tv);
-      }
-    /* End timestamp computation */
+    struct timespec tv = compute_timestamp ();
 
     msg << "This is a DENM,"
         << tv.tv_sec << ","
@@ -264,11 +252,9 @@ namespace ns3
     /* First DENM */
     DENM_t *denm1 = (DENM_t*) calloc(1, sizeof(DENM_t));
 
-    /* The DENM here is filled with random values. Be careful that some of the fields are mandatory */
+    /* The DENM here is filled with some example values. Be careful that some of the fields are mandatory */
 
-    /* The timestamp is set in referenceTime */
-    struct timespec tv;
-    clock_gettime (CLOCK_MONOTONIC, &tv);
+    struct timespec tv = compute_timestamp ();
     long gen_time;
     if(m_real_time)
       {
@@ -319,6 +305,7 @@ namespace ns3
     m_denm_sent++;
     ASN_STRUCT_FREE(asn_DEF_DENM,denm1);
   }
+
   /* This function is used to calculate the delay for packet reception */
   double
   DENMSender::time_diff(double sec1, double usec1, double sec2, double usec2)
@@ -329,5 +316,23 @@ namespace ns3
             diff = tot2 - tot1;
             return diff;
     }
+
+  struct timespec
+  DENMSender::compute_timestamp ()
+  {
+    struct timespec tv;
+    if (!m_real_time)
+      {
+        double nanosec =  Simulator::Now ().GetNanoSeconds ();
+        tv.tv_sec = 0;
+        tv.tv_nsec = nanosec;
+      }
+    else
+      {
+        clock_gettime (CLOCK_MONOTONIC, &tv);
+      }
+    return tv;
+  }
+
 } // Namespace ns3
 
