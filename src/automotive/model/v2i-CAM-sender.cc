@@ -66,7 +66,7 @@ namespace ns3
 
   long retValue(double value, int defValue, int fix, int fixNeeded)
   {
-      if(fix < fixNeeded)
+      if(fix<fixNeeded)
           return defValue;
       else
           return value;
@@ -235,9 +235,9 @@ namespace ns3
   CAMSender::SendCam()
   {
     /*DEBUG: Print position*/
-//    Ptr<MobilityModel> mob = this->GetNode ()->GetObject<MobilityModel> ();
-//    std::cout << "x:" << mob->GetPosition ().x << std::endl;
-//    std::cout << "y:" << mob->GetPosition ().y << std::endl;
+    //Ptr<MobilityModel> mob = this->GetNode ()->GetObject<MobilityModel> ();
+    //std::cout << "x:" << mob->GetPosition ().x << std::endl;
+    //std::cout << "y:" << mob->GetPosition ().y << std::endl;
 
     /* This block computes the timestamp. If realtime-> use system time.
      * Else, depending on if it is multi client or not, use ns3 or sumo sim time */
@@ -377,7 +377,7 @@ namespace ns3
     ssize_t ec = uper_encode_to_new_buffer(&asn_DEF_CAM, constraints, cam, &buffer);
     if (ec==-1)
       {
-        NS_LOG_INFO("Cannot encode CAM");
+        std::cout << "Cannot encode CAM" << std::endl;
         return;
       }
 
@@ -411,6 +411,12 @@ namespace ns3
 
         rval = uper_decode(0, &asn_DEF_DENM, &decoded_, buffer, packet->GetSize ()-1, 0, 1);
 
+        if (rval.code != RC_OK)
+          {
+            std::cout << "CAM ASN decoding failed!" << std::endl;
+            return;
+          }
+
         DENM_t *decoded = (DENM_t *) decoded_;
 
         std::cout << "DENM in ASN.1 format received by " << m_id << std::endl;
@@ -422,14 +428,14 @@ namespace ns3
 
     else
       {
-//        std::vector<std::string> values;
-//        std::string s = std::string ((char*) buffer);
-//        std::cout << "Packet received - content:" << s;
-//        std::stringstream ss(s);
-//        std::string element;
-//        while (std::getline(ss, element, ',')) {
-//            values.push_back (element);
-//          }
+        //std::vector<std::string> values;
+        //std::string s = std::string ((char*) buffer);
+        //std::cout << "Packet received - content:" << s;
+        //std::stringstream ss(s);
+        //std::string element;
+        //while (std::getline(ss, element, ',')) {
+        //    values.push_back (element);
+        //  }
         std::cout << "DENM in plain text received by " << m_id << std::endl;
         m_denm_received++;
       }

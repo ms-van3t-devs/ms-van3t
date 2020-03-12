@@ -193,10 +193,12 @@ namespace ns3
         asn_dec_rval_t rval;
         rval = uper_decode (NULL, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ()-1,0,1);
 
-        if (rval.code != RC_OK) {
-                NS_LOG_INFO("Cannot decode CAM");
-                return;
+        if (rval.code != RC_OK)
+          {
+            std::cout << "DENM ASN decoding failed!" << std::endl;
+            return;
           }
+
 
         CAM_t *decoded = (CAM_t *) decoded_;
 
@@ -296,7 +298,7 @@ namespace ns3
     ssize_t ec = uper_encode_to_new_buffer(&asn_DEF_DENM, constraints, denm1, &buffer1);
     if (ec==-1)
       {
-        NS_LOG_INFO("Cannot encode DENM");
+        std::cout << "Cannot encode DENM" << std::endl;
         return;
       }
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) buffer1, ec+1);
