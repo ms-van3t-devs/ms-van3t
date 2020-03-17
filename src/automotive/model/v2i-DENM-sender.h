@@ -9,6 +9,7 @@
 #include "ns3/address.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/traced-callback.h"
+#include "ns3/appServer.h"
 
 #define SPEED_OF_LIGHT      299792458.0
 #define MAX_CACHED_SEQ      30000
@@ -16,6 +17,14 @@
 #define FIX_PROT_VERS       1
 #define FIX_DENMID          1
 
+#define MICRO               1000000
+#define CENTI               100
+
+enum ret {
+	DO_NOT_SEND,	/* Dont send DENM */
+	SEND_0,		/* Send DENM with seq=0 */
+	SEND_1		/* Send DENM with seq=1 */
+};
 
 namespace ns3 {
 
@@ -60,12 +69,12 @@ private:
   /**
    * @brief This function is to encode and send a DENM using ASN.1
   */
-  void Populate_and_send_asn_denm(Address address);
+  void Populate_and_send_asn_denm(Address address, int speedmode);
 
   /**
    * @brief This function is to encode and send a DENM in plain text
   */
-  void Populate_and_send_normal_denm(Address address);
+  void Populate_and_send_normal_denm(Address address, int speedmode);
 
   /**
    * @brief This function is to eventually compute the time diff between two timestamps

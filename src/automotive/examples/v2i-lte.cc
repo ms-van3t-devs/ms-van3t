@@ -33,6 +33,7 @@ main (int argc, char *argv[])
   std::string sumo_folder = "src/automotive/examples/sumo-files/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
+  bool send_lon_lat = false;
 
   /*** 0.b LENA Options ***/
   double interPacketInterval = 100;
@@ -55,6 +56,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
+  cmd.AddValue ("lonlat", "Send LonLat instead on XY", send_lon_lat);
 
   /* Cmd Line option for Lena */
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
@@ -196,19 +198,29 @@ main (int argc, char *argv[])
 
   /*** 7. Create and Setup application for the server ***/
   DENMSenderHelper DenmSenderHelper (9); // Port #9
+  appServerHelper AppServerHelper;
+  AppServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  AppServerHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
+
   DenmSenderHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
   DenmSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
   DenmSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   DenmSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
 
   ApplicationContainer DENMSenderApp = DenmSenderHelper.Install (remoteHostContainer.Get (0));
+  ApplicationContainer AppServer = AppServerHelper.Install (remoteHostContainer.Get (0));
+
   DENMSenderApp.Start (Seconds (0.0));
+  AppServer.Start (Seconds (0.0));
   DENMSenderApp.Stop (simulationTime - Seconds (0.1));
+  AppServer.Stop (simulationTime - Seconds (0.1));
   ++nodeCounter;
 
   /*** 8. Setup interface and application for dynamic nodes ***/
   CAMSenderHelper CamSenderHelper (9);
+  AppClientHelper appClientHelper;
   CamSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -235,7 +247,10 @@ main (int argc, char *argv[])
       CamSenderHelper.SetAttribute ("ServerAddr", StringValue(serv_addr));
 
       ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
+      ApplicationContainer ClientApp = appClientHelper.Install (includedNode);
+      ClientApp.Start (Seconds (0.0));
       CAMSenderApp.Start (Seconds (0.0));
+      ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
       CAMSenderApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
       return includedNode;
@@ -246,8 +261,12 @@ main (int argc, char *argv[])
     {
       /* stop all applications */
       Ptr<CAMSender> CAMSender_ = exNode->GetApplication(0)->GetObject<CAMSender>();
+      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
+
       if(CAMSender_)
         CAMSender_->StopApplicationNow();
+      if(appClient_)
+        appClient_->StopApplicationNow ();
 
        /* set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();

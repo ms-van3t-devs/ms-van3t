@@ -25,7 +25,7 @@ typedef enum StationType {
 	StationType_cyclist	= 2,
 	StationType_moped	= 3,
 	StationType_motorcycle	= 4,
-	StationType_passengerCar	= 5,
+	StationType_passengerCar = 5,
 	StationType_bus	= 6,
 	StationType_lightTruck	= 7,
 	StationType_heavyTruck	= 8,

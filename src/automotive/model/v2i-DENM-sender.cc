@@ -177,6 +177,7 @@ namespace ns3
   void
   DENMSender::HandleRead (Ptr<Socket> socket)
   {
+    CAMinfo cam;
     /* Debug print */
     //NS_LOG_INFO("SUMO time:" << m_client->simulation.getTime () << "\n");
     //NS_LOG_INFO("NS3 time:" << Simulator::Now () << "\n");
@@ -193,18 +194,21 @@ namespace ns3
         asn_dec_rval_t rval;
         rval = uper_decode (NULL, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ()-1,0,1);
 
-        if (rval.code != RC_OK)
+        if (rval.code == RC_FAIL)
           {
-            std::cout << "DENM ASN decoding failed!" << std::endl;
+            std::cout << "CAM ASN.1 decoding failed!" << std::endl;
             return;
           }
-
 
         CAM_t *decoded = (CAM_t *) decoded_;
 
         /* Now in "decoded" you have the CAM */
+        //Long = x, Lat = y
 
         /* Build your CAM strategy here! */
+        cam.position.x = (double)decoded->cam.camParameters.basicContainer.referencePosition.longitude/MICRO;
+        cam.position.y = (double)decoded->cam.camParameters.basicContainer.referencePosition.latitude/MICRO;
+        cam.speed = (double)decoded->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI;
 
         m_cam_received++;
         ASN_STRUCT_FREE(asn_DEF_CAM,decoded);
@@ -212,23 +216,49 @@ namespace ns3
     else
       {
         /* A CAM in plain text is received */
+        std::vector<std::string> values;
+        std::string s = std::string ((char*) buffer);
+        //std::cout << "Packet received - content:" << s << std::endl;
+        std::stringstream ss(s);
+        std::string element;
+        while (std::getline(ss, element, ',')) {
+            values.push_back (element);
+          }
+
+        /* Build your CAM strategy here! */
+        cam.position.x = std::stod(values[2]);
+        cam.position.y = std::stod(values[3]);
+        cam.speed = std::stod(values[4]);
         m_cam_received++;
       }
 
-    /* In this case we run a very simple logic: everytime a CAM is received,
-       we reply with probability 1/100 with a DENM */
-    Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
-    int y = x->GetValue (0,100);
-    if (y==50 && m_asn==true)
-      DENMSender::Populate_and_send_asn_denm(from);
-    else if(y==50 && m_asn==false)
-      DENMSender::Populate_and_send_normal_denm(from);
-    else
+    cam.position.z=0;
+    Ptr<appServer> app = GetNode()->GetApplication (1)->GetObject<appServer> ();
+
+    int decision = app->receiveCAM (cam,from);
+
+    if (decision == DO_NOT_SEND)
       return;
+
+    if (decision == SEND_0)
+      {
+        if (m_asn)
+          DENMSender::Populate_and_send_asn_denm (from,0);
+        else
+          DENMSender::Populate_and_send_normal_denm (from,0);
+      }
+    else if (decision == SEND_1)
+      {
+        if (m_asn)
+          DENMSender::Populate_and_send_asn_denm (from,1);
+        else
+          DENMSender::Populate_and_send_normal_denm (from,1);
+      }
+
   }
 
   void
-  DENMSender::Populate_and_send_normal_denm(Address address)
+  DENMSender::Populate_and_send_normal_denm(Address address,int speedmode)
   {
 
     // Generate the packet
@@ -237,8 +267,9 @@ namespace ns3
     struct timespec tv = compute_timestamp ();
 
     msg << "This is a DENM,"
-        << tv.tv_sec << ","
-        << tv.tv_nsec << ",end\0";
+        << tv.tv_sec  << ","
+        << tv.tv_nsec << ","
+        << std::to_string (speedmode) << ",end\0";
 
     //Tweak: add +1, otherwise some random characters are received at the end of the packet
     uint16_t packetSize = msg.str ().length () + 1;
@@ -249,7 +280,7 @@ namespace ns3
   }
 
   void
-  DENMSender::Populate_and_send_asn_denm(Address address)
+  DENMSender::Populate_and_send_asn_denm(Address address, int speedmode)
   {
     /* First DENM */
     DENM_t *denm1 = (DENM_t*) calloc(1, sizeof(DENM_t));
@@ -288,9 +319,10 @@ namespace ns3
     denm1->denm.management.eventPosition.altitude.altitudeValue=AltitudeValue_unavailable;
     denm1->denm.management.eventPosition.longitude=Longitude_unavailable;
 
-    /* We encode the seq_num in sequenceNumber and the precedence in messageID (FIX THIS) */
     denm1->header.messageID=FIX_DENMID;
-    denm1->denm.management.actionID.sequenceNumber=0;
+
+    /* We encode the app information in sequenceNumber. This should not be done, use "à la carte container" instead (FIX THIS) */
+    denm1->denm.management.actionID.sequenceNumber=speedmode;
 
     /** Encoding **/
     void *buffer1 = NULL;

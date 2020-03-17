@@ -9,6 +9,7 @@
 #include "ns3/address.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/traced-callback.h"
+#include "ns3/appClient.h"
 
 #define SPEED_OF_LIGHT      299792458.0
 #define OFFSET_X            0
@@ -35,6 +36,7 @@
 //unit measure CAM
 #define CENTI               100
 #define DOT_ONE_MICRO       10000000
+#define MICRO               1000000
 
 namespace ns3 {
 
@@ -110,6 +112,7 @@ private:
   bool m_already_print; //!< To avoid printing two summary
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
   double m_cam_intertime; //!< Time between two consecutives CAMs
+  bool m_lon_lat; //!< Use LonLat instead of XY
 
   /* Counters */
   int m_cam_sent;

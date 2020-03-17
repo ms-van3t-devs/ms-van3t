@@ -17,8 +17,12 @@ def build(bld):
     module.source = [
         'model/v2i-CAM-sender.cc',
         'model/v2i-DENM-sender.cc',
+        'model/appClient.cc',
+        'model/appServer.cc',
         'helper/v2i-cam-sender-helper.cc',
         'helper/v2i-denm-sender-helper.cc',
+        'helper/appClient-helper.cc',
+        'helper/appServer-helper.cc',
 
         'model/asn1/AccelerationConfidence.c',
         'model/asn1/AccelerationControl.c',
@@ -221,8 +225,13 @@ def build(bld):
     headers.source = [
         'model/v2i-CAM-sender.h',
         'model/v2i-DENM-sender.h',
+        'model/appClient.h',
+        'model/appServer.h',
         'helper/v2i-cam-sender-helper.h',
         'helper/v2i-denm-sender-helper.h',
+        'helper/appClient-helper.h',
+        'helper/appServer-helper.h',
+
 
         'model/asn1/AccelerationConfidence.h',
         'model/asn1/AccelerationControl.h',
