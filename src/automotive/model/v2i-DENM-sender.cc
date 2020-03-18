@@ -232,9 +232,13 @@ namespace ns3
         m_cam_received++;
       }
 
+    /* In this case, we pass to the server the information regarding position and speed of the vehicle, as well as a unique identifier
+       (we used the IP address from which it sent the massage). The server will return DO_NOT_SEND if it is not necessary to send a DENM.
+       In case a DENM with the information to slow down should be sent to the vehicle, the server returns SEND_0; in case a DENM containing
+       the info to speed-up is needed, SEND_1 is returned.
+    */
     cam.position.z=0;
     Ptr<appServer> app = GetNode()->GetApplication (1)->GetObject<appServer> ();
-
     int decision = app->receiveCAM (cam,from);
 
     if (decision == DO_NOT_SEND)

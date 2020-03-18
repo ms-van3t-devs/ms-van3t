@@ -85,17 +85,28 @@ namespace ns3
   void
   appClient::receiveDENM (int speedmode)
   {
+    /* This function only parameter is extracted from the DENM:
+     * if 0, the vehicle slows down by setting the max speed to 6.94m/s (25km/h)
+     * if 1, the vehicle maximum speed is set to 30m/s (108km/h)
+     * Additionaly, for visualization purposes, the vehicles change color everytime they change zone
+     */
+
     if (speedmode==0)
       {
+        libsumo::TraCIColor orange;
+        orange.r=255;orange.g=99;orange.b=71;orange.a=255;
         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 6.94);
+        m_client->TraCIAPI::vehicle.setColor (m_id,orange);
       }
     else if (speedmode==1)
       {
+        libsumo::TraCIColor green;
+        green.r=50;green.g=205;green.b=50;green.a=255;
         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 30.00);
+        m_client->TraCIAPI::vehicle.setColor (m_id,green);
       }
+
   }
-
-
 }
 
 

@@ -220,6 +220,7 @@ main (int argc, char *argv[])
   CAMSenderHelper CamSenderHelper (9);
   AppClientHelper appClientHelper;
   CamSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  CamSenderHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* callback function for node creation */

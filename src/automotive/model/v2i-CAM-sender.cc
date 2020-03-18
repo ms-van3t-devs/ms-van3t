@@ -459,10 +459,9 @@ namespace ns3
       }
 
     /* Build your DENM strategy here! */
+    /* In this example, we pass to the application only the information about the speedmode */
     Ptr<appClient> app = GetNode()->GetApplication (1)->GetObject<appClient> ();
-
     app->receiveDENM (speedmode);
-
   }
 
   /* This function is used to calculate the delay for packet reception */
