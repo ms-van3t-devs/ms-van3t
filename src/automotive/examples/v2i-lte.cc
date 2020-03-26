@@ -115,8 +115,10 @@ main (int argc, char *argv[])
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
+
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
+
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
   /*** 2. Create (and configure) the remote host that will gather the CAM and send the DENM ***/
@@ -153,6 +155,7 @@ main (int argc, char *argv[])
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
+
   /* Set the eNB to a fixed position */
   Ptr<MobilityModel> mobilityeNBn = enbNodes.Get (0)->GetObject<MobilityModel> ();
   mobilityeNBn->SetPosition (Vector (0, 0, 20.0)); // set eNB to fixed position
@@ -221,6 +224,12 @@ main (int argc, char *argv[])
   AppClientHelper appClientHelper;
   CamSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
   CamSenderHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
+  CamSenderHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
+  CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(false));
+  CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
+  CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
+
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* callback function for node creation */
@@ -235,11 +244,6 @@ main (int argc, char *argv[])
 
       /* Install Application */
       CamSenderHelper.SetAttribute ("Index", IntegerValue(nodeCounter));
-      CamSenderHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
-      CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-      CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(false));
-      CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
-      CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
 
       std::ostringstream oss;
       std::ostream &os = oss;

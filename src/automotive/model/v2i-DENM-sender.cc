@@ -264,7 +264,6 @@ namespace ns3
   void
   DENMSender::Populate_and_send_normal_denm(Address address,int speedmode)
   {
-
     // Generate the packet
     std::ostringstream msg;
 
@@ -286,12 +285,13 @@ namespace ns3
   void
   DENMSender::Populate_and_send_asn_denm(Address address, int speedmode)
   {
+    struct timespec tv = compute_timestamp ();
+
     /* First DENM */
     DENM_t *denm1 = (DENM_t*) calloc(1, sizeof(DENM_t));
 
     /* The DENM here is filled with some example values. Be careful that some of the fields are mandatory */
 
-    struct timespec tv = compute_timestamp ();
     long gen_time;
     if(m_real_time)
       {

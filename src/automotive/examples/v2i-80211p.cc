@@ -173,6 +173,12 @@ main (int argc, char *argv[])
   AppClientHelper appClientHelper;
   CamSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
   CamSenderHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
+  CamSenderHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
+  CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(true));
+  CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
+  CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
+
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* Extract the server address */
@@ -192,11 +198,6 @@ main (int argc, char *argv[])
 
       /* Install Application */
       CamSenderHelper.SetAttribute ("Index", IntegerValue(nodeCounter));
-      CamSenderHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
-      CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-      CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(true));
-      CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
-      CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
 
       std::ostringstream oss;
       std::ostream &os = oss;

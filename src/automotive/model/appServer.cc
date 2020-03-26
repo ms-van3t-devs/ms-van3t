@@ -83,6 +83,8 @@ namespace ns3
     libsumo::TraCIPosition pos2;
     libsumo::TraCIPosition map_center;
 
+    /* Check if LonLat or XY are used */
+    //Long = x, Lat = y
     if (m_lon_lat)
       {
         pos1 = m_client->TraCIAPI::simulation.convertXYtoLonLat (net_boundaries[0].x,net_boundaries[0].y);
@@ -94,12 +96,16 @@ namespace ns3
         pos2 = net_boundaries[1];
 
       }
+
+    /* Check the center of the map */
     map_center.x = (pos1.x + pos2.x)/2;
     map_center.y = (pos1.y + pos2.y)/2;
 
+    /* Check the size of the map */
     double map_size_x = std::abs(pos1.x - pos2.x);
     double map_size_y = std::abs(pos1.y - pos2.y);
 
+    /* Compute x and y limit (in case */
     m_upperLimit.x = map_center.x + ((map_size_x)*2/3)/2;
     m_lowerLimit.x = map_center.x - ((map_size_x)*2/3)/2;
     m_upperLimit.y = map_center.y + ((map_size_y)*2/3)/2;
@@ -122,13 +128,14 @@ namespace ns3
   int
   appServer::receiveCAM (struct CAMinfo cam, Address address)
   {
-    /* If is the first time the this veh sends a CAM */
+    /* If is the first time the this veh sends a CAM, check if it is inside or outside */
     if (m_veh_position.find (address) == m_veh_position.end ())
       {
         if (isInside (cam.position.x,cam.position.y))
           m_veh_position[address] = INSIDE;
         else
           m_veh_position[address] = OUTSIDE;
+        return 0;
       }
 
     if (isInside (cam.position.x,cam.position.y))

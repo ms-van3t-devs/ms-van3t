@@ -61,6 +61,8 @@ The server checks whenever a transition between the two areas is performed by a 
 The mobility trace is managed by the file automotive/example/sumo-files/cars.rou.xml -> please note that the very first line of this file are used to determine the number of UE to be generated in the simulation and is very important to update it if the number of vehicles changes.
 The SUMO map embeds also some re-routers that allows the vehicles to move in the map without exiting.
 
+CAM and DENM are received and generated through v2i-CAM-sender and v2i-DENM-sender respectively, while the application logic resides on appClient and appServer.
+
 **Important**
 If using the LTE version in this very simple toy case, it is possible to connect at most 23 UEs to the enB (due to LENA framework limitation). You can avoid this problem by using the command `--ns3::LteEnbRrc::SrsPeriodicity=[value]"`where [value]=0, 2, 5, 10, 20, 40, 80, 160, 320. In this way you can add more UEs. Example: `./waf --run "v2i-lte --ns3::LteEnbRrc::SrsPeriodicity=160"`
 

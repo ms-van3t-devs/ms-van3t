@@ -244,21 +244,6 @@ namespace ns3
     //std::cout << "x:" << mob->GetPosition ().x << std::endl;
     //std::cout << "y:" << mob->GetPosition ().y << std::endl;
 
-    /* This block computes the timestamp. If realtime-> use system time.
-     * Else, depending on if it is multi client or not, use ns3 or sumo sim time */
-    struct timespec tv;
-    if (!m_real_time)
-      {
-        double nanosec =  Simulator::Now ().GetNanoSeconds ();
-        tv.tv_sec = 0;
-        tv.tv_nsec = nanosec;
-      }
-    else
-      {
-        clock_gettime (CLOCK_MONOTONIC, &tv);
-      }
-    /* End timestamp computation */
-
     if (m_asn)
       CAMSender::Populate_and_send_asn_cam();
     else
