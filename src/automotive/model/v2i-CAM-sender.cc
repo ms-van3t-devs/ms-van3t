@@ -243,6 +243,8 @@ namespace ns3
     //Ptr<MobilityModel> mob = this->GetNode ()->GetObject<MobilityModel> ();
     //std::cout << "x:" << mob->GetPosition ().x << std::endl;
     //std::cout << "y:" << mob->GetPosition ().y << std::endl;
+    //std::cout << "x_sumo:" << m_client->TraCIAPI::vehicle.getPosition (m_id).x<< std::endl;
+    //std::cout << "y_sumo:" << m_client->TraCIAPI::vehicle.getPosition (m_id).y << std::endl;
 
     if (m_asn)
       CAMSender::Populate_and_send_asn_cam();
@@ -262,6 +264,7 @@ namespace ns3
 
     libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
 
+    /* If lonlat is used, positions should be converted */
     if (m_lon_lat)
         pos = m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
 
@@ -361,7 +364,6 @@ namespace ns3
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth =
         m_client->TraCIAPI::vehicle.getWidth (m_id)*10;
 
-    /* */
     /* We filled just some fields, you can fill them all to match any purpose */
 
     /** Encoding **/
@@ -373,15 +375,13 @@ namespace ns3
         std::cout << "Cannot encode CAM" << std::endl;
         return;
       }
-    else
-      {
-        /** Packet creation **/
-        Ptr<Packet> packet = Create<Packet> ((uint8_t*) buffer, ec+1);
 
-        m_socket->Send (packet);
-        m_cam_seq++;
-        m_cam_sent++;
-      }
+    /** Packet creation **/
+    Ptr<Packet> packet = Create<Packet> ((uint8_t*) buffer, ec+1);
+
+    m_socket->Send (packet);
+    m_cam_seq++;
+    m_cam_sent++;
 
     ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }

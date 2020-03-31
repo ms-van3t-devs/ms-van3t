@@ -323,9 +323,8 @@ namespace ns3
     denm1->denm.management.eventPosition.altitude.altitudeValue=AltitudeValue_unavailable;
     denm1->denm.management.eventPosition.longitude=Longitude_unavailable;
 
-    denm1->header.messageID=FIX_DENMID;
-
     /* We encode the app information in sequenceNumber. This should not be done, use "à la carte container" instead (FIX THIS) */
+    denm1->header.messageID=FIX_DENMID;
     denm1->denm.management.actionID.sequenceNumber=speedmode;
 
     /** Encoding **/
