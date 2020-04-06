@@ -168,6 +168,8 @@ main (int argc, char *argv[])
   AppServer.Stop (simulationTime - Seconds (0.1));
   ++nodeCounter;
 
+
+
   /*** 7. Setup interface and application for dynamic nodes ***/
   CAMSenderHelper CamSenderHelper (9);
   AppClientHelper appClientHelper;
@@ -178,13 +180,13 @@ main (int argc, char *argv[])
   CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(true));
   CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
   CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
-
-  appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-
   /* Extract the server address */
   Ptr<Ipv4> ipv4 = wifiNodes.Get (0)->GetObject<Ipv4> ();
   Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
   Ipv4Address remoteHostAddr = iaddr.GetLocal ();
+  CamSenderHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+
+  appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -198,12 +200,6 @@ main (int argc, char *argv[])
 
       /* Install Application */
       CamSenderHelper.SetAttribute ("Index", IntegerValue(nodeCounter));
-
-      std::ostringstream oss;
-      std::ostream &os = oss;
-      remoteHostAddr.Print (os);
-      std::string serv_addr = oss.str();
-      CamSenderHelper.SetAttribute ("ServerAddr", StringValue(serv_addr));
 
       ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer ClientApp = appClientHelper.Install (includedNode);

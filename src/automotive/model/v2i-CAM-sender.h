@@ -108,7 +108,7 @@ private:
   bool m_asn; //!< To decide if ASN.1 is used
   double m_sumo_update; //!< SUMO granularity
   bool m_print_summary; //!< To print a small summary when vehicle leaves the simulation
-  std::string m_server_addr; //!< Remote addr
+  Ipv4Address m_server_addr; //!< Remote addr
   bool m_already_print; //!< To avoid printing two summary
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
   double m_cam_intertime; //!< Time between two consecutives CAMs

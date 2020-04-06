@@ -229,6 +229,7 @@ main (int argc, char *argv[])
   CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(false));
   CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
   CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
+  CamSenderHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
 
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
@@ -244,12 +245,6 @@ main (int argc, char *argv[])
 
       /* Install Application */
       CamSenderHelper.SetAttribute ("Index", IntegerValue(nodeCounter));
-
-      std::ostringstream oss;
-      std::ostream &os = oss;
-      remoteHostAddr.Print (os);
-      std::string serv_addr = oss.str();
-      CamSenderHelper.SetAttribute ("ServerAddr", StringValue(serv_addr));
 
       ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer ClientApp = appClientHelper.Install (includedNode);

@@ -122,9 +122,9 @@ namespace ns3
             MakeBooleanChecker ())
         .AddAttribute ("ServerAddr",
             "Ip Addr of the server",
-            StringValue("10.0.0.1"),
-            MakeStringAccessor (&CAMSender::m_server_addr),
-            MakeStringChecker ())
+            Ipv4AddressValue("10.0.0.2"),
+            MakeIpv4AddressAccessor (&CAMSender::m_server_addr),
+            MakeIpv4AddressChecker ())
         .AddAttribute ("CAMIntertime",
             "Time between two consecutive CAMs",
             DoubleValue(0.1),
@@ -176,10 +176,7 @@ namespace ns3
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     m_socket = Socket::CreateSocket (GetNode (), tid);
 
-    Ipv4Address serverIp;
-    // Set the socket to send to the server
-    serverIp.Set (m_server_addr.c_str ());
-    InetSocketAddress remote = InetSocketAddress (serverIp, m_port);
+    InetSocketAddress remote = InetSocketAddress (m_server_addr, m_port);
 
     // Bind the socket to receive packets coming from every IP
     InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
