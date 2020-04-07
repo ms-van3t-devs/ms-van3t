@@ -259,19 +259,28 @@ namespace ns3
 
     std::ostringstream msg;
 
-    libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
-
     /* If lonlat is used, positions should be converted */
+    /* Positions */
+    libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
     if (m_lon_lat)
+      {
         pos = m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+        pos.x = pos.x * DOT_ONE_MICRO;
+        pos.y = pos.y * DOT_ONE_MICRO;
+      }
+    else
+      { /* For the standard you should use WGS84 co-ordinate system */
+        pos.x = pos.x * MICRO;
+        pos.y = pos.y * MICRO;
+      }
 
     /* Create the message to be sent in plain text */
     msg << "CAM," << m_id << ","
         << pos.x << ","
         << pos.y << ","
-        << m_client->TraCIAPI::vehicle.getSpeed(m_id) << ","
-        << m_client->TraCIAPI::vehicle.getAcceleration (m_id) << ","
-        << m_client->TraCIAPI::vehicle.getAngle (m_id) << ","
+        << m_client->TraCIAPI::vehicle.getSpeed(m_id)*CENTI << ","
+        << m_client->TraCIAPI::vehicle.getAcceleration (m_id)*DECI << ","
+        << m_client->TraCIAPI::vehicle.getAngle (m_id)*DECI << ","
         << tv.tv_sec << "," << tv.tv_nsec << ","
         << m_cam_seq << ",end\0";
 
@@ -295,74 +304,82 @@ namespace ns3
     /* Install the high freq container */
     cam->cam.camParameters.highFrequencyContainer.present = HighFrequencyContainer_PR_basicVehicleContainerHighFrequency;
 
-    /* Generation time (ms since time reference) */
-    GenerationDeltaTime_t gen_time;
+    /* Generation delta time (ms since time reference) */
+    long timestamp;
     if(m_real_time)
       {
-        long now_ms = tv.tv_sec*1000 + (tv.tv_nsec/1000000);
-        gen_time=now_ms-m_start_ms;
+        timestamp = compute_timestampIts ()%65536;
       }
     else
-      gen_time = (tv.tv_nsec/1000000)%65536;
+      timestamp = (tv.tv_nsec/1000000)%65536;
+    cam->cam.generationDeltaTime = (GenerationDeltaTime_t)timestamp;
 
-    cam->cam.generationDeltaTime = gen_time;
-
-    /* ID, e CAM seq */
-    cam->header.protocolVersion=FIX_PROT_VERS;
-    cam->header.stationID = std::stol (m_id.substr (3));
-    cam->header.messageID=FIX_CAMID;
-
-    /* YawRate angle */
-    YawRate yawR;
-    double angle = m_client->TraCIAPI::vehicle.getAngle (m_id);
-    yawR.yawRateValue=(YawRateValue_t)retValue(angle,DEF_YAWRATE,0,0);
-    yawR.yawRateConfidence=setConfidence(FIX_YAWRATE_CONF,DEF_YAWRATE_CONF,angle,DEF_YAWRATE);
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.yawRate=yawR;
-
-    /* Heading */
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue=DEF_HEADING;
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingConfidence=DEF_HEADING_CONF;
+    /* Station Type */
+    cam->cam.camParameters.basicContainer.stationType = StationType_passengerCar;
 
     /* Positions */
     libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
     if (m_lon_lat)
+      {
         pos = m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+        pos.x = pos.x * DOT_ONE_MICRO;
+        pos.y = pos.y * DOT_ONE_MICRO;
+      }
+    else
+      { /* For the standard you should use WGS84 co-ordinate system */
+        pos.x = pos.x * MICRO;
+        pos.y = pos.y * MICRO;
+      }
 
     //altitude
-    cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence=0;
-    cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue=0;
+    cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
+    cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue=AltitudeValue_unavailable;
+
     //latitude
-    Latitude_t latitudeT=(Latitude_t)retValue(pos.y*MICRO,DEF_LATITUDE,FIX2D,FIX2D);
+    Latitude_t latitudeT=(Latitude_t)retValue(pos.y,DEF_LATITUDE,0,0);
     cam->cam.camParameters.basicContainer.referencePosition.latitude=latitudeT;
 
     //longitude
-    Longitude_t longitudeT=(Longitude_t)retValue(pos.x*MICRO,DEF_LONGITUDE,FIX2D,FIX2D);
+    Longitude_t longitudeT=(Longitude_t)retValue(pos.x,DEF_LONGITUDE,0,0);
     cam->cam.camParameters.basicContainer.referencePosition.longitude=longitudeT;
+
+    /* Heading */
+    double angle = m_client->TraCIAPI::vehicle.getAngle (m_id);
+    Heading heading;
+    heading.headingValue=(HeadingValue_t)retValue (angle*DECI,DEF_HEADING,0,0);
+    heading.headingConfidence=HeadingConfidence_unavailable;
+    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading=heading;
 
     /* Speed */
     Speed_t vel;
     double speed=m_client->TraCIAPI::vehicle.getSpeed(m_id);
     vel.speedValue=(SpeedValue_t)retValue(speed*CENTI,DEF_SPEED,0,0);
-    vel.speedConfidence=setConfidence(FIX_SPEED_CONF,DEF_SPEED_CONF,speed,DEF_SPEED);
+    vel.speedConfidence=SpeedConfidence_unavailable;
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed=vel;
 
     /* Acceleration */
     LongitudinalAcceleration_t longAcc;
     double acc=m_client->TraCIAPI::vehicle.getAcceleration (m_id);
-    longAcc.longitudinalAccelerationValue=(LongitudinalAccelerationValue_t)retValue(acc,DEF_ACCELERATION,0,0);
-    longAcc.longitudinalAccelerationConfidence=setConfidence(FIX_ACCEL_CONF,DEF_ACCEL_CONF,acc,DEF_ACCELERATION);
+    longAcc.longitudinalAccelerationValue=(LongitudinalAccelerationValue_t)retValue(acc*DECI,DEF_ACCELERATION,0,0);
+    longAcc.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration=longAcc;
 
     /* Length and width of car */
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue =
-        m_client->TraCIAPI::vehicle.getLength (m_id)*10;
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthConfidenceIndication=
-        VehicleLengthConfidenceIndication_unavailable;
-    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth =
-        m_client->TraCIAPI::vehicle.getWidth (m_id)*10;
+    double veh_length = m_client->TraCIAPI::vehicle.getLength (m_id);
+    VehicleLength length;
+    length.vehicleLengthConfidenceIndication=VehicleLengthConfidenceIndication_unavailable;
+    length.vehicleLengthValue=(VehicleLengthValue_t)retValue (veh_length*DECI,DEF_LENGTH,0,0);
+    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength = length;
+    double veh_width = m_client->TraCIAPI::vehicle.getWidth (m_id);
+    VehicleWidth width = (VehicleWidth)retValue (veh_width*DECI,DEF_WIDTH,0,0);
+    cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth = width;
+
+    /* Other needed fields */
+    cam->header.protocolVersion=FIX_PROT_VERS;
+    cam->header.stationID = std::stol (m_id.substr (3));
+    cam->header.messageID=FIX_CAMID;
 
     /* We filled just some fields, you can fill them all to match any purpose */
-
     /** Encoding **/
     void *buffer = NULL;
     asn_per_constraints_s *constraints = NULL;
@@ -472,6 +489,17 @@ namespace ns3
         clock_gettime (CLOCK_MONOTONIC, &tv);
       }
     return tv;
+  }
+
+  long
+  CAMSender::compute_timestampIts ()
+  {
+    /* To et millisec since  2004-01-01T00:00:00:000Z*/
+    auto time = std::chrono::system_clock::now(); // get the current time
+    auto since_epoch = time.time_since_epoch(); // get the duration since epoch
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
+    long elapsed_since_2004 = millis.count() - TIME_SHIFT;
+    return elapsed_since_2004;
   }
 
 }

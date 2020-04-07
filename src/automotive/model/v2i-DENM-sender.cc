@@ -206,9 +206,9 @@ namespace ns3
         //Long = x, Lat = y
 
         /* Build your CAM strategy here! */
-        cam.position.x = (double)decoded->cam.camParameters.basicContainer.referencePosition.longitude/MICRO;
-        cam.position.y = (double)decoded->cam.camParameters.basicContainer.referencePosition.latitude/MICRO;
-        cam.speed = (double)decoded->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI;
+        cam.position.x = (double)decoded->cam.camParameters.basicContainer.referencePosition.longitude;
+        cam.position.y = (double)decoded->cam.camParameters.basicContainer.referencePosition.latitude;
+        cam.speed = (double)decoded->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue;
 
         m_cam_received++;
         ASN_STRUCT_FREE(asn_DEF_CAM,decoded);
@@ -238,7 +238,9 @@ namespace ns3
        the info to speed-up is needed, SEND_1 is returned.
     */
     cam.position.z=0;
+
     Ptr<appServer> app = GetNode()->GetApplication (1)->GetObject<appServer> ();
+
     int decision = app->receiveCAM (cam,from);
 
     if (decision == DO_NOT_SEND)

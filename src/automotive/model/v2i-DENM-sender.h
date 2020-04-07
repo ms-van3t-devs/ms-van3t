@@ -17,7 +17,6 @@
 #define FIX_PROT_VERS       1
 #define FIX_DENMID          1
 
-#define MICRO               1000000
 #define CENTI               100
 
 enum ret {

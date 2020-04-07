@@ -129,6 +129,20 @@ namespace ns3
   appServer::receiveCAM (struct CAMinfo cam, Address address)
   {
     /* If is the first time the this veh sends a CAM, check if it is inside or outside */
+
+    /* First of all, convert the values */
+    if(m_lon_lat)
+      {
+        cam.position.x = cam.position.x/DOT_ONE_MICRO;
+        cam.position.y = cam.position.y/DOT_ONE_MICRO;
+      }
+    else
+      {
+        cam.position.x = cam.position.x/MICRO;
+        cam.position.y = cam.position.y/MICRO;
+      }
+    cam.speed = cam.speed/CENTI;
+
     if (m_veh_position.find (address) == m_veh_position.end ())
       {
         if (isInside (cam.position.x,cam.position.y))

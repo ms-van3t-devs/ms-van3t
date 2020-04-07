@@ -5,6 +5,10 @@
 #include "ns3/application.h"
 #include "ns3/address.h"
 
+#define DOT_ONE_MICRO       10000000
+#define MICRO               1000000
+#define CENTI               100
+
 namespace ns3 {
 
 struct CAMinfo
@@ -40,6 +44,7 @@ public:
   int receiveCAM(struct CAMinfo, Address address);
 
   void StopApplicationNow ();
+  bool m_lon_lat; //!< Use LonLat instead of XY
 
 protected:
   virtual void DoDispose (void);
@@ -53,7 +58,6 @@ private:
   
   Ptr<TraciClient> m_client; //!< TraCI client
   std::string m_id; //!< vehicle id
-  bool m_lon_lat; //!< Use LonLat instead of XY
   libsumo::TraCIPosition m_upperLimit; //!< To store the speed limit area boundaries
   libsumo::TraCIPosition m_lowerLimit; //!< To store the speed limit area boundaries
 
