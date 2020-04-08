@@ -10,14 +10,20 @@
 #include "ns3/ipv4-address.h"
 #include "ns3/traced-callback.h"
 #include "ns3/appServer.h"
+#include "ns3/socket.h"
+#include <chrono>
 
 #define SPEED_OF_LIGHT      299792458.0
 #define MAX_CACHED_SEQ      30000
 
 #define FIX_PROT_VERS       1
 #define FIX_DENMID          1
+#define FIX_CAMID           2
 
 #define CENTI               100
+
+//Epoch time at 2004-01-01
+#define TIME_SHIFT 1072915200000
 
 enum ret {
 	DO_NOT_SEND,	/* Dont send DENM */
@@ -68,7 +74,7 @@ private:
   /**
    * @brief This function is to encode and send a DENM using ASN.1
   */
-  void Populate_and_send_asn_denm(Address address, int speedmode);
+  void Populate_and_send_asn_denm(Address address, int speedmode, long timestamp);
 
   /**
    * @brief This function is to encode and send a DENM in plain text
@@ -84,6 +90,11 @@ private:
    * @brief This function compute the timestamps
   */
   struct timespec compute_timestamp();
+
+  /**
+   * @brief This function compute the milliseconds elapsed from 2004-01-01
+  */
+  long compute_timestampIts ();
 
   Ptr<TraciClient> m_client; //!< TraCI client
   uint16_t m_port; //!< Port on which traffic is sent
@@ -101,6 +112,8 @@ private:
 
   EventId m_aggegateOutputEvent; //!< Event to create aggregate output
   EventId m_sendEvent; //!< Event to send the next packet
+
+  int m_this_id; //!< The ID of the ITS station. Set to 0
 
 };
 

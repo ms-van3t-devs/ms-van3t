@@ -16,9 +16,10 @@
 #define OFFSET_X            0
 #define OFFSET_Y            0
 
-//CAM utils
+//ASN.1 utils
 #define FIX_PROT_VERS       1
 #define FIX_CAMID           2
+#define FIX_DENMID          1
 #define DEF_LATITUDE        90000001
 #define DEF_LONGITUDE       1800000001
 #define DEF_LENGTH          1022
@@ -118,13 +119,10 @@ private:
   /* Counters */
   int m_cam_sent;
   int m_denm_received;
-  u_int16_t m_cam_seq; //!< CAM sequence
 
   int m_index;  //!< vehicle index
   std::string m_id; //!< vehicle id
   std::string m_veh_prefix; //!< prefix used in SUMO
-
-  long long m_start_ms; //!< To save the base time of simulation*/
 
   EventId m_sendCamEvent; //!< Event to send the CAM
 

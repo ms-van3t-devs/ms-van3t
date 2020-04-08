@@ -17,28 +17,21 @@
 
  * Edited by Marco Malinverno, Politecnico di Torino (marco.malinverno@polito.it)
 */
+#include "ns3/pointer.h"
 #include "ns3/log.h"
 #include "ns3/ipv4.h"
-#include "ns3/ipv4-address.h"
-#include "ns3/ipv6-address.h"
-#include "ns3/address-utils.h"
 #include "ns3/nstime.h"
 #include "ns3/inet-socket-address.h"
-#include "ns3/inet6-socket-address.h"
 #include "ns3/socket.h"
-#include "ns3/udp-socket.h"
 #include "ns3/simulator.h"
-#include "ns3/socket-factory.h"
+#include "ns3/udp-socket-factory.h"
 #include "ns3/packet.h"
 #include "ns3/uinteger.h"
 #include <string>
 #include <stdlib.h>
 #include <algorithm>
-#include "ns3/udp-socket-factory.h"
 #include <sys/time.h>
 #include <sys/types.h>
-#include "ns3/pointer.h"
-#include "ns3/trace-source-accessor.h"
 
 #include <errno.h>
 
@@ -107,7 +100,7 @@ namespace ns3
             MakeBooleanChecker ())
         .AddAttribute ("LonLat",
             "If it is true, position are sent through lonlat (not XY).",
-            BooleanValue (false),
+            BooleanValue (true),
             MakeBooleanAccessor (&CAMSender::m_lon_lat),
             MakeBooleanChecker ())
         .AddAttribute ("RealTime",
@@ -146,7 +139,6 @@ namespace ns3
     m_port = 0;
     m_client = nullptr;
     m_veh_prefix = "veh";
-    m_cam_seq = 0;
     m_cam_sent = 0;
     m_denm_received = 0;
     m_print_summary = true;
@@ -176,31 +168,26 @@ namespace ns3
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     m_socket = Socket::CreateSocket (GetNode (), tid);
 
-    InetSocketAddress remote = InetSocketAddress (m_server_addr, m_port);
-
     // Bind the socket to receive packets coming from every IP
     InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
     if (m_socket->Bind (local) == -1)
       {
         NS_FATAL_ERROR ("Failed to bind client socket");
       }
+
+    // Connect it to the server
+    InetSocketAddress remote = InetSocketAddress (m_server_addr, m_port);
     m_socket->Connect(remote);
 
+    // Take the vehicle ID from SUMO
     m_id = m_client->GetVehicleId (this->GetNode ());    
+
     // Schedule CAM dissemination
     if (m_send_cam)
        m_sendCamEvent = Simulator::Schedule (Seconds (1.0), &CAMSender::SendCam, this);
 
     // Make the callback to handle received packets
     m_socket->SetRecvCallback (MakeCallback (&CAMSender::HandleRead, this));
-
-    /* If we are in realtime, save a base timestamp to start from */
-    if(m_real_time)
-      {
-        struct timespec tv;
-        clock_gettime (CLOCK_MONOTONIC, &tv);
-        m_start_ms = tv.tv_sec*1000 + (tv.tv_nsec/1000000);
-      }
   }
 
   void
@@ -259,7 +246,8 @@ namespace ns3
 
     std::ostringstream msg;
 
-    /* If lonlat is used, positions should be converted */
+    /* If lonlat is used, positions should be converted, since TraCI returns by default XY */
+    /* Values are scaled according to ASN.1 specification. They are converted back at receiver */
     /* Positions */
     libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
     if (m_lon_lat)
@@ -281,15 +269,14 @@ namespace ns3
         << m_client->TraCIAPI::vehicle.getSpeed(m_id)*CENTI << ","
         << m_client->TraCIAPI::vehicle.getAcceleration (m_id)*DECI << ","
         << m_client->TraCIAPI::vehicle.getAngle (m_id)*DECI << ","
-        << tv.tv_sec << "," << tv.tv_nsec << ","
-        << m_cam_seq << ",end\0";
+        << tv.tv_sec << "," << tv.tv_nsec << ",end\0";
 
     // Tweak: add +1, otherwise some strange character are received at the end of the packet
     uint16_t packetSize = msg.str ().length () + 1;
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), packetSize);
 
-    m_cam_seq++;
     m_cam_sent++;
+
     // Send packet through the interface
     m_socket->Send(packet);
   }
@@ -297,27 +284,32 @@ namespace ns3
   void
   CAMSender::Populate_and_send_asn_cam()
   {
-    struct timespec tv = compute_timestamp ();
+    /* Here a ASN.1 CAM is encoded, following ETSI EN 302 637-3, ETSI EN 302 637-2 and ETSI TS 102 894-2 encoding rules
+     * in square brakets the unit used to transfer the data */
 
     CAM_t *cam = (CAM_t*) calloc(1, sizeof(CAM_t));
 
     /* Install the high freq container */
     cam->cam.camParameters.highFrequencyContainer.present = HighFrequencyContainer_PR_basicVehicleContainerHighFrequency;
 
-    /* Generation delta time (ms since time reference) */
+    /* Generation delta time [ms since 2004-01-01]. In case the scheduler is not real time, we have to use simulation time,
+     * otherwise timestamps will be not reliable */
     long timestamp;
     if(m_real_time)
       {
         timestamp = compute_timestampIts ()%65536;
       }
     else
-      timestamp = (tv.tv_nsec/1000000)%65536;
+      {
+        struct timespec tv = compute_timestamp ();
+        timestamp = (tv.tv_nsec/1000000)%65536;
+      }
     cam->cam.generationDeltaTime = (GenerationDeltaTime_t)timestamp;
 
     /* Station Type */
     cam->cam.camParameters.basicContainer.stationType = StationType_passengerCar;
 
-    /* Positions */
+    /* Positions - the standard is followed only if m_lonlat is true */
     libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
     if (m_lon_lat)
       {
@@ -331,40 +323,40 @@ namespace ns3
         pos.y = pos.y * MICRO;
       }
 
-    //altitude
+    //altitude [0,01 m]
     cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
     cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue=AltitudeValue_unavailable;
 
-    //latitude
+    //latitude WGS84 [0,1 microdegree]
     Latitude_t latitudeT=(Latitude_t)retValue(pos.y,DEF_LATITUDE,0,0);
     cam->cam.camParameters.basicContainer.referencePosition.latitude=latitudeT;
 
-    //longitude
+    //longitude WGS84 [0,1 microdegree]
     Longitude_t longitudeT=(Longitude_t)retValue(pos.x,DEF_LONGITUDE,0,0);
     cam->cam.camParameters.basicContainer.referencePosition.longitude=longitudeT;
 
-    /* Heading */
+    /* Heading WGS84 north [0.1 degree] */
     double angle = m_client->TraCIAPI::vehicle.getAngle (m_id);
     Heading heading;
     heading.headingValue=(HeadingValue_t)retValue (angle*DECI,DEF_HEADING,0,0);
     heading.headingConfidence=HeadingConfidence_unavailable;
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading=heading;
 
-    /* Speed */
+    /* Speed [0.01 m/s] */
     Speed_t vel;
     double speed=m_client->TraCIAPI::vehicle.getSpeed(m_id);
     vel.speedValue=(SpeedValue_t)retValue(speed*CENTI,DEF_SPEED,0,0);
     vel.speedConfidence=SpeedConfidence_unavailable;
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed=vel;
 
-    /* Acceleration */
+    /* Acceleration [0.1 m/s^2] */
     LongitudinalAcceleration_t longAcc;
     double acc=m_client->TraCIAPI::vehicle.getAcceleration (m_id);
     longAcc.longitudinalAccelerationValue=(LongitudinalAccelerationValue_t)retValue(acc*DECI,DEF_ACCELERATION,0,0);
     longAcc.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
     cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration=longAcc;
 
-    /* Length and width of car */
+    /* Length and width of car [0.1 m] */
     double veh_length = m_client->TraCIAPI::vehicle.getLength (m_id);
     VehicleLength length;
     length.vehicleLengthConfidenceIndication=VehicleLengthConfidenceIndication_unavailable;
@@ -379,7 +371,8 @@ namespace ns3
     cam->header.stationID = std::stol (m_id.substr (3));
     cam->header.messageID=FIX_CAMID;
 
-    /* We filled just some fields, you can fill them all to match any purpose */
+    /* We filled just some fields, it is possible to fill them all to match any purpose */
+
     /** Encoding **/
     void *buffer = NULL;
     asn_per_constraints_s *constraints = NULL;
@@ -394,7 +387,7 @@ namespace ns3
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) buffer, ec+1);
 
     m_socket->Send (packet);
-    m_cam_seq++;
+
     m_cam_sent++;
 
     ASN_STRUCT_FREE(asn_DEF_CAM,cam);
@@ -431,17 +424,25 @@ namespace ns3
 
         DENM_t *decoded = (DENM_t *) decoded_;
 
-        std::cout << "DENM in ASN.1 format received by " << m_id << std::endl;
-        m_denm_received++;
-
-        speedmode = (int)decoded->denm.management.actionID.sequenceNumber;
-
-        /* Now in "decoded" you have the DENM */
-        ASN_STRUCT_FREE(asn_DEF_DENM,decoded);
+        if (decoded->header.messageID==FIX_DENMID)
+          {
+            std::cout << "DENM in ASN.1 format received by " << m_id << std::endl;
+            m_denm_received++;
+            speedmode = (int)decoded->denm.management.actionID.sequenceNumber;
+            /* Now in "decoded" you have the DENM */
+            ASN_STRUCT_FREE(asn_DEF_DENM,decoded);
+          }
+        else
+          {
+            /* What you received is not a DENM, clean and exit */
+            ASN_STRUCT_FREE(asn_DEF_DENM,decoded);
+            return;
+          }
       }
 
     else
       {
+        /* A DENM in plain text is received */
         std::vector<std::string> values;
         std::string s = std::string ((char*) buffer);
         //std::cout << "Packet received - content:" << s << std::endl;
@@ -451,10 +452,15 @@ namespace ns3
             values.push_back (element);
           }
 
-        std::cout << "DENM in plain text received by " << m_id << std::endl;
-        m_denm_received++;
-
-        speedmode = std::stoi (values[3]);
+        if(values[0]=="DENM")
+          {
+            std::cout << "DENM in plain text received by " << m_id << std::endl;
+            m_denm_received++;
+            speedmode = std::stoi (values[3]);
+          }
+        else
+          /* What you received is not a DENM, exit */
+          return;
       }
 
     /* Build your DENM strategy here! */
@@ -494,11 +500,12 @@ namespace ns3
   long
   CAMSender::compute_timestampIts ()
   {
-    /* To et millisec since  2004-01-01T00:00:00:000Z*/
+    /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time
     auto since_epoch = time.time_since_epoch(); // get the duration since epoch
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
-    long elapsed_since_2004 = millis.count() - TIME_SHIFT;
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch); // convert it in millisecond since epoch
+
+    long elapsed_since_2004 = millis.count() - TIME_SHIFT; // in TIME_SHIFT we saved the millisec from epoch to 2004-01-01
     return elapsed_since_2004;
   }
 

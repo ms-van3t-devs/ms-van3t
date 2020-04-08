@@ -17,29 +17,20 @@
 
  * Edited by Marco Malinverno, Politecnico di Torino (marco.malinverno@polito.it)
  */
+
+#include "ns3/trace-source-accessor.h"
 #include "ns3/log.h"
-#include "ns3/ipv4.h"
-#include "ns3/ipv4-address.h"
-#include "ns3/ipv6-address.h"
-#include "ns3/address-utils.h"
 #include "ns3/nstime.h"
 #include "ns3/inet-socket-address.h"
-#include "ns3/inet6-socket-address.h"
-#include "ns3/socket.h"
-#include "ns3/udp-socket.h"
 #include "ns3/simulator.h"
-#include "ns3/socket-factory.h"
 #include "ns3/packet.h"
+#include "ns3/udp-socket-factory.h"
 #include "ns3/uinteger.h"
 #include <string>
 #include <stdlib.h>
 #include <algorithm>
-#include "ns3/udp-socket-factory.h"
 #include <sys/time.h>
 #include <sys/types.h>
-#include "ns3/pointer.h"
-#include "ns3/trace-source-accessor.h"
-
 #include <errno.h>
 
 #include "v2i-DENM-sender.h"
@@ -98,6 +89,7 @@ namespace ns3
     m_cam_received = 0;
     m_denm_sent = 0;
     m_client = nullptr;
+    m_this_id = 0;
   }
 
   DENMSender::~DENMSender ()
@@ -178,6 +170,7 @@ namespace ns3
   DENMSender::HandleRead (Ptr<Socket> socket)
   {
     CAMinfo cam;
+
     /* Debug print */
     //NS_LOG_INFO("SUMO time:" << m_client->simulation.getTime () << "\n");
     //NS_LOG_INFO("NS3 time:" << Simulator::Now () << "\n");
@@ -202,16 +195,23 @@ namespace ns3
 
         CAM_t *decoded = (CAM_t *) decoded_;
 
-        /* Now in "decoded" you have the CAM */
-        //Long = x, Lat = y
+        if (decoded->header.messageID == FIX_CAMID)
+          {
+            /* Now in "decoded" you have the CAM */
+            /* Build your CAM strategy here! */
+            cam.position.x = (double)decoded->cam.camParameters.basicContainer.referencePosition.longitude;
+            cam.position.y = (double)decoded->cam.camParameters.basicContainer.referencePosition.latitude;
+            cam.speed = (double)decoded->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue;
 
-        /* Build your CAM strategy here! */
-        cam.position.x = (double)decoded->cam.camParameters.basicContainer.referencePosition.longitude;
-        cam.position.y = (double)decoded->cam.camParameters.basicContainer.referencePosition.latitude;
-        cam.speed = (double)decoded->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue;
-
-        m_cam_received++;
-        ASN_STRUCT_FREE(asn_DEF_CAM,decoded);
+            m_cam_received++;
+            ASN_STRUCT_FREE(asn_DEF_CAM,decoded);
+          }
+        else
+          {
+            /* What you received is not a CAM, clean and exit */
+            ASN_STRUCT_FREE(asn_DEF_CAM,decoded);
+            return;
+          }
     }
     else
       {
@@ -225,11 +225,19 @@ namespace ns3
             values.push_back (element);
           }
 
-        /* Build your CAM strategy here! */
-        cam.position.x = std::stod(values[2]);
-        cam.position.y = std::stod(values[3]);
-        cam.speed = std::stod(values[4]);
-        m_cam_received++;
+        if(values[0]=="CAM")
+          {
+            /* Build your CAM strategy here! */
+            cam.position.x = std::stod(values[2]);
+            cam.position.y = std::stod(values[3]);
+            cam.speed = std::stod(values[4]);
+            m_cam_received++;
+          }
+        else
+          {
+            /* What you received is not a CAM, exit */
+            return;
+          }
       }
 
     /* In this case, we pass to the server the information regarding position and speed of the vehicle, as well as a unique identifier
@@ -246,21 +254,31 @@ namespace ns3
     if (decision == DO_NOT_SEND)
       return;
 
+    long timestamp;
+    if(m_real_time)
+      {
+        timestamp = compute_timestampIts ()%65536;
+      }
+    else
+      {
+        struct timespec tv = compute_timestamp ();
+        timestamp = (tv.tv_nsec/1000000)%65536;
+      }
+
     if (decision == SEND_0)
       {
         if (m_asn)
-          DENMSender::Populate_and_send_asn_denm (from,0);
+          DENMSender::Populate_and_send_asn_denm (from,0,timestamp);
         else
           DENMSender::Populate_and_send_normal_denm (from,0);
       }
     else if (decision == SEND_1)
       {
         if (m_asn)
-          DENMSender::Populate_and_send_asn_denm (from,1);
+          DENMSender::Populate_and_send_asn_denm (from,1,timestamp);
         else
           DENMSender::Populate_and_send_normal_denm (from,1);
       }
-
   }
 
   void
@@ -271,10 +289,10 @@ namespace ns3
 
     struct timespec tv = compute_timestamp ();
 
-    msg << "This is a DENM,"
+    msg << "DENM,"
         << tv.tv_sec  << ","
         << tv.tv_nsec << ","
-        << std::to_string (speedmode) << ",end\0";
+        << speedmode << ",end\0";
 
     //Tweak: add +1, otherwise some random characters are received at the end of the packet
     uint16_t packetSize = msg.str ().length () + 1;
@@ -285,54 +303,55 @@ namespace ns3
   }
 
   void
-  DENMSender::Populate_and_send_asn_denm(Address address, int speedmode)
+  DENMSender::Populate_and_send_asn_denm(Address address, int speedmode, long det_time)
   {
-    struct timespec tv = compute_timestamp ();
+    /* Here a ASN.1 DENM is encoded, following ETSI EN 302 637-3, ETSI EN 302 637-2 and ETSI TS 102 894-2 encoding rules
+     * in square brakets the unit used to transfer the data */
 
-    /* First DENM */
-    DENM_t *denm1 = (DENM_t*) calloc(1, sizeof(DENM_t));
+    DENM_t *denm = (DENM_t*) calloc(1, sizeof(DENM_t));
 
-    /* The DENM here is filled with some example values. Be careful that some of the fields are mandatory */
+    /* Header */
+    denm->header.protocolVersion=FIX_PROT_VERS;
+    denm->header.stationID=m_this_id;
+    denm->header.messageID=FIX_DENMID;
 
-    long gen_time;
+    /* Management container */
+    /* The actionID shall be the combination of an ITS-S ID and a sequence number. The ITS-S ID corresponds to stationID
+     * of the originating ITS-S that detects an event for the first time. The sequence number is assigned to the actionID
+     * for each new DENM. In our case we use the sequencenumber field to encode the speedmode. */
+    denm->denm.management.actionID.sequenceNumber=speedmode;
+    denm->denm.management.actionID.originatingStationID=m_this_id;
+
+    /* Detection time [ms since 2004-01-01] (time at which the event is detected). */
+    INTEGER_t detection_time;
+    memset(&detection_time, 0, sizeof(detection_time));
+    asn_ulong2INTEGER(&detection_time, det_time);
+    denm->denm.management.detectionTime=detection_time;
+
+    /* Reference time [ms since 2004-01-01] (time at wich the DENM is generated). In case the scheduler is not real time,
+     * we have to use simulation time, otherwise timestamps will be not reliable */
+    long timestamp;
     if(m_real_time)
       {
-        long now_ms = tv.tv_sec*1000 + (tv.tv_nsec/1000000);
-        gen_time=now_ms-m_start_ms;
+        timestamp = compute_timestampIts ()%65536;
       }
     else
-      gen_time = (tv.tv_nsec/1000000)%65536;
+      {
+        struct timespec tv = compute_timestamp ();
+        timestamp = (tv.tv_nsec/1000000)%65536;
+      }
+    INTEGER_t ref_time;
+    memset(&ref_time, 0, sizeof(ref_time));
+    asn_ulong2INTEGER(&ref_time, timestamp);
+    denm->denm.management.referenceTime=ref_time;
 
-    INTEGER_t decttime;
-    memset(&decttime, 0, sizeof(decttime));
-    asn_ulong2INTEGER(&decttime, int(tv.tv_sec));
-    denm1->denm.management.detectionTime=decttime;
-
-    INTEGER_t timeResult;
-    memset(&timeResult, 0, sizeof(timeResult));
-    asn_ulong2INTEGER(&timeResult, gen_time);
-    denm1->denm.management.referenceTime=timeResult;
-
-    denm1->header.stationID=0;
-    denm1->header.protocolVersion=FIX_PROT_VERS;
-
-    StationType_t stationType = StationType_passengerCar;
-    denm1->denm.management.stationType=stationType;
-    denm1->denm.management.actionID.originatingStationID=0;
-
-    denm1->denm.management.eventPosition.latitude=Latitude_unavailable;
-    denm1->denm.management.eventPosition.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
-    denm1->denm.management.eventPosition.altitude.altitudeValue=AltitudeValue_unavailable;
-    denm1->denm.management.eventPosition.longitude=Longitude_unavailable;
-
-    /* We encode the app information in sequenceNumber. This should not be done, use "à la carte container" instead (FIX THIS) */
-    denm1->header.messageID=FIX_DENMID;
-    denm1->denm.management.actionID.sequenceNumber=speedmode;
+    /* Station Type */
+    denm->denm.management.stationType=StationType_roadSideUnit;
 
     /** Encoding **/
     void *buffer1 = NULL;
     asn_per_constraints_s *constraints = NULL;
-    ssize_t ec = uper_encode_to_new_buffer(&asn_DEF_DENM, constraints, denm1, &buffer1);
+    ssize_t ec = uper_encode_to_new_buffer(&asn_DEF_DENM, constraints, denm, &buffer1);
     if (ec==-1)
       {
         std::cout << "Cannot encode DENM" << std::endl;
@@ -342,7 +361,7 @@ namespace ns3
     m_socket->SendTo (packet,2,address);
 
     m_denm_sent++;
-    ASN_STRUCT_FREE(asn_DEF_DENM,denm1);
+    ASN_STRUCT_FREE(asn_DEF_DENM,denm);
   }
 
   /* This function is used to calculate the delay for packet reception */
@@ -371,6 +390,18 @@ namespace ns3
         clock_gettime (CLOCK_MONOTONIC, &tv);
       }
     return tv;
+  }
+
+  long
+  DENMSender::compute_timestampIts ()
+  {
+    /* To get millisec since  2004-01-01T00:00:00:000Z */
+    auto time = std::chrono::system_clock::now(); // get the current time
+    auto since_epoch = time.time_since_epoch(); // get the duration since epoch
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch); // convert it in millisecond since epoch
+
+    long elapsed_since_2004 = millis.count() - TIME_SHIFT; // in TIME_SHIFT we saved the millisec from epoch to 2004-01-01
+    return elapsed_since_2004;
   }
 
 } // Namespace ns3

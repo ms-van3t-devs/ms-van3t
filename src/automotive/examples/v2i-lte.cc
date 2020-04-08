@@ -28,12 +28,12 @@ main (int argc, char *argv[])
   bool aggregate_out = true;
   double sumo_updates = 0.01;
   bool send_cam = true;
-  bool asn = false;
+  bool asn = true;
   double cam_intertime = 0.1;
   std::string sumo_folder = "src/automotive/examples/sumo-files/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
-  bool send_lon_lat = false;
+  bool send_lon_lat = true;
 
   /*** 0.b LENA Options ***/
   double interPacketInterval = 100;
