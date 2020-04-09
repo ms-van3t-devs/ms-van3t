@@ -116,3 +116,9 @@ waf
 waf.bat
 wscript
 wutils.py
+
+*.user
+*.files
+*.includes
+*.creator
+*.config
