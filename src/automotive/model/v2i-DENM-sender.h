@@ -108,8 +108,6 @@ private:
   u_int m_cam_received;
   u_int m_denm_sent;
 
-  long long m_start_ms; //!< To save the base time of simulation*/
-
   EventId m_aggegateOutputEvent; //!< Event to create aggregate output
   EventId m_sendEvent; //!< Event to send the next packet
 

@@ -29,8 +29,9 @@
 #define DEF_HEADING         3601
 #define DECI                10
 #define CENTI               100
-#define DOT_ONE_MICRO       10000000
 #define MICRO               1000000
+#define DOT_ONE_MICRO       10000000
+
 
 //Epoch time at 2004-01-01
 #define TIME_SHIFT 1072915200000

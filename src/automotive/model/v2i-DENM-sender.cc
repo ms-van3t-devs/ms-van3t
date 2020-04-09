@@ -130,14 +130,6 @@ namespace ns3
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
       m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &DENMSender::aggregateOutput, this);
-
-    /* If we are in realtime, save a base timestamp to start from */
-    if(m_real_time)
-      {
-        struct timespec tv;
-        clock_gettime (CLOCK_MONOTONIC, &tv);
-        m_start_ms = tv.tv_sec*1000 + (tv.tv_nsec/1000000);
-      }
   }
 
   void
