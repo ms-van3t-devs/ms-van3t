@@ -15,7 +15,7 @@ To build the project:
 
 * Clone this repository in your pc.
     
-* Configure waf to build the new modules with "<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests --enable-sudo" (add here what you want to enable) - The usage of the optimized profile allows to speed up the simulation time
+* Configure waf to build the new modules with "<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests" (add here what you want to enable) - The usage of the optimized profile allows to speed up the simulation time
 
 * Build ns3
 
