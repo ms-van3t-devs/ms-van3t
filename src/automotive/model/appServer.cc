@@ -77,7 +77,6 @@ namespace ns3
      *   The application will first of all calculate this area, then, in the function receiveCAM, it will check every CAM
      *   to see if the limits are respected.
     ***/
-
     libsumo::TraCIPositionVector net_boundaries = m_client->TraCIAPI::simulation.getNetBoundary ();
     libsumo::TraCIPosition pos1;
     libsumo::TraCIPosition pos2;
@@ -105,7 +104,7 @@ namespace ns3
     double map_size_x = std::abs(pos1.x - pos2.x);
     double map_size_y = std::abs(pos1.y - pos2.y);
 
-    /* Compute x and y limit (in case */
+    /* Compute x and y limit */
     m_upperLimit.x = map_center.x + ((map_size_x)*2/3)/2;
     m_lowerLimit.x = map_center.x - ((map_size_x)*2/3)/2;
     m_upperLimit.y = map_center.y + ((map_size_y)*2/3)/2;
@@ -130,17 +129,11 @@ namespace ns3
   {
     /* If is the first time the this veh sends a CAM, check if it is inside or outside */
 
-    /* First of all, convert the values */
-    if(m_lon_lat)
-      {
-        cam.position.x = cam.position.x/DOT_ONE_MICRO;
-        cam.position.y = cam.position.y/DOT_ONE_MICRO;
-      }
-    else
-      {
-        cam.position.x = cam.position.x/MICRO;
-        cam.position.y = cam.position.y/MICRO;
-      }
+    /* Convert the values */
+
+    cam.position.x = cam.position.x/DOT_ONE_MICRO;
+    cam.position.y = cam.position.y/DOT_ONE_MICRO;
+
     cam.speed = cam.speed/CENTI;
 
     if (m_veh_position.find (address) == m_veh_position.end ())

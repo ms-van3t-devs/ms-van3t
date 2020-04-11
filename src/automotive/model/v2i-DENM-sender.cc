@@ -317,7 +317,7 @@ namespace ns3
     /* Detection time [ms since 2004-01-01] (time at which the event is detected). */
     INTEGER_t detection_time;
     memset(&detection_time, 0, sizeof(detection_time));
-    asn_ulong2INTEGER(&detection_time, det_time);
+    asn_long2INTEGER(&detection_time, det_time);
     denm->denm.management.detectionTime=detection_time;
 
     /* Reference time [ms since 2004-01-01] (time at wich the DENM is generated). In case the scheduler is not real time,
@@ -334,7 +334,7 @@ namespace ns3
       }
     INTEGER_t ref_time;
     memset(&ref_time, 0, sizeof(ref_time));
-    asn_ulong2INTEGER(&ref_time, timestamp);
+    asn_long2INTEGER(&ref_time, timestamp);
     denm->denm.management.referenceTime=ref_time;
 
     /* Station Type */

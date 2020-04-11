@@ -173,20 +173,18 @@ main (int argc, char *argv[])
   /*** 7. Setup interface and application for dynamic nodes ***/
   CAMSenderHelper CamSenderHelper (9);
   AppClientHelper appClientHelper;
-  CamSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  CamSenderHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
-  CamSenderHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
-  CamSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  CamSenderHelper.SetAttribute ("PrintSummary", BooleanValue(true));
-  CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
-  CamSenderHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
   /* Extract the server address */
   Ptr<Ipv4> ipv4 = wifiNodes.Get (0)->GetObject<Ipv4> ();
   Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
   Ipv4Address remoteHostAddr = iaddr.GetLocal ();
   CamSenderHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+  CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
 
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  appClientHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
+  appClientHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
+  appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
+  appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -199,8 +197,6 @@ main (int argc, char *argv[])
       ++nodeCounter; //increment counter for next node
 
       /* Install Application */
-      CamSenderHelper.SetAttribute ("Index", IntegerValue(nodeCounter));
-
       ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer ClientApp = appClientHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));

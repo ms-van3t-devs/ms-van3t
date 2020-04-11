@@ -24,6 +24,7 @@ def build(bld):
         'helper/appClient-helper.cc',
         'helper/appServer-helper.cc',
 
+        #CAM+DENM sources
         'model/asn1/AccelerationConfidence.c',
         'model/asn1/AccelerationControl.c',
         'model/asn1/AccidentSubCauseCode.c',
@@ -231,8 +232,9 @@ def build(bld):
         'helper/v2i-denm-sender-helper.h',
         'helper/appClient-helper.h',
         'helper/appServer-helper.h',
+        'model/utils.h',
 
-
+        #CAM+DENM headers
         'model/asn1/AccelerationConfidence.h',
         'model/asn1/AccelerationControl.h',
         'model/asn1/AccidentSubCauseCode.h',
