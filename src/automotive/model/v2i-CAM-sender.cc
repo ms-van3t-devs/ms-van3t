@@ -263,17 +263,17 @@ namespace ns3
 
     if (decoded->header.messageID==FIX_DENMID)
       {
-        denm.proto = (long)decoded->header.protocolVersion;
-        denm.id = (long)decoded->header.stationID;
+        denm.proto = (int)decoded->header.protocolVersion;
+        denm.stationid = (long)decoded->header.stationID;
         denm.messageid = (int)decoded->header.messageID;
 
         denm.sequence = (int)decoded->denm.management.actionID.sequenceNumber;
-        denm.originatingstationid = (long)decoded->denm.management.actionID.originatingStationID;
+        denm.actionid = (long)decoded->denm.management.actionID.originatingStationID;
 
         long detection_time;
         memset(&detection_time, 0, sizeof(detection_time));
         asn_INTEGER2long (&decoded->denm.management.detectionTime,&detection_time);
-        denm.detectiontime = detection_time;
+        denm.detectiontime =detection_time;
 
         long ref_time;
         memset(&ref_time, 0, sizeof(ref_time));

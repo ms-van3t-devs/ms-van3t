@@ -21,6 +21,12 @@
 
 #include "appServer.h"
 
+extern "C"
+{
+  #include "asn1/CAM.h"
+  #include "asn1/DENM.h"
+}
+
 namespace ns3
 {
 
@@ -37,15 +43,25 @@ namespace ns3
         .SetGroupName ("Applications")
         .AddConstructor<appServer> ()
         .AddAttribute ("LonLat",
-            "If it is true, position are sent through lonlat (not XY).",
-            BooleanValue (false),
-            MakeBooleanAccessor (&appServer::m_lon_lat),
-            MakeBooleanChecker ())
+           "If it is true, position are sent through lonlat (not XY).",
+           BooleanValue (false),
+           MakeBooleanAccessor (&appServer::m_lon_lat),
+           MakeBooleanChecker ())
+        .AddAttribute ("AggregateOutput",
+           "If it is true, the server will print every second an aggregate output about cam and denm",
+           BooleanValue (false),
+           MakeBooleanAccessor (&appServer::m_aggregate_output),
+           MakeBooleanChecker ())
+        .AddAttribute ("RealTime",
+           "To compute properly timestamps",
+           BooleanValue(false),
+           MakeBooleanAccessor (&appServer::m_real_time),
+           MakeBooleanChecker ())
         .AddAttribute ("Client",
-            "TraCI client for SUMO",
-            PointerValue (0),
-            MakePointerAccessor (&appServer::m_client),
-            MakePointerChecker<TraciClient> ());
+           "TraCI client for SUMO",
+           PointerValue (0),
+           MakePointerAccessor (&appServer::m_client),
+           MakePointerChecker<TraciClient> ());
         return tid;
   }
 
@@ -53,6 +69,8 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
+    m_cam_received = 0;
+    m_denm_sent = 0;
   }
 
   appServer::~appServer ()
@@ -109,12 +127,20 @@ namespace ns3
     m_lowerLimit.x = map_center.x - ((map_size_x)*2/3)/2;
     m_upperLimit.y = map_center.y + ((map_size_y)*2/3)/2;
     m_lowerLimit.y = map_center.y - ((map_size_y)*2/3)/2;
+
+    /* If aggregate output is enabled, start it */
+    if (m_aggregate_output)
+      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &appServer::aggregateOutput, this);
   }
 
   void
   appServer::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
+    Simulator::Cancel (m_aggegateOutputEvent);
+
+    if (m_aggregate_output)
+      std::cout << Simulator::Now () << "," << m_cam_received  << "," << m_denm_sent << std::endl;
   }
 
   void
@@ -124,28 +150,58 @@ namespace ns3
     StopApplication ();
   }
 
-  int
-  appServer::receiveCAM (struct CAMinfo cam, Address address)
+  void
+  appServer::TriggerDenm (long detectionTime, int speedmode, Address address)
+  {
+    /* Build DENM data */
+    /* In our case we encode the speedmode inside the stationID
+     * FIX: implement other containers, and use them!! */
+    den_data_t denm;
+    denm.detectiontime = detectionTime;
+    denm.messageid = FIX_DENMID;
+    denm.proto = FIX_PROT_VERS;
+    denm.stationid = speedmode;
+    denm.stationtype = StationType_roadSideUnit;
+
+    denm.validity = 10; // seconds
+
+    Ptr<DENMSender> app = GetNode()->GetApplication (0)->GetObject<DENMSender> ();
+    int app_ret = app->SendDenm(denm,address);
+
+    if (app_ret)
+      m_denm_sent++;
+  }
+
+  void
+  appServer::receiveCAM (ca_data_t cam, Address address)
   {
     /* If is the first time the this veh sends a CAM, check if it is inside or outside */
 
     /* Convert the values */
-
-    cam.position.x = cam.position.x/DOT_ONE_MICRO;
-    cam.position.y = cam.position.y/DOT_ONE_MICRO;
-
-    cam.speed = cam.speed/CENTI;
+    double lat = (double)cam.latitude/DOT_ONE_MICRO;
+    double lon = (double)cam.longitude/DOT_ONE_MICRO;
 
     if (m_veh_position.find (address) == m_veh_position.end ())
       {
-        if (isInside (cam.position.x,cam.position.y))
+        if (isInside (lon,lat))
           m_veh_position[address] = INSIDE;
         else
           m_veh_position[address] = OUTSIDE;
-        return 0;
+        return;
       }
 
-    if (isInside (cam.position.x,cam.position.y))
+    long timestamp;
+    if(m_real_time)
+      {
+        timestamp = compute_timestampIts ()%65536;
+      }
+    else
+      {
+        struct timespec tv = compute_timestamp ();
+        timestamp = (tv.tv_nsec/1000000)%65536;
+      }
+
+    if (isInside (lon,lat))
       {
         /* The vehice is in the low-speed area */
         /* If it was registered as in the high-speed area, then send a DENM telling him to slow down,
@@ -153,10 +209,8 @@ namespace ns3
         if (m_veh_position[address] == OUTSIDE)
           {
             m_veh_position[address] = INSIDE;
-            return SEND_0;
+            TriggerDenm (timestamp,0,address);
           }
-        else
-          return DO_NOT_SEND;
       }
     else
       {
@@ -166,14 +220,12 @@ namespace ns3
         if (m_veh_position[address] == INSIDE)
           {
             m_veh_position[address] = OUTSIDE;
-            return SEND_1;
+            TriggerDenm (timestamp,1,address);
           }
-        else
-          return DO_NOT_SEND;
       }
-
-    return 0;
   }
+
+
 
   bool
   appServer::isInside(double x, double y)
@@ -185,6 +237,41 @@ namespace ns3
     return 0;
   }
 
+  struct timespec
+  appServer::compute_timestamp ()
+  {
+    struct timespec tv;
+    if (!m_real_time)
+      {
+        double nanosec =  Simulator::Now ().GetNanoSeconds ();
+        tv.tv_sec = 0;
+        tv.tv_nsec = nanosec;
+      }
+    else
+      {
+        clock_gettime (CLOCK_MONOTONIC, &tv);
+      }
+    return tv;
+  }
+
+  long
+  appServer::compute_timestampIts ()
+  {
+    /* To get millisec since  2004-01-01T00:00:00:000Z */
+    auto time = std::chrono::system_clock::now(); // get the current time
+    auto since_epoch = time.time_since_epoch(); // get the duration since epoch
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch); // convert it in millisecond since epoch
+
+    long elapsed_since_2004 = millis.count() - TIME_SHIFT; // in TIME_SHIFT we saved the millisec from epoch to 2004-01-01
+    return elapsed_since_2004;
+  }
+
+  void
+  appServer::aggregateOutput()
+  {
+    std::cout << Simulator::Now () << "," << m_cam_received << "," << m_denm_sent << std::endl;
+    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &appServer::aggregateOutput, this);
+  }
 
 }
 

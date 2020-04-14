@@ -1,4 +1,4 @@
-<!-- number of vehicles:20 -->
+<!-- number of vehicles:2 -->
 <!-- generated on 2020-01-15 16:03:29.004195 by "vehicleFlow.py cars.rou.xml -m 5 -r 0.7 -s 13.89 -t 20" -->
 <routes>
   <route id="0" edges="w_to_c1 c1_to_c2 c2_to_e"/>
@@ -37,7 +37,7 @@
       <vehicle id="veh1" type="Car0" depart="4.13769369709" route="6">
     </vehicle>
       <vehicle id="veh2" type="Car0" depart="6.13769369709" route="21">
-    </vehicle>
+    </vehicle><!--
       <vehicle id="veh3" type="Car0" depart="9.24165789334" route="25">
     </vehicle>
       <vehicle id="veh4" type="Car0" depart="12.1133764275" route="7">
@@ -73,5 +73,5 @@
       <vehicle id="veh19" type="Car0" depart="45.9031896322" route="7">
     </vehicle>
       <vehicle id="veh20" type="Car0" depart="46.7557985314" route="5">
-    </vehicle>
+    </vehicle>-->
 </routes>

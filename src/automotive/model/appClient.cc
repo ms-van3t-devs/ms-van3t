@@ -226,7 +226,7 @@ namespace ns3
     m_denm_received++;
     std::cout << "DENM received by " << m_id << std::endl;
 
-    int speedmode = denm.sequence;
+    int speedmode = denm.stationid;
 
     if (speedmode==0)
       {

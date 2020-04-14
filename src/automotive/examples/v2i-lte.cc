@@ -204,10 +204,9 @@ main (int argc, char *argv[])
   appServerHelper AppServerHelper;
   AppServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
   AppServerHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
+  AppServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AppServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
 
-  DenmSenderHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  DenmSenderHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  DenmSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   DenmSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
 
   ApplicationContainer DENMSenderApp = DenmSenderHelper.Install (remoteHostContainer.Get (0));
