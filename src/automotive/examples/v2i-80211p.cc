@@ -33,7 +33,9 @@ main (int argc, char *argv[])
   std::string sumo_folder = "src/automotive/examples/sumo-files/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
+  std::string csv_name;
   bool send_lon_lat = true;
+  bool print_summary = false;
 
   double simTime = 100;
 
@@ -55,6 +57,8 @@ main (int argc, char *argv[])
   cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
   cmd.AddValue ("lonlat", "Send LonLat instead on XY", send_lon_lat);
   cmd.AddValue ("sim-time", "Total duration of the simulation [s])", simTime);
+  cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
+  cmd.AddValue ("summary", "Print a summary for each vehicle at the end of the simulation", print_summary);
 
   cmd.Parse (argc, argv);
 
@@ -147,6 +151,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
+  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=output.xml"));
 
   /*** 6. Create and Setup application for the server ***/
   DENMSenderHelper DenmSenderHelper (9); // Port #9
@@ -155,6 +160,7 @@ main (int argc, char *argv[])
   AppServerHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
   AppServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   AppServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AppServerHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   DenmSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
 
@@ -166,8 +172,6 @@ main (int argc, char *argv[])
   DENMSenderApp.Stop (simulationTime - Seconds (0.1));
   AppServer.Stop (simulationTime - Seconds (0.1));
   ++nodeCounter;
-
-
 
   /*** 7. Setup interface and application for dynamic nodes ***/
   CAMSenderHelper CamSenderHelper (9);
@@ -183,7 +187,9 @@ main (int argc, char *argv[])
   appClientHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
   appClientHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
   appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
+  appClientHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
   appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  appClientHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>

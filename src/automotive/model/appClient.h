@@ -50,7 +50,8 @@ private:
   double m_cam_intertime; //!< Time between two consecutives CAMs
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
   bool m_real_time; //!< To decide wheter to use realtime scheduler
-  std::string m_veh_prefix; //!< prefix used in SUMO
+  std::string m_csv_name; //!< CSV log file name
+  std::ofstream m_csv_ofstream;
   bool m_print_summary; //!< To print a small summary when vehicle leaves the simulation
   bool m_already_print; //!< To avoid printing two summary
 

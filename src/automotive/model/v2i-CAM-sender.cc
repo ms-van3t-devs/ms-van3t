@@ -141,6 +141,7 @@ namespace ns3
     msg << "CAM," << cam.id << ","
         << cam.longitude << ","
         << cam.latitude << ","
+        << cam.altitude_value << ","
         << cam.speed_value << ","
         << cam.longAcc_value << ","
         << cam.heading_value << ","
@@ -282,6 +283,9 @@ namespace ns3
 
         denm.stationtype = (long)decoded->denm.management.stationType;
 
+        //[tbr]
+        denm.evpos_lat = (long)decoded->denm.management.eventPosition.latitude;
+
         Ptr<appClient> app = GetNode()->GetApplication (1)->GetObject<appClient> ();
         app->receiveDENM (denm);
       }
@@ -305,7 +309,10 @@ namespace ns3
     if(values[0]=="DENM")
       {
         denm.messageid = FIX_DENMID;
-        denm.sequence = std::stoi(values[3]);
+        denm.detectiontime =  std::stol(values[1]);
+        denm.referencetime = std::stol(values[2]);
+        denm.stationid = std::stoi(values[3]);
+        denm.sequence = std::stoi(values[4]);
 
         Ptr<appClient> app = GetNode()->GetApplication (1)->GetObject<appClient> ();
         app->receiveDENM (denm);

@@ -101,8 +101,8 @@ private:
   bool m_real_time; //!< To decide wheter to use realtime scheduler
   bool m_asn; //!< To decide if ASN.1 is used
 
-  long m_sequence = 0; //!< Sequence number of DENMs
-  long m_actionId = 0; //!< ActionID number of DENMs
+  long m_sequence; //!< Sequence number of DENMs
+  long m_actionId; //!< ActionID number of DENMs
 
   EventId m_sendEvent; //!< Event to send the next packet
 

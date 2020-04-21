@@ -74,10 +74,10 @@ namespace ns3
             BooleanValue(false),
             MakeBooleanAccessor (&appClient::m_real_time),
             MakeBooleanChecker ())
-        .AddAttribute ("NodePrefix",
-            "The prefix used to idefy vehicles in SUMO.",
-            StringValue ("veh"),
-            MakeStringAccessor (&appClient::m_veh_prefix),
+        .AddAttribute ("CSV",
+            "CSV log name",
+            StringValue (),
+            MakeStringAccessor (&appClient::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("Client",
             "TraCI client for SUMO",
@@ -117,9 +117,19 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     m_id = m_client->GetVehicleId (this->GetNode ());
 
+    if (!m_csv_name.empty ())
+      {
+        m_csv_ofstream.open (m_csv_name+"-"+m_id+".csv",std::ofstream::trunc);
+        m_csv_ofstream << "messageId,sequence,referenceTime,detectionTime,stationId,MeasuredDelayms" << std::endl;
+      }
+
     // Schedule CAM dissemination
+    std::srand(Simulator::Now().GetNanoSeconds ());
     if (m_send_cam)
-       m_sendCamEvent = Simulator::Schedule (Seconds (m_cam_intertime), &appClient::TriggerCam, this);
+      {
+        double desync = ((double)std::rand()/RAND_MAX);
+        m_sendCamEvent = Simulator::Schedule (Seconds (desync), &appClient::TriggerCam, this);
+      }
   }
 
   void
@@ -127,6 +137,9 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
     Simulator::Remove(m_sendCamEvent);
+
+    if (!m_csv_name.empty ())
+      m_csv_ofstream.close ();
 
     if (m_print_summary && !m_already_print)
       {
@@ -174,7 +187,8 @@ namespace ns3
 
     //altitude [0,01 m]
     cam.altitude_conf = AltitudeConfidence_unavailable;
-    cam.altitude_value = AltitudeValue_unavailable;
+    //cam.altitude_value = AltitudeValue_unavailable;
+
     //latitude WGS84 [0,1 microdegree]
     cam.latitude = (long)retValue(pos.y*DOT_ONE_MICRO,DEF_LATITUDE,0,0);
     //longitude WGS84 [0,1 microdegree]
@@ -206,6 +220,10 @@ namespace ns3
     cam.proto = FIX_PROT_VERS;
     cam.id = std::stol (m_id.substr (3));
     cam.messageid = FIX_CAMID;
+
+    //[tbr]
+    struct timespec tv2 = compute_timestamp ();
+    cam.altitude_value = (tv2.tv_nsec/1000)%800000;
 
     Ptr<CAMSender> app = GetNode()->GetApplication (0)->GetObject<CAMSender> ();
     app->SendCam (cam);
@@ -239,10 +257,28 @@ namespace ns3
       {
         libsumo::TraCIColor green;
         green.r=50;green.g=205;green.b=50;green.a=255;
-        m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 27.77);
+        m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 13.89);
         m_client->TraCIAPI::vehicle.setColor (m_id,green);
       }
 
+    if (!m_csv_name.empty ())
+      {
+        long timestamp;
+        if(m_real_time)
+          {
+            timestamp = compute_timestampIts ()%65536;
+          }
+        else
+          {
+            struct timespec tv = compute_timestamp ();
+            //timestamp = (tv.tv_nsec/1000000)%65536;
+            timestamp = (tv.tv_nsec/1000)%900000000; //[TBR]
+          }
+        long delay = timestamp - denm.evpos_lat;
+        m_csv_ofstream << denm.messageid << "," << denm.sequence << ",";
+        m_csv_ofstream << denm.referencetime << "," << denm.detectiontime << ",";
+        m_csv_ofstream << denm.stationid << "," << delay << std::endl;
+      }
   }
 
   struct timespec

@@ -57,6 +57,11 @@ namespace ns3
            BooleanValue(false),
            MakeBooleanAccessor (&appServer::m_real_time),
            MakeBooleanChecker ())
+        .AddAttribute ("CSV",
+            "CSV log name.",
+            StringValue (),
+            MakeStringAccessor (&appServer::m_csv_name),
+            MakeStringChecker ())
         .AddAttribute ("Client",
            "TraCI client for SUMO",
            PointerValue (0),
@@ -128,6 +133,12 @@ namespace ns3
     m_upperLimit.y = map_center.y + ((map_size_y)*2/3)/2;
     m_lowerLimit.y = map_center.y - ((map_size_y)*2/3)/2;
 
+    if (!m_csv_name.empty ())
+      {
+        m_csv_ofstream.open (m_csv_name+"-server.csv",std::ofstream::trunc);
+        m_csv_ofstream << "messageId,camId,timestamp,latitude,longitude,altitude,heading,speed,acceleration,MeasuredDelayms" << std::endl;
+      }
+
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
       m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &appServer::aggregateOutput, this);
@@ -138,6 +149,9 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_aggegateOutputEvent);
+
+    if (!m_csv_name.empty ())
+      m_csv_ofstream.close ();
 
     if (m_aggregate_output)
       std::cout << Simulator::Now () << "," << m_cam_received  << "," << m_denm_sent << std::endl;
@@ -163,6 +177,10 @@ namespace ns3
     denm.stationid = speedmode;
     denm.stationtype = StationType_roadSideUnit;
 
+    //[tbr]
+    struct timespec tv = compute_timestamp ();
+    denm.evpos_lat = tv.tv_nsec/1000%900000000;
+
     denm.validity = 10; // seconds
 
     Ptr<DENMSender> app = GetNode()->GetApplication (0)->GetObject<DENMSender> ();
@@ -175,20 +193,12 @@ namespace ns3
   void
   appServer::receiveCAM (ca_data_t cam, Address address)
   {
-    /* If is the first time the this veh sends a CAM, check if it is inside or outside */
 
+    m_cam_received++;
+    /* If is the first time the this veh sends a CAM, check if it is inside or outside */
     /* Convert the values */
     double lat = (double)cam.latitude/DOT_ONE_MICRO;
-    double lon = (double)cam.longitude/DOT_ONE_MICRO;
-
-    if (m_veh_position.find (address) == m_veh_position.end ())
-      {
-        if (isInside (lon,lat))
-          m_veh_position[address] = INSIDE;
-        else
-          m_veh_position[address] = OUTSIDE;
-        return;
-      }
+    double lon = (double)cam.longitude/DOT_ONE_MICRO; 
 
     long timestamp;
     if(m_real_time)
@@ -198,10 +208,31 @@ namespace ns3
     else
       {
         struct timespec tv = compute_timestamp ();
-        timestamp = (tv.tv_nsec/1000000)%65536;
+        //timestamp = (tv.tv_nsec/1000000)%65536;
+        timestamp = (tv.tv_nsec/1000)%800000;//[TBR]
       }
 
-    if (isInside (lon,lat))
+    if (!m_csv_name.empty ())
+      {
+        long delay = timestamp-cam.altitude_value;//[tbr]
+        m_csv_ofstream << cam.messageid << "," << cam.id << ",";
+        m_csv_ofstream << cam.timestamp << "," << (double)cam.latitude/DOT_ONE_MICRO << ",";
+        m_csv_ofstream << (double)cam.longitude/DOT_ONE_MICRO << "," << (cam.altitude_value!=AltitudeValue_unavailable ? (double)cam.altitude_value/DOT_ONE_MICRO : AltitudeValue_unavailable) << ",";
+        m_csv_ofstream << (double)cam.heading_value/DECI << "," << (double)cam.speed_value/CENTI << ",";
+        m_csv_ofstream << (double)cam.longAcc_value/DECI << "," << delay << std::endl;
+      }
+
+    if (m_veh_position.find (address) == m_veh_position.end ())
+      {
+        if (appServer::isInside (lon,lat))
+          m_veh_position[address] = INSIDE;
+        else
+          m_veh_position[address] = OUTSIDE;
+        return;
+      }
+
+
+    if (appServer::isInside (lon,lat))
       {
         /* The vehice is in the low-speed area */
         /* If it was registered as in the high-speed area, then send a DENM telling him to slow down,
@@ -209,7 +240,7 @@ namespace ns3
         if (m_veh_position[address] == OUTSIDE)
           {
             m_veh_position[address] = INSIDE;
-            TriggerDenm (timestamp,0,address);
+            appServer::TriggerDenm (timestamp,0,address);
           }
       }
     else
@@ -220,12 +251,10 @@ namespace ns3
         if (m_veh_position[address] == INSIDE)
           {
             m_veh_position[address] = OUTSIDE;
-            TriggerDenm (timestamp,1,address);
+            appServer::TriggerDenm (timestamp,1,address);
           }
       }
   }
-
-
 
   bool
   appServer::isInside(double x, double y)

@@ -62,7 +62,8 @@ namespace ns3
     m_sendEvent = EventId ();
     m_port = 0;
     m_socket = 0;
-    m_this_id = 0;
+    m_sequence = 0;
+    m_actionId = 0;
   }
 
   DENMSender::~DENMSender ()
@@ -135,8 +136,6 @@ namespace ns3
       DENMSender::Decode_normal_cam(buffer,from);
   }
 
-
-
   int DENMSender::SendDenm(den_data_t denm, Address address)
   {
     if (m_asn)
@@ -161,9 +160,11 @@ namespace ns3
         struct timespec tv = compute_timestamp ();
         timestamp = (tv.tv_nsec/1000000)%65536;
       }
+
+//    Overflow problem - FIX IT
     /* If validity is expired return 0 */
-    if ((timestamp - denm.detectiontime) > denm.validity)
-      return 0;
+//    if ((timestamp - denm.detectiontime) > (denm.validity)*1000)
+//      return 0;
 
     m_sequence++;
     m_actionId++;
@@ -171,7 +172,7 @@ namespace ns3
     msg << "DENM,"
         << denm.detectiontime << ","
         << timestamp << ","
-        << denm.messageid << ","
+        << denm.stationid << ","
         << m_sequence << ",end\0";
 
     //Tweak: add +1, otherwise some random characters are received at the end of the packet
@@ -180,7 +181,6 @@ namespace ns3
 
     m_socket->SendTo (packet,2,address);
     return m_actionId;
-    /* FIX:This facility should return the actionID, not the seq number!! */
   }
 
   int
@@ -200,9 +200,11 @@ namespace ns3
         struct timespec tv = compute_timestamp ();
         timestamp = (tv.tv_nsec/1000000)%65536;
       }
-    /* If validity is expired return 0 */
-    if ((timestamp - data.detectiontime) > data.validity)
-      return 0;
+
+//    Overflow problem - FIX IT
+//    /* If validity is expired return 0 */
+//    if ((timestamp - data.detectiontime) > (data.validity)*1000)
+//        return 0;
 
     m_sequence++;
     m_actionId++;
@@ -238,6 +240,9 @@ namespace ns3
 
     /* Station Type */
     denm->denm.management.stationType = data.stationtype;
+
+    //[tbr]
+    denm->denm.management.eventPosition.latitude=data.evpos_lat;
 
     /** Encoding **/
     void *buffer1 = NULL;
@@ -359,9 +364,14 @@ namespace ns3
     if(values[0]=="CAM")
       {
         cam.messageid = FIX_CAMID;
-        cam.latitude = std::stod(values[2]);
-        cam.longitude = std::stod(values[3]);
-        cam.speed_value = std::stod(values[4]);
+        cam.id = std::stol(values[1]);
+        cam.latitude = std::stol(values[2]);
+        cam.longitude = std::stol(values[3]);
+        cam.altitude_value = std::stol(values[4]);
+        cam.speed_value = std::stol(values[5]);
+        cam.longAcc_value = std::stol(values[6]);
+        cam.heading_value = std::stol(values[7]);
+        cam.timestamp = std::stol(values[8]);
 
         Ptr<appServer> app = GetNode()->GetApplication (1)->GetObject<appServer> ();
         app->receiveCAM (cam,address);

@@ -69,6 +69,8 @@ private:
   libsumo::TraCIPosition m_lowerLimit; //!< To store the speed limit area boundaries
   bool m_aggregate_output; //!< To decide wheter to print the report each second or not
   bool m_real_time; //!< To decide wheter to use realtime scheduler
+  std::string m_csv_name; //!< CSV log file name
+  std::ofstream m_csv_ofstream;
 
   /* Counters */
   u_int m_cam_received;

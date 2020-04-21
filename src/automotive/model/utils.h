@@ -37,6 +37,8 @@ namespace ns3 {
      long referencetime;
      long stationtype;
      int validity;
+     long evpos_lat;
+     long evpos_long;
   }den_data_t;
   typedef struct _ca_data_t
   {

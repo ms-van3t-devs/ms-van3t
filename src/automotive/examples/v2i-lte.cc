@@ -33,7 +33,9 @@ main (int argc, char *argv[])
   std::string sumo_folder = "src/automotive/examples/sumo-files/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
+  std::string csv_name;
   bool send_lon_lat = true;
+
 
   /*** 0.b LENA Options ***/
   double interPacketInterval = 100;
@@ -57,6 +59,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
   cmd.AddValue ("lonlat", "Send LonLat instead on XY", send_lon_lat);
+  cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
 
   /* Cmd Line option for Lena */
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
@@ -130,9 +133,9 @@ main (int argc, char *argv[])
 
   /* Connect the remote host to the packet gateway and create the Internet */
   PointToPointHelper p2ph;
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("10Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.000)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.005)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("10.0.0.0", "255.0.0.0");
@@ -198,6 +201,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
+  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=output.xml"));
 
   /*** 7. Create and Setup application for the server ***/
   DENMSenderHelper DenmSenderHelper (9); // Port #9
@@ -206,6 +210,7 @@ main (int argc, char *argv[])
   AppServerHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
   AppServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   AppServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AppServerHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   DenmSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
 
@@ -229,6 +234,7 @@ main (int argc, char *argv[])
   appClientHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
   appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
   appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  appClientHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
