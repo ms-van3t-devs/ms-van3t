@@ -3,9 +3,12 @@
 
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
-#include "ns3/address.h"
-#include "v2i-DENM-sender.h"
-#include "utils.h"
+#include "ns3/asn_utils.h"
+
+#include "ns3/denBasicService.h"
+#include "ns3/caBasicService.h"
+//#include "ns3/socket.h"
+
 
 namespace ns3 {
 
@@ -20,6 +23,12 @@ enum pos {
 	OUTSIDE
 };
 
+typedef enum
+{
+    slowSpeedkmph=25,
+    highSpeedkmph=75
+} speedmode_t;
+
 class appServer : public Application
 {
 public:
@@ -33,7 +42,14 @@ public:
 
   virtual ~appServer ();
 
-  void receiveCAM(ca_data_t cam, Address address);
+  /**
+   * \brief Callback to handle a CAM reception.
+   *
+   * This function is called everytime a packet is received by the CABasicService.
+   *
+   * \param the ASN.1 CAM structure containing the info of the packet that was received.
+   */
+  void receiveCAM (CAM_t *cam, Address address);
 
   void StopApplicationNow ();
 
@@ -44,14 +60,31 @@ protected:
 
 private:
 
+  DENBasicService m_denService; //!< DEN Basic Service object
+  CABasicService m_caService; //!< CA Basic Service object
+
+  Ptr<Socket> m_socket; //!< Server socket
+
   virtual void StartApplication (void);
   virtual void StopApplication (void);
 
   bool isInside(double, double);
 
-  void TriggerDenm(long detectionTime, int speedmode, Address address);
   /**
-   * @brief This function compute the timestamps
+   * \brief Trigger a new DENM (i.e. call appDENM_trigger as foreseen by ETSI EN 302 637-3 V1.3.1)
+   *
+   * This function can be called to send a new DENM.
+   *
+   */
+  void TriggerDenm(speedmode_t speedmode, Address from);
+  /**
+   * @brief This function return the current time with respect to an arbitrary point in the past
+   *
+   * The returned timestamp is an ns-3 simulated time if m_real_time is false, or a
+   * Linux CLOCK_REALTIME time if m_real_time is true.
+   * The time is returned in terms of nanoseconds.
+   * If m_real_time is false, only the tv_nsec field is filled, and it contains also the seconds.
+   * If m_real_time is true, a standard struct timespec is returned.
   */
   struct timespec compute_timestamp();
   /**
@@ -64,13 +97,12 @@ private:
   void aggregateOutput(void);
   
   Ptr<TraciClient> m_client; //!< TraCI client
-  std::string m_id; //!< vehicle id
   libsumo::TraCIPosition m_upperLimit; //!< To store the speed limit area boundaries
   libsumo::TraCIPosition m_lowerLimit; //!< To store the speed limit area boundaries
   bool m_aggregate_output; //!< To decide wheter to print the report each second or not
   bool m_real_time; //!< To decide wheter to use realtime scheduler
   std::string m_csv_name; //!< CSV log file name
-  std::ofstream m_csv_ofstream;
+  std::ofstream m_csv_ofstream_cam;
 
   /* Counters */
   u_int m_cam_received;

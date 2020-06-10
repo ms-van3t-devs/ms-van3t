@@ -1,7 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright 2007 University of Washington
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
@@ -15,17 +13,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
- * Edited by Marco Malinverno, Politecnico di Torino (marco.malinverno@polito.it)
+ * Edited by Francesco Raviglione and Marco Malinverno, Politecnico di Torino
+ * (francescorav.es483@gmail.com)
+ * (marco.malinverno@polito.it)
 */
-#include <errno.h>
-
 #include "appClient.h"
 
-extern "C"
-{
-  #include "asn1/CAM.h"
-  #include "asn1/DENM.h"
-}
+#include "asn1/CAM.h"
+#include "asn1/DENM.h"
+#include "ns3/vdpTraci.h"
+#include "ns3/socket.h"
 
 namespace ns3
 {
@@ -49,16 +46,6 @@ namespace ns3
         .SetParent<Application> ()
         .SetGroupName ("Applications")
         .AddConstructor<appClient> ()
-        .AddAttribute ("LonLat",
-            "If it is true, position are sent through lonlat (not XY).",
-            BooleanValue (true),
-            MakeBooleanAccessor (&appClient::m_lon_lat),
-            MakeBooleanChecker ())
-        .AddAttribute ("CAMIntertime",
-            "Time between two consecutive CAMs",
-            DoubleValue(0.1),
-            MakeDoubleAccessor (&appClient::m_cam_intertime),
-            MakeDoubleChecker<double> ())
         .AddAttribute ("PrintSummary",
             "To print summary at the end of simulation",
             BooleanValue(false),
@@ -79,6 +66,11 @@ namespace ns3
             StringValue (),
             MakeStringAccessor (&appClient::m_csv_name),
             MakeStringChecker ())
+        .AddAttribute ("ServerAddr",
+            "Ip Addr of the server",
+            Ipv4AddressValue("10.0.0.1"),
+            MakeIpv4AddressAccessor (&appClient::m_server_addr),
+            MakeIpv4AddressChecker ())
         .AddAttribute ("Client",
             "TraCI client for SUMO",
             PointerValue (0),
@@ -101,7 +93,6 @@ namespace ns3
   appClient::~appClient ()
   {
     NS_LOG_FUNCTION(this);
-
   }
 
   void
@@ -117,18 +108,51 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     m_id = m_client->GetVehicleId (this->GetNode ());
 
+    /* Create the socket for TX and RX */
+    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+
+    /* Socket used to send CAMs and receive DENMs */
+    m_socket = Socket::CreateSocket (GetNode (), tid);
+
+    /* Bind the socket to receive packets coming from every IP */
+    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 9);
+    if (m_socket->Bind (local) == -1)
+      {
+        NS_FATAL_ERROR ("Failed to bind client socket");
+      }
+
+    /* Connect it to the server */
+    // Set the socket to send to the server
+    InetSocketAddress remote = InetSocketAddress (m_server_addr, 9);
+    m_socket->Connect(remote);
+
+    /* Make the callback to handle received DENMs */
+    m_socket->SetRecvCallback (MakeCallback (&DENBasicService::receiveDENM, &m_denService));
+
+    /* Set sockets, callback and station properties in DENBasicService */
+    m_denService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
+    m_denService.addDENRxCallback (std::bind(&appClient::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+
+    /* Set sockets, callback, station properties and TraCI VDP in CABasicService */
+    m_caService.setSocketTx (m_socket);
+    m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
+
+    VDPTraCI traci_vdp(m_client,m_id);
+    m_caService.setVDP(traci_vdp);
+
+    /* Create CSV file, if requested */
     if (!m_csv_name.empty ())
       {
         m_csv_ofstream.open (m_csv_name+"-"+m_id+".csv",std::ofstream::trunc);
-        m_csv_ofstream << "messageId,sequence,referenceTime,detectionTime,stationId,MeasuredDelayms" << std::endl;
+        m_csv_ofstream << "messageID,originatingStationID,sequence,referenceTime,detectionTime,stationID" << std::endl;
       }
 
-    // Schedule CAM dissemination
+    /* Schedule CAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());
     if (m_send_cam)
       {
-        double desync = ((double)std::rand()/RAND_MAX);
-        m_sendCamEvent = Simulator::Schedule (Seconds (desync), &appClient::TriggerCam, this);
+         double desync = ((double)std::rand()/RAND_MAX);
+         m_caService.startCamDissemination(desync);
       }
   }
 
@@ -138,13 +162,18 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     Simulator::Remove(m_sendCamEvent);
 
+    uint64_t cam_sent;
+
     if (!m_csv_name.empty ())
       m_csv_ofstream.close ();
+
+    cam_sent = m_caService.terminateDissemination ();
+    m_denService.cleanup();
 
     if (m_print_summary && !m_already_print)
       {
         std::cout << "INFO-" << m_id
-                  << ",CAM-SENT:" << m_cam_sent
+                  << ",CAM-SENT:" << cam_sent
                   << ",DENM-RECEIVED:" << m_denm_received
                   << std::endl;
         m_already_print=true;
@@ -159,125 +188,51 @@ namespace ns3
   }
 
   void
-  appClient::TriggerCam()
-  {
-    /* Build CAM data */
-    ca_data_t cam;
-
-    /* Generation delta time [ms since 2004-01-01]. In case the scheduler is not real time, we have to use simulation time,
-     * otherwise timestamps will be not reliable */
-    long timestamp;
-    if(m_real_time)
-      {
-        timestamp = compute_timestampIts ()%65536;
-      }
-    else
-      {
-        struct timespec tv = compute_timestamp ();
-        timestamp = (tv.tv_nsec/1000000)%65536;
-      }
-    cam.timestamp = timestamp;
-
-    cam.type = StationType_passengerCar;
-
-    /* Positions - the standard is followed only if m_lonlat is true */
-    libsumo::TraCIPosition pos = m_client->TraCIAPI::vehicle.getPosition(m_id);
-    if (m_lon_lat)
-        pos = m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
-
-    //altitude [0,01 m]
-    cam.altitude_conf = AltitudeConfidence_unavailable;
-    //cam.altitude_value = AltitudeValue_unavailable;
-
-    //latitude WGS84 [0,1 microdegree]
-    cam.latitude = (long)retValue(pos.y*DOT_ONE_MICRO,DEF_LATITUDE,0,0);
-    //longitude WGS84 [0,1 microdegree]
-    cam.longitude = (long)retValue(pos.x*DOT_ONE_MICRO,DEF_LONGITUDE,0,0);
-
-    /* Heading WGS84 north [0.1 degree] */
-    double angle = m_client->TraCIAPI::vehicle.getAngle (m_id);
-    cam.heading_value = (double)retValue (angle*DECI,DEF_HEADING,0,0);
-    cam.heading_conf = HeadingConfidence_unavailable;
-
-    /* Speed [0.01 m/s] */
-    double speed=m_client->TraCIAPI::vehicle.getSpeed(m_id);
-    cam.speed_value = (long)retValue(speed*CENTI,DEF_SPEED,0,0);
-    cam.speed_conf = SpeedConfidence_unavailable;
-
-    /* Acceleration [0.1 m/s^2] */
-    double acc=m_client->TraCIAPI::vehicle.getAcceleration (m_id);
-    cam.longAcc_value = (long)retValue(acc*DECI,DEF_ACCELERATION,0,0);
-    cam.longAcc_conf = AccelerationConfidence_unavailable;
-
-    /* Length and width of car [0.1 m] */
-    double veh_length = m_client->TraCIAPI::vehicle.getLength (m_id);
-    cam.length_value = (double)retValue (veh_length*DECI,DEF_LENGTH,0,0);
-    cam.length_conf = VehicleLengthConfidenceIndication_unavailable;
-    double veh_width = m_client->TraCIAPI::vehicle.getWidth (m_id);
-    cam.width = (long)retValue (veh_width*DECI,DEF_WIDTH,0,0);
-
-    /* Proto version, id and msg id */
-    cam.proto = FIX_PROT_VERS;
-    cam.id = std::stol (m_id.substr (3));
-    cam.messageid = FIX_CAMID;
-
-    //[tbr]
-    struct timespec tv2 = compute_timestamp ();
-    cam.altitude_value = (tv2.tv_nsec/1000)%800000;
-
-    Ptr<CAMSender> app = GetNode()->GetApplication (0)->GetObject<CAMSender> ();
-    app->SendCam (cam);
-
-    m_cam_sent++;
-
-    m_sendCamEvent = Simulator::Schedule (Seconds (m_cam_intertime), &appClient::TriggerCam, this);
-  }
-
-  void
-  appClient::receiveDENM (den_data_t denm)
+  appClient::receiveDENM (denData denm, Address from)
   {
     /* This function extracts only one parameter from the DENM:
-     * if 0, the vehicle slows down by setting the max speed to 6.94m/s (25km/h)
-     * if 1, the vehicle maximum speed is set to 30m/s (108km/h)
-     * Additionaly, for visualization purposes, the vehicles change color everytime they change zone
      */
     m_denm_received++;
     std::cout << "DENM received by " << m_id << std::endl;
 
-    int speedmode = denm.stationid;
-
-    if (speedmode==0)
+    /*
+     * Check the speed limit saved in the roadWorks container inside
+     * the optional "A la carte" container
+     * The division by 3.6 is used to convert the value stored in the DENM
+     * from km/h to m/s, as required for SUMO
+    */
+    if(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit == NULL)
       {
-        libsumo::TraCIColor orange;
-        orange.r=255;orange.g=99;orange.b=71;orange.a=255;
-        m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 6.94);
-        m_client->TraCIAPI::vehicle.setColor (m_id,orange);
+        NS_FATAL_ERROR("Error in appClient.cc. Received a NULL pointer for speedLimit.");
       }
-    else if (speedmode==1)
+
+    double speedLimit = *(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit)/3.6;
+
+    m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, speedLimit);
+
+    // Change color for fast-moving vehicles to orange
+    if(speedLimit>13)
       {
-        libsumo::TraCIColor green;
-        green.r=50;green.g=205;green.b=50;green.a=255;
-        m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, 13.89);
-        m_client->TraCIAPI::vehicle.setColor (m_id,green);
+          libsumo::TraCIColor orange;
+          orange.r=255;orange.g=99;orange.b=71;orange.a=255;
+          m_client->TraCIAPI::vehicle.setColor (m_id,orange);
+      }
+    // Change color for slow-moving vehicles to green
+    else
+      {
+          libsumo::TraCIColor green;
+          green.r=50;green.g=205;green.b=50;green.a=255;
+          m_client->TraCIAPI::vehicle.setColor (m_id,green);
       }
 
     if (!m_csv_name.empty ())
       {
-        long timestamp;
-        if(m_real_time)
-          {
-            timestamp = compute_timestampIts ()%65536;
-          }
-        else
-          {
-            struct timespec tv = compute_timestamp ();
-            //timestamp = (tv.tv_nsec/1000000)%65536;
-            timestamp = (tv.tv_nsec/1000)%900000000; //[TBR]
-          }
-        long delay = timestamp - denm.evpos_lat;
-        m_csv_ofstream << denm.messageid << "," << denm.sequence << ",";
-        m_csv_ofstream << denm.referencetime << "," << denm.detectiontime << ",";
-        m_csv_ofstream << denm.stationid << "," << delay << std::endl;
+        m_csv_ofstream << denm.getDenmHeaderMessageID () << ","
+                       << denm.getDenmActionID ().originatingStationID << ","
+                       << denm.getDenmActionID ().sequenceNumber << ","
+                       << denm.getDenmMgmtReferenceTime () << ","
+                       << denm.getDenmMgmtDetectionTime () << ","
+                       << denm.getDenmHeaderStationID () << std::endl;
       }
   }
 

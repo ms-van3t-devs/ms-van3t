@@ -1,26 +1,22 @@
 #include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/lte-helper.h"
-#include "ns3/epc-helper.h"
-#include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/ipv4-global-routing-helper.h"
-#include "ns3/internet-module.h"
-#include "ns3/mobility-module.h"
-#include "ns3/lte-module.h"
-#include "ns3/applications-module.h"
-#include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
-#include "ns3/phy-stats-calculator.h"
-#include <functional>
-#include <stdlib.h>
+#include "ns3/internet-module.h"
+#include "ns3/lte-module.h"
+#include "ns3/sumo_xml_parser.h"
+#include "ns3/point-to-point-helper.h"
 
 using namespace ns3;
-NS_LOG_COMPONENT_DEFINE("v2i-lte-sandbox");
+NS_LOG_COMPONENT_DEFINE("v2i-lte");
 
 int
 main (int argc, char *argv[])
 {
+  std::string sumo_folder = "src/automotive/examples/sumo-files/";
+  std::string mob_trace = "cars.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
+
   /*** 0.a App Options ***/
   bool verbose = true;
   bool realtime = false;
@@ -28,14 +24,8 @@ main (int argc, char *argv[])
   bool aggregate_out = true;
   double sumo_updates = 0.01;
   bool send_cam = true;
-  bool asn = true;
-  double cam_intertime = 0.1;
-  std::string sumo_folder = "src/automotive/examples/sumo-files/";
-  std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
   std::string csv_name;
-  bool send_lon_lat = true;
-
+  bool print_summary = false;
 
   /*** 0.b LENA Options ***/
   double interPacketInterval = 100;
@@ -43,6 +33,9 @@ main (int argc, char *argv[])
 
   uint16_t numberOfNodes;
   uint32_t nodeCounter = 0;
+
+  xmlDocPtr rou_xml_file;
+
   double simTime = 100;
 
   CommandLine cmd;
@@ -54,11 +47,8 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
   cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
-  cmd.AddValue ("asn", "Use ASN.1 or plain-text to send message", asn);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
-  cmd.AddValue ("cam-intertime", "CAM dissemination inter-time [s]", cam_intertime);
-  cmd.AddValue ("lonlat", "Send LonLat instead on XY", send_lon_lat);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
 
   /* Cmd Line option for Lena */
@@ -71,9 +61,9 @@ main (int argc, char *argv[])
 
   if (verbose)
     {
-      LogComponentEnable ("TraciClient", LOG_LEVEL_INFO);
-      LogComponentEnable ("v2i-CAM-sender", LOG_LEVEL_INFO);
-      LogComponentEnable ("v2i-DENM-sender", LOG_LEVEL_INFO);
+      LogComponentEnable ("v2i-lte", LOG_LEVEL_INFO);
+      LogComponentEnable ("CABasicService", LOG_LEVEL_INFO);
+      LogComponentEnable ("DENBasicService", LOG_LEVEL_INFO);
     }
 
   /* Carrier aggregation for LTE */
@@ -88,25 +78,33 @@ main (int argc, char *argv[])
   if(realtime)
       GlobalValue::Bind ("SimulatorImplementationType", StringValue ("ns3::RealtimeSimulatorImpl"));
 
-  /*** 0.c Read from the mob_trace the number of vehicles that will be created.
-   *      The file should begin with something like:
-   *      <!-- number of vehicles:2 -->
-   *      The file must be included in the sumo-folder
+  /*** 0.b Read from the mob_trace the number of vehicles that will be created.
+   *       The number of vehicles is directly parsed from the rou.xml file, looking at all
+   *       the valid XML elements of type <vehicle>
   ***/
+  NS_LOG_INFO("Reading the .rou file...");
   std::string path = sumo_folder + mob_trace;
-  std::ifstream infile (path);
-  std::string num_client;
-  /* Read the file*/
-  if (infile.good())
-    {
-      getline(infile, num_client);
-    }
-  infile.close();
-  /* Manipulate the string to get only the number of vehicles present */
-  num_client.erase (0,24);
-  num_client.erase (num_client.end ()-4,num_client.end ());
-  numberOfNodes = std::stoi (num_client)+1;
 
+  /* Load the .rou.xml document */
+  xmlInitParser();
+  rou_xml_file = xmlParseFile(path.c_str ());
+  if (rou_xml_file == NULL)
+    {
+      NS_FATAL_ERROR("Error: unable to parse the specified XML file: "<<path);
+    }
+  numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
+
+  xmlFreeDoc(rou_xml_file);
+  xmlCleanupParser();
+
+  if(numberOfNodes==-1)
+    {
+      NS_FATAL_ERROR("Fatal error: cannot gather the number of vehicles from the specified XML file: "<<path<<". Please check if it is a correct SUMO file.");
+    }
+  NS_LOG_INFO("The .rou file has been read: " << numberOfNodes << " vehicles will be present in the simulation.");
+
+  /* Set the simulation time (in seconds) */
+  NS_LOG_INFO("Simulation will last " << simTime << " seconds");
   ns3::Time simulationTime (ns3::Seconds(simTime));
 
   /*** 1. Create LTE objects
@@ -154,8 +152,8 @@ main (int argc, char *argv[])
   ueNodes.Create(numberOfNodes);
 
   /*** 4. Create and install mobility (SUMO will be attached later) ***/
+  /*** 6. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
-  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
 
@@ -204,35 +202,23 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=output.xml"));
 
   /*** 7. Create and Setup application for the server ***/
-  DENMSenderHelper DenmSenderHelper (9); // Port #9
-  appServerHelper AppServerHelper;
-  AppServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
-  AppServerHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
-  AppServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AppServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  AppServerHelper.SetAttribute ("CSV", StringValue(csv_name));
+  AppServerHelper appServerHelper;
+  appServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  appServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  appServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  appServerHelper.SetAttribute ("CSV", StringValue(csv_name));
 
-  DenmSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
+  ApplicationContainer AppServer = appServerHelper.Install (remoteHostContainer.Get (0));
 
-  ApplicationContainer DENMSenderApp = DenmSenderHelper.Install (remoteHostContainer.Get (0));
-  ApplicationContainer AppServer = AppServerHelper.Install (remoteHostContainer.Get (0));
-
-  DENMSenderApp.Start (Seconds (0.0));
   AppServer.Start (Seconds (0.0));
-  DENMSenderApp.Stop (simulationTime - Seconds (0.1));
   AppServer.Stop (simulationTime - Seconds (0.1));
-  ++nodeCounter;
 
   /*** 8. Setup interface and application for dynamic nodes ***/
-  CAMSenderHelper CamSenderHelper (9);
   AppClientHelper appClientHelper;
-  CamSenderHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
-  CamSenderHelper.SetAttribute ("ASN", BooleanValue(asn));
-
+  appClientHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
   appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  appClientHelper.SetAttribute ("LonLat", (BooleanValue) send_lon_lat);
-  appClientHelper.SetAttribute ("CAMIntertime", DoubleValue(cam_intertime));
   appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
+  appClientHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
   appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   appClientHelper.SetAttribute ("CSV", StringValue(csv_name));
 
@@ -247,12 +233,9 @@ main (int argc, char *argv[])
       ++nodeCounter; // increment counter for next node
 
       /* Install Application */
-      ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer ClientApp = appClientHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));
-      CAMSenderApp.Start (Seconds (0.0));
       ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
-      CAMSenderApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
       return includedNode;
     };
@@ -261,11 +244,8 @@ main (int argc, char *argv[])
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
       /* stop all applications */
-      Ptr<CAMSender> CAMSender_ = exNode->GetApplication(0)->GetObject<CAMSender>();
       Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
 
-      if(CAMSender_)
-        CAMSender_->StopApplicationNow();
       if(appClient_)
         appClient_->StopApplicationNow ();
 
@@ -273,7 +253,7 @@ main (int argc, char *argv[])
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
       mob->SetPosition(Vector(-1000.0+(rand()%25),320.0+(rand()%25),250.0));// rand() for visualization purposes
 
-      /* NOTE: further actions could be required for a save shut down! */
+      /* NOTE: further actions could be required for a safe shut down! */
     };
 
   /* start traci client with given function pointers */

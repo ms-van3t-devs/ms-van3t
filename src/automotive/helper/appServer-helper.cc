@@ -6,14 +6,14 @@
 
 namespace ns3 {
 
-appServerHelper::appServerHelper ()
+AppServerHelper::AppServerHelper ()
 {
   m_factory.SetTypeId (appServer::GetTypeId ());
 }
 
 
 void 
-appServerHelper::SetAttribute (
+AppServerHelper::SetAttribute (
   std::string name, 
   const AttributeValue &value)
 {
@@ -21,20 +21,20 @@ appServerHelper::SetAttribute (
 }
 
 ApplicationContainer
-appServerHelper::Install (Ptr<Node> node) const
+AppServerHelper::Install (Ptr<Node> node) const
 {
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-appServerHelper::Install (std::string nodeName) const
+AppServerHelper::Install (std::string nodeName) const
 {
   Ptr<Node> node = Names::Find<Node> (nodeName);
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-appServerHelper::Install (NodeContainer c) const
+AppServerHelper::Install (NodeContainer c) const
 {
   ApplicationContainer apps;
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
@@ -46,7 +46,7 @@ appServerHelper::Install (NodeContainer c) const
 }
 
 Ptr<Application>
-appServerHelper::InstallPriv (Ptr<Node> node) const
+AppServerHelper::InstallPriv (Ptr<Node> node) const
 {
   Ptr<Application> app = m_factory.Create<appServer> ();
   node->AddApplication (app);

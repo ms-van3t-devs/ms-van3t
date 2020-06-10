@@ -18,7 +18,7 @@ namespace ns3 {
  * \ingroup TrafficInfo
  * \brief Create an application which sends a UDP packet and waits for an echo of this packet
  */
-class appServerHelper
+class AppServerHelper
 {
 public:
   /**
@@ -28,7 +28,7 @@ public:
    * \param ip The IP address of the remote Traffic Info server
    * \param port The port number of the remote Traffic Info server
    */
-  appServerHelper ();
+  AppServerHelper ();
 
   void SetAttribute (std::string name, const AttributeValue &value);
 
