@@ -1,8 +1,8 @@
 # v2i-framework
 
-ns3 modules to build a simple V2I application using SUMO (v-1.5.0) and ns-3 (v-3.29).
+ns3 modules to build a simple V2I application using SUMO (v-1.6.0) and ns-3 (v-3.29).
 
-It has been tested with SUMO v1.5.0 and ns3 v3.29 on Ubuntu 18.04.
+It has been tested with SUMO v1.6.0 and ns3 v3.29 on Ubuntu 20.04.
 Back compatibility **is not** ensured with newer version of TraCI.
 
 To build the project:
@@ -11,7 +11,7 @@ To build the project:
     	`sudo add-apt-repository ppa:sumo/stable`  
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
-    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with **v-1.5.0**)
+    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with **v-1.6.0**)
 
 * Clone this repository in your pc.
     
@@ -29,6 +29,8 @@ The final project path-tree should be like:
                helper/
                model/
                     asn1/
+                    facilities/
+                    utilities/
                test/
     traci/
           doc/
