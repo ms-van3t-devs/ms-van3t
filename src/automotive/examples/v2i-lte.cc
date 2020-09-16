@@ -21,7 +21,7 @@ main (int argc, char *argv[])
   bool verbose = true;
   bool realtime = false;
   bool sumo_gui = true;
-  bool aggregate_out = true;
+  bool aggregate_out = false;
   double sumo_updates = 0.01;
   bool send_cam = true;
   std::string csv_name;
@@ -52,10 +52,10 @@ main (int argc, char *argv[])
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
 
   /* Cmd Line option for Lena */
-  cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
-  cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
+  cmd.AddValue("interPacketInterval", "Inter packet interval [ms]", interPacketInterval);
+  cmd.AddValue("useCa", "Whether to use carrier aggregation", useCa);
 
-  cmd.AddValue("sim-time", "Total duration of the simulation [s])", simTime);
+  cmd.AddValue("sim-time", "Total duration of the simulation [s]", simTime);
 
   cmd.Parse (argc, argv);
 
@@ -199,7 +199,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
-  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=output.xml"));
+  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 7. Create and Setup application for the server ***/
   AppServerHelper appServerHelper;

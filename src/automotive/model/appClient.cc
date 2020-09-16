@@ -193,7 +193,8 @@ namespace ns3
     /* This function extracts only one parameter from the DENM:
      */
     m_denm_received++;
-    std::cout << "DENM received by " << m_id << std::endl;
+    // Uncomment the following line to print a line to standard output for each DENM received by a vehicle
+    //std::cout << "DENM received by " << m_id << std::endl;
 
     /*
      * Check the speed limit saved in the roadWorks container inside

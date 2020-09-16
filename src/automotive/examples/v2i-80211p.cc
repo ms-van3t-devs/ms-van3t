@@ -4,8 +4,6 @@
 #include "ns3/wave-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/sumo_xml_parser.h"
-//#include "ns3/appClient-helper.h"
-//#include "ns3/appServer-helper.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2i-80211p");
@@ -25,12 +23,12 @@ main (int argc, char *argv[])
   bool verbose = true;
   bool realtime = false;
   bool sumo_gui = true;
-  bool aggregate_out = true;
+  bool aggregate_out = false;
   double sumo_updates = 0.01;
   bool send_cam = true;
   std::string csv_name;
   bool print_summary = false;
-  uint8_t txPower=26;
+  int txPower=26;
   float datarate=12;
 
   double simTime = 100;
@@ -58,7 +56,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
   cmd.AddValue ("datarate", "802.11p channel data rate [Mbit/s]", datarate);
 
-  cmd.AddValue ("sim-time", "Total duration of the simulation [s])", simTime);
+  cmd.AddValue ("sim-time", "Total duration of the simulation [s]", simTime);
 
   cmd.Parse (argc, argv);
 
@@ -173,7 +171,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
-  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=output.xml"));
+  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 6. Create and Setup application for the server ***/
   AppServerHelper appServerHelper;
@@ -237,8 +235,6 @@ main (int argc, char *argv[])
 
   /* start traci client with given function pointers */
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
-
-  wifiPhy.EnablePcapAll ("zzzzzepoiunnome");
 
   /*** 8. Start Simulation ***/
   Simulator::Stop (simulationTime);

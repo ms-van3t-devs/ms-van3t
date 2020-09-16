@@ -122,3 +122,8 @@ wutils.py
 *.includes
 *.creator
 *.config
+
+.clang-format
+.hgignore
+.hgtags
+.vscode/*
