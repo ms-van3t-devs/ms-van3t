@@ -1,3 +1,10 @@
+# Misc files
+DlRlcStats.txt
+UlRlcStats.txt
+sumo-errors-or-collisions.xml
+v2i-framework.cflags
+v2i-framework.cxxflags
+
 *.diff
 *.orig
 *.patch
