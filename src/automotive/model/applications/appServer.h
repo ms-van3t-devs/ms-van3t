@@ -7,8 +7,6 @@
 
 #include "ns3/denBasicService.h"
 #include "ns3/caBasicService.h"
-//#include "ns3/socket.h"
-
 
 namespace ns3 {
 

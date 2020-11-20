@@ -1,5 +1,6 @@
 #ifndef ITSSORIGINATINGTABLEENTRY_H
 #define ITSSORIGINATINGTABLEENTRY_H
+
 #include "ns3/DENM.h"
 #include "ns3/packet.h"
 

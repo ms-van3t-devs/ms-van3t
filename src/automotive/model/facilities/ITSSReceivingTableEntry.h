@@ -1,5 +1,6 @@
 #ifndef ITSSRECEIVINGTABLEENTRY_H
 #define ITSSRECEIVINGTABLEENTRY_H
+
 #include "ns3/DENM.h"
 #include "ns3/packet.h"
 

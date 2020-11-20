@@ -19,8 +19,8 @@
 */
 #include "appClient.h"
 
-#include "asn1/CAM.h"
-#include "asn1/DENM.h"
+#include "ns3/CAM.h"
+#include "ns3/DENM.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 
@@ -132,10 +132,12 @@ namespace ns3
     /* Set sockets, callback and station properties in DENBasicService */
     m_denService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
     m_denService.addDENRxCallback (std::bind(&appClient::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+    m_denService.setRealTime (m_real_time);
 
     /* Set sockets, callback, station properties and TraCI VDP in CABasicService */
     m_caService.setSocketTx (m_socket);
     m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
+    m_caService.setRealTime (m_real_time);
 
     VDPTraCI traci_vdp(m_client,m_id);
     m_caService.setVDP(traci_vdp);

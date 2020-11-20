@@ -19,8 +19,8 @@
 */
 #include "appServer.h"
 
-#include "asn1/CAM.h"
-#include "asn1/DENM.h"
+#include "ns3/CAM.h"
+#include "ns3/DENM.h"
 #include "ns3/socket.h"
 
 namespace ns3

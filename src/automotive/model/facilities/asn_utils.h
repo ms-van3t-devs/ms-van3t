@@ -1,6 +1,8 @@
 #ifndef ASN_UTILS_H
 #define ASN_UTILS_H
 
+#include "ns3/simulator.h"
+
 #define FIX_PROT_VERS       0x01
 #define FIX_DENMID          0x01
 #define FIX_CAMID           0x02
@@ -19,7 +21,7 @@
 
 namespace ns3
 {
-  long compute_timestampIts (void);
+  long compute_timestampIts (bool real_time);
 }
 
 #endif // ASN_UTILS_H

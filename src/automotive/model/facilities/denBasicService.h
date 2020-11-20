@@ -41,8 +41,6 @@ namespace ns3 {
 
     void addDENRxCallback(std::function<void(denData,Address)> rx_callback) {m_DENReceiveCallback=rx_callback;}
 
-    static long GetTimestampIts (void);
-
     DENBasicService_error_t appDENM_trigger(denData data, ActionID_t &actionid);
     DENBasicService_error_t appDENM_update(denData data, const ActionID_t actionid);
     DENBasicService_error_t appDENM_termination(denData data, const ActionID_t actionid);
@@ -53,6 +51,7 @@ namespace ns3 {
     void setStationType(long fixed_stationtype) {m_stationtype=fixed_stationtype;}
 
     void setSocketTx(Ptr<Socket> socket_tx) {m_socket_tx=socket_tx;}
+    void setRealTime(bool real_time){m_real_time=real_time;}
 
     /* Cleanup function - always call this before terminating the simulation */
     void cleanup(void);

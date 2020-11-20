@@ -201,7 +201,7 @@ namespace ns3 {
       }
 
     /* 1. If validity is expired return DENM_T_O_VALIDITY_EXPIRED */
-    if (GetTimestampIts () > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
+    if (compute_timestampIts (m_real_time) > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
         return DENM_T_O_VALIDITY_EXPIRED;
 
     /* 2. Assign unused actionID value */
@@ -213,7 +213,7 @@ namespace ns3 {
     m_seq_number++;
 
     /* 3. 4. 5. Manage Transmission interval and fill DENM */
-    fillDENM_rval=fillDENM(denm,data,actionid,GetTimestampIts ());
+    fillDENM_rval=fillDENM(denm,data,actionid,compute_timestampIts (m_real_time));
 
     if(fillDENM_rval!=DENM_NO_ERROR)
       {
@@ -295,7 +295,7 @@ namespace ns3 {
       }
 
     /* 1. If validity is expired return DENM_T_O_VALIDITY_EXPIRED */
-    if (GetTimestampIts () > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
+    if (compute_timestampIts (m_real_time) > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
         return DENM_T_O_VALIDITY_EXPIRED;
 
     /* 2. Compare actionID in the application request with entries in the originating ITS-S message table (i.e. m_originatingITSSTable, implemented as a map) */
@@ -315,7 +315,7 @@ namespace ns3 {
     std::get<T_REPETITION_DURATION_INDEX>(m_originatingTimerTable[map_index]).Cancel();
 
     /* 4. 5. 6. Manage transmission interval, reference time and fill DENM */
-    fillDENM_rval=fillDENM(denm,data,actionid,GetTimestampIts ());
+    fillDENM_rval=fillDENM(denm,data,actionid,compute_timestampIts (m_real_time));
 
     if(fillDENM_rval!=DENM_NO_ERROR)
       {
@@ -396,7 +396,7 @@ namespace ns3 {
     std::pair <unsigned long, long> map_index = std::make_pair((unsigned long)actionid.originatingStationID,(long)actionid.sequenceNumber);
 
     /* 1. If validity is expired return DENM_T_O_VALIDITY_EXPIRED */
-    if (GetTimestampIts () > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
+    if (compute_timestampIts (m_real_time) > data.getDenmMgmtDetectionTime () + (data.getDenmMgmtValidityDuration ()*MILLI))
         return DENM_T_O_VALIDITY_EXPIRED;
 
     /* 2. Compare actionID in the application request with entries in the originating ITS-S message table and the receiving ITS-S message table */
@@ -466,7 +466,7 @@ namespace ns3 {
       }
     else
       {
-        referenceTime=GetTimestampIts ();
+        referenceTime=compute_timestampIts (m_real_time);
       }
 
     /* 3. Set referenceTime to current time (for termination = 0) or to the receiving table entry's reference time (for termination = 1) and fill DENM */
@@ -591,7 +591,7 @@ namespace ns3 {
     asn_INTEGER2long (&decoded_denm->denm.management.detectionTime,&detectionTime_long);
     asn_INTEGER2long (&decoded_denm->denm.management.referenceTime,&referenceTime_long);
 
-    long now = GetTimestampIts ();
+    long now = compute_timestampIts (m_real_time);
     /* 1. If validity is expired return without performing further steps */
     if (now > detectionTime_long + ((long)validityDuration*MILLI))
       {
@@ -688,18 +688,6 @@ namespace ns3 {
       DENBasicService::fillDenDataAlacarte (*decoded_denm->denm.alacarte, den_data);
 
     m_DENReceiveCallback(den_data,from);
-  }
-
-  long
-  DENBasicService::GetTimestampIts()
-  {
-    /* To get millisec since  2004-01-01T00:00:00:000Z */
-    auto time = std::chrono::system_clock::now(); // get the current time
-    auto since_epoch = time.time_since_epoch(); // get the duration since epoch
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch); // convert it in millisecond since epoch
-
-    long elapsed_since_2004 = millis.count() - TIME_SHIFT; // in TIME_SHIFT we saved the millisec from epoch to 2004-01-01
-    return elapsed_since_2004;
   }
 
   void

@@ -292,7 +292,7 @@ namespace ns3
      * remainder of the corresponding value of TimestampIts divided by 65 536 as below:
      * generationDeltaTime = TimestampIts mod 65 536"
     */
-    cam->cam.generationDeltaTime = compute_timestampIts () % 65536;
+    cam->cam.generationDeltaTime = compute_timestampIts (m_real_time) % 65536;
 
     /* Fill the basicContainer's station type */
     cam->cam.camParameters.basicContainer.stationType = m_stationtype;

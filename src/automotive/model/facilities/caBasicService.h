@@ -37,6 +37,7 @@ namespace ns3
     void changeNGenCamMax(int16_t N_GenCamMax) {m_N_GenCamMax=N_GenCamMax;}
     void changeRSUGenInterval(long RSU_GenCam_ms) {m_RSU_GenCam_ms=RSU_GenCam_ms;}
     void addCARxCallback(std::function<void(CAM_t *, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
+    void setRealTime(bool real_time){m_real_time=real_time;}
 
     void startCamDissemination();
     void startCamDissemination(double desync_s);
