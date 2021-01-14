@@ -18,6 +18,8 @@ def build(bld):
         'helper/appClient-helper.cc',
         'helper/appServer-helper.cc',
         'helper/appSample-helper.cc',
+        'helper/obuEmu-helper.cc',
+
         'model/applications/appClient.cc',
         'model/applications/appServer.cc',
         'model/applications/appSample.cc',
@@ -29,7 +31,7 @@ def build(bld):
         'model/facilities/vdpTraci.cc',
         'model/facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
-
+        'model/applications/obuEmu.cc',
 
          #CAM+DENM sources
         '/model/asn1-legacy/AccelerationConfidence.c',
@@ -255,6 +257,8 @@ def build(bld):
         'helper/appClient-helper.h',
         'helper/appServer-helper.h',
         'helper/appSample-helper.h',
+        'helper/obuEmu-helper.h',
+
         'model/applications/appClient.h',
         'model/applications/appServer.h',
         'model/applications/appSample.h',
@@ -267,6 +271,7 @@ def build(bld):
         'model/facilities/vdp.h',
         'model/facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',
+        'model/applications/obuEmu.h',
 
         #CAM+DENM headers
         '/model/asn1-legacy/AccelerationConfidence.h',
