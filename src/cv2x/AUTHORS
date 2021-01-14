@@ -1,0 +1,48 @@
+
+The ns-3 LTE module is the result of the development effort carried out by different people/institutions/projects. The main contributors are listed below.
+
+====================================================
+  Patching the code for ms-van3t (2021)
+====================================================
+
+Marco Malinverno, Politecnico di Torino <marco.malinverno@polito.it>
+Francesco Raviglione, Politecnico di Torino <francesco.raviglione@polito.it>
+
+The code has been patched by taking the C-V2X model by Fabian Eckermann (https://github.com/FabianEckermann/ns-3_c-v2x),
+based itself on the NIST D2D model, based in turn on LENA, and by adding the cv2x prefix to each file/class/struct
+This should enable the full co-existence between "vanilla" LENA and the C-V2X model
+
+====================================================
+  LTE-EPC Network simulAtor (LENA) Project (2011-13)
+====================================================
+
+Nicola Baldo, CTTC <nbaldo@cttc.es>
+Marco Miozzo, CTTC <mmiozzo@cttc.es>
+Manuel Requena, CTTC <mrequena@cttc.es>
+Jaume Nin, CTTC <jnin@cttc.es>
+Lluis Parcerisa, CTTC <lparcerisa@cttc.es>
+
+
+====================================================
+        Google Summer of Code (GSoC) (2012)
+====================================================
+ 
+Dizhi Zhou, University of New Brunswick, Canada <dizhi.zhou@gmail.com>
+develop several LTE MAC schedulers
+ 
+Nicola Baldo, CTTC <nbaldo@cttc.es>
+Marco Miozzo, CTTC <mmiozzo@cttc.es>
+supervision and GSoC project mentorship
+
+
+====================================================
+       Google Summer of Code (GSoC) (2010)
+====================================================
+
+Giuseppe Piro, TELEMATICS LAB, Politecnico di Bari <G.Piro@poliba.it>
+design and development
+
+Nicola Baldo, CTTC <nbaldo@cttc.es>
+Marco Miozzo, CTTC <mmiozzo@cttc.es>
+supervision and GSoC project mentorship
+

@@ -16,9 +16,9 @@ main (int argc, char *argv[])
   std::string datarate_config;
 
   /*** 0.a App Options ***/
-  std::string sumo_folder = "src/automotive/examples/sumo-files/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_map/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo-files/map.sumo.cfg";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2i_map/map.sumo.cfg";
 
   bool verbose = true;
   bool realtime = false;

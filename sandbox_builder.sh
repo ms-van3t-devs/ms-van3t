@@ -4,7 +4,7 @@ NS3_VERSION=3.29
 
 if [ $# -ne 0 -a $# -ne 1 ]; then
     echo "Too many arguments. You shall specify:"
-    echo "	(Optional) 'install-dependencies' to attempt the installation of the ns-3.29 main dependencies"
+    echo "	(Optional) 'install-dependencies' to attempt the installation of the ns-${NS3_VERSION} main dependencies"
 
     exit 1
 fi
@@ -25,7 +25,7 @@ read -p "Press ENTER to continue with the installation..."
 
 if [ ! -z $1 ]; then
 	if [ $1 == "install-dependencies" ]; then
-		echo "Installing some of the main dependencies for ns-3.29..."
+		echo "Installing some of the main dependencies for ns-${NS3_VERSION}..."
 		sudo apt update
 		if [ $? -ne 0 ]; then
 			echo "Error: cannot run 'apt update'."
@@ -52,7 +52,7 @@ if [ ! -z $1 ]; then
 	fi
 fi
 
-echo "Downloading ns-3.29 from the official repository..."
+echo "Downloading ns-${NS3_VERSION} from the official repository..."
 sleep 1
 set -v
 git clone https://gitlab.com/nsnam/ns-3-allinone.git
@@ -60,7 +60,7 @@ cd ns-3-allinone
 ./download.py -n ns-${NS3_VERSION}
 set +v
 
-echo "Removing git from vanilla ns-3.29..."
+echo "Removing git from vanilla ns-${NS3_VERSION}..."
 sleep 1
 set -v
 find . -type d -name .git -exec rm -rfv {} \;

@@ -100,15 +100,15 @@ src/topology-read/
 gitignorer.sh
 
 .settings/
-bindings/
-contrib/
-doc/
-examples/
-log/
-patch/
-scratch/
-utils/
-waf-tools/
+/bindings/
+/contrib/
+/doc/
+/examples/
+/log/
+/patch/
+/scratch/
+/utils/
+/waf-tools/
 CHANGES.html
 Makefile
 README

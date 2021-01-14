@@ -17,8 +17,10 @@ def build(bld):
     module.source = [
         'helper/appClient-helper.cc',
         'helper/appServer-helper.cc',
+        'helper/appSample-helper.cc',
         'model/applications/appClient.cc',
         'model/applications/appServer.cc',
+        'model/applications/appSample.cc',
         'model/facilities/denBasicService.cc',
         'model/facilities/denData.cc',
         'model/facilities/ITSSOriginatingTableEntry.cc',
@@ -253,9 +255,10 @@ def build(bld):
     headers.source = [
         'helper/appClient-helper.h',
         'helper/appServer-helper.h',
+        'helper/appSample-helper.h',
         'model/applications/appClient.h',
         'model/applications/appServer.h',
-
+        'model/applications/appSample.h',
         'model/facilities/denBasicService.h',
         'model/facilities/denData.h',
         'model/facilities/asn_utils.h',

@@ -1,0 +1,3187 @@
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Authors: Nicola Baldo <nbaldo@cttc.es>
+ *          Marco Miozzo <mmiozzo@cttc.es>
+ *          Manuel Requena <manuel.requena@cttc.es>
+ * Modified by:  
+ *          Danilo Abrignani <danilo.abrignani@unibo.it> (Carrier Aggregation - GSoC 2015),
+ *          Biljana Bojovic <biljana.bojovic@cttc.es> (Carrier Aggregation)
+ *          NIST (D2D)
+ */
+
+#include "cv2x_lte-enb-rrc.h"
+
+#include <ns3/fatal-error.h>
+#include <ns3/log.h>
+#include <ns3/abort.h>
+
+#include <ns3/pointer.h>
+#include <ns3/object-map.h>
+#include <ns3/object-factory.h>
+#include <ns3/simulator.h>
+
+#include <ns3/cv2x_lte-radio-bearer-info.h>
+#include <ns3/cv2x_eps-bearer-tag.h>
+#include <ns3/packet.h>
+
+#include <ns3/cv2x_lte-rlc.h>
+#include <ns3/cv2x_lte-rlc-tm.h>
+#include <ns3/cv2x_lte-rlc-um.h>
+#include <ns3/cv2x_lte-rlc-am.h>
+#include <ns3/cv2x_lte-pdcp.h>
+
+
+
+
+namespace ns3 {
+
+NS_LOG_COMPONENT_DEFINE ("cv2x_LteEnbRrc");
+
+///////////////////////////////////////////
+// CMAC SAP forwarder
+///////////////////////////////////////////
+
+/**
+ * \brief Class for forwarding CMAC SAP User functions.
+ */
+class cv2x_EnbRrcMemberLteEnbCmacSapUser : public cv2x_LteEnbCmacSapUser
+{
+public:
+  /**
+   * Constructor
+   *
+   * \param rrc ENB RRC
+   */
+  cv2x_EnbRrcMemberLteEnbCmacSapUser (cv2x_LteEnbRrc* rrc, uint8_t componentCarrierId);
+
+  virtual uint16_t AllocateTemporaryCellRnti ();
+  virtual void NotifyLcConfigResult (uint16_t rnti, uint8_t lcid, bool success);
+  virtual void RrcConfigurationUpdateInd (UeConfig params);
+
+private:
+  cv2x_LteEnbRrc* m_rrc; ///< the RRC
+  uint8_t m_componentCarrierId; ///< Component carrier ID
+};
+
+cv2x_EnbRrcMemberLteEnbCmacSapUser::cv2x_EnbRrcMemberLteEnbCmacSapUser (cv2x_LteEnbRrc* rrc, uint8_t componentCarrierId)
+  : m_rrc (rrc)
+  , m_componentCarrierId {componentCarrierId}
+{
+}
+
+uint16_t
+cv2x_EnbRrcMemberLteEnbCmacSapUser::AllocateTemporaryCellRnti ()
+{
+  return m_rrc->DoAllocateTemporaryCellRnti (m_componentCarrierId);
+}
+
+void
+cv2x_EnbRrcMemberLteEnbCmacSapUser::NotifyLcConfigResult (uint16_t rnti, uint8_t lcid, bool success)
+{
+  m_rrc->DoNotifyLcConfigResult (rnti, lcid, success);
+}
+
+void
+cv2x_EnbRrcMemberLteEnbCmacSapUser::RrcConfigurationUpdateInd (UeConfig params)
+{
+  m_rrc->DoRrcConfigurationUpdateInd (params);
+}
+
+
+
+///////////////////////////////////////////
+// cv2x_LteEnbRrcSl
+///////////////////////////////////////////
+  
+NS_OBJECT_ENSURE_REGISTERED (cv2x_LteEnbRrcSl);
+
+cv2x_LteEnbRrcSl::cv2x_LteEnbRrcSl ()
+  : m_slEnabled (false)
+{
+  m_preconfigCommTxPoolExceptional.nbPools = 0;
+}
+
+void
+cv2x_LteEnbRrcSl::DoInitialize ()
+{
+
+
+}
+
+cv2x_LteEnbRrcSl::~cv2x_LteEnbRrcSl (void)
+{
+}
+  
+void
+cv2x_LteEnbRrcSl::DoDispose ()
+{
+  
+    
+}
+
+TypeId cv2x_LteEnbRrcSl::GetTypeId (void)
+{
+  static TypeId  tid = TypeId ("ns3::cv2x_LteEnbRrcSl")
+    .SetParent<Object> ()
+    .AddConstructor<cv2x_LteEnbRrcSl> ()
+    
+    ;
+  return tid;
+}
+
+/**
+ * \brief makes a copy of the sidelink configuration
+ * \return a copy of the sidelink configuration
+ */
+Ptr<cv2x_LteEnbRrcSl>
+cv2x_LteEnbRrcSl::Copy ()
+{
+  NS_LOG_FUNCTION (this);
+  Ptr<cv2x_LteEnbRrcSl> copy = CreateObject<cv2x_LteEnbRrcSl> ();
+  //copy internal values
+  copy->m_slEnabled = m_slEnabled;
+  copy->m_sib18 = m_sib18;
+  //copy->m_dedicatedPoolMap = m_dedicatedPoolMap;
+  copy->m_preconfigDedicatedPoolMap = m_preconfigDedicatedPoolMap;
+  copy->m_preconfigCommTxPoolExceptional = m_preconfigCommTxPoolExceptional;
+  
+  return copy;
+}
+
+  
+// void
+// cv2x_LteEnbRrcSl::SetSystemInformationBlockType18 (cv2x_LteRrcSap::SystemInformationBlockType18 sib18)
+// {
+//   NS_LOG_FUNCTION (this);
+//   m_sib18 = sib18;
+// }
+  
+/**
+ * Gets the SIB 18 information
+ * \return The SIB 18
+ */
+cv2x_LteRrcSap::SystemInformationBlockType18
+cv2x_LteEnbRrcSl::GetSystemInformationType18 ()
+{
+  NS_LOG_FUNCTION (this);
+
+  //build the content of SIB 18 by looking at pools allocated
+  cv2x_LteRrcSap::SystemInformationBlockType18 sib18;
+  sib18.commConfig.commRxPool.nbPools = 0;
+  sib18.commConfig.commTxPoolNormalCommon.nbPools = 0;
+  sib18.commConfig.commTxPoolExceptional.nbPools = 0;
+  
+  std::map <uint32_t, cv2x_LteEnbRrcSl::ActivePoolInfo>::iterator it;
+  for (it = m_activePoolMap.begin() ; it != m_activePoolMap.end() ; it++) {
+    //check if pool already listed
+    if (it->second.m_poolSetup.setup == cv2x_LteRrcSap::SlCommTxResourcesSetup::SCHEDULED) {
+      //check single pool
+      if (!IsPoolInList(it->second.m_poolSetup.scheduled.commTxConfig, sib18.commConfig.commRxPool.pools, sib18.commConfig.commRxPool.nbPools)) {
+        //add pool
+        sib18.commConfig.commRxPool.pools[sib18.commConfig.commRxPool.nbPools]=it->second.m_poolSetup.scheduled.commTxConfig;
+        sib18.commConfig.commRxPool.nbPools++;
+      }
+    } else if (it->second.m_poolSetup.ueSelected.havePoolToAdd) {
+      //check all pools
+      for (int i = 0 ; i < it->second.m_poolSetup.ueSelected.poolToAddModList.nbPools ; i++) {
+        if (!IsPoolInList(it->second.m_poolSetup.ueSelected.poolToAddModList.pools[i].pool, sib18.commConfig.commRxPool.pools, sib18.commConfig.commRxPool.nbPools)) {
+          //add pool
+        sib18.commConfig.commRxPool.pools[sib18.commConfig.commRxPool.nbPools]=it->second.m_poolSetup.ueSelected.poolToAddModList.pools[i].pool;
+        sib18.commConfig.commRxPool.nbPools++;
+        }
+      }
+    }
+  }
+  
+  sib18.commConfig.commTxPoolExceptional = m_preconfigCommTxPoolExceptional;
+  
+  return sib18;
+}
+
+bool
+cv2x_LteEnbRrcSl::IsPoolInList (cv2x_LteRrcSap::SlCommResourcePool pool, cv2x_LteRrcSap::SlCommResourcePool *pools, int nbPool)
+{
+  bool found = false;
+  for (int i = 0 ; i < nbPool && !found; i++) {
+    found =  pool == pools[i];
+  }
+  return found;
+}
+  
+
+void
+cv2x_LteEnbRrcSl::SetSlEnabled (bool status)
+{
+  NS_LOG_FUNCTION (this);
+  m_slEnabled = status;
+}
+    
+bool
+cv2x_LteEnbRrcSl::IsSlEnabled ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_slEnabled;
+}
+
+void
+cv2x_LteEnbRrcSl::AddPreconfiguredDedicatedPool (uint32_t group, cv2x_LteRrcSap::SlCommTxResourcesSetup pool)
+{
+  NS_LOG_FUNCTION (this);
+  m_preconfigDedicatedPoolMap.insert (std::pair<uint32_t, cv2x_LteRrcSap::SlCommTxResourcesSetup> (group, pool));
+}
+
+void
+cv2x_LteEnbRrcSl::SetCommTxPoolExceptional (cv2x_LteRrcSap::SlCommTxPoolList pool)
+{
+  NS_LOG_FUNCTION (this);
+  m_preconfigCommTxPoolExceptional = pool;
+}
+
+
+
+///////////////////////////////////////////
+// cv2x_UeManager
+///////////////////////////////////////////
+
+
+/// Map each of UE Manager states to its string representation.
+static const std::string g_ueManagerStateName[cv2x_UeManager::NUM_STATES] =
+{
+  "INITIAL_RANDOM_ACCESS",
+  "CONNECTION_SETUP",
+  "CONNECTION_REJECTED",
+  "CONNECTED_NORMALLY",
+  "CONNECTION_RECONFIGURATION",
+  "CONNECTION_REESTABLISHMENT",
+  "HANDOVER_PREPARATION",
+  "HANDOVER_JOINING",
+  "HANDOVER_PATH_SWITCH",
+  "HANDOVER_LEAVING",
+};
+
+/**
+ * \param s The UE manager state.
+ * \return The string representation of the given state.
+ */
+static const std::string & ToString (cv2x_UeManager::State s)
+{
+  return g_ueManagerStateName[s];
+}
+
+
+NS_OBJECT_ENSURE_REGISTERED (cv2x_UeManager);
+
+
+cv2x_UeManager::cv2x_UeManager ()
+{
+  NS_FATAL_ERROR ("this constructor is not expected to be used");
+}
+
+
+cv2x_UeManager::cv2x_UeManager (Ptr<cv2x_LteEnbRrc> rrc, uint16_t rnti, State s, uint8_t componentCarrierId)
+  : m_lastAllocatedDrbid (0),
+    m_rnti (rnti),
+    m_imsi (0),
+    m_componentCarrierId (componentCarrierId),
+    m_lastRrcTransactionIdentifier (0),
+    m_rrc (rrc),
+    m_state (s),
+    m_pendingRrcConnectionReconfiguration (false),
+    m_sourceX2apId (0),
+    m_sourceCellId (0),
+    m_needPhyMacConfiguration (false),
+    m_caSupportConfigured (false),
+    m_pendingStartDataRadioBearers (false),
+    m_slPoolChanged (false)
+{ 
+  NS_LOG_FUNCTION (this);
+}
+
+void
+cv2x_UeManager::DoInitialize ()
+{
+  NS_LOG_FUNCTION (this);
+  m_drbPdcpSapUser = new cv2x_LtePdcpSpecificLtePdcpSapUser<cv2x_UeManager> (this);
+
+  m_physicalConfigDedicated.haveAntennaInfoDedicated = true;
+  m_physicalConfigDedicated.antennaInfo.transmissionMode = m_rrc->m_defaultTransmissionMode;
+  m_physicalConfigDedicated.haveSoundingRsUlConfigDedicated = true;
+  m_physicalConfigDedicated.soundingRsUlConfigDedicated.srsConfigIndex = m_rrc->GetNewSrsConfigurationIndex ();
+  m_physicalConfigDedicated.soundingRsUlConfigDedicated.type = cv2x_LteRrcSap::SoundingRsUlConfigDedicated::SETUP;
+  m_physicalConfigDedicated.soundingRsUlConfigDedicated.srsBandwidth = 0;
+  m_physicalConfigDedicated.havePdschConfigDedicated = true;
+  m_physicalConfigDedicated.pdschConfigDedicated.pa = cv2x_LteRrcSap::PdschConfigDedicated::dB0;
+
+  
+  for (uint8_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+    {
+      m_rrc->m_cmacSapProvider.at (i)->AddUe (m_rnti);
+      m_rrc->m_cphySapProvider.at (i)->AddUe (m_rnti);
+    }
+
+  // setup the eNB side of SRB0
+  {
+    uint8_t lcid = 0;
+
+    Ptr<cv2x_LteRlc> rlc = CreateObject<cv2x_LteRlcTm> ()->GetObject<cv2x_LteRlc> ();
+    rlc->SetLteMacSapProvider (m_rrc->m_macSapProvider);
+    rlc->SetRnti (m_rnti);
+    rlc->SetLcId (lcid);
+
+    m_srb0 = CreateObject<cv2x_LteSignalingRadioBearerInfo> ();
+    m_srb0->m_rlc = rlc;
+    m_srb0->m_srbIdentity = 0;
+    // no need to store logicalChannelConfig as SRB0 is pre-configured
+
+    cv2x_LteEnbCmacSapProvider::LcInfo lcinfo;
+    lcinfo.rnti = m_rnti;
+    lcinfo.lcId = lcid;
+    // Initialise the rest of lcinfo structure even if CCCH (LCID 0) is pre-configured, and only m_rnti and lcid will be used from passed lcinfo structure.
+    // See FF LTE MAC Scheduler Iinterface Specification v1.11, 4.3.4 logicalChannelConfigListElement
+    lcinfo.lcGroup = 0;
+    lcinfo.qci = 0;
+    lcinfo.isGbr = false;
+    lcinfo.mbrUl = 0;
+    lcinfo.mbrDl = 0;
+    lcinfo.gbrUl = 0;
+    lcinfo.gbrDl = 0;
+
+    // MacSapUserForRlc in the cv2x_ComponentCarrierManager MacSapUser
+    cv2x_LteMacSapUser* lteMacSapUser = m_rrc->m_ccmRrcSapProvider->ConfigureSignalBearer(lcinfo, rlc->GetLteMacSapUser ()); 
+    // Signal Channel are only on Primary Carrier
+    m_rrc->m_cmacSapProvider.at (m_componentCarrierId)->AddLc (lcinfo, lteMacSapUser);
+    m_rrc->m_ccmRrcSapProvider->AddLc (lcinfo, lteMacSapUser);
+  }
+
+  // setup the eNB side of SRB1; the UE side will be set up upon RRC connection establishment
+  {
+    uint8_t lcid = 1;
+
+    Ptr<cv2x_LteRlc> rlc = CreateObject<cv2x_LteRlcAm> ()->GetObject<cv2x_LteRlc> ();
+    rlc->SetLteMacSapProvider (m_rrc->m_macSapProvider);
+    rlc->SetRnti (m_rnti);
+    rlc->SetLcId (lcid);
+
+    Ptr<cv2x_LtePdcp> pdcp = CreateObject<cv2x_LtePdcp> ();
+    pdcp->SetRnti (m_rnti);
+    pdcp->SetLcId (lcid);
+    pdcp->SetLtePdcpSapUser (m_drbPdcpSapUser);
+    pdcp->SetLteRlcSapProvider (rlc->GetLteRlcSapProvider ());
+    rlc->SetLteRlcSapUser (pdcp->GetLteRlcSapUser ());
+
+    m_srb1 = CreateObject<cv2x_LteSignalingRadioBearerInfo> ();
+    m_srb1->m_rlc = rlc;
+    m_srb1->m_pdcp = pdcp;
+    m_srb1->m_srbIdentity = 1;
+    m_srb1->m_logicalChannelConfig.priority = 1;
+    m_srb1->m_logicalChannelConfig.prioritizedBitRateKbps = 100;
+    m_srb1->m_logicalChannelConfig.bucketSizeDurationMs = 100;
+    m_srb1->m_logicalChannelConfig.logicalChannelGroup = 0;
+
+    cv2x_LteEnbCmacSapProvider::LcInfo lcinfo;
+    lcinfo.rnti = m_rnti;
+    lcinfo.lcId = lcid;
+    lcinfo.lcGroup = 0; // all SRBs always mapped to LCG 0
+    lcinfo.qci = cv2x_EpsBearer::GBR_CONV_VOICE; // not sure why the FF API requires a CQI even for SRBs...
+    lcinfo.isGbr = true;
+    lcinfo.mbrUl = 1e6;
+    lcinfo.mbrDl = 1e6;
+    lcinfo.gbrUl = 1e4;
+    lcinfo.gbrDl = 1e4;
+    // MacSapUserForRlc in the cv2x_ComponentCarrierManager MacSapUser
+    cv2x_LteMacSapUser* MacSapUserForRlc = m_rrc->m_ccmRrcSapProvider->ConfigureSignalBearer(lcinfo, rlc->GetLteMacSapUser ()); 
+    // Signal Channel are only on Primary Carrier
+    m_rrc->m_cmacSapProvider.at (m_componentCarrierId)->AddLc (lcinfo, MacSapUserForRlc);
+    m_rrc->m_ccmRrcSapProvider->AddLc (lcinfo, MacSapUserForRlc);
+  }
+
+  cv2x_LteEnbRrcSapUser::SetupUeParameters ueParams;
+  ueParams.srb0SapProvider = m_srb0->m_rlc->GetLteRlcSapProvider ();
+  ueParams.srb1SapProvider = m_srb1->m_pdcp->GetLtePdcpSapProvider ();
+  m_rrc->m_rrcSapUser->SetupUe (m_rnti, ueParams);
+
+  // configure MAC (and scheduler)
+  cv2x_LteEnbCmacSapProvider::UeConfig req;
+  req.m_rnti = m_rnti;
+  req.m_transmissionMode = m_physicalConfigDedicated.antennaInfo.transmissionMode;
+
+  // configure PHY
+  for (uint16_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+    {
+      m_rrc->m_cmacSapProvider.at (i)->UeUpdateConfigurationReq (req);
+      m_rrc->m_cphySapProvider.at (i)->SetTransmissionMode (m_rnti, m_physicalConfigDedicated.antennaInfo.transmissionMode);
+      m_rrc->m_cphySapProvider.at (i)->SetSrsConfigurationIndex (m_rnti, m_physicalConfigDedicated.soundingRsUlConfigDedicated.srsConfigIndex);
+    }
+  // schedule this cv2x_UeManager instance to be deleted if the UE does not give any sign of life within a reasonable time
+  Time maxConnectionDelay;
+  switch (m_state)
+    {
+    case INITIAL_RANDOM_ACCESS:
+      m_connectionRequestTimeout = Simulator::Schedule (m_rrc->m_connectionRequestTimeoutDuration,
+                                                        &cv2x_LteEnbRrc::ConnectionRequestTimeout,
+                                                        m_rrc, m_rnti);
+      break;
+
+    case HANDOVER_JOINING:
+      m_handoverJoiningTimeout = Simulator::Schedule (m_rrc->m_handoverJoiningTimeoutDuration,
+                                                      &cv2x_LteEnbRrc::HandoverJoiningTimeout,
+                                                      m_rrc, m_rnti);
+      break;
+
+    default:
+      NS_FATAL_ERROR ("unexpected state " << ToString (m_state));
+      break;
+    }
+  m_caSupportConfigured =  false;
+}
+
+
+cv2x_UeManager::~cv2x_UeManager (void)
+{
+}
+
+void
+cv2x_UeManager::DoDispose ()
+{
+  delete m_drbPdcpSapUser;
+  // delete eventual X2-U TEIDs
+  for (std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.begin ();
+       it != m_drbMap.end ();
+       ++it)
+    {
+      m_rrc->m_x2uTeidInfoMap.erase (it->second->m_gtpTeid);
+    }
+
+}
+
+TypeId cv2x_UeManager::GetTypeId (void)
+{
+  static TypeId  tid = TypeId ("ns3::cv2x_UeManager")
+    .SetParent<Object> ()
+    .AddConstructor<cv2x_UeManager> ()
+    .AddAttribute ("DataRadioBearerMap", "List of UE DataRadioBearerInfo by DRBID.",
+                   ObjectMapValue (),
+                   MakeObjectMapAccessor (&cv2x_UeManager::m_drbMap),
+                   MakeObjectMapChecker<cv2x_LteDataRadioBearerInfo> ())
+    .AddAttribute ("Srb0", "SignalingRadioBearerInfo for SRB0",
+                   PointerValue (),
+                   MakePointerAccessor (&cv2x_UeManager::m_srb0),
+                   MakePointerChecker<cv2x_LteSignalingRadioBearerInfo> ())
+    .AddAttribute ("Srb1", "SignalingRadioBearerInfo for SRB1",
+                   PointerValue (),
+                   MakePointerAccessor (&cv2x_UeManager::m_srb1),
+                   MakePointerChecker<cv2x_LteSignalingRadioBearerInfo> ())
+    .AddAttribute ("C-RNTI",
+                   "Cell Radio Network Temporary Identifier",
+                   TypeId::ATTR_GET, // read-only attribute
+                   UintegerValue (0), // unused, read-only attribute
+                   MakeUintegerAccessor (&cv2x_UeManager::m_rnti),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddTraceSource ("StateTransition",
+                     "fired upon every UE state transition seen by the "
+                     "cv2x_UeManager at the eNB RRC",
+                     MakeTraceSourceAccessor (&cv2x_UeManager::m_stateTransitionTrace),
+                     "ns3::cv2x_UeManager::StateTracedCallback")
+  ;
+  return tid;
+}
+
+void 
+cv2x_UeManager::SetSource (uint16_t sourceCellId, uint16_t sourceX2apId)
+{
+  m_sourceX2apId = sourceX2apId;
+  m_sourceCellId = sourceCellId;
+}
+
+void 
+cv2x_UeManager::SetImsi (uint64_t imsi)
+{
+  m_imsi = imsi;
+}
+
+void
+cv2x_UeManager::SetupDataRadioBearer (cv2x_EpsBearer bearer, uint8_t bearerId, uint32_t gtpTeid, Ipv4Address transportLayerAddress)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) m_rnti);
+
+  Ptr<cv2x_LteDataRadioBearerInfo> drbInfo = CreateObject<cv2x_LteDataRadioBearerInfo> ();
+  uint8_t drbid = AddDataRadioBearerInfo (drbInfo);
+  uint8_t lcid = Drbid2Lcid (drbid); 
+  uint8_t bid = Drbid2Bid (drbid);
+  NS_ASSERT_MSG ( bearerId == 0 || bid == bearerId, "bearer ID mismatch (" << (uint32_t) bid << " != " << (uint32_t) bearerId << ", the assumption that ID are allocated in the same way by MME and RRC is not valid any more");
+  drbInfo->m_epsBearer = bearer;
+  drbInfo->m_epsBearerIdentity = bid;
+  drbInfo->m_drbIdentity = drbid;
+  drbInfo->m_logicalChannelIdentity = lcid;
+  drbInfo->m_gtpTeid = gtpTeid;
+  drbInfo->m_transportLayerAddress = transportLayerAddress;
+
+  if (m_state == HANDOVER_JOINING)
+    {
+      // setup TEIDs for receiving data eventually forwarded over X2-U 
+      cv2x_LteEnbRrc::X2uTeidInfo x2uTeidInfo;
+      x2uTeidInfo.rnti = m_rnti;
+      x2uTeidInfo.drbid = drbid;
+      std::pair<std::map<uint32_t, cv2x_LteEnbRrc::X2uTeidInfo>::iterator, bool>
+      ret = m_rrc->m_x2uTeidInfoMap.insert (std::pair<uint32_t, cv2x_LteEnbRrc::X2uTeidInfo> (gtpTeid, x2uTeidInfo));
+      NS_ASSERT_MSG (ret.second == true, "overwriting a pre-existing entry in m_x2uTeidInfoMap");
+    }
+
+  TypeId rlcTypeId = m_rrc->GetRlcType (bearer);
+
+  ObjectFactory rlcObjectFactory;
+  rlcObjectFactory.SetTypeId (rlcTypeId);
+  Ptr<cv2x_LteRlc> rlc = rlcObjectFactory.Create ()->GetObject<cv2x_LteRlc> ();
+  rlc->SetLteMacSapProvider (m_rrc->m_macSapProvider);
+  rlc->SetRnti (m_rnti);
+
+  drbInfo->m_rlc = rlc;
+
+  rlc->SetLcId (lcid);
+
+  // we need PDCP only for real RLC, i.e., RLC/UM or RLC/AM
+  // if we are using RLC/SM we don't care of anything above RLC
+  if (rlcTypeId != cv2x_LteRlcSm::GetTypeId ())
+    {
+      Ptr<cv2x_LtePdcp> pdcp = CreateObject<cv2x_LtePdcp> ();
+      pdcp->SetRnti (m_rnti);
+      pdcp->SetLcId (lcid);
+      pdcp->SetLtePdcpSapUser (m_drbPdcpSapUser);
+      pdcp->SetLteRlcSapProvider (rlc->GetLteRlcSapProvider ());
+      rlc->SetLteRlcSapUser (pdcp->GetLteRlcSapUser ());
+      drbInfo->m_pdcp = pdcp;
+    }
+
+  std::vector<cv2x_LteCcmRrcSapProvider::LcsConfig> lcOnCcMapping = m_rrc->m_ccmRrcSapProvider->SetupDataRadioBearer (bearer, bearerId, m_rnti, lcid, m_rrc->GetLogicalChannelGroup (bearer), rlc->GetLteMacSapUser ());
+  // cv2x_LteEnbCmacSapProvider::LcInfo lcinfo;
+  // lcinfo.rnti = m_rnti;
+  // lcinfo.lcId = lcid;
+  // lcinfo.lcGroup = m_rrc->GetLogicalChannelGroup (bearer);
+  // lcinfo.qci = bearer.qci;
+  // lcinfo.isGbr = bearer.IsGbr ();
+  // lcinfo.mbrUl = bearer.gbrQosInfo.mbrUl;
+  // lcinfo.mbrDl = bearer.gbrQosInfo.mbrDl;
+  // lcinfo.gbrUl = bearer.gbrQosInfo.gbrUl;
+  // lcinfo.gbrDl = bearer.gbrQosInfo.gbrDl;
+  // use a for cycle to send the AddLc to the appropriate Mac Sap
+  // if the sap is not initialized the appropriated method has to be called
+  std::vector<cv2x_LteCcmRrcSapProvider::LcsConfig>::iterator itLcOnCcMapping = lcOnCcMapping.begin ();
+  NS_ASSERT_MSG (itLcOnCcMapping != lcOnCcMapping.end (), "Problem");
+  for (itLcOnCcMapping = lcOnCcMapping.begin (); itLcOnCcMapping != lcOnCcMapping.end (); ++itLcOnCcMapping)
+    {
+      NS_LOG_DEBUG (this << " RNTI " << itLcOnCcMapping->lc.rnti << "Lcid " << (uint16_t) itLcOnCcMapping->lc.lcId << " lcGroup " << (uint16_t) itLcOnCcMapping->lc.lcGroup << " cv2x_ComponentCarrierId " << itLcOnCcMapping->componentCarrierId);
+      uint8_t index = itLcOnCcMapping->componentCarrierId;
+      cv2x_LteEnbCmacSapProvider::LcInfo lcinfo = itLcOnCcMapping->lc;
+      cv2x_LteMacSapUser *msu = itLcOnCcMapping->msu;
+      m_rrc->m_cmacSapProvider.at (index)->AddLc (lcinfo, msu);
+      m_rrc->m_ccmRrcSapProvider->AddLc (lcinfo, msu);
+    }
+
+  if (rlcTypeId == cv2x_LteRlcAm::GetTypeId ())
+    {
+      drbInfo->m_rlcConfig.choice =  cv2x_LteRrcSap::RlcConfig::AM;
+    }
+  else
+    {
+      drbInfo->m_rlcConfig.choice =  cv2x_LteRrcSap::RlcConfig::UM_BI_DIRECTIONAL;
+    }
+
+  drbInfo->m_logicalChannelIdentity = lcid;
+  drbInfo->m_logicalChannelConfig.priority =  m_rrc->GetLogicalChannelPriority (bearer);
+  drbInfo->m_logicalChannelConfig.logicalChannelGroup = m_rrc->GetLogicalChannelGroup (bearer);
+  if (bearer.IsGbr ())
+    {
+      drbInfo->m_logicalChannelConfig.prioritizedBitRateKbps = bearer.gbrQosInfo.gbrUl;
+    }
+  else
+    {
+      drbInfo->m_logicalChannelConfig.prioritizedBitRateKbps = 0;
+    }
+  drbInfo->m_logicalChannelConfig.bucketSizeDurationMs = 1000;
+
+  ScheduleRrcConnectionReconfiguration ();
+}
+
+void
+cv2x_UeManager::RecordDataRadioBearersToBeStarted ()
+{
+  NS_LOG_FUNCTION (this << (uint32_t) m_rnti);
+  for (std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.begin ();
+       it != m_drbMap.end ();
+       ++it)
+    {
+      m_drbsToBeStarted.push_back (it->first);
+    }
+}
+
+void
+cv2x_UeManager::StartDataRadioBearers ()
+{
+  NS_LOG_FUNCTION (this << (uint32_t) m_rnti);
+  for (std::list <uint8_t>::iterator drbIdIt = m_drbsToBeStarted.begin ();
+       drbIdIt != m_drbsToBeStarted.end ();
+       ++drbIdIt)
+    {
+      std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator drbIt = m_drbMap.find (*drbIdIt);
+      NS_ASSERT (drbIt != m_drbMap.end ());
+      drbIt->second->m_rlc->Initialize ();
+      if (drbIt->second->m_pdcp)
+        {
+          drbIt->second->m_pdcp->Initialize ();
+        }
+    }
+  m_drbsToBeStarted.clear ();
+}
+
+
+void
+cv2x_UeManager::ReleaseDataRadioBearer (uint8_t drbid)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) m_rnti << (uint32_t) drbid);
+  uint8_t lcid = Drbid2Lcid (drbid);
+  std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.find (drbid);
+  NS_ASSERT_MSG (it != m_drbMap.end (), "request to remove radio bearer with unknown drbid " << drbid);
+
+  // first delete eventual X2-U TEIDs
+  m_rrc->m_x2uTeidInfoMap.erase (it->second->m_gtpTeid);
+
+  m_drbMap.erase (it);
+  std::vector<uint8_t> ccToRelease = m_rrc->m_ccmRrcSapProvider->ReleaseDataRadioBearer (m_rnti, lcid);
+  std::vector<uint8_t>::iterator itCcToRelease = ccToRelease.begin ();
+  NS_ASSERT_MSG (itCcToRelease != ccToRelease.end (), "request to remove radio bearer with unknown drbid (cv2x_ComponentCarrierManager)");
+  for (itCcToRelease = ccToRelease.begin (); itCcToRelease != ccToRelease.end (); ++itCcToRelease)
+    {
+      m_rrc->m_cmacSapProvider.at (*itCcToRelease)->ReleaseLc (m_rnti, lcid);
+    }
+  cv2x_LteRrcSap::RadioResourceConfigDedicated rrcd;
+  rrcd.havePhysicalConfigDedicated = false;
+  rrcd.drbToReleaseList.push_back (drbid);
+  //populating RadioResourceConfigDedicated information element as per 3GPP TS 36.331 version 9.2.0
+  rrcd.havePhysicalConfigDedicated = true;
+  rrcd.physicalConfigDedicated = m_physicalConfigDedicated;
+ 
+  //populating RRCConnectionReconfiguration message as per 3GPP TS 36.331 version 9.2.0 Release 9
+  cv2x_LteRrcSap::RrcConnectionReconfiguration msg;
+  msg.haveMeasConfig = false;
+  msg.haveMobilityControlInfo = false;
+  msg.radioResourceConfigDedicated = rrcd;
+  msg.haveRadioResourceConfigDedicated = true;
+  // ToDo: Resend in eny case this configuration
+  // needs to be initialized
+  msg.haveNonCriticalExtension = false;
+  //RRC Connection Reconfiguration towards UE
+  m_rrc->m_rrcSapUser->SendRrcConnectionReconfiguration (m_rnti, msg);
+}
+
+void
+cv2x_LteEnbRrc::DoSendReleaseDataRadioBearer (uint64_t imsi, uint16_t rnti, uint8_t bearerId)
+{
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  // Bearer de-activation towards UE
+  ueManager->ReleaseDataRadioBearer (bearerId);
+  // Bearer de-activation indication towards epc-enb application
+  m_s1SapProvider->DoSendReleaseIndication (imsi,rnti,bearerId);
+}
+
+void 
+cv2x_UeManager::ScheduleRrcConnectionReconfiguration ()
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case INITIAL_RANDOM_ACCESS:
+    case CONNECTION_SETUP:
+    case CONNECTION_RECONFIGURATION:
+    case CONNECTION_REESTABLISHMENT:
+    case HANDOVER_PREPARATION:
+    case HANDOVER_JOINING:
+    case HANDOVER_LEAVING:
+      // a previous reconfiguration still ongoing, we need to wait for it to be finished
+      m_pendingRrcConnectionReconfiguration = true;
+      break;
+
+    case CONNECTED_NORMALLY:
+      {
+        m_pendingRrcConnectionReconfiguration = false;
+        cv2x_LteRrcSap::RrcConnectionReconfiguration msg = BuildRrcConnectionReconfiguration ();
+        m_rrc->m_rrcSapUser->SendRrcConnectionReconfiguration (m_rnti, msg);
+        RecordDataRadioBearersToBeStarted ();
+        SwitchToState (CONNECTION_RECONFIGURATION);
+      }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void 
+cv2x_UeManager::PrepareHandover (uint16_t cellId)
+{
+  NS_LOG_FUNCTION (this << cellId);
+  switch (m_state)
+    {
+    case CONNECTED_NORMALLY:
+      {
+        m_targetCellId = cellId;
+        cv2x_EpcX2SapProvider::HandoverRequestParams params;
+        params.oldEnbUeX2apId = m_rnti;
+        params.cause          = cv2x_EpcX2SapProvider::HandoverDesirableForRadioReason;
+        params.sourceCellId   = m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId);
+        params.targetCellId   = cellId;
+        params.mmeUeS1apId    = m_imsi;
+        params.ueAggregateMaxBitRateDownlink = 200 * 1000;
+        params.ueAggregateMaxBitRateUplink = 100 * 1000;
+        params.bearers = GetErabList ();
+
+        cv2x_LteRrcSap::HandoverPreparationInfo hpi;
+        hpi.asConfig.sourceUeIdentity = m_rnti;
+        hpi.asConfig.sourceDlCarrierFreq = m_rrc->m_dlEarfcn;
+        hpi.asConfig.sourceMeasConfig = m_rrc->m_ueMeasConfig;
+        hpi.asConfig.sourceRadioResourceConfig = GetRadioResourceConfigForHandoverPreparationInfo ();
+        hpi.asConfig.sourceMasterInformationBlock.dlBandwidth = m_rrc->m_dlBandwidth;
+        hpi.asConfig.sourceMasterInformationBlock.systemFrameNumber = 0;
+        hpi.asConfig.sourceSystemInformationBlockType1.cellAccessRelatedInfo.plmnIdentityInfo.plmnIdentity = m_rrc->m_sib1.at (m_componentCarrierId).cellAccessRelatedInfo.plmnIdentityInfo.plmnIdentity;
+        hpi.asConfig.sourceSystemInformationBlockType1.cellAccessRelatedInfo.cellIdentity = m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId);
+        hpi.asConfig.sourceSystemInformationBlockType1.cellAccessRelatedInfo.csgIndication = m_rrc->m_sib1.at (m_componentCarrierId).cellAccessRelatedInfo.csgIndication;
+        hpi.asConfig.sourceSystemInformationBlockType1.cellAccessRelatedInfo.csgIdentity = m_rrc->m_sib1.at (m_componentCarrierId).cellAccessRelatedInfo.csgIdentity;
+        cv2x_LteEnbCmacSapProvider::RachConfig rc = m_rrc->m_cmacSapProvider.at (m_componentCarrierId)->GetRachConfig ();
+        hpi.asConfig.sourceSystemInformationBlockType2.radioResourceConfigCommon.rachConfigCommon.preambleInfo.numberOfRaPreambles = rc.numberOfRaPreambles;
+        hpi.asConfig.sourceSystemInformationBlockType2.radioResourceConfigCommon.rachConfigCommon.raSupervisionInfo.preambleTransMax = rc.preambleTransMax;
+        hpi.asConfig.sourceSystemInformationBlockType2.radioResourceConfigCommon.rachConfigCommon.raSupervisionInfo.raResponseWindowSize = rc.raResponseWindowSize;
+        hpi.asConfig.sourceSystemInformationBlockType2.freqInfo.ulCarrierFreq = m_rrc->m_ulEarfcn;
+        hpi.asConfig.sourceSystemInformationBlockType2.freqInfo.ulBandwidth = m_rrc->m_ulBandwidth;
+        params.rrcContext = m_rrc->m_rrcSapUser->EncodeHandoverPreparationInformation (hpi);
+
+        NS_LOG_LOGIC ("oldEnbUeX2apId = " << params.oldEnbUeX2apId);
+        NS_LOG_LOGIC ("sourceCellId = " << params.sourceCellId);
+        NS_LOG_LOGIC ("targetCellId = " << params.targetCellId);
+        NS_LOG_LOGIC ("mmeUeS1apId = " << params.mmeUeS1apId);
+        NS_LOG_LOGIC ("rrcContext   = " << params.rrcContext);
+
+        m_rrc->m_x2SapProvider->SendHandoverRequest (params);
+        SwitchToState (HANDOVER_PREPARATION);
+      }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+
+}
+
+void 
+cv2x_UeManager::RecvHandoverRequestAck (cv2x_EpcX2SapUser::HandoverRequestAckParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_ASSERT_MSG (params.notAdmittedBearers.empty (), "not admission of some bearers upon handover is not supported");
+  NS_ASSERT_MSG (params.admittedBearers.size () == m_drbMap.size (), "not enough bearers in admittedBearers");
+
+  // note: the Handover command from the target eNB to the source eNB
+  // is expected to be sent transparently to the UE; however, here we
+  // decode the message and eventually re-encode it. This way we can
+  // support both a real RRC protocol implementation and an ideal one
+  // without actual RRC protocol encoding. 
+
+  Ptr<Packet> encodedHandoverCommand = params.rrcContext;
+  cv2x_LteRrcSap::RrcConnectionReconfiguration handoverCommand = m_rrc->m_rrcSapUser->DecodeHandoverCommand (encodedHandoverCommand);
+  m_rrc->m_rrcSapUser->SendRrcConnectionReconfiguration (m_rnti, handoverCommand);
+  SwitchToState (HANDOVER_LEAVING);
+  m_handoverLeavingTimeout = Simulator::Schedule (m_rrc->m_handoverLeavingTimeoutDuration, 
+                                                  &cv2x_LteEnbRrc::HandoverLeavingTimeout, 
+                                                  m_rrc, m_rnti);
+  NS_ASSERT (handoverCommand.haveMobilityControlInfo);
+  m_rrc->m_handoverStartTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti, handoverCommand.mobilityControlInfo.targetPhysCellId);
+
+  cv2x_EpcX2SapProvider::SnStatusTransferParams sst;
+  sst.oldEnbUeX2apId = params.oldEnbUeX2apId;
+  sst.newEnbUeX2apId = params.newEnbUeX2apId;
+  sst.sourceCellId = params.sourceCellId;
+  sst.targetCellId = params.targetCellId;
+  for ( std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator drbIt = m_drbMap.begin ();
+        drbIt != m_drbMap.end ();
+        ++drbIt)
+    {
+      // SN status transfer is only for AM RLC
+      if (0 != drbIt->second->m_rlc->GetObject<cv2x_LteRlcAm> ())
+        {
+          cv2x_LtePdcp::Status status = drbIt->second->m_pdcp->GetStatus ();
+          cv2x_EpcX2Sap::ErabsSubjectToStatusTransferItem i;
+          i.dlPdcpSn = status.txSn;
+          i.ulPdcpSn = status.rxSn;
+          sst.erabsSubjectToStatusTransferList.push_back (i);
+        }
+    }
+  m_rrc->m_x2SapProvider->SendSnStatusTransfer (sst);
+}
+
+
+cv2x_LteRrcSap::RadioResourceConfigDedicated
+cv2x_UeManager::GetRadioResourceConfigForHandoverPreparationInfo ()
+{
+  NS_LOG_FUNCTION (this);
+  return BuildRadioResourceConfigDedicated ();
+}
+
+cv2x_LteRrcSap::RrcConnectionReconfiguration 
+cv2x_UeManager::GetRrcConnectionReconfigurationForHandover ()
+{
+  NS_LOG_FUNCTION (this);
+  return BuildRrcConnectionReconfiguration ();
+}
+
+void
+cv2x_UeManager::SendData (uint8_t bid, Ptr<Packet> p)
+{
+  NS_LOG_FUNCTION (this << p << (uint16_t) bid);
+  switch (m_state)
+    {
+    case INITIAL_RANDOM_ACCESS:
+    case CONNECTION_SETUP:
+      NS_LOG_WARN ("not connected, discarding packet");
+      return;
+      break;
+
+    case CONNECTED_NORMALLY:
+    case CONNECTION_RECONFIGURATION:
+    case CONNECTION_REESTABLISHMENT:
+    case HANDOVER_PREPARATION:
+    case HANDOVER_JOINING:
+    case HANDOVER_PATH_SWITCH:
+      {
+        NS_LOG_LOGIC ("queueing data on PDCP for transmission over the air");
+        cv2x_LtePdcpSapProvider::TransmitPdcpSduParameters params;
+        params.pdcpSdu = p;
+        params.rnti = m_rnti;
+        params.lcid = Bid2Lcid (bid);
+        params.srcL2Id = 0;
+        params.dstL2Id = 0;
+
+        uint8_t drbid = Bid2Drbid (bid);
+        //Transmit PDCP sdu only if DRB ID found in drbMap
+        std::map<uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.find (drbid);
+        if (it != m_drbMap.end ())
+          {
+            Ptr<cv2x_LteDataRadioBearerInfo> bearerInfo = GetDataRadioBearerInfo (drbid);
+            if (bearerInfo != NULL)
+              {
+                cv2x_LtePdcpSapProvider* pdcpSapProvider = bearerInfo->m_pdcp->GetLtePdcpSapProvider ();
+                pdcpSapProvider->TransmitPdcpSdu (params);
+              }
+          }
+      }
+      break;
+
+    case HANDOVER_LEAVING:
+      {
+        NS_LOG_LOGIC ("forwarding data to target eNB over X2-U");
+        uint8_t drbid = Bid2Drbid (bid);
+        cv2x_EpcX2Sap::UeDataParams params;
+        params.sourceCellId = m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId);
+        params.targetCellId = m_targetCellId;
+        params.gtpTeid = GetDataRadioBearerInfo (drbid)->m_gtpTeid;
+        params.ueData = p;
+        m_rrc->m_x2SapProvider->SendUeData (params);
+      }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+std::vector<cv2x_EpcX2Sap::ErabToBeSetupItem>
+cv2x_UeManager::GetErabList ()
+{
+  NS_LOG_FUNCTION (this);
+  std::vector<cv2x_EpcX2Sap::ErabToBeSetupItem> ret;
+  for (std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it =  m_drbMap.begin ();
+       it != m_drbMap.end ();
+       ++it)
+    {
+      cv2x_EpcX2Sap::ErabToBeSetupItem etbsi;
+      etbsi.erabId = it->second->m_epsBearerIdentity;
+      etbsi.erabLevelQosParameters = it->second->m_epsBearer;
+      etbsi.dlForwarding = false;
+      etbsi.transportLayerAddress = it->second->m_transportLayerAddress;
+      etbsi.gtpTeid = it->second->m_gtpTeid;
+      ret.push_back (etbsi);
+    }
+  return ret;
+}
+
+void
+cv2x_UeManager::SendUeContextRelease ()
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case HANDOVER_PATH_SWITCH:
+      NS_LOG_INFO ("Send UE CONTEXT RELEASE from target eNB to source eNB");
+      cv2x_EpcX2SapProvider::UeContextReleaseParams ueCtxReleaseParams;
+      ueCtxReleaseParams.oldEnbUeX2apId = m_sourceX2apId;
+      ueCtxReleaseParams.newEnbUeX2apId = m_rnti;
+      ueCtxReleaseParams.sourceCellId = m_sourceCellId;
+      ueCtxReleaseParams.targetCellId = m_targetCellId;
+      m_rrc->m_x2SapProvider->SendUeContextRelease (ueCtxReleaseParams);
+      SwitchToState (CONNECTED_NORMALLY);
+      m_rrc->m_handoverEndOkTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti);
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void 
+cv2x_UeManager::RecvHandoverPreparationFailure (uint16_t cellId)
+{
+  NS_LOG_FUNCTION (this << cellId);
+  switch (m_state)
+    {
+    case HANDOVER_PREPARATION:
+      NS_ASSERT (cellId == m_targetCellId);
+      NS_LOG_INFO ("target eNB sent HO preparation failure, aborting HO");
+      SwitchToState (CONNECTED_NORMALLY);
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void 
+cv2x_UeManager::RecvSnStatusTransfer (cv2x_EpcX2SapUser::SnStatusTransferParams params)
+{
+  NS_LOG_FUNCTION (this);
+  for (std::vector<cv2x_EpcX2Sap::ErabsSubjectToStatusTransferItem>::iterator erabIt 
+         = params.erabsSubjectToStatusTransferList.begin ();
+       erabIt != params.erabsSubjectToStatusTransferList.end ();
+       ++erabIt)
+    {
+      // cv2x_LtePdcp::Status status;
+      // status.txSn = erabIt->dlPdcpSn;
+      // status.rxSn = erabIt->ulPdcpSn;
+      // uint8_t drbId = Bid2Drbid (erabIt->erabId);
+      // std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator drbIt = m_drbMap.find (drbId);
+      // NS_ASSERT_MSG (drbIt != m_drbMap.end (), "could not find DRBID " << (uint32_t) drbId);
+      // drbIt->second->m_pdcp->SetStatus (status);
+    }
+}
+
+void 
+cv2x_UeManager::RecvUeContextRelease (cv2x_EpcX2SapUser::UeContextReleaseParams params)
+{
+  NS_LOG_FUNCTION (this);
+  NS_ASSERT_MSG (m_state == HANDOVER_LEAVING, "method unexpected in state " << ToString (m_state));
+  m_handoverLeavingTimeout.Cancel ();
+}
+
+
+// methods forwarded from RRC SAP
+
+void 
+cv2x_UeManager::CompleteSetupUe (cv2x_LteEnbRrcSapProvider::CompleteSetupUeParameters params)
+{
+  NS_LOG_FUNCTION (this);
+  m_srb0->m_rlc->SetLteRlcSapUser (params.srb0SapUser);
+  m_srb1->m_pdcp->SetLtePdcpSapUser (params.srb1SapUser);
+}
+
+void
+cv2x_UeManager::RecvRrcConnectionRequest (cv2x_LteRrcSap::RrcConnectionRequest msg)
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case INITIAL_RANDOM_ACCESS:
+      {
+        m_connectionRequestTimeout.Cancel ();
+
+        if (m_rrc->m_admitRrcConnectionRequest == true)
+          {
+            m_imsi = msg.ueIdentity;
+            if (m_rrc->m_s1SapProvider != 0)
+              {
+                m_rrc->m_s1SapProvider->InitialUeMessage (m_imsi, m_rnti);
+              }
+
+            // send RRC CONNECTION SETUP to UE
+            cv2x_LteRrcSap::RrcConnectionSetup msg2;
+            msg2.rrcTransactionIdentifier = GetNewRrcTransactionIdentifier ();
+            msg2.radioResourceConfigDedicated = BuildRadioResourceConfigDedicated ();
+            m_rrc->m_rrcSapUser->SendRrcConnectionSetup (m_rnti, msg2);
+
+            RecordDataRadioBearersToBeStarted ();
+            m_connectionSetupTimeout = Simulator::Schedule (
+                m_rrc->m_connectionSetupTimeoutDuration,
+                &cv2x_LteEnbRrc::ConnectionSetupTimeout, m_rrc, m_rnti);
+            SwitchToState (CONNECTION_SETUP);
+          }
+        else
+          {
+            NS_LOG_INFO ("rejecting connection request for RNTI " << m_rnti);
+
+            // send RRC CONNECTION REJECT to UE
+            cv2x_LteRrcSap::RrcConnectionReject rejectMsg;
+            rejectMsg.waitTime = 3;
+            m_rrc->m_rrcSapUser->SendRrcConnectionReject (m_rnti, rejectMsg);
+
+            m_connectionRejectedTimeout = Simulator::Schedule (
+                m_rrc->m_connectionRejectedTimeoutDuration,
+                &cv2x_LteEnbRrc::ConnectionRejectedTimeout, m_rrc, m_rnti);
+            SwitchToState (CONNECTION_REJECTED);
+          }
+      }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void
+cv2x_UeManager::RecvRrcConnectionSetupCompleted (cv2x_LteRrcSap::RrcConnectionSetupCompleted msg)
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case CONNECTION_SETUP:
+      m_connectionSetupTimeout.Cancel ();
+      if ( m_caSupportConfigured == false && m_rrc->m_numberOfComponentCarriers > 1)
+        {
+          m_pendingRrcConnectionReconfiguration = true; // Force Reconfiguration
+          m_pendingStartDataRadioBearers = true;
+        }
+      else
+        {
+          m_pendingStartDataRadioBearers = false;
+          StartDataRadioBearers ();
+        }
+      SwitchToState (CONNECTED_NORMALLY);
+      m_rrc->m_connectionEstablishedTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti);
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void
+cv2x_UeManager::RecvRrcConnectionReconfigurationCompleted (cv2x_LteRrcSap::RrcConnectionReconfigurationCompleted msg)
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case CONNECTION_RECONFIGURATION:
+      StartDataRadioBearers ();
+      if (m_needPhyMacConfiguration)
+        {
+          // configure MAC (and scheduler)
+          cv2x_LteEnbCmacSapProvider::UeConfig req;
+          req.m_rnti = m_rnti;
+          req.m_transmissionMode = m_physicalConfigDedicated.antennaInfo.transmissionMode;
+          req.m_slDestinations = m_slDestinations;
+          for (uint8_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+            {
+              m_rrc->m_cmacSapProvider.at (i)->UeUpdateConfigurationReq (req);
+
+              // configure PHY
+              m_rrc->m_cphySapProvider.at (i)->SetTransmissionMode (req.m_rnti, req.m_transmissionMode);
+              double paDouble = cv2x_LteRrcSap::ConvertPdschConfigDedicated2Double (m_physicalConfigDedicated.pdschConfigDedicated);
+              m_rrc->m_cphySapProvider.at (i)->SetPa (m_rnti, paDouble);
+            }
+
+          m_needPhyMacConfiguration = false;
+        }
+      SwitchToState (CONNECTED_NORMALLY);
+      m_rrc->m_connectionReconfigurationTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti);
+      break;
+
+    // This case is added to NS-3 in order to handle bearer de-activation scenario for CONNECTED state UE
+    case CONNECTED_NORMALLY:
+      if (!m_slPoolChanged)
+        {
+          NS_LOG_INFO ("ignoring RecvRrcConnectionReconfigurationCompleted in state " << ToString (m_state));
+        }
+      else
+        {
+          //inform about new sidelink pool if needed
+          // configure MAC (and scheduler)
+          cv2x_LteEnbCmacSapProvider::UeConfig req;
+          req.m_rnti = m_rnti;
+          req.m_transmissionMode = m_physicalConfigDedicated.antennaInfo.transmissionMode;
+          req.m_slDestinations = m_slDestinations;
+          for (uint8_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+            {
+              m_rrc->m_cmacSapProvider.at (i)->UeUpdateConfigurationReq (req);
+            }
+            
+          m_slPoolChanged = false;
+        }
+      break;
+
+    case HANDOVER_LEAVING:
+      NS_LOG_INFO ("ignoring RecvRrcConnectionReconfigurationCompleted in state " << ToString (m_state));
+      break;
+
+    case HANDOVER_JOINING:
+      {
+        m_handoverJoiningTimeout.Cancel ();
+        NS_LOG_INFO ("Send PATH SWITCH REQUEST to the MME");
+        cv2x_EpcEnbS1SapProvider::PathSwitchRequestParameters params;
+        params.rnti = m_rnti;
+        params.cellId = m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId);
+        params.mmeUeS1Id = m_imsi;
+        SwitchToState (HANDOVER_PATH_SWITCH);
+        for (std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it =  m_drbMap.begin ();
+             it != m_drbMap.end ();
+             ++it)
+          {
+            cv2x_EpcEnbS1SapProvider::BearerToBeSwitched b;
+            b.epsBearerId = it->second->m_epsBearerIdentity;
+            b.teid =  it->second->m_gtpTeid;
+            params.bearersToBeSwitched.push_back (b);
+          }
+        m_rrc->m_s1SapProvider->PathSwitchRequest (params);
+      }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+}
+
+void 
+cv2x_UeManager::RecvRrcConnectionReestablishmentRequest (cv2x_LteRrcSap::RrcConnectionReestablishmentRequest msg)
+{
+  NS_LOG_FUNCTION (this);
+  switch (m_state)
+    {
+    case CONNECTED_NORMALLY:
+      break;
+
+    case HANDOVER_LEAVING:
+      m_handoverLeavingTimeout.Cancel ();
+      break;
+
+    default:
+      NS_FATAL_ERROR ("method unexpected in state " << ToString (m_state));
+      break;
+    }
+
+  cv2x_LteRrcSap::RrcConnectionReestablishment msg2;
+  msg2.rrcTransactionIdentifier = GetNewRrcTransactionIdentifier ();
+  msg2.radioResourceConfigDedicated = BuildRadioResourceConfigDedicated ();
+  m_rrc->m_rrcSapUser->SendRrcConnectionReestablishment (m_rnti, msg2);
+  SwitchToState (CONNECTION_REESTABLISHMENT);
+}
+
+void 
+cv2x_UeManager::RecvRrcConnectionReestablishmentComplete (cv2x_LteRrcSap::RrcConnectionReestablishmentComplete msg)
+{
+  NS_LOG_FUNCTION (this);
+  SwitchToState (CONNECTED_NORMALLY);
+}
+
+void 
+cv2x_UeManager::RecvMeasurementReport (cv2x_LteRrcSap::MeasurementReport msg)
+{
+  uint8_t measId = msg.measResults.measId;
+  NS_LOG_FUNCTION (this << (uint16_t) measId);
+  NS_LOG_LOGIC ("measId " << (uint16_t) measId
+                          << " haveMeasResultNeighCells " << msg.measResults.haveMeasResultNeighCells
+                          << " measResultListEutra " << msg.measResults.measResultListEutra.size ()
+                          << " haveScellsMeas " << msg.measResults.haveScellsMeas
+                          << " measScellResultList " << msg.measResults.measScellResultList.measResultScell.size ());
+  NS_LOG_LOGIC ("serving cellId " << m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId)
+                                  << " RSRP " << (uint16_t) msg.measResults.rsrpResult
+                                  << " RSRQ " << (uint16_t) msg.measResults.rsrqResult);
+
+  for (std::list <cv2x_LteRrcSap::MeasResultEutra>::iterator it = msg.measResults.measResultListEutra.begin ();
+       it != msg.measResults.measResultListEutra.end ();
+       ++it)
+    {
+      NS_LOG_LOGIC ("neighbour cellId " << it->physCellId
+                                        << " RSRP " << (it->haveRsrpResult ? (uint16_t) it->rsrpResult : 255)
+                                        << " RSRQ " << (it->haveRsrqResult ? (uint16_t) it->rsrqResult : 255));
+    }
+
+  if ((m_rrc->m_handoverManagementSapProvider != 0)
+      && (m_rrc->m_handoverMeasIds.find (measId) != m_rrc->m_handoverMeasIds.end ()))
+    {
+      // this measurement was requested by the handover algorithm
+      m_rrc->m_handoverManagementSapProvider->ReportUeMeas (m_rnti,
+                                                            msg.measResults);
+    }
+
+  if ((m_rrc->m_ccmRrcSapProvider != 0)
+      && (m_rrc->m_componentCarrierMeasIds.find (measId) != m_rrc->m_componentCarrierMeasIds.end ()))
+    {
+      // this measurement was requested by the handover algorithm
+      m_rrc->m_ccmRrcSapProvider->ReportUeMeas (m_rnti,
+                                                msg.measResults);
+    }
+
+  if ((m_rrc->m_anrSapProvider != 0)
+      && (m_rrc->m_anrMeasIds.find (measId) != m_rrc->m_anrMeasIds.end ()))
+    {
+      // this measurement was requested by the ANR function
+      m_rrc->m_anrSapProvider->ReportUeMeas (msg.measResults);
+    }
+
+  if ((m_rrc->m_ffrRrcSapProvider.at (0) != 0)
+      && (m_rrc->m_ffrMeasIds.find (measId) != m_rrc->m_ffrMeasIds.end ()))
+    {
+      // this measurement was requested by the FFR function
+      m_rrc->m_ffrRrcSapProvider.at (0)->ReportUeMeas (m_rnti, msg.measResults);
+    }
+  if (msg.measResults.haveScellsMeas == true)
+    {
+      for (std::list <cv2x_LteRrcSap::MeasResultScell>::iterator it = msg.measResults.measScellResultList.measResultScell.begin ();
+           it != msg.measResults.measScellResultList.measResultScell.end ();
+           ++it)
+        {
+          m_rrc->m_ffrRrcSapProvider.at (it->servFreqId)->ReportUeMeas (m_rnti, msg.measResults);
+          /// ToDo: implement on Ffr algorithm the code to properly parsing the new measResults message format
+          /// alternatevely it is needed to 'repack' properly the measResults message before sending to Ffr 
+        }
+    }
+
+  ///Report any measurements to cv2x_ComponentCarrierManager, so it can react to any change or activate the SCC
+  m_rrc->m_ccmRrcSapProvider->ReportUeMeas (m_rnti, msg.measResults);
+  // fire a trace source
+  m_rrc->m_recvMeasurementReportTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti, msg);
+
+} // end of cv2x_UeManager::RecvMeasurementReport
+
+
+void
+cv2x_UeManager::RecvSidelinkUeInformation (cv2x_LteRrcSap::SidelinkUeInformation msg)
+{
+  NS_LOG_FUNCTION (this);
+  //Parse message and decide on allocation
+  //for now we only handle one group per UE
+  if (msg.haveCommTxResourceReq)  {
+    NS_ASSERT_MSG (msg.slCommTxResourceReq.slDestinationInfoList.nbDestinations=1, "Current implementation does not support more than 1 group per UE");
+
+    //store destination list in the UE
+    m_slDestinations.clear ();
+    for (int i = 0 ; i < msg.slCommTxResourceReq.slDestinationInfoList.nbDestinations; i++) {
+      m_slDestinations.push_back (msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[i]);
+    }
+
+    
+    //populate dedicated resources
+    cv2x_LteRrcSap::SlCommConfig dedicatedResource;
+    dedicatedResource.commTxResources = cv2x_LteRrcSap::SlCommConfig::SETUP;
+    
+    //check if pool already in use
+    std::map <uint32_t, cv2x_LteEnbRrcSl::ActivePoolInfo>::iterator it2 = m_rrc->m_sidelinkConfiguration->m_activePoolMap.find (msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[0]);
+    
+    if (it2 == m_rrc->m_sidelinkConfiguration->m_activePoolMap.end())
+      {
+        //no active pool for this group, let's check if we have a preconfigured one
+        //or later, how to create one dynamically
+        std::map <uint32_t, cv2x_LteRrcSap::SlCommTxResourcesSetup>::iterator it = m_rrc->m_sidelinkConfiguration->m_preconfigDedicatedPoolMap.find (msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[0]);
+
+        if (it != m_rrc->m_sidelinkConfiguration->m_preconfigDedicatedPoolMap.end())
+          {
+            dedicatedResource.setup = it->second;
+          } else
+          {
+            NS_LOG_INFO ("No pre-provisioned pool found for group " << msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[0]);
+          }
+      
+        Ptr<SidelinkTxCommResourcePool> m_slPool = CreateObject<SidelinkTxCommResourcePool> ();
+        if (dedicatedResource.setup.setup == cv2x_LteRrcSap::SlCommTxResourcesSetup::SCHEDULED)
+          {
+            m_slPool->SetPool (dedicatedResource.setup.scheduled.commTxConfig);
+            if (dedicatedResource.setup.scheduled.haveMcs) {
+              m_slPool->SetScheduledTxParameters (m_rnti, dedicatedResource.setup.scheduled.macMainConfig, dedicatedResource.setup.scheduled.commTxConfig, 0, dedicatedResource.setup.scheduled.mcs);
+            } else
+              {
+                m_slPool->SetScheduledTxParameters (m_rnti, dedicatedResource.setup.scheduled.macMainConfig, dedicatedResource.setup.scheduled.commTxConfig, 0);
+              }
+          } else
+          {
+            //right now, only use the first pool
+            NS_ASSERT (dedicatedResource.setup.ueSelected.havePoolToAdd && dedicatedResource.setup.ueSelected.poolToAddModList.nbPools > 0);
+            m_slPool->SetPool (dedicatedResource.setup.ueSelected.poolToAddModList.pools[0].pool);
+          }
+
+        cv2x_LteEnbRrcSl::ActivePoolInfo newPoolInfo;
+        newPoolInfo.m_pool = m_slPool;
+        newPoolInfo.m_poolSetup = it->second;
+        newPoolInfo.m_rntiSet.insert (m_rnti);
+        //tell the MAC that there is a new pool
+        for (uint8_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+          {
+            m_rrc->m_cmacSapProvider.at (i)->AddPool (msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[0], m_slPool);
+          }
+
+        m_rrc->m_sidelinkConfiguration->m_activePoolMap.insert (std::pair<uint32_t, cv2x_LteEnbRrcSl::ActivePoolInfo> (msg.slCommTxResourceReq.slDestinationInfoList.SlDestinationIdentity[0], newPoolInfo));
+        m_slPoolChanged = true;
+        
+      } else
+      {
+        dedicatedResource.setup = it2->second.m_poolSetup;
+        if (it2->second.m_rntiSet.find (m_rnti) == it2->second.m_rntiSet.end()) {
+          //the pool is active but the UE was not on the list
+          it2->second.m_rntiSet.insert (m_rnti);
+          m_slPoolChanged = true;
+        }
+      } //else we already know this UE is using this pool
+            
+    //populating RRCConnectionReconfiguration message 
+    cv2x_LteRrcSap::RrcConnectionReconfiguration msg2;
+    msg2.haveMeasConfig = false;
+    msg2.haveMobilityControlInfo = false;
+    msg2.haveRadioResourceConfigDedicated = false;
+    msg2.haveSlCommConfig = true;
+    msg2.slCommConfig = dedicatedResource;
+    //RRC Connection Reconfiguration towards UE
+    m_rrc->m_rrcSapUser->SendRrcConnectionReconfiguration (m_rnti, msg2);
+    
+    
+  } else {
+    //must release resources
+    
+    cv2x_LteRrcSap::SlCommConfig dedicatedResource;
+    dedicatedResource.commTxResources = cv2x_LteRrcSap::SlCommConfig::RELEASE;
+    //populating RRCConnectionReconfiguration message 
+    cv2x_LteRrcSap::RrcConnectionReconfiguration msg2;
+    msg2.haveMeasConfig = false;
+    msg2.haveMobilityControlInfo = false;
+    msg2.haveRadioResourceConfigDedicated = false;
+    msg2.haveSlCommConfig = true;
+    msg2.slCommConfig = dedicatedResource;
+    //RRC Connection Reconfiguration towards UE
+    m_rrc->m_rrcSapUser->SendRrcConnectionReconfiguration (m_rnti, msg2);
+      
+    m_slDestinations.clear();
+    m_slPoolChanged = true;
+  }
+
+  if (msg.haveCommRxInterestedFreq) {
+    //interest from the UE
+  } else if (0) {
+    //no more interest from that UE
+  }
+}
+
+
+// methods forwarded from CMAC SAP
+
+void
+cv2x_UeManager::CmacUeConfigUpdateInd (cv2x_LteEnbCmacSapUser::UeConfig cmacParams)
+{
+  NS_LOG_FUNCTION (this << m_rnti);
+  // at this stage used only by the scheduler for updating txMode
+
+  m_physicalConfigDedicated.antennaInfo.transmissionMode = cmacParams.m_transmissionMode;
+
+  m_needPhyMacConfiguration = true;
+
+  // reconfigure the UE RRC
+  ScheduleRrcConnectionReconfiguration ();
+}
+
+
+// methods forwarded from PDCP SAP
+
+void
+cv2x_UeManager::DoReceivePdcpSdu (cv2x_LtePdcpSapUser::ReceivePdcpSduParameters params)
+{
+  NS_LOG_FUNCTION (this);
+  if (params.lcid > 2)
+    {
+      // data radio bearer
+      cv2x_EpsBearerTag tag;
+      tag.SetRnti (params.rnti);
+      tag.SetBid (Lcid2Bid (params.lcid));
+      params.pdcpSdu->AddPacketTag (tag);
+      m_rrc->m_forwardUpCallback (params.pdcpSdu);
+    }
+}
+
+
+uint16_t
+cv2x_UeManager::GetRnti (void) const
+{
+  return m_rnti;
+}
+
+uint64_t
+cv2x_UeManager::GetImsi (void) const
+{
+  return m_imsi;
+}
+
+uint8_t
+cv2x_UeManager::GetComponentCarrierId () const
+{
+  return m_componentCarrierId;
+}
+
+uint16_t
+cv2x_UeManager::GetSrsConfigurationIndex (void) const
+{
+  return m_physicalConfigDedicated.soundingRsUlConfigDedicated.srsConfigIndex;
+}
+
+void
+cv2x_UeManager::SetSrsConfigurationIndex (uint16_t srsConfIndex)
+{
+  NS_LOG_FUNCTION (this);
+  m_physicalConfigDedicated.soundingRsUlConfigDedicated.srsConfigIndex = srsConfIndex;
+  for (uint16_t i = 0; i < m_rrc->m_numberOfComponentCarriers; i++)
+    {
+      m_rrc->m_cphySapProvider.at (i)->SetSrsConfigurationIndex (m_rnti, srsConfIndex);
+    }
+  switch (m_state)
+    {
+    case INITIAL_RANDOM_ACCESS:
+      // do nothing, srs conf index will be correctly enforced upon
+      // RRC connection establishment
+      break;
+
+    default:
+      ScheduleRrcConnectionReconfiguration ();
+      break;
+    }
+}
+
+cv2x_UeManager::State
+cv2x_UeManager::GetState (void) const
+{
+  return m_state;
+}
+
+void
+cv2x_UeManager::SetPdschConfigDedicated (cv2x_LteRrcSap::PdschConfigDedicated pdschConfigDedicated)
+{
+  NS_LOG_FUNCTION (this);
+  m_physicalConfigDedicated.pdschConfigDedicated = pdschConfigDedicated;
+
+  m_needPhyMacConfiguration = true;
+
+  // reconfigure the UE RRC
+  ScheduleRrcConnectionReconfiguration ();
+}
+
+uint8_t
+cv2x_UeManager::AddDataRadioBearerInfo (Ptr<cv2x_LteDataRadioBearerInfo> drbInfo)
+{
+  NS_LOG_FUNCTION (this);
+  const uint8_t MAX_DRB_ID = 32;
+  for (int drbid = (m_lastAllocatedDrbid + 1) % MAX_DRB_ID; 
+       drbid != m_lastAllocatedDrbid; 
+       drbid = (drbid + 1) % MAX_DRB_ID)
+    {
+      if (drbid != 0) // 0 is not allowed
+        {
+          if (m_drbMap.find (drbid) == m_drbMap.end ())
+            {
+              m_drbMap.insert (std::pair<uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> > (drbid, drbInfo));
+              drbInfo->m_drbIdentity = drbid;
+              m_lastAllocatedDrbid = drbid;
+              return drbid;
+            }
+        }
+    }
+  NS_FATAL_ERROR ("no more data radio bearer ids available");
+  return 0;
+}
+
+Ptr<cv2x_LteDataRadioBearerInfo>
+cv2x_UeManager::GetDataRadioBearerInfo (uint8_t drbid)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) drbid);
+  NS_ASSERT (0 != drbid);
+  std::map<uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.find (drbid);
+  NS_ABORT_IF (it == m_drbMap.end ());
+  return it->second;
+}
+
+
+void
+cv2x_UeManager::RemoveDataRadioBearerInfo (uint8_t drbid)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) drbid);
+  std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.find (drbid);
+  NS_ASSERT_MSG (it != m_drbMap.end (), "request to remove radio bearer with unknown drbid " << drbid);
+  m_drbMap.erase (it);
+}
+
+
+cv2x_LteRrcSap::RrcConnectionReconfiguration
+cv2x_UeManager::BuildRrcConnectionReconfiguration ()
+{
+  NS_LOG_FUNCTION (this);
+  cv2x_LteRrcSap::RrcConnectionReconfiguration msg;
+  msg.rrcTransactionIdentifier = GetNewRrcTransactionIdentifier ();
+  msg.haveRadioResourceConfigDedicated = true;
+  msg.radioResourceConfigDedicated = BuildRadioResourceConfigDedicated ();
+  msg.haveMobilityControlInfo = false;
+  msg.haveMeasConfig = true;
+  msg.haveSlCommConfig = false;
+  msg.measConfig = m_rrc->m_ueMeasConfig;
+  if ( m_caSupportConfigured == false && m_rrc->m_numberOfComponentCarriers > 1)
+    {
+      m_caSupportConfigured = true;
+      NS_LOG_FUNCTION ( this << "CA not configured. Configure now!" );
+      msg.haveNonCriticalExtension = true;
+      msg.nonCriticalExtension = BuildNonCriticalExtentionConfigurationCa ();
+      NS_LOG_FUNCTION ( this << " haveNonCriticalExtension " << msg.haveNonCriticalExtension );
+    }
+  else
+    {
+      msg.haveNonCriticalExtension = false;
+    }
+
+  return msg;
+}
+
+cv2x_LteRrcSap::RadioResourceConfigDedicated
+cv2x_UeManager::BuildRadioResourceConfigDedicated ()
+{
+  cv2x_LteRrcSap::RadioResourceConfigDedicated rrcd;
+
+  if (m_srb1 != 0)
+    {
+      cv2x_LteRrcSap::SrbToAddMod stam;
+      stam.srbIdentity = m_srb1->m_srbIdentity;
+      stam.logicalChannelConfig = m_srb1->m_logicalChannelConfig;
+      rrcd.srbToAddModList.push_back (stam);
+    }
+
+  for (std::map <uint8_t, Ptr<cv2x_LteDataRadioBearerInfo> >::iterator it = m_drbMap.begin ();
+       it != m_drbMap.end ();
+       ++it)
+    {
+      cv2x_LteRrcSap::DrbToAddMod dtam;
+      dtam.epsBearerIdentity = it->second->m_epsBearerIdentity;
+      dtam.drbIdentity = it->second->m_drbIdentity;
+      dtam.rlcConfig = it->second->m_rlcConfig;
+      dtam.logicalChannelIdentity = it->second->m_logicalChannelIdentity;
+      dtam.logicalChannelConfig = it->second->m_logicalChannelConfig;
+      rrcd.drbToAddModList.push_back (dtam);
+    }
+
+  rrcd.havePhysicalConfigDedicated = true;
+  rrcd.physicalConfigDedicated = m_physicalConfigDedicated;
+  return rrcd;
+}
+
+uint8_t 
+cv2x_UeManager::GetNewRrcTransactionIdentifier ()
+{
+  ++m_lastRrcTransactionIdentifier;
+  m_lastRrcTransactionIdentifier %= 4;
+  return m_lastRrcTransactionIdentifier;
+}
+
+uint8_t 
+cv2x_UeManager::Lcid2Drbid (uint8_t lcid)
+{
+  NS_ASSERT (lcid > 2);
+  return lcid - 2;
+}
+
+uint8_t 
+cv2x_UeManager::Drbid2Lcid (uint8_t drbid)
+{
+  return drbid + 2;
+}
+uint8_t 
+cv2x_UeManager::Lcid2Bid (uint8_t lcid)
+{
+  NS_ASSERT (lcid > 2);
+  return lcid - 2;
+}
+
+uint8_t 
+cv2x_UeManager::Bid2Lcid (uint8_t bid)
+{
+  return bid + 2;
+}
+
+uint8_t 
+cv2x_UeManager::Drbid2Bid (uint8_t drbid)
+{
+  return drbid;
+}
+
+uint8_t 
+cv2x_UeManager::Bid2Drbid (uint8_t bid)
+{
+  return bid;
+}
+
+
+void 
+cv2x_UeManager::SwitchToState (State newState)
+{
+  NS_LOG_FUNCTION (this << ToString (newState));
+  State oldState = m_state;
+  m_state = newState;
+  NS_LOG_INFO (this << " IMSI " << m_imsi << " RNTI " << m_rnti << " cv2x_UeManager "
+                    << ToString (oldState) << " --> " << ToString (newState));
+  m_stateTransitionTrace (m_imsi, m_rrc->cv2x_ComponentCarrierToCellId (m_componentCarrierId), m_rnti, oldState, newState);
+
+  switch (newState)
+    {
+    case INITIAL_RANDOM_ACCESS:
+    case HANDOVER_JOINING:
+      NS_FATAL_ERROR ("cannot switch to an initial state");
+      break;
+
+    case CONNECTION_SETUP:
+      break;
+
+    case CONNECTED_NORMALLY:
+      {
+        if (m_pendingRrcConnectionReconfiguration == true)
+          {
+            ScheduleRrcConnectionReconfiguration ();
+          }
+        if (m_pendingStartDataRadioBearers == true && m_caSupportConfigured == true)
+          {
+            StartDataRadioBearers ();
+          }
+      }
+      break;
+
+    case CONNECTION_RECONFIGURATION:
+      break;
+
+    case CONNECTION_REESTABLISHMENT:
+      break;
+
+    case HANDOVER_LEAVING:
+      break;
+
+    default:
+      break;
+    }
+}
+
+cv2x_LteRrcSap::NonCriticalExtensionConfiguration
+cv2x_UeManager::BuildNonCriticalExtentionConfigurationCa ()
+{
+  NS_LOG_FUNCTION ( this );
+  cv2x_LteRrcSap::NonCriticalExtensionConfiguration ncec;
+  
+  //  cv2x_LteRrcSap::SCellToAddMod scell;
+  std::list<cv2x_LteRrcSap::SCellToAddMod> SccCon;
+
+  // sCellToReleaseList is always empty since no Scc is released
+
+  for (auto &it: m_rrc->m_componentCarrierPhyConf)
+    {
+      uint8_t ccId = it.first;
+
+      if (ccId == m_componentCarrierId)
+        {
+          // Skip primary CC.
+          continue;
+        }
+      else if (ccId < m_componentCarrierId)
+        {
+          // Shift all IDs below PCC forward so PCC can use CC ID 1.
+          ccId++;
+        }
+
+      Ptr<cv2x_ComponentCarrierEnb> eNbCcm = it.second;
+      cv2x_LteRrcSap::SCellToAddMod component;
+      component.sCellIndex = ccId;
+      component.cellIdentification.physCellId = eNbCcm->GetCellId ();
+      component.cellIdentification.dlCarrierFreq = eNbCcm->GetDlEarfcn ();
+      component.radioResourceConfigCommonSCell.haveNonUlConfiguration = true;
+      component.radioResourceConfigCommonSCell.nonUlConfiguration.dlBandwidth = eNbCcm->GetDlBandwidth ();
+      component.radioResourceConfigCommonSCell.nonUlConfiguration.antennaInfoCommon.antennaPortsCount = 0;
+      component.radioResourceConfigCommonSCell.nonUlConfiguration.pdschConfigCommon.referenceSignalPower = m_rrc->m_cphySapProvider.at (0)->GetReferenceSignalPower ();
+      component.radioResourceConfigCommonSCell.nonUlConfiguration.pdschConfigCommon.pb = 0;
+      component.radioResourceConfigCommonSCell.haveUlConfiguration = true;
+      component.radioResourceConfigCommonSCell.ulConfiguration.ulFreqInfo.ulCarrierFreq = eNbCcm->GetUlEarfcn ();
+      component.radioResourceConfigCommonSCell.ulConfiguration.ulFreqInfo.ulBandwidth = eNbCcm->GetUlBandwidth ();
+      component.radioResourceConfigCommonSCell.ulConfiguration.ulPowerControlCommonSCell.alpha = 0;
+      //component.radioResourceConfigCommonSCell.ulConfiguration.soundingRsUlConfigCommon.type = cv2x_LteRrcSap::SoundingRsUlConfigDedicated::SETUP;
+      component.radioResourceConfigCommonSCell.ulConfiguration.soundingRsUlConfigCommon.srsBandwidthConfig = 0;
+      component.radioResourceConfigCommonSCell.ulConfiguration.soundingRsUlConfigCommon.srsSubframeConfig = 0;
+      component.radioResourceConfigCommonSCell.ulConfiguration.prachConfigSCell.index = 0;
+    
+      if (true)
+        {
+          component.haveRadioResourceConfigDedicatedSCell = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.haveNonUlConfiguration = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.haveAntennaInfoDedicated = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.antennaInfo.transmissionMode = m_rrc->m_defaultTransmissionMode;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.crossCarrierSchedulingConfig = false;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.havePdschConfigDedicated = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.pdschConfigDedicated.pa = cv2x_LteRrcSap::PdschConfigDedicated::dB0;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.haveUlConfiguration = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.haveAntennaInfoUlDedicated = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.antennaInfoUl.transmissionMode = m_rrc->m_defaultTransmissionMode;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.pushConfigDedicatedSCell.nPuschIdentity = 0;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.ulPowerControlDedicatedSCell.pSrsOffset = 0;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.haveSoundingRsUlConfigDedicated = true;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.soundingRsUlConfigDedicated.srsConfigIndex = GetSrsConfigurationIndex();
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.soundingRsUlConfigDedicated.type = cv2x_LteRrcSap::SoundingRsUlConfigDedicated::SETUP;
+          component.radioResourceConfigDedicateSCell.physicalConfigDedicatedSCell.soundingRsUlConfigDedicated.srsBandwidth = 0;
+        }
+      else 
+        {
+          component.haveRadioResourceConfigDedicatedSCell = false;
+        }
+      SccCon.push_back (component);
+    }
+  ncec.sCellsToAddModList = SccCon;
+
+  return ncec;
+}
+
+
+///////////////////////////////////////////
+// eNB RRC methods
+///////////////////////////////////////////
+
+NS_OBJECT_ENSURE_REGISTERED (cv2x_LteEnbRrc);
+
+cv2x_LteEnbRrc::cv2x_LteEnbRrc ()
+  : m_x2SapProvider (0),
+    m_cmacSapProvider (0),
+    m_handoverManagementSapProvider (0),
+    m_ccmRrcSapProvider (0),
+    m_anrSapProvider (0),
+    m_ffrRrcSapProvider (0),
+    m_rrcSapUser (0),
+    m_macSapProvider (0),
+    m_s1SapProvider (0),
+    m_cphySapProvider (0),
+    m_configured (false),
+    m_lastAllocatedRnti (0),
+    m_srsCurrentPeriodicityId (0),
+    m_lastAllocatedConfigurationIndex (0),
+    m_reconfigureUes (false),
+    m_numberOfComponentCarriers (0),
+    m_carriersConfigured (false),
+    m_sidelinkConfiguration (0)
+{
+  NS_LOG_FUNCTION (this);
+  m_cmacSapUser.push_back (new cv2x_EnbRrcMemberLteEnbCmacSapUser (this, 0));
+  m_handoverManagementSapUser = new cv2x_MemberLteHandoverManagementSapUser<cv2x_LteEnbRrc> (this);
+  m_anrSapUser = new cv2x_MemberLteAnrSapUser<cv2x_LteEnbRrc> (this);
+  m_ffrRrcSapUser.push_back (new cv2x_MemberLteFfrRrcSapUser<cv2x_LteEnbRrc> (this));
+  m_rrcSapProvider = new cv2x_MemberLteEnbRrcSapProvider<cv2x_LteEnbRrc> (this);
+  m_x2SapUser = new cv2x_EpcX2SpecificEpcX2SapUser<cv2x_LteEnbRrc> (this);
+  m_s1SapUser = new cv2x_MemberEpcEnbS1SapUser<cv2x_LteEnbRrc> (this);
+  m_cphySapUser.push_back (new cv2x_MemberLteEnbCphySapUser<cv2x_LteEnbRrc> (this));
+  m_ccmRrcSapUser = new cv2x_MemberLteCcmRrcSapUser <cv2x_LteEnbRrc>(this);
+  m_cphySapProvider.push_back (0);
+  m_cmacSapProvider.push_back (0);
+  m_ffrRrcSapProvider.push_back (0);
+}
+
+void
+cv2x_LteEnbRrc::ConfigureCarriers (std::map<uint8_t, Ptr<cv2x_ComponentCarrierEnb>> ccPhyConf)
+{
+  NS_ASSERT_MSG (!m_carriersConfigured, "Secondary carriers can be configured only once.");
+  m_componentCarrierPhyConf = ccPhyConf;
+  m_numberOfComponentCarriers = ccPhyConf.size ();
+
+  NS_ASSERT (m_numberOfComponentCarriers >= MIN_NO_CC && m_numberOfComponentCarriers <= MAX_NO_CC);
+
+  for (uint8_t i = 1; i < m_numberOfComponentCarriers; i++)
+    {
+      m_cphySapUser.push_back (new cv2x_MemberLteEnbCphySapUser<cv2x_LteEnbRrc> (this));
+      m_cmacSapUser.push_back (new cv2x_EnbRrcMemberLteEnbCmacSapUser (this, i));
+      m_ffrRrcSapUser.push_back (new cv2x_MemberLteFfrRrcSapUser<cv2x_LteEnbRrc> (this));
+      m_cphySapProvider.push_back (0);
+      m_cmacSapProvider.push_back (0);
+      m_ffrRrcSapProvider.push_back (0);
+    }
+  m_carriersConfigured = true;
+  Object::DoInitialize ();
+}
+
+cv2x_LteEnbRrc::~cv2x_LteEnbRrc ()
+{
+  NS_LOG_FUNCTION (this);
+}
+
+
+void
+cv2x_LteEnbRrc::DoDispose ()
+{
+  NS_LOG_FUNCTION (this);
+  for ( uint8_t i = 0; i < m_numberOfComponentCarriers ; i++)
+    {
+      delete m_cphySapUser[i];
+      delete m_cmacSapUser[i];
+      delete m_ffrRrcSapUser[i];
+    }
+  //delete m_cphySapUser;        
+  m_cphySapUser.erase (m_cphySapUser.begin (),m_cphySapUser.end ());
+  m_cphySapUser.clear ();  
+  //delete m_cmacSapUser;
+  m_cmacSapUser.erase (m_cmacSapUser.begin (),m_cmacSapUser.end ());
+  m_cmacSapUser.clear ();  
+  //delete m_ffrRrcSapUser;
+  m_ffrRrcSapUser.erase (m_ffrRrcSapUser.begin (),m_ffrRrcSapUser.end ());
+  m_ffrRrcSapUser.clear ();
+  m_ueMap.clear ();  
+  delete m_handoverManagementSapUser;
+  delete m_ccmRrcSapUser;
+  delete m_anrSapUser;
+  delete m_rrcSapProvider;
+  delete m_x2SapUser;
+  delete m_s1SapUser;
+
+}
+
+TypeId
+cv2x_LteEnbRrc::GetTypeId (void)
+{
+  NS_LOG_FUNCTION ("cv2x_LteEnbRrc::GetTypeId");
+  static TypeId tid = TypeId ("ns3::cv2x_LteEnbRrc")
+    .SetParent<Object> ()
+    .SetGroupName("Lte")
+    .AddConstructor<cv2x_LteEnbRrc> ()
+    .AddAttribute ("UeMap", "List of cv2x_UeManager by C-RNTI.",
+                   ObjectMapValue (),
+                   MakeObjectMapAccessor (&cv2x_LteEnbRrc::m_ueMap),
+                   MakeObjectMapChecker<cv2x_UeManager> ())
+    .AddAttribute ("DefaultTransmissionMode",
+                   "The default UEs' transmission mode (0: SISO)",
+                   UintegerValue (0),  // default tx-mode
+                   MakeUintegerAccessor (&cv2x_LteEnbRrc::m_defaultTransmissionMode),
+                   MakeUintegerChecker<uint8_t> ())
+    .AddAttribute ("cv2x_EpsBearerToRlcMapping", 
+                   "Specify which type of RLC will be used for each type of EPS bearer. ",
+                   EnumValue (RLC_SM_ALWAYS),
+                   MakeEnumAccessor (&cv2x_LteEnbRrc::m_epsBearerToRlcMapping),
+                   MakeEnumChecker (RLC_SM_ALWAYS, "RlcSmAlways",
+                                    RLC_UM_ALWAYS, "RlcUmAlways",
+                                    RLC_AM_ALWAYS, "RlcAmAlways",
+                                    PER_BASED,     "PacketErrorRateBased"))
+    .AddAttribute ("SystemInformationPeriodicity",
+                   "The interval for sending system information (Time value)",
+                   TimeValue (MilliSeconds (80)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_systemInformationPeriodicity),
+                   MakeTimeChecker ())
+
+    // SRS related attributes
+    .AddAttribute ("SrsPeriodicity",
+                   "The SRS periodicity in milliseconds",
+                   UintegerValue (40),
+                   MakeUintegerAccessor (&cv2x_LteEnbRrc::SetSrsPeriodicity, 
+                                         &cv2x_LteEnbRrc::GetSrsPeriodicity),
+                   MakeUintegerChecker<uint32_t> ())
+
+    // Timeout related attributes
+    .AddAttribute ("ConnectionRequestTimeoutDuration",
+                   "After a RA attempt, if no RRC CONNECTION REQUEST is "
+                   "received before this time, the UE context is destroyed. "
+                   "Must account for reception of RAR and transmission of "
+                   "RRC CONNECTION REQUEST over UL GRANT.",
+                   TimeValue (MilliSeconds (15)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_connectionRequestTimeoutDuration),
+                   MakeTimeChecker ())
+    .AddAttribute ("ConnectionSetupTimeoutDuration",
+                   "After accepting connection request, if no RRC CONNECTION "
+                   "SETUP COMPLETE is received before this time, the UE "
+                   "context is destroyed. Must account for the UE's reception "
+                   "of RRC CONNECTION SETUP and transmission of RRC CONNECTION "
+                   "SETUP COMPLETE.",
+                   TimeValue (MilliSeconds (150)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_connectionSetupTimeoutDuration),
+                   MakeTimeChecker ())
+    .AddAttribute ("ConnectionRejectedTimeoutDuration",
+                   "Time to wait between sending a RRC CONNECTION REJECT and "
+                   "destroying the UE context",
+                   TimeValue (MilliSeconds (30)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_connectionRejectedTimeoutDuration),
+                   MakeTimeChecker ())
+    .AddAttribute ("HandoverJoiningTimeoutDuration",
+                   "After accepting a handover request, if no RRC CONNECTION "
+                   "RECONFIGURATION COMPLETE is received before this time, the "
+                   "UE context is destroyed. Must account for reception of "
+                   "X2 HO REQ ACK by source eNB, transmission of the Handover "
+                   "Command, non-contention-based random access and reception "
+                   "of the RRC CONNECTION RECONFIGURATION COMPLETE message.",
+                   TimeValue (MilliSeconds (200)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_handoverJoiningTimeoutDuration),
+                   MakeTimeChecker ())
+    .AddAttribute ("HandoverLeavingTimeoutDuration",
+                   "After issuing a Handover Command, if neither RRC "
+                   "CONNECTION RE-ESTABLISHMENT nor X2 UE Context Release has "
+                   "been previously received, the UE context is destroyed.",
+                   TimeValue (MilliSeconds (500)),
+                   MakeTimeAccessor (&cv2x_LteEnbRrc::m_handoverLeavingTimeoutDuration),
+                   MakeTimeChecker ())
+
+    // Cell selection related attribute
+    .AddAttribute ("QRxLevMin",
+                   "One of information transmitted within the SIB1 message, "
+                   "indicating the required minimum RSRP level that any UE must "
+                   "receive from this cell before it is allowed to camp to this "
+                   "cell. The default value -70 corresponds to -140 dBm and is "
+                   "the lowest possible value as defined by Section 6.3.4 of "
+                   "3GPP TS 36.133. This restriction, however, only applies to "
+                   "initial cell selection and EPC-enabled simulation.",
+                   TypeId::ATTR_GET | TypeId::ATTR_CONSTRUCT,
+                   IntegerValue (-70),
+                   MakeIntegerAccessor (&cv2x_LteEnbRrc::m_qRxLevMin),
+                   MakeIntegerChecker<int8_t> (-70, -22))
+    .AddAttribute ("NumberOfComponentCarriers",
+                   "Number of Component Carriers ",
+                   UintegerValue (1),
+                   MakeIntegerAccessor (&cv2x_LteEnbRrc::m_numberOfComponentCarriers),
+                   MakeIntegerChecker<int16_t> (MIN_NO_CC, MAX_NO_CC))
+
+    // Handover related attributes
+    .AddAttribute ("AdmitHandoverRequest",
+                   "Whether to admit an X2 handover request from another eNB",
+                   BooleanValue (true),
+                   MakeBooleanAccessor (&cv2x_LteEnbRrc::m_admitHandoverRequest),
+                   MakeBooleanChecker ())
+    .AddAttribute ("AdmitRrcConnectionRequest",
+                   "Whether to admit a connection request from a UE",
+                   BooleanValue (true),
+                   MakeBooleanAccessor (&cv2x_LteEnbRrc::m_admitRrcConnectionRequest),
+                   MakeBooleanChecker ())
+
+    // UE measurements related attributes
+    .AddAttribute ("RsrpFilterCoefficient",
+                   "Determines the strength of smoothing effect induced by "
+                   "layer 3 filtering of RSRP in all attached UE; "
+                   "if set to 0, no layer 3 filtering is applicable",
+                   // i.e. the variable k in 3GPP TS 36.331 section 5.5.3.2
+                   UintegerValue (4),
+                   MakeUintegerAccessor (&cv2x_LteEnbRrc::m_rsrpFilterCoefficient),
+                   MakeUintegerChecker<uint8_t> (0))
+    .AddAttribute ("RsrqFilterCoefficient",
+                   "Determines the strength of smoothing effect induced by "
+                   "layer 3 filtering of RSRQ in all attached UE; "
+                   "if set to 0, no layer 3 filtering is applicable",
+                   // i.e. the variable k in 3GPP TS 36.331 section 5.5.3.2
+                   UintegerValue (4),
+                   MakeUintegerAccessor (&cv2x_LteEnbRrc::m_rsrqFilterCoefficient),
+                   MakeUintegerChecker<uint8_t> (0))
+    //Add accessor to sidelink configuration
+    .AddAttribute ("SidelinkConfiguration",
+                   "The sidelink configuration associated to this cv2x_LtePhy",
+                   PointerValue (),
+                   MakePointerAccessor (&cv2x_LteEnbRrc::m_sidelinkConfiguration),
+                   MakePointerChecker <cv2x_LteEnbRrcSl> ())
+
+    // Trace sources
+    .AddTraceSource ("NewUeContext",
+                     "Fired upon creation of a new UE context.",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_newUeContextTrace),
+                     "ns3::cv2x_LteEnbRrc::NewUeContextTracedCallback")
+    .AddTraceSource ("ConnectionEstablished",
+                     "Fired upon successful RRC connection establishment.",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_connectionEstablishedTrace),
+                     "ns3::cv2x_LteEnbRrc::ConnectionHandoverTracedCallback")
+    .AddTraceSource ("ConnectionReconfiguration",
+                     "trace fired upon RRC connection reconfiguration",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_connectionReconfigurationTrace),
+                     "ns3::cv2x_LteEnbRrc::ConnectionHandoverTracedCallback")
+    .AddTraceSource ("HandoverStart",
+                     "trace fired upon start of a handover procedure",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_handoverStartTrace),
+                     "ns3::cv2x_LteEnbRrc::HandoverStartTracedCallback")
+    .AddTraceSource ("HandoverEndOk",
+                     "trace fired upon successful termination of a handover procedure",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_handoverEndOkTrace),
+                     "ns3::cv2x_LteEnbRrc::ConnectionHandoverTracedCallback")
+    .AddTraceSource ("RecvMeasurementReport",
+                     "trace fired when measurement report is received",
+                     MakeTraceSourceAccessor (&cv2x_LteEnbRrc::m_recvMeasurementReportTrace),
+                     "ns3::cv2x_LteEnbRrc::ReceiveReportTracedCallback")
+  ;
+  return tid;
+}
+
+void
+cv2x_LteEnbRrc::SetEpcX2SapProvider (cv2x_EpcX2SapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_x2SapProvider = s;
+}
+
+cv2x_EpcX2SapUser*
+cv2x_LteEnbRrc::GetEpcX2SapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_x2SapUser;
+}
+
+void
+cv2x_LteEnbRrc::SetLteEnbCmacSapProvider (cv2x_LteEnbCmacSapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_cmacSapProvider.at (0) = s;
+}
+
+void
+cv2x_LteEnbRrc::SetLteEnbCmacSapProvider (cv2x_LteEnbCmacSapProvider * s, uint8_t pos)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_cmacSapProvider.at (pos) = s;
+}
+
+cv2x_LteEnbCmacSapUser*
+cv2x_LteEnbRrc::GetLteEnbCmacSapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_cmacSapUser.at (0);
+}
+
+cv2x_LteEnbCmacSapUser*
+cv2x_LteEnbRrc::GetLteEnbCmacSapUser (uint8_t pos)
+{
+  NS_LOG_FUNCTION (this);
+  return m_cmacSapUser.at (pos);
+}
+
+void
+cv2x_LteEnbRrc::SetLteHandoverManagementSapProvider (cv2x_LteHandoverManagementSapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_handoverManagementSapProvider = s;
+}
+
+cv2x_LteHandoverManagementSapUser*
+cv2x_LteEnbRrc::GetLteHandoverManagementSapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_handoverManagementSapUser;
+}
+
+void
+cv2x_LteEnbRrc::SetLteCcmRrcSapProvider (cv2x_LteCcmRrcSapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_ccmRrcSapProvider = s;
+}
+
+cv2x_LteCcmRrcSapUser*
+cv2x_LteEnbRrc::GetLteCcmRrcSapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_ccmRrcSapUser;
+}
+
+void
+cv2x_LteEnbRrc::SetLteAnrSapProvider (cv2x_LteAnrSapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_anrSapProvider = s;
+}
+
+cv2x_LteAnrSapUser*
+cv2x_LteEnbRrc::GetLteAnrSapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_anrSapUser;
+}
+
+void
+cv2x_LteEnbRrc::SetLteFfrRrcSapProvider (cv2x_LteFfrRrcSapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_ffrRrcSapProvider.at (0) = s;
+}
+
+void
+cv2x_LteEnbRrc::SetLteFfrRrcSapProvider (cv2x_LteFfrRrcSapProvider * s, uint8_t index)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_ffrRrcSapProvider.at (index) = s;
+}
+
+cv2x_LteFfrRrcSapUser*
+cv2x_LteEnbRrc::GetLteFfrRrcSapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_ffrRrcSapUser.at (0);
+}
+
+cv2x_LteFfrRrcSapUser*
+cv2x_LteEnbRrc::GetLteFfrRrcSapUser (uint8_t index)
+{
+  NS_LOG_FUNCTION (this);
+  NS_ASSERT_MSG (index < m_numberOfComponentCarriers, "Invalid component carrier index:"<<index<<" provided in order to obtain FfrRrcSapUser.");
+  return m_ffrRrcSapUser.at (index);
+}
+
+void
+cv2x_LteEnbRrc::SetLteEnbRrcSapUser (cv2x_LteEnbRrcSapUser * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_rrcSapUser = s;
+}
+
+cv2x_LteEnbRrcSapProvider*
+cv2x_LteEnbRrc::GetLteEnbRrcSapProvider ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_rrcSapProvider;
+}
+
+void
+cv2x_LteEnbRrc::SetLteMacSapProvider (cv2x_LteMacSapProvider * s)
+{
+  NS_LOG_FUNCTION (this);
+  m_macSapProvider = s;
+}
+
+void 
+cv2x_LteEnbRrc::SetS1SapProvider (cv2x_EpcEnbS1SapProvider * s)
+{
+  m_s1SapProvider = s;
+}
+
+
+cv2x_EpcEnbS1SapUser* 
+cv2x_LteEnbRrc::GetS1SapUser ()
+{
+  return m_s1SapUser;
+}
+
+void
+cv2x_LteEnbRrc::SetLteEnbCphySapProvider (cv2x_LteEnbCphySapProvider * s)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_cphySapProvider.at(0) = s;
+}
+
+cv2x_LteEnbCphySapUser*
+cv2x_LteEnbRrc::GetLteEnbCphySapUser ()
+{
+  NS_LOG_FUNCTION (this);
+  return m_cphySapUser.at(0);
+}
+
+void
+cv2x_LteEnbRrc::SetLteEnbCphySapProvider (cv2x_LteEnbCphySapProvider * s, uint8_t pos)
+{
+  NS_LOG_FUNCTION (this << s);
+  m_cphySapProvider.at(pos) = s;
+}
+
+cv2x_LteEnbCphySapUser*
+cv2x_LteEnbRrc::GetLteEnbCphySapUser (uint8_t pos)
+{
+  NS_LOG_FUNCTION (this);
+  return m_cphySapUser.at(pos);
+}
+
+bool
+cv2x_LteEnbRrc::HasUeManager (uint16_t rnti) const
+{
+  NS_LOG_FUNCTION (this << (uint32_t) rnti);
+  std::map<uint16_t, Ptr<cv2x_UeManager> >::const_iterator it = m_ueMap.find (rnti);
+  return (it != m_ueMap.end ());
+}
+
+Ptr<cv2x_UeManager>
+cv2x_LteEnbRrc::GetUeManager (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) rnti);
+  NS_ASSERT (0 != rnti);
+  std::map<uint16_t, Ptr<cv2x_UeManager> >::iterator it = m_ueMap.find (rnti);
+  NS_ASSERT_MSG (it != m_ueMap.end (), "UE manager for RNTI " << rnti << " not found");
+  return it->second;
+}
+
+uint8_t
+cv2x_LteEnbRrc::AddUeMeasReportConfig (cv2x_LteRrcSap::ReportConfigEutra config)
+{
+  NS_LOG_FUNCTION (this);
+
+  // SANITY CHECK
+
+  NS_ASSERT_MSG (m_ueMeasConfig.measIdToAddModList.size () == m_ueMeasConfig.reportConfigToAddModList.size (),
+                 "Measurement identities and reporting configuration should not have different quantity");
+
+  if (Simulator::Now () != Seconds (0))
+    {
+      NS_FATAL_ERROR ("AddUeMeasReportConfig may not be called after the simulation has run");
+    }
+
+  // INPUT VALIDATION
+
+  switch (config.triggerQuantity)
+    {
+    case cv2x_LteRrcSap::ReportConfigEutra::RSRP:
+      if ((config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A5)
+          && (config.threshold2.choice != cv2x_LteRrcSap::ThresholdEutra::THRESHOLD_RSRP))
+        {
+          NS_FATAL_ERROR ("The given triggerQuantity (RSRP) does not match with the given threshold2.choice");
+        }
+
+      if (((config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A1)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A2)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A4)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A5))
+          && (config.threshold1.choice != cv2x_LteRrcSap::ThresholdEutra::THRESHOLD_RSRP))
+        {
+          NS_FATAL_ERROR ("The given triggerQuantity (RSRP) does not match with the given threshold1.choice");
+        }
+      break;
+
+    case cv2x_LteRrcSap::ReportConfigEutra::RSRQ:
+      if ((config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A5)
+          && (config.threshold2.choice != cv2x_LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ))
+        {
+          NS_FATAL_ERROR ("The given triggerQuantity (RSRQ) does not match with the given threshold2.choice");
+        }
+
+      if (((config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A1)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A2)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A4)
+           || (config.eventId == cv2x_LteRrcSap::ReportConfigEutra::EVENT_A5))
+          && (config.threshold1.choice != cv2x_LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ))
+        {
+          NS_FATAL_ERROR ("The given triggerQuantity (RSRQ) does not match with the given threshold1.choice");
+        }
+      break;
+
+    default:
+      NS_FATAL_ERROR ("unsupported triggerQuantity");
+      break;
+    }
+
+  if (config.purpose != cv2x_LteRrcSap::ReportConfigEutra::REPORT_STRONGEST_CELLS)
+    {
+      NS_FATAL_ERROR ("Only REPORT_STRONGEST_CELLS purpose is supported");
+    }
+
+  if (config.reportQuantity != cv2x_LteRrcSap::ReportConfigEutra::BOTH)
+    {
+      NS_LOG_WARN ("reportQuantity = BOTH will be used instead of the given reportQuantity");
+    }
+
+  uint8_t nextId = m_ueMeasConfig.reportConfigToAddModList.size () + 1;
+
+  // create the reporting configuration
+  cv2x_LteRrcSap::ReportConfigToAddMod reportConfig;
+  reportConfig.reportConfigId = nextId;
+  reportConfig.reportConfigEutra = config;
+
+  // create the measurement identity
+  cv2x_LteRrcSap::MeasIdToAddMod measId;
+  measId.measId = nextId;
+  measId.measObjectId = 1;
+  measId.reportConfigId = nextId;
+
+  // add both to the list of UE measurement configuration
+  m_ueMeasConfig.reportConfigToAddModList.push_back (reportConfig);
+  m_ueMeasConfig.measIdToAddModList.push_back (measId);
+
+  return nextId;
+}
+
+void
+cv2x_LteEnbRrc::ConfigureCell (std::map<uint8_t, Ptr<cv2x_ComponentCarrierEnb>> ccPhyConf)
+{
+  auto it = ccPhyConf.begin ();
+  NS_ASSERT (it != ccPhyConf.end ());
+  uint8_t ulBandwidth = it->second->GetUlBandwidth ();
+  uint8_t dlBandwidth = it->second->GetDlBandwidth ();
+  uint32_t ulEarfcn = it->second->GetUlEarfcn ();
+  uint32_t dlEarfcn = it->second->GetDlEarfcn ();
+  NS_LOG_FUNCTION (this << (uint16_t) ulBandwidth << (uint16_t) dlBandwidth
+                        << ulEarfcn << dlEarfcn);
+  NS_ASSERT (!m_configured);
+
+  for (const auto &it: ccPhyConf)
+    {
+      m_cphySapProvider.at (it.first)->SetBandwidth (it.second->GetUlBandwidth (), it.second->GetDlBandwidth ());
+      m_cphySapProvider.at (it.first)->SetEarfcn (it.second->GetUlEarfcn (), it.second->GetDlEarfcn ());
+      m_cphySapProvider.at (it.first)->SetCellId (it.second->GetCellId ());
+      m_cmacSapProvider.at (it.first)->ConfigureMac (it.second->GetUlBandwidth (), it.second->GetDlBandwidth ());
+      m_ffrRrcSapProvider.at (it.first)->SetCellId (it.second->GetCellId ());
+      m_ffrRrcSapProvider.at (it.first)->SetBandwidth (it.second->GetUlBandwidth (), it.second->GetDlBandwidth ());
+    }
+
+  m_dlEarfcn = dlEarfcn;
+  m_ulEarfcn = ulEarfcn;
+  m_dlBandwidth = dlBandwidth;
+  m_ulBandwidth = ulBandwidth;
+
+  /*
+   * Initializing the list of UE measurement configuration (m_ueMeasConfig).
+   * Only intra-frequency measurements are supported, so only one measurement
+   * object is created.
+   */
+
+  cv2x_LteRrcSap::MeasObjectToAddMod measObject;
+  measObject.measObjectId = 1;
+  measObject.measObjectEutra.carrierFreq = m_dlEarfcn;
+  measObject.measObjectEutra.allowedMeasBandwidth = m_dlBandwidth;
+  measObject.measObjectEutra.presenceAntennaPort1 = false;
+  measObject.measObjectEutra.neighCellConfig = 0;
+  measObject.measObjectEutra.offsetFreq = 0;
+  measObject.measObjectEutra.haveCellForWhichToReportCGI = false;
+
+  m_ueMeasConfig.measObjectToAddModList.push_back (measObject);
+  m_ueMeasConfig.haveQuantityConfig = true;
+  m_ueMeasConfig.quantityConfig.filterCoefficientRSRP = m_rsrpFilterCoefficient;
+  m_ueMeasConfig.quantityConfig.filterCoefficientRSRQ = m_rsrqFilterCoefficient;
+  m_ueMeasConfig.haveMeasGapConfig = false;
+  m_ueMeasConfig.haveSmeasure = false;
+  m_ueMeasConfig.haveSpeedStatePars = false;
+
+  m_sib1.clear ();
+  m_sib1.reserve (ccPhyConf.size ());
+  for (const auto &it: ccPhyConf)
+    {
+      // Enabling MIB transmission
+      cv2x_LteRrcSap::MasterInformationBlock mib;
+      mib.dlBandwidth = it.second->GetDlBandwidth ();
+      mib.systemFrameNumber = 0;
+      m_cphySapProvider.at (it.first)->SetMasterInformationBlock (mib);
+
+      // Enabling SIB1 transmission with default values
+      cv2x_LteRrcSap::SystemInformationBlockType1 sib1;
+      sib1.cellAccessRelatedInfo.cellIdentity = it.second->GetCellId ();
+      sib1.cellAccessRelatedInfo.csgIndication = false;
+      sib1.cellAccessRelatedInfo.csgIdentity = 0;
+      sib1.cellAccessRelatedInfo.plmnIdentityInfo.plmnIdentity = 0; // not used
+      sib1.cellSelectionInfo.qQualMin = -34; // not used, set as minimum value
+      sib1.cellSelectionInfo.qRxLevMin = m_qRxLevMin; // set as minimum value
+      m_sib1.push_back (sib1);
+      m_cphySapProvider.at (it.first)->SetSystemInformationBlockType1 (sib1);
+    }
+  /*
+   * Enabling transmission of other SIB. The first time System Information is
+   * transmitted is arbitrarily assumed to be at +0.016s, and then it will be
+   * regularly transmitted every 80 ms by default (set the
+   * SystemInformationPeriodicity attribute to configure this).
+   */
+  Simulator::Schedule (MilliSeconds (16), &cv2x_LteEnbRrc::SendSystemInformation, this);
+
+  m_configured = true;
+
+}
+
+
+void
+cv2x_LteEnbRrc::SetCellId (uint16_t cellId)
+{
+  // update SIB1
+  m_sib1.at (0).cellAccessRelatedInfo.cellIdentity = cellId;
+  m_cphySapProvider.at (0)->SetSystemInformationBlockType1 (m_sib1.at (0));
+}
+
+void
+cv2x_LteEnbRrc::SetCellId (uint16_t cellId, uint8_t ccIndex)
+{
+  // update SIB1
+  m_sib1.at (ccIndex).cellAccessRelatedInfo.cellIdentity = cellId;
+  m_cphySapProvider.at (ccIndex)->SetSystemInformationBlockType1 (m_sib1.at (ccIndex));
+}
+
+uint8_t
+cv2x_LteEnbRrc::CellToComponentCarrierId (uint16_t cellId)
+{
+  NS_LOG_FUNCTION (this << cellId);
+  for (auto &it: m_componentCarrierPhyConf)
+    {
+      if (it.second->GetCellId () == cellId)
+        {
+          return it.first;
+        }
+    }
+  NS_FATAL_ERROR ("Cell " << cellId << " not found in CC map");
+}
+
+uint16_t
+cv2x_LteEnbRrc::cv2x_ComponentCarrierToCellId (uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << +componentCarrierId);
+  return m_componentCarrierPhyConf.at (componentCarrierId)->GetCellId ();
+}
+
+bool
+cv2x_LteEnbRrc::SendData (Ptr<Packet> packet)
+{
+  NS_LOG_FUNCTION (this << packet);
+
+  cv2x_EpsBearerTag tag;
+  bool found = packet->RemovePacketTag (tag);
+  NS_ASSERT_MSG (found, "no cv2x_EpsBearerTag found in packet to be sent");
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (tag.GetRnti ());
+  ueManager->SendData (tag.GetBid (), packet);
+
+  return true;
+}
+
+void 
+cv2x_LteEnbRrc::SetForwardUpCallback (Callback <void, Ptr<Packet> > cb)
+{
+  m_forwardUpCallback = cb;
+}
+
+void
+cv2x_LteEnbRrc::ConnectionRequestTimeout (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  NS_ASSERT_MSG (GetUeManager (rnti)->GetState () == cv2x_UeManager::INITIAL_RANDOM_ACCESS,
+                 "ConnectionRequestTimeout in unexpected state " << ToString (GetUeManager (rnti)->GetState ()));
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::ConnectionSetupTimeout (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  NS_ASSERT_MSG (GetUeManager (rnti)->GetState () == cv2x_UeManager::CONNECTION_SETUP,
+                 "ConnectionSetupTimeout in unexpected state " << ToString (GetUeManager (rnti)->GetState ()));
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::ConnectionRejectedTimeout (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  NS_ASSERT_MSG (GetUeManager (rnti)->GetState () == cv2x_UeManager::CONNECTION_REJECTED,
+                 "ConnectionRejectedTimeout in unexpected state " << ToString (GetUeManager (rnti)->GetState ()));
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::HandoverJoiningTimeout (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  NS_ASSERT_MSG (GetUeManager (rnti)->GetState () == cv2x_UeManager::HANDOVER_JOINING,
+                 "HandoverJoiningTimeout in unexpected state " << ToString (GetUeManager (rnti)->GetState ()));
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::HandoverLeavingTimeout (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  NS_ASSERT_MSG (GetUeManager (rnti)->GetState () == cv2x_UeManager::HANDOVER_LEAVING,
+                 "HandoverLeavingTimeout in unexpected state " << ToString (GetUeManager (rnti)->GetState ()));
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::SendHandoverRequest (uint16_t rnti, uint16_t cellId)
+{
+  NS_LOG_FUNCTION (this << rnti << cellId);
+  NS_LOG_LOGIC ("Request to send HANDOVER REQUEST");
+  NS_ASSERT (m_configured);
+
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->PrepareHandover (cellId);
+ 
+}
+
+void 
+cv2x_LteEnbRrc::DoCompleteSetupUe (uint16_t rnti, cv2x_LteEnbRrcSapProvider::CompleteSetupUeParameters params)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->CompleteSetupUe (params);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvRrcConnectionRequest (uint16_t rnti, cv2x_LteRrcSap::RrcConnectionRequest msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvRrcConnectionRequest (msg);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvRrcConnectionSetupCompleted (uint16_t rnti, cv2x_LteRrcSap::RrcConnectionSetupCompleted msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvRrcConnectionSetupCompleted (msg);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvRrcConnectionReconfigurationCompleted (uint16_t rnti, cv2x_LteRrcSap::RrcConnectionReconfigurationCompleted msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvRrcConnectionReconfigurationCompleted (msg);
+}
+
+void 
+cv2x_LteEnbRrc::DoRecvRrcConnectionReestablishmentRequest (uint16_t rnti, cv2x_LteRrcSap::RrcConnectionReestablishmentRequest msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvRrcConnectionReestablishmentRequest (msg);
+}
+
+void 
+cv2x_LteEnbRrc::DoRecvRrcConnectionReestablishmentComplete (uint16_t rnti, cv2x_LteRrcSap::RrcConnectionReestablishmentComplete msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvRrcConnectionReestablishmentComplete (msg);
+}
+
+void 
+cv2x_LteEnbRrc::DoRecvMeasurementReport (uint16_t rnti, cv2x_LteRrcSap::MeasurementReport msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  GetUeManager (rnti)->RecvMeasurementReport (msg);
+}
+
+void 
+cv2x_LteEnbRrc::DoRecvSidelinkUeInformation (uint16_t rnti, cv2x_LteRrcSap::SidelinkUeInformation msg)
+{
+  NS_LOG_FUNCTION (this << rnti);
+  //TODO
+  GetUeManager (rnti)->RecvSidelinkUeInformation (msg);
+}
+
+void 
+cv2x_LteEnbRrc::DoDataRadioBearerSetupRequest (cv2x_EpcEnbS1SapUser::DataRadioBearerSetupRequestParameters request)
+{
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (request.rnti);
+  ueManager->SetupDataRadioBearer (request.bearer, request.bearerId, request.gtpTeid, request.transportLayerAddress);
+}
+
+void 
+cv2x_LteEnbRrc::DoPathSwitchRequestAcknowledge (cv2x_EpcEnbS1SapUser::PathSwitchRequestAcknowledgeParameters params)
+{
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (params.rnti);
+  ueManager->SendUeContextRelease ();
+}
+
+void
+cv2x_LteEnbRrc::DoRecvHandoverRequest (cv2x_EpcX2SapUser::HandoverRequestParams req)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: HANDOVER REQUEST");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << req.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("sourceCellId = " << req.sourceCellId);
+  NS_LOG_LOGIC ("targetCellId = " << req.targetCellId);
+  NS_LOG_LOGIC ("mmeUeS1apId = " << req.mmeUeS1apId);
+
+  if (m_admitHandoverRequest == false)
+    {
+      NS_LOG_INFO ("rejecting handover request from cellId " << req.sourceCellId);
+      cv2x_EpcX2Sap::HandoverPreparationFailureParams res;
+      res.oldEnbUeX2apId =  req.oldEnbUeX2apId;
+      res.sourceCellId = req.sourceCellId;
+      res.targetCellId = req.targetCellId;
+      res.cause = 0;
+      res.criticalityDiagnostics = 0;
+      m_x2SapProvider->SendHandoverPreparationFailure (res);
+      return;
+    }
+
+  uint16_t rnti = AddUe (cv2x_UeManager::HANDOVER_JOINING, CellToComponentCarrierId (req.targetCellId));
+  cv2x_LteEnbCmacSapProvider::AllocateNcRaPreambleReturnValue anrcrv = m_cmacSapProvider.at (0)->AllocateNcRaPreamble (rnti);
+  if (anrcrv.valid == false)
+    {
+      NS_LOG_INFO (this << " failed to allocate a preamble for non-contention based RA => cannot accept HO");
+      RemoveUe (rnti);
+      NS_FATAL_ERROR ("should trigger HO Preparation Failure, but it is not implemented");
+      return;
+    }
+
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->SetSource (req.sourceCellId, req.oldEnbUeX2apId);
+  ueManager->SetImsi (req.mmeUeS1apId);
+
+  cv2x_EpcX2SapProvider::HandoverRequestAckParams ackParams;
+  ackParams.oldEnbUeX2apId = req.oldEnbUeX2apId;
+  ackParams.newEnbUeX2apId = rnti;
+  ackParams.sourceCellId = req.sourceCellId;
+  ackParams.targetCellId = req.targetCellId;
+
+  for (std::vector <cv2x_EpcX2Sap::ErabToBeSetupItem>::iterator it = req.bearers.begin ();
+       it != req.bearers.end ();
+       ++it)
+    {
+      ueManager->SetupDataRadioBearer (it->erabLevelQosParameters, it->erabId, it->gtpTeid, it->transportLayerAddress);
+      cv2x_EpcX2Sap::ErabAdmittedItem i;
+      i.erabId = it->erabId;
+      ackParams.admittedBearers.push_back (i);
+    }
+
+  cv2x_LteRrcSap::RrcConnectionReconfiguration handoverCommand = ueManager->GetRrcConnectionReconfigurationForHandover ();
+  handoverCommand.haveMobilityControlInfo = true;
+  handoverCommand.mobilityControlInfo.targetPhysCellId = req.targetCellId;
+  handoverCommand.mobilityControlInfo.haveCarrierFreq = true;
+  handoverCommand.mobilityControlInfo.carrierFreq.dlCarrierFreq = m_dlEarfcn;
+  handoverCommand.mobilityControlInfo.carrierFreq.ulCarrierFreq = m_ulEarfcn;
+  handoverCommand.mobilityControlInfo.haveCarrierBandwidth = true;
+  handoverCommand.mobilityControlInfo.carrierBandwidth.dlBandwidth = m_dlBandwidth;
+  handoverCommand.mobilityControlInfo.carrierBandwidth.ulBandwidth = m_ulBandwidth;
+  handoverCommand.mobilityControlInfo.newUeIdentity = rnti;
+  handoverCommand.mobilityControlInfo.haveRachConfigDedicated = true;
+  handoverCommand.mobilityControlInfo.rachConfigDedicated.raPreambleIndex = anrcrv.raPreambleId;
+  handoverCommand.mobilityControlInfo.rachConfigDedicated.raPrachMaskIndex = anrcrv.raPrachMaskIndex;
+
+  cv2x_LteEnbCmacSapProvider::RachConfig rc = m_cmacSapProvider.at (0)->GetRachConfig ();
+  handoverCommand.mobilityControlInfo.radioResourceConfigCommon.rachConfigCommon.preambleInfo.numberOfRaPreambles = rc.numberOfRaPreambles;
+  handoverCommand.mobilityControlInfo.radioResourceConfigCommon.rachConfigCommon.raSupervisionInfo.preambleTransMax = rc.preambleTransMax;
+  handoverCommand.mobilityControlInfo.radioResourceConfigCommon.rachConfigCommon.raSupervisionInfo.raResponseWindowSize = rc.raResponseWindowSize;
+  handoverCommand.haveNonCriticalExtension = false;
+
+  Ptr<Packet> encodedHandoverCommand = m_rrcSapUser->EncodeHandoverCommand (handoverCommand);
+
+  ackParams.rrcContext = encodedHandoverCommand;
+
+  NS_LOG_LOGIC ("Send X2 message: HANDOVER REQUEST ACK");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << ackParams.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("newEnbUeX2apId = " << ackParams.newEnbUeX2apId);
+  NS_LOG_LOGIC ("sourceCellId = " << ackParams.sourceCellId);
+  NS_LOG_LOGIC ("targetCellId = " << ackParams.targetCellId);
+
+  m_x2SapProvider->SendHandoverRequestAck (ackParams);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvHandoverRequestAck (cv2x_EpcX2SapUser::HandoverRequestAckParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: HANDOVER REQUEST ACK");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << params.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("newEnbUeX2apId = " << params.newEnbUeX2apId);
+  NS_LOG_LOGIC ("sourceCellId = " << params.sourceCellId);
+  NS_LOG_LOGIC ("targetCellId = " << params.targetCellId);
+
+  uint16_t rnti = params.oldEnbUeX2apId;
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->RecvHandoverRequestAck (params);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvHandoverPreparationFailure (cv2x_EpcX2SapUser::HandoverPreparationFailureParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: HANDOVER PREPARATION FAILURE");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << params.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("sourceCellId = " << params.sourceCellId);
+  NS_LOG_LOGIC ("targetCellId = " << params.targetCellId);
+  NS_LOG_LOGIC ("cause = " << params.cause);
+  NS_LOG_LOGIC ("criticalityDiagnostics = " << params.criticalityDiagnostics);
+
+  uint16_t rnti = params.oldEnbUeX2apId;
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->RecvHandoverPreparationFailure (params.targetCellId);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvSnStatusTransfer (cv2x_EpcX2SapUser::SnStatusTransferParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: SN STATUS TRANSFER");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << params.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("newEnbUeX2apId = " << params.newEnbUeX2apId);
+  NS_LOG_LOGIC ("erabsSubjectToStatusTransferList size = " << params.erabsSubjectToStatusTransferList.size ());
+
+  uint16_t rnti = params.newEnbUeX2apId;
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->RecvSnStatusTransfer (params);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvUeContextRelease (cv2x_EpcX2SapUser::UeContextReleaseParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: UE CONTEXT RELEASE");
+
+  NS_LOG_LOGIC ("oldEnbUeX2apId = " << params.oldEnbUeX2apId);
+  NS_LOG_LOGIC ("newEnbUeX2apId = " << params.newEnbUeX2apId);
+
+  uint16_t rnti = params.oldEnbUeX2apId;
+  GetUeManager (rnti)->RecvUeContextRelease (params);
+  RemoveUe (rnti);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvLoadInformation (cv2x_EpcX2SapUser::LoadInformationParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: LOAD INFORMATION");
+
+  NS_LOG_LOGIC ("Number of cellInformationItems = " << params.cellInformationList.size ());
+
+  m_ffrRrcSapProvider.at (0)->RecvLoadInformation (params);
+}
+
+void
+cv2x_LteEnbRrc::DoRecvResourceStatusUpdate (cv2x_EpcX2SapUser::ResourceStatusUpdateParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv X2 message: RESOURCE STATUS UPDATE");
+
+  NS_LOG_LOGIC ("Number of cellMeasurementResultItems = " << params.cellMeasurementResultList.size ());
+
+  NS_ASSERT ("Processing of RESOURCE STATUS UPDATE X2 message IS NOT IMPLEMENTED");
+}
+
+void
+cv2x_LteEnbRrc::DoRecvUeData (cv2x_EpcX2SapUser::UeDataParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_LOGIC ("Recv UE DATA FORWARDING through X2 interface");
+  NS_LOG_LOGIC ("sourceCellId = " << params.sourceCellId);
+  NS_LOG_LOGIC ("targetCellId = " << params.targetCellId);
+  NS_LOG_LOGIC ("gtpTeid = " << params.gtpTeid);
+  NS_LOG_LOGIC ("ueData = " << params.ueData);
+  NS_LOG_LOGIC ("ueData size = " << params.ueData->GetSize ());
+
+  std::map<uint32_t, X2uTeidInfo>::iterator 
+    teidInfoIt = m_x2uTeidInfoMap.find (params.gtpTeid);
+  if (teidInfoIt != m_x2uTeidInfoMap.end ())
+    {
+      GetUeManager (teidInfoIt->second.rnti)->SendData (teidInfoIt->second.drbid, params.ueData);
+    }
+  else
+    {
+      NS_FATAL_ERROR ("X2-U data received but no X2uTeidInfo found");
+    }
+}
+
+
+uint16_t 
+cv2x_LteEnbRrc::DoAllocateTemporaryCellRnti (uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this << +componentCarrierId);
+  return AddUe (cv2x_UeManager::INITIAL_RANDOM_ACCESS, componentCarrierId);
+}
+
+void
+cv2x_LteEnbRrc::DoRrcConfigurationUpdateInd (cv2x_LteEnbCmacSapUser::UeConfig cmacParams)
+{
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (cmacParams.m_rnti);
+  ueManager->CmacUeConfigUpdateInd (cmacParams);
+}
+
+void
+cv2x_LteEnbRrc::DoNotifyLcConfigResult (uint16_t rnti, uint8_t lcid, bool success)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) rnti);
+  NS_FATAL_ERROR ("not implemented");
+}
+
+
+uint8_t
+cv2x_LteEnbRrc::DoAddUeMeasReportConfigForHandover (cv2x_LteRrcSap::ReportConfigEutra reportConfig)
+{
+  NS_LOG_FUNCTION (this);
+  uint8_t measId = AddUeMeasReportConfig (reportConfig);
+  m_handoverMeasIds.insert (measId);
+  return measId;
+}
+
+uint8_t
+cv2x_LteEnbRrc::DoAddUeMeasReportConfigForComponentCarrier (cv2x_LteRrcSap::ReportConfigEutra reportConfig)
+{
+  NS_LOG_FUNCTION (this);
+  uint8_t measId = AddUeMeasReportConfig (reportConfig);
+  m_componentCarrierMeasIds.insert (measId);
+  return measId;
+}
+
+void
+cv2x_LteEnbRrc::DoTriggerHandover (uint16_t rnti, uint16_t targetCellId)
+{
+  NS_LOG_FUNCTION (this << rnti << targetCellId);
+
+  bool isHandoverAllowed = true;
+
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  NS_ASSERT_MSG (ueManager != 0, "Cannot find UE context with RNTI " << rnti);
+
+  if (m_anrSapProvider != 0)
+    {
+      // ensure that proper neighbour relationship exists between source and target cells
+      bool noHo = m_anrSapProvider->GetNoHo (targetCellId);
+      bool noX2 = m_anrSapProvider->GetNoX2 (targetCellId);
+      NS_LOG_DEBUG (this << " cellId=" << cv2x_ComponentCarrierToCellId (ueManager->GetComponentCarrierId ())
+                         << " targetCellId=" << targetCellId
+                         << " NRT.NoHo=" << noHo << " NRT.NoX2=" << noX2);
+
+      if (noHo || noX2)
+        {
+          isHandoverAllowed = false;
+          NS_LOG_LOGIC (this << " handover to cell " << targetCellId
+                             << " is not allowed by ANR");
+        }
+    }
+
+  if (ueManager->GetState () != cv2x_UeManager::CONNECTED_NORMALLY)
+    {
+      isHandoverAllowed = false;
+      NS_LOG_LOGIC (this << " handover is not allowed because the UE"
+                         << " rnti=" << rnti << " is in "
+                         << ToString (ueManager->GetState ()) << " state");
+    }
+
+  if (isHandoverAllowed)
+    {
+      // initiate handover execution
+      ueManager->PrepareHandover (targetCellId);
+    }
+}
+
+uint8_t
+cv2x_LteEnbRrc::DoAddUeMeasReportConfigForAnr (cv2x_LteRrcSap::ReportConfigEutra reportConfig)
+{
+  NS_LOG_FUNCTION (this);
+  uint8_t measId = AddUeMeasReportConfig (reportConfig);
+  m_anrMeasIds.insert (measId);
+  return measId;
+}
+
+uint8_t
+cv2x_LteEnbRrc::DoAddUeMeasReportConfigForFfr (cv2x_LteRrcSap::ReportConfigEutra reportConfig)
+{
+  NS_LOG_FUNCTION (this);
+  uint8_t measId = AddUeMeasReportConfig (reportConfig);
+  m_ffrMeasIds.insert (measId);
+  return measId;
+}
+
+void
+cv2x_LteEnbRrc::DoSetPdschConfigDedicated (uint16_t rnti, cv2x_LteRrcSap::PdschConfigDedicated pdschConfigDedicated)
+{
+  NS_LOG_FUNCTION (this);
+  Ptr<cv2x_UeManager> ueManager = GetUeManager (rnti);
+  ueManager->SetPdschConfigDedicated (pdschConfigDedicated);
+}
+
+void
+cv2x_LteEnbRrc::DoSendLoadInformation (cv2x_EpcX2Sap::LoadInformationParams params)
+{
+  NS_LOG_FUNCTION (this);
+
+  m_x2SapProvider->SendLoadInformation(params);
+}
+
+uint16_t
+cv2x_LteEnbRrc::AddUe (cv2x_UeManager::State state, uint8_t componentCarrierId)
+{
+  NS_LOG_FUNCTION (this);
+  bool found = false;
+  uint16_t rnti;
+  for (rnti = m_lastAllocatedRnti + 1; 
+       (rnti != m_lastAllocatedRnti - 1) && (!found);
+       ++rnti)
+    {
+      if ((rnti != 0) && (m_ueMap.find (rnti) == m_ueMap.end ()))
+        {
+          found = true;
+          break;
+        }
+    }
+
+  NS_ASSERT_MSG (found, "no more RNTIs available (do you have more than 65535 UEs in a cell?)");
+  m_lastAllocatedRnti = rnti;
+  Ptr<cv2x_UeManager> ueManager = CreateObject<cv2x_UeManager> (this, rnti, state, componentCarrierId);
+  m_ccmRrcSapProvider-> AddUe (rnti, (uint8_t)state);
+  m_ueMap.insert (std::pair<uint16_t, Ptr<cv2x_UeManager> > (rnti, ueManager));
+  ueManager->Initialize ();
+  const uint16_t cellId = cv2x_ComponentCarrierToCellId (componentCarrierId);
+  NS_LOG_DEBUG (this << " New UE RNTI " << rnti << " cellId " << cellId << " srs CI " << ueManager->GetSrsConfigurationIndex ());
+  m_newUeContextTrace (cellId, rnti);
+  return rnti;
+}
+
+void
+cv2x_LteEnbRrc::RemoveUe (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) rnti);
+  std::map <uint16_t, Ptr<cv2x_UeManager> >::iterator it = m_ueMap.find (rnti);
+  NS_ASSERT_MSG (it != m_ueMap.end (), "request to remove UE info with unknown rnti " << rnti);
+  uint16_t srsCi = (*it).second->GetSrsConfigurationIndex ();
+  m_ueMap.erase (it);
+  for (uint8_t i = 0; i < m_numberOfComponentCarriers; i++)
+    {
+      m_cmacSapProvider.at (i)->RemoveUe (rnti);
+      m_cphySapProvider.at (i)->RemoveUe (rnti);
+    }
+  if (m_s1SapProvider != 0)
+    {
+      m_s1SapProvider->UeContextRelease (rnti);
+    }
+  m_ccmRrcSapProvider-> RemoveUe (rnti);
+  // need to do this after cv2x_UeManager has been deleted
+  RemoveSrsConfigurationIndex (srsCi); 
+}
+
+TypeId
+cv2x_LteEnbRrc::GetRlcType (cv2x_EpsBearer bearer)
+{
+  switch (m_epsBearerToRlcMapping)
+    {
+    case RLC_SM_ALWAYS:
+      return cv2x_LteRlcSm::GetTypeId ();
+      break;
+
+    case  RLC_UM_ALWAYS:
+      return cv2x_LteRlcUm::GetTypeId ();
+      break;
+
+    case RLC_AM_ALWAYS:
+      return cv2x_LteRlcAm::GetTypeId ();
+      break;
+
+    case PER_BASED:
+      if (bearer.GetPacketErrorLossRate () > 1.0e-5)
+        {
+          return cv2x_LteRlcUm::GetTypeId ();
+        }
+      else
+        {
+          return cv2x_LteRlcAm::GetTypeId ();
+        }
+      break;
+
+    default:
+      return cv2x_LteRlcSm::GetTypeId ();
+      break;
+    }
+}
+
+
+void
+cv2x_LteEnbRrc::AddX2Neighbour (uint16_t cellId)
+{
+  NS_LOG_FUNCTION (this << cellId);
+
+  if (m_anrSapProvider != 0)
+    {
+      m_anrSapProvider->AddNeighbourRelation (cellId);
+    }
+}
+
+void
+cv2x_LteEnbRrc::SetCsgId (uint32_t csgId, bool csgIndication)
+{
+  NS_LOG_FUNCTION (this << csgId << csgIndication);
+  for (uint8_t componentCarrierId = 0; componentCarrierId < m_sib1.size (); componentCarrierId++)
+    {
+      m_sib1.at (componentCarrierId).cellAccessRelatedInfo.csgIdentity = csgId;
+      m_sib1.at (componentCarrierId).cellAccessRelatedInfo.csgIndication = csgIndication;
+      m_cphySapProvider.at (componentCarrierId)->SetSystemInformationBlockType1 (m_sib1.at (componentCarrierId));
+    }
+}
+
+void
+cv2x_LteEnbRrc::SetNumberOfComponentCarriers(uint16_t numberOfComponentCarriers)
+{
+  m_numberOfComponentCarriers = numberOfComponentCarriers;
+}
+
+/// Number of distinct SRS periodicity plus one.
+static const uint8_t SRS_ENTRIES = 9;
+/**
+ * Sounding Reference Symbol (SRS) periodicity (TSRS) in milliseconds. Taken
+ * from 3GPP TS 36.213 Table 8.2-1. Index starts from 1.
+ */
+static const uint16_t g_srsPeriodicity[SRS_ENTRIES] = {0, 2, 5, 10, 20, 40,  80, 160, 320};
+/**
+ * The lower bound (inclusive) of the SRS configuration indices (ISRS) which
+ * use the corresponding SRS periodicity (TSRS). Taken from 3GPP TS 36.213
+ * Table 8.2-1. Index starts from 1.
+ */
+static const uint16_t g_srsCiLow[SRS_ENTRIES] =       {0, 0, 2,  7, 17, 37,  77, 157, 317};
+/**
+ * The upper bound (inclusive) of the SRS configuration indices (ISRS) which
+ * use the corresponding SRS periodicity (TSRS). Taken from 3GPP TS 36.213
+ * Table 8.2-1. Index starts from 1.
+ */
+static const uint16_t g_srsCiHigh[SRS_ENTRIES] =      {0, 1, 6, 16, 36, 76, 156, 316, 636};
+
+void 
+cv2x_LteEnbRrc::SetSrsPeriodicity (uint32_t p)
+{
+  NS_LOG_FUNCTION (this << p);
+  for (uint32_t id = 1; id < SRS_ENTRIES; ++id)
+    {
+      if (g_srsPeriodicity[id] == p)
+        {
+          m_srsCurrentPeriodicityId = id;
+          return;
+        }
+    }
+  // no match found
+  std::ostringstream allowedValues;
+  for (uint32_t id = 1; id < SRS_ENTRIES; ++id)
+    {
+      allowedValues << g_srsPeriodicity[id] << " ";
+    }
+  NS_FATAL_ERROR ("illecit SRS periodicity value " << p << ". Allowed values: " << allowedValues.str ());
+}
+
+uint32_t 
+cv2x_LteEnbRrc::GetSrsPeriodicity () const
+{
+  NS_LOG_FUNCTION (this);
+  NS_ASSERT (m_srsCurrentPeriodicityId > 0);
+  NS_ASSERT (m_srsCurrentPeriodicityId < SRS_ENTRIES);
+  return g_srsPeriodicity[m_srsCurrentPeriodicityId];
+}
+
+
+uint16_t
+cv2x_LteEnbRrc::GetNewSrsConfigurationIndex ()
+{
+  NS_LOG_FUNCTION (this << m_ueSrsConfigurationIndexSet.size ());
+  // SRS
+  NS_ASSERT (m_srsCurrentPeriodicityId > 0);
+  NS_ASSERT (m_srsCurrentPeriodicityId < SRS_ENTRIES);
+  NS_LOG_DEBUG (this << " SRS p " << g_srsPeriodicity[m_srsCurrentPeriodicityId] << " set " << m_ueSrsConfigurationIndexSet.size ());
+  if (m_ueSrsConfigurationIndexSet.size () >= g_srsPeriodicity[m_srsCurrentPeriodicityId])
+    {
+      NS_FATAL_ERROR ("too many UEs (" << m_ueSrsConfigurationIndexSet.size () + 1 
+                                       << ") for current SRS periodicity "
+                                       <<  g_srsPeriodicity[m_srsCurrentPeriodicityId]
+                                       << ", consider increasing the value of ns3::cv2x_LteEnbRrc::SrsPeriodicity");
+    }
+
+  if (m_ueSrsConfigurationIndexSet.empty ())
+    {
+      // first entry
+      m_lastAllocatedConfigurationIndex = g_srsCiLow[m_srsCurrentPeriodicityId];
+      m_ueSrsConfigurationIndexSet.insert (m_lastAllocatedConfigurationIndex);
+    }
+  else
+    {
+      // find a CI from the available ones
+      std::set<uint16_t>::reverse_iterator rit = m_ueSrsConfigurationIndexSet.rbegin ();
+      NS_ASSERT (rit != m_ueSrsConfigurationIndexSet.rend ());
+      NS_LOG_DEBUG (this << " lower bound " << (*rit) << " of " << g_srsCiHigh[m_srsCurrentPeriodicityId]);
+      if ((*rit) < g_srsCiHigh[m_srsCurrentPeriodicityId])
+        {
+          // got it from the upper bound
+          m_lastAllocatedConfigurationIndex = (*rit) + 1;
+          m_ueSrsConfigurationIndexSet.insert (m_lastAllocatedConfigurationIndex);
+        }
+      else
+        {
+          // look for released ones
+          for (uint16_t srcCi = g_srsCiLow[m_srsCurrentPeriodicityId]; srcCi < g_srsCiHigh[m_srsCurrentPeriodicityId]; srcCi++) 
+            {
+              std::set<uint16_t>::iterator it = m_ueSrsConfigurationIndexSet.find (srcCi);
+              if (it == m_ueSrsConfigurationIndexSet.end ())
+                {
+                  m_lastAllocatedConfigurationIndex = srcCi;
+                  m_ueSrsConfigurationIndexSet.insert (srcCi);
+                  break;
+                }
+            }
+        } 
+    }
+  return m_lastAllocatedConfigurationIndex;
+
+}
+
+
+void
+cv2x_LteEnbRrc::RemoveSrsConfigurationIndex (uint16_t srcCi)
+{
+  NS_LOG_FUNCTION (this << srcCi);
+  std::set<uint16_t>::iterator it = m_ueSrsConfigurationIndexSet.find (srcCi);
+  NS_ASSERT_MSG (it != m_ueSrsConfigurationIndexSet.end (), "request to remove unkwown SRS CI " << srcCi);
+  m_ueSrsConfigurationIndexSet.erase (it);
+}
+
+uint8_t 
+cv2x_LteEnbRrc::GetLogicalChannelGroup (cv2x_EpsBearer bearer)
+{
+  if (bearer.IsGbr ())
+    {
+      return 1;
+    }
+  else
+    {
+      return 2;
+    }
+}
+
+uint8_t 
+cv2x_LteEnbRrc::GetLogicalChannelPriority (cv2x_EpsBearer bearer)
+{
+  return bearer.qci;
+}
+
+void
+cv2x_LteEnbRrc::SendSystemInformation ()
+{
+  // NS_LOG_FUNCTION (this);
+
+  for (auto &it: m_componentCarrierPhyConf)
+    {
+      uint8_t ccId = it.first;
+
+      cv2x_LteRrcSap::SystemInformation si;
+      si.haveSib2 = true;
+      si.sib2.freqInfo.ulCarrierFreq = it.second->GetUlEarfcn ();
+      si.sib2.freqInfo.ulBandwidth = it.second->GetUlBandwidth ();
+      si.sib2.radioResourceConfigCommon.pdschConfigCommon.referenceSignalPower = m_cphySapProvider.at (ccId)->GetReferenceSignalPower ();
+      si.sib2.radioResourceConfigCommon.pdschConfigCommon.pb = 0;
+
+      cv2x_LteEnbCmacSapProvider::RachConfig rc = m_cmacSapProvider.at (ccId)->GetRachConfig ();
+      cv2x_LteRrcSap::RachConfigCommon rachConfigCommon;
+      rachConfigCommon.preambleInfo.numberOfRaPreambles = rc.numberOfRaPreambles;
+      rachConfigCommon.raSupervisionInfo.preambleTransMax = rc.preambleTransMax;
+      rachConfigCommon.raSupervisionInfo.raResponseWindowSize = rc.raResponseWindowSize;
+      si.sib2.radioResourceConfigCommon.rachConfigCommon = rachConfigCommon;
+
+      m_rrcSapUser->SendSystemInformation (it.second->GetCellId (), si);
+    }
+
+  /*
+   * For simplicity, we use the same periodicity for all SIBs. Note that in real
+   * systems the periodicy of each SIBs could be different.
+   */
+  Simulator::Schedule (m_systemInformationPeriodicity, &cv2x_LteEnbRrc::SendSystemInformation, this);
+}
+
+
+} // namespace ns3
+

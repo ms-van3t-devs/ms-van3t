@@ -1,5 +1,5 @@
 #include "denBasicService.h"
-#include "../asn1/asn_application.h"
+#include "ns3/asn_application.h"
 
 namespace ns3 {
 
@@ -11,6 +11,7 @@ namespace ns3 {
     m_stationtype = LONG_MAX;
     m_seq_number = 0;
     m_socket_tx = NULL;
+    m_real_time = false;
   }
 
   bool
@@ -68,6 +69,7 @@ namespace ns3 {
 
     memset(&referenceTimeInteger, 0, sizeof(INTEGER_t));
     asn_long2INTEGER(&referenceTimeInteger, referenceTimeLong);
+    m_ptr_queue.push ((void*)referenceTimeInteger.buf);
 
     denm->denm.management.referenceTime=referenceTimeInteger;
     denm->denm.management.stationType=m_stationtype;
@@ -173,6 +175,7 @@ namespace ns3 {
     m_stationtype = (StationType_t) fixed_stationtype;
     m_seq_number = 0;
     m_socket_tx = socket_tx;
+    m_real_time = false;
   }
 
   DENBasicService_error_t
@@ -554,12 +557,14 @@ namespace ns3 {
 
     packet = socket->RecvFrom (from);
 
-    uint8_t *buffer = new uint8_t[packet->GetSize ()];
+    uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
+    buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
     packet->CopyData (buffer, packet->GetSize ()-1);
 
     if(!CheckMainAttributes ())
       {
         NS_LOG_ERROR("DENBasicService has unset parameters. Cannot receive any data.");
+        free(buffer);
         return;
       }
 
@@ -567,6 +572,7 @@ namespace ns3 {
     if (buffer[1]!=FIX_DENMID)
       {
         NS_LOG_ERROR("Warning: received a message which has messageID '"<<buffer[1]<<"' but '1' was expected.");
+        free(buffer);
         return;
       }
 
@@ -577,6 +583,8 @@ namespace ns3 {
     do {
       decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_DENM, &decoded_, buffer, packet->GetSize ()-1);
     } while(decode_result.code==RC_WMORE);
+
+    free(buffer);
 
     if(decode_result.code!=RC_OK || decoded_==NULL) {
         NS_LOG_ERROR("Warning: unable to decode a received DENM.");
@@ -688,6 +696,7 @@ namespace ns3 {
       DENBasicService::fillDenDataAlacarte (*decoded_denm->denm.alacarte, den_data);
 
     m_DENReceiveCallback(den_data,from);
+    ASN_STRUCT_FREE(asn_DEF_DENM,decoded_denm);
   }
 
   void

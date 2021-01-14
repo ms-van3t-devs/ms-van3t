@@ -92,14 +92,16 @@ namespace ns3
 
     packet = socket->RecvFrom (from);
 
-    uint8_t *buffer = new uint8_t[packet->GetSize ()];
+    uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
+    buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
     packet->CopyData (buffer, packet->GetSize ()-1);
 
 
-    /* Try to check if the received packet is really a DENM */
+    /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
       {
         NS_LOG_ERROR("Warning: received a message which has messageID '"<<buffer[1]<<"' but '2' was expected.");
+        free(buffer);
         return;
       }
 
@@ -111,8 +113,11 @@ namespace ns3
       decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ()-1);
     } while(decode_result.code==RC_WMORE);
 
+    free(buffer);
+
     if(decode_result.code!=RC_OK || decoded_==NULL) {
         NS_LOG_ERROR("Warning: unable to decode a received CAM.");
+        if(decoded_) free(decoded_);
         return;
       }
 
@@ -257,7 +262,7 @@ namespace ns3
     RSUContainerHighFrequency_t* rsu_container=NULL;
 
     Ptr<Packet> packet;
-    asn_encode_to_new_buffer_result_t encode_result;
+    asn_encode_to_new_buffer_result_t encode_result={.buffer=NULL};
     int64_t now;
 
     if(m_vehicle==false)
@@ -400,6 +405,7 @@ namespace ns3
     if (encode_result.result.encoded==-1)
       {
         errval=CAM_ASN1_UPER_ENC_ERROR;
+        if(encode_result.buffer) free(encode_result.buffer);
         goto error;
       }
 
@@ -418,6 +424,8 @@ namespace ns3
     lastCamGen = now;
 
     error:
+    if(encode_result.buffer) free(encode_result.buffer);
+
     // Free all the previously allocated memory
     if(m_vehicle==true)
       {

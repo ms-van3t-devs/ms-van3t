@@ -156,6 +156,8 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_aggegateOutputEvent);
 
+    m_denService.cleanup();
+
     if (!m_csv_name.empty ())
       m_csv_ofstream_cam.close ();
 
@@ -219,8 +221,10 @@ namespace ns3
         m_denm_sent++;
       }
 
+    if(alacartedata.roadWorks && alacartedata.roadWorks->speedLimit) free(alacartedata.roadWorks->speedLimit);
     if(alacartedata.roadWorks) free(alacartedata.roadWorks);
-    if(alacartedata.roadWorks->speedLimit) free(alacartedata.roadWorks->speedLimit);
+
+    data.denDataFree ();
   }
 
   void
@@ -248,7 +252,7 @@ namespace ns3
           m_veh_position[address] = INSIDE;
         else
           m_veh_position[address] = OUTSIDE;
-        return;
+        goto asn_free;
       }
 
     if (appServer::isInside (lon,lat))
@@ -274,6 +278,7 @@ namespace ns3
           }
       }
 
+    asn_free:
     ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 

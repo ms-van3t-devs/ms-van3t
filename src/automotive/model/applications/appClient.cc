@@ -30,14 +30,6 @@ namespace ns3
 
   NS_OBJECT_ENSURE_REGISTERED(appClient);
 
-  long retValue(double value, int defValue, int fix, int fixNeeded)
-  {
-      if(fix<fixNeeded)
-          return defValue;
-      else
-          return value;
-  }
-
   TypeId
   appClient::GetTypeId (void)
   {

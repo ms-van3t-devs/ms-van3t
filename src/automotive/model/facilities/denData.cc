@@ -141,5 +141,6 @@ denData::isDenDataRight()
 void
 denData::denDataFree()
 {
+  if(m_management.detectionTime.buf) free(m_management.detectionTime.buf);
   if(m_management.validityDuration) free(m_management.validityDuration);
 }
