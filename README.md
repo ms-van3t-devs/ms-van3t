@@ -61,7 +61,7 @@ The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_
 
 # Simple V2I example and V2I/V2N applications
 
-*ms-van3t* currently support two stack/communication technologies for V2I/V2N:
+*ms-van3t* currently supports two stack/communication technologies for V2I/V2N:
 - 802.11p, communicating, for instance, with a Road Side Unit (sample program name: `v2i-80211p`)
 - LTE, for V2N communications (sample program name: `v2i-lte`)
 
@@ -91,22 +91,22 @@ The user *IS NOT* expected to modify the code inside the "facilities" folder, bu
 If using the LTE version in this very simple toy case, it is possible to connect at most 23 UEs to the enB (due to LENA framework limitation). You can avoid this problem by using the option `--ns3::LteEnbRrc::SrsPeriodicity=[value]"` where [value]=0, 2, 5, 10, 20, 40, 80, 160, 320. In this way you can add more UEs. Example: `./waf --run "v2i-lte --ns3::LteEnbRrc::SrsPeriodicity=160"`
 
 **List of the most important options:**
-* --realtime				   [bool] decide to run the simulation using the realtime scheduler or not
-* --sim-time                   [double] simulation time
-* --sumo-gui                   [bool] decide to show sumo-gui or not
-* --server-aggregate-output	   [bool] if true, the server will print every second a report on the number of DENM sent and CAM received correctly
-* --sumo-updates 			   [double] frequency of SUMO updates
-* --send-cam 				   [bool] enable vehicles to send CAM
-* --asn                        [bool] if true, CAMs and DENMs are encoded and decoded using ASN.1 
-* --lonlat					   [bool] if true, the position information included in CAMs id traslated from XY to lonlat geo coordinates
-* --csv-log:                   [string] prefix of the CSV log files where to save the disaggregated data coming from the CAMs received by the server and the DENMs received by the vehicles (the user can then use this sample application to build more complex logging mechanisms and/or log additional data coming from the server and/or the vehicles)
+* `--realtime                  [bool] decide to run the simulation using the realtime scheduler or not`
+* `--sim-time                  [double] simulation time`
+* `--sumo-gui                  [bool] decide to show sumo-gui or not`
+* `--server-aggregate-output   [bool] if true, the server will print every second a report on the number of DENM sent and CAM received correctly`
+* `--sumo-updates              [double] frequency of SUMO updates`
+* `--send-cam                  [bool] enable vehicles to send CAM`
+* `--asn                       [bool] if true, CAMs and DENMs are encoded and decoded using ASN.1`
+* `--lonlat                    [bool] if true, the position information included in CAMs id traslated from XY to lonlat geo coordinates`
+* `--csv-log                   [string] prefix of the CSV log files where to save the disaggregated data coming from the CAMs received by the server and the DENMs received by the vehicles (the user can then use this sample application to build more complex logging mechanisms and/or log additional data coming from the server and/or the vehicles)`
 
 
 
 # Simple V2V example and V2V applications
 
-*ms-van3t* currently support two stack/communication technologies for V2V:
-- 802.11p, (sample program name: `v2v-80211p`)
+*ms-van3t* currently supports two stack/communication technologies for V2V:
+- 802.11p (sample program name: `v2v-80211p`)
 - C-V2X Mode 4 (sample program name: `v2v-cv2x`)
 
 To run the program:
@@ -135,7 +135,7 @@ The mobility trace is contained inside the file `automotive/example/sumo_files_v
 
 The SUMO map also embeds some re-routers allowing the vehicles to continuosly travel on the available road segments.
 
-For visualization puproses, in SUMO, normal vehicles are shown as yellow cars, while ambulances/emergency vehicles are red. When a vehicle is reacting to the presence of an ambulance, it turns either orange (slowing down and changing lane) or green (speeding up to change lane and then slow down as soon as possible).
+For visualization purposes, in SUMO, normal vehicles are shown as yellow cars, while ambulances/emergency vehicles are red. When a vehicle is reacting to the presence of an ambulance, it turns either orange (slowing down and changing lane) or green (speeding up to change lane and then slow down as soon as possible).
 
 ![](img/img2_v2v.png)
 
@@ -143,16 +143,16 @@ For visualization puproses, in SUMO, normal vehicles are shown as yellow cars, w
 
 
 **List of the most important options:**
-* --realtime                   [bool] decide to run the simulation using the realtime scheduler or not
-* --sim-time                   [double] simulation time
-* --sumo-gui                   [bool] decide to show sumo-gui or not
-* --sumo-updates               [double] frequency of SUMO updates
-* --send-cam                   [bool] enable vehicles to send CAM
-* --asn                        [bool] if true, CAMs and DENMs are encoded and decoded using ASN.1 
-* --lonlat                     [bool] if true, the position information included in CAMs id traslated from XY to lonlat geo coordinates
-* --csv-log:                   [string] prefix of the CSV log files where to save CAMs and DENMs disaggregated data and statistics
+* `--realtime                   [bool] decide to run the simulation using the realtime scheduler or not`
+* `--sim-time                   [double] simulation time`
+* `--sumo-gui                   [bool] decide to show sumo-gui or not`
+* `--sumo-updates               [double] frequency of SUMO updates`
+* `--send-cam                   [bool] enable vehicles to send CAM`
+* `--asn                        [bool] if true, CAMs and DENMs are encoded and decoded using ASN.1`
+* `--lonlat                     [bool] if true, the position information included in CAMs id traslated from XY to lonlat geo coordinates`
+* `--csv-log:                   [string] prefix of the CSV log files where to save CAMs and DENMs disaggregated data and statistics`
 
-**Note**
+**Note:**
 In this version LTE python bindings are disabled!
 
 # Sample V2X emulator application
@@ -192,8 +192,8 @@ The files in which this application is contained are:
 - `ns-3.29/src/automotive/helper/obuEmu-helper.cc`
 
 **List of the most important options:**
-* --sim-time                   [double] total emulation/simulation time
-* --sumo-gui                   [bool] decide to show sumo-gui or not
-* --sumo-updates               [double] frequency of SUMO updates
-* --send-cam                   [bool] enable vehicles to send CAMs
-* **--interface				   [string] Name of the physical interface to send(/receive) V2X messages to(/from)**
+* `--sim-time                   [double] total emulation/simulation time`
+* `--sumo-gui                   [bool] decide to show sumo-gui or not`
+* `--sumo-updates               [double] frequency of SUMO updates`
+* `--send-cam                   [bool] enable vehicles to send CAMs`
+* `--interface                  [string] Name of the physical interface to send(/receive) V2X messages to(/from)`
