@@ -4,7 +4,7 @@
 
 ns3 modules to build an ETSI-compliant VANET (V2X) application using SUMO (v-1.6.0+) and ns-3 (v-3.29).
 
-It has been tested with SUMO v1.6.0 and ns3 v3.29 on Ubuntu 18.04 and 20.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns3 v3.29 on Ubuntu 18.04 and 20.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
@@ -13,7 +13,7 @@ To build the project:
     	`sudo add-apt-repository ppa:sumo/stable`  
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
-    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with **v-1.6.0**)
+    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with **v-1.6.0** to **v-1.8.0** )
 
 * Clone this repository in your pc.
 
@@ -56,7 +56,7 @@ automotive/ contains all the application related files. Inside sumo_files_v2v_ma
 traci/ and traci-applications/ contains all the logic to link ns-3 and SUMO.
 
 
-**Simple V2I example**
+# Simple V2I example
 
 To run the program:
 `./waf --run "v2i-lte"` or
@@ -94,7 +94,7 @@ If using the LTE version in this very simple toy case, it is possible to connect
 
 
 
-**Simple V2V example**
+# Simple V2V example
 
 To run the program:
 
