@@ -2,9 +2,9 @@
 
 ![](img/MS-VAN3T_logo.png)
 
-ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.29), with the possibility of easily switching stack and communication technology.
+ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
 
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns3 v3.29 on Ubuntu 18.04 and 20.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns3 v3.33 on Ubuntu 18.04 and 20.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
@@ -19,7 +19,7 @@ To build the project:
 
 * Run, from this repository:
 `./sandbox_builder.sh`
-This script will download ns-3.29 and install this framework. The folder `ns-3.29` will remain linked to this GitHub repository (not to the vanilla ns-3.29 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
+This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
 * Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time - 
 **Sometimes it may happen that in build phase you have some "Warning threated as error"**. To solve this issue, configure the project using:
@@ -80,7 +80,7 @@ The map is divided into two areas: the area in the middle, where the maximum spe
 
 The server checks whenever a transition between the two areas is performed by a vehicle, and, when it happens, it sends it a DENM message to tell it to slow-down (or to let it speed-up again).
 
-The mobility trace is contained in the file `ns-3.29/src/automotive/example/sumo_files_v2i_map/cars.rou.xml`.
+The mobility trace is contained in the file `ns-3.33/src/automotive/example/sumo_files_v2i_map/cars.rou.xml`.
 This SUMO map embeds some re-routers allowing the vehicles to continuously move in the map.
 
 The CAMs and DENMs dissemination logic are in the modules inside the `automotive/facilities` folder while the application logic resides on appClient.cc/.h and appServer.cc/.h, inside `automotive/applications`.
@@ -186,10 +186,10 @@ The promiscuous mode can then be disabled with:
 `sudo` may be needed to use the underlying ns-3 *FdNetDevice*: if you get a "permission denied" error, try to run again the `emu-v2x` application with `sudo`.
 
 The files in which this application is contained are:
-- `ns-3.29/src/automotive/model/applications/obuEmu.h`
-- `ns-3.29/src/automotive/model/applications/obuEmu.cc`
-- `ns-3.29/src/automotive/helper/obuEmu-helper.h`
-- `ns-3.29/src/automotive/helper/obuEmu-helper.cc`
+- `ns-3.33/src/automotive/model/applications/obuEmu.h`
+- `ns-3.33/src/automotive/model/applications/obuEmu.cc`
+- `ns-3.33/src/automotive/helper/obuEmu-helper.h`
+- `ns-3.33/src/automotive/helper/obuEmu-helper.cc`
 
 **List of the most important options:**
 * `--sim-time                   [double] total emulation/simulation time`

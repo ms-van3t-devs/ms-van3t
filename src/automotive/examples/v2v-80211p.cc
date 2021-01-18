@@ -119,7 +119,7 @@ main (int argc, char *argv[])
   obuNodes.Create(numberOfNodes);
 
   /*** 2. Create and setup channel   ***/
-  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+  YansWifiPhyHelper wifiPhy;
   wifiPhy.Set ("TxPowerStart", DoubleValue (txPower));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (txPower));
   NS_LOG_INFO("Setting up the 802.11p channel @ " << datarate << " Mbit/s, 10 MHz, and tx power " << (int)txPower << " dBm.");
@@ -127,6 +127,8 @@ main (int argc, char *argv[])
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
   wifiPhy.SetChannel (channel);
+  /* To be removed when BPT is implemented */
+  Config::SetDefault ("ns3::ArpCache::DeadTimeout", TimeValue (Seconds (1)));
 
   /*** 3. Create and setup MAC ***/
   wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);

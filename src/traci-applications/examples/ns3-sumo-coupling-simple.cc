@@ -39,7 +39,7 @@ main (int argc, char *argv[])
 
   /*** 2. Create and setup channel ***/
   std::string phyMode ("OfdmRate6MbpsBW10MHz");
-  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+  YansWifiPhyHelper wifiPhy;
   wifiPhy.Set ("TxPowerStart", DoubleValue (20));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (20));
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();

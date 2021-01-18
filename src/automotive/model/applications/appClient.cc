@@ -98,6 +98,7 @@ namespace ns3
   appClient::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
+
     m_id = m_client->GetVehicleId (this->GetNode ());
 
     /* Create the socket for TX and RX */

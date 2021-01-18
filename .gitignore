@@ -5,8 +5,15 @@
 /DlRlcStats.txt
 /UlRlcStats.txt
 /sumo-errors-or-collisions.xml
-/v2i-framework.cflags
-/v2i-framework.cxxflags
+
+/ms-van3t.cflags
+/ms-van3t.cxxflags
+
+/.editorconfig
+/.mailmap
+/CONTRIBUTING.md
+/ms-van3t-3.33.cflags
+/ms-van3t-3.33.cxxflags
 
 *.diff
 *.orig
