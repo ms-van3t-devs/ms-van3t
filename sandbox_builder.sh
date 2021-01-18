@@ -85,13 +85,11 @@ cd ns-3-allinone/ns-${NS3_VERSION}
 sed -i -E 's#^([[:blank:]]*)(program.create_task\("SuidBuild"\))#\1program.create_task("SuidBuild_task")#' wscript
 set +v
 
-read -p "STOP"
-
 echo "Moving the full installation to the current directory..."
 sleep 1
 set -v
 cd ../..
-rm -rf -v !("sandbox_builder.sh"|"ns-3-allinone")
+rm -rfv AUTHORS .git .gitignore img LICENSE license_gplv2.txt README.md src switch_CAM_DENM_version.sh VERSION
 cp -af ns-3-allinone/* .
 rm -rf ns-3-allinone
 set +v
