@@ -1,3 +1,6 @@
+# Main src wscript
+/src/wscript
+
 # Misc files
 /DlRlcStats.txt
 /UlRlcStats.txt

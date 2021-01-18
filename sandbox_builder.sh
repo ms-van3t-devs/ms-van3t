@@ -85,6 +85,8 @@ cd ns-3-allinone/ns-${NS3_VERSION}
 sed -i -E 's#^([[:blank:]]*)(program.create_task\("SuidBuild"\))#\1program.create_task("SuidBuild_task")#' wscript
 set +v
 
+read -p "STOP"
+
 echo "Moving the full installation to the current directory..."
 sleep 1
 set -v
