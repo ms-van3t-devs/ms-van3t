@@ -4,7 +4,7 @@
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
 
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns3 v3.33 on Ubuntu 18.04 and 20.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns-3 v3.33 on Ubuntu 18.04 and 20.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
@@ -21,9 +21,7 @@ To build the project:
 `./sandbox_builder.sh`
 This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
-* Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time - 
-**Sometimes it may happen that in build phase you have some "Warning threated as error"**. To solve this issue, configure the project using:
-`CXXFLAGS="-Wno-maybe-uninitialized" ./waf configure --build-profile=optimized --enable-examples --enable-tests --enable-sudo`.
+* Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time
 
 * Build ns3:
 `./waf build`
@@ -33,35 +31,45 @@ This script will download ns-3.33 and install this framework. The folder `ns-3.3
 The final project path-tree should look like (referring to the `src` directory):
 
     automotive/
-               doc/
-               examples/
-                        sumo_files_v2v_map/
-                        sumo_files_v2i_map/
-               helper/
-               model/
-                    applications/
-                    asn1/
-                    facilities/
-                    utilities/
-               test/
+          doc/
+          examples/
+            sumo_files_v2v_map/
+            sumo_files_v2i_map/
+          helper/
+          model/
+            applications/
+            asn1/
+            facilities/
+            utilities/
+          test/
+    cv2x/
+          bindings/
+          doc/
+          examples/
+          helper/
+          model/
+          patching_scripts/
+          test/
     traci/
           doc/
           examples/
           model/
     traci-applications/
-                       examples/
-                       helper/
-                       model/
+          examples/
+          helper/
+          model/
 
-`automotive/` contains all the application related files. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application.
-`traci/` and `traci-applications/` contain instead all the logic to link ns-3 and SUMO.
+
+
+
+`automotive/` contains all the application related files. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application. `traci/` and `traci-applications/` contain instead all the logic to link ns-3 and SUMO. `cv2x/` contains the model for C-V2X in transmission mode 4.
 
 The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_map` folders to save there the SUMO-related files for his/her own applications.
 
 
 # Simple V2I example and V2I/V2N applications
 
-*ms-van3t* currently supports two stack/communication technologies for V2I/V2N:
+*ms-van3t* currently supports two stacks/communication technologies for V2I/V2N:
 - 802.11p, communicating, for instance, with a Road Side Unit (sample program name: `v2i-80211p`)
 - LTE, for V2N communications (sample program name: `v2i-lte`)
 
@@ -70,7 +78,7 @@ To run the sample V2I program you can use:
 `./waf --run "v2i-80211p"`
 
 *  Nodes are created in the ns3 simulation as vehicles enter the SUMO simulation
-*  A full LTE or WAVE stack is implemented at lower layers (depending on which example is run)
+*  A full LTE or 802.11p stack is implemented at lower layers (depending on which example is run)
 
 In this example, every vehicle that enters the scenario will start sending CAMs with a frequency between *1 Hz* and *10 Hz* (according to the ETSI standards). The server, that is behind the RSU or behind an eNB + EPC, will receive them and will check the position of the vehicles. 
 
@@ -83,12 +91,12 @@ The server checks whenever a transition between the two areas is performed by a 
 The mobility trace is contained in the file `ns-3.33/src/automotive/example/sumo_files_v2i_map/cars.rou.xml`.
 This SUMO map embeds some re-routers allowing the vehicles to continuously move in the map.
 
-The CAMs and DENMs dissemination logic are in the modules inside the `automotive/facilities` folder while the application logic resides on appClient.cc/.h and appServer.cc/.h, inside `automotive/applications`.
+The CAMs and DENMs dissemination logics are in the modules inside the `automotive/facilities` folder while the application logic resides on appClient.cc/.h and appServer.cc/.h, inside `automotive/applications`.
 The user *IS NOT* expected to modify the code inside the "facilities" folder, but rather to use the ETSI Facilities Layer methods inside the application.
 
 **Important**
 
-If using the LTE version in this very simple toy case, it is possible to connect at most 23 UEs to the enB (due to LENA framework limitation). You can avoid this problem by using the option `--ns3::LteEnbRrc::SrsPeriodicity=[value]"` where [value]=0, 2, 5, 10, 20, 40, 80, 160, 320. In this way you can add more UEs. Example: `./waf --run "v2i-lte --ns3::LteEnbRrc::SrsPeriodicity=160"`
+If using the LTE version in this very simple toy case, it is possible to connect at most 23 UEs to the enB (due to the LENA framework currently implemented features). You can avoid this problem by using the option `--ns3::LteEnbRrc::SrsPeriodicity=[value]"` where [value]=0, 2, 5, 10, 20, 40, 80, 160, 320. In this way you can add more UEs. Example: `./waf --run "v2i-lte --ns3::LteEnbRrc::SrsPeriodicity=160"`
 
 **List of the most important options:**
 * `--realtime                  [bool] decide to run the simulation using the realtime scheduler or not`
@@ -105,7 +113,7 @@ If using the LTE version in this very simple toy case, it is possible to connect
 
 # Simple V2V example and V2V applications
 
-*ms-van3t* currently supports two stack/communication technologies for V2V:
+*ms-van3t* currently supports two stacks/communication technologies for V2V:
 - 802.11p (sample program name: `v2v-80211p`)
 - C-V2X Mode 4 (sample program name: `v2v-cv2x`)
 
@@ -113,7 +121,6 @@ To run the program:
 
 `./waf --run "v2v-cv2x"` or
 `./waf --run "v2v-80211p"`
-
 
 *  Nodes are created in the ns3 simulation as vehicle enters the SUMO simulation
 *  A full C-V2X or 802.11p stack is implemented at lower layers
