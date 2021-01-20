@@ -5,6 +5,7 @@
 #include "ns3/internet-module.h"
 #include "ns3/cv2x-module.h"
 #include "ns3/sumo_xml_parser.h"
+#include <ns3/node-list.h>
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-cv2x");
@@ -201,7 +202,17 @@ main (int argc, char *argv[])
   /* Required to use NIST 3GPP model */
   BuildingsHelper::Install (ueNodes);
   BuildingsHelper::Install (enbNodes);
-  BuildingsHelper::MakeMobilityModelConsistent ();
+  // BuildingsHelper::MakeMobilityModelConsistent (); Removed because DEPRECATED from 3.31
+  for (NodeList::Iterator nit = NodeList::Begin (); nit != NodeList::End (); ++nit)
+    {
+      Ptr<MobilityModel> mm = (*nit)->GetObject<MobilityModel> ();
+      if (mm != 0)
+        {
+          Ptr<MobilityBuildingInfo> bmm = mm->GetObject<MobilityBuildingInfo> ();
+          NS_ABORT_MSG_UNLESS (0 != bmm, "node " << (*nit)->GetId () << " has a MobilityModel that does not have a MobilityBuildingInfo");
+          bmm->MakeConsistent (mm);
+        }
+    }
 
   lteHelper->SetAttribute("UseSidelink", BooleanValue (true));
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);

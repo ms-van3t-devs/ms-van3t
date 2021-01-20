@@ -6,9 +6,6 @@ def build(bld):
     obj.source = 'lena-cqi-threshold.cc'
     obj = bld.create_ns3_program('lena-dual-stripe',
                                  ['lte'])
-    obj.source = 'lena-dual-stripe.cc'
-    obj = bld.create_ns3_program('lena-fading',
-                                 ['lte'])
     obj.source = 'lena-fading.cc'
     obj = bld.create_ns3_program('lena-intercell-interference',
                                  ['lte'])
@@ -24,21 +21,6 @@ def build(bld):
     obj.source = 'lena-ipv6-ue-ue.cc'
     obj = bld.create_ns3_program('lena-pathloss-traces',
                                  ['lte'])
-    obj.source = 'lena-pathloss-traces.cc'
-    obj = bld.create_ns3_program('lena-profiling',
-                                 ['lte'])
-    obj.source = 'lena-profiling.cc'
-    obj = bld.create_ns3_program('lena-rem',
-                                 ['lte'])
-    obj.source = 'lena-rem.cc'
-    obj = bld.create_ns3_program('lena-rem-sector-antenna',
-                                 ['lte'])
-    obj.source = 'lena-rem-sector-antenna.cc'
-    obj = bld.create_ns3_program('lena-rlc-traces',
-                                 ['lte'])
-    obj.source = 'lena-rlc-traces.cc'
-    obj = bld.create_ns3_program('lena-simple',
-                                 ['lte'])
     obj.source = 'lena-simple.cc'
     obj = bld.create_ns3_program('lena-simple-epc',
                                  ['lte'])
@@ -47,9 +29,6 @@ def build(bld):
                                  ['lte'])
     obj.source = 'lena-deactivate-bearer.cc'
     obj = bld.create_ns3_program('lena-x2-handover',
-                                 ['lte'])
-    obj.source = 'lena-x2-handover.cc'
-    obj = bld.create_ns3_program('lena-x2-handover-measures',
                                  ['lte'])
     obj.source = 'lena-x2-handover-measures.cc'
     obj = bld.create_ns3_program('lena-frequency-reuse',

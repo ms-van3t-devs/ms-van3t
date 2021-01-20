@@ -274,9 +274,9 @@ cv2x_Lte3gppPropagationLossModel::EvaluateSigma (Ptr<MobilityBuildingInfo> a, Pt
   //D2D
   else if ((a->GetObject<Node> ()->GetDevice (0)->GetObject<cv2x_LteUeNetDevice> () != 0) and (b->GetObject<Node> ()->GetDevice (0)->GetObject<cv2x_LteUeNetDevice> () != 0))
   {
-    if (a->IsOutdoor ())
+    if (!a->IsIndoor ())
     {
-      if (b->IsOutdoor ())
+      if (!b->IsIndoor ())
       {
         // Outdoor
         return 7;

@@ -217,8 +217,7 @@ def build(bld):
         'test/cv2x_lte-test-ipv6-routing.cc',
         'test/cv2x_lte-test-carrier-aggregation-configuration.cc',
         'test/cv2x_test-nist-parabolic-3d-antenna.cc',
-        'test/cv2x_test-nist-phy-error-model.cc',
-        'test/cv2x_test-nist-3gpp-validation.cc'
+        'test/cv2x_test-nist-phy-error-model.cc'
         ]
 
     headers = bld(features='ns3header')
