@@ -17,8 +17,11 @@ To build the project:
 
 * Clone this repository in your pc.
 
-* Run, from this repository:
-`./sandbox_builder.sh`
+* Run, from this repository either:
+`./sandbox_builder.sh install-dependencies` -> if this is the first time you install ns-3 or ms-van3t on your system (it will also try to install the needed dependencies with `apt`)
+or
+`./sandbox_builder.sh` -> if this is **not** the first time you install ns-3 (no dependencies installation is performed)
+
 This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
 * Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time
