@@ -29,6 +29,7 @@ namespace ns3
     CABasicService(unsigned long fixed_stationid,long fixed_stationtype,CURRENT_VDP_TYPE vdp,bool real_time,bool is_vehicle,Ptr<Socket> socket_tx);
 
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
+    void setFixedPositionRSU(double latitude_deg, double longitude_deg);
     void setStationID(unsigned long fixed_stationid);
     void setStationType(long fixed_stationtype);
     void setSocketTx(Ptr<Socket> socket_tx) {m_btp->setSocketTx (socket_tx);}

@@ -168,6 +168,14 @@ namespace ns3
     m_caService.setSocketRx (m_socket);
     m_caService.addCARxCallback (std::bind(&areaSpeedAdvisoryServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
+    // Set the RSU position in the CA and DEN basic service (mandatory for any RSU object)
+    // As the position must be specified in (lat, lon), we must take it from the mobility model and then convert it to Latitude and Longitude
+    // As SUMO is used here, we can rely on the TraCIAPI for this conversion
+    Ptr<MobilityModel> mob = GetNode ()->GetObject<MobilityModel>();
+    libsumo::TraCIPosition rsuPos = m_client->TraCIAPI::simulation.convertXYtoLonLat (mob->GetPosition ().x,mob->GetPosition ().y);;
+    m_denService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
+    m_caService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
+
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);

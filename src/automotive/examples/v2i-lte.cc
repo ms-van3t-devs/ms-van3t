@@ -51,7 +51,7 @@ main (int argc, char *argv[])
   double interPacketInterval = 100;
   bool useCa = false;
 
-  uint16_t numberOfNodes;
+  int numberOfNodes;
   uint32_t nodeCounter = 0;
 
   xmlDocPtr rou_xml_file;
@@ -177,7 +177,7 @@ main (int argc, char *argv[])
 
   /* Set the eNB to a fixed position */
   Ptr<MobilityModel> mobilityeNBn = enbNodes.Get (0)->GetObject<MobilityModel> ();
-  mobilityeNBn->SetPosition (Vector (0, 0, 20.0)); // set eNB to fixed position
+  mobilityeNBn->SetPosition (Vector (0, 0, 20.0)); // Normally, in SUMO, (0,0) is the center of the map
 
   /*** 5. Install LTE Devices to the nodes + assign IP to UE***/
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);

@@ -50,6 +50,7 @@ namespace ns3 {
     void receiveDENM(BTPDataIndication_t dataIndication, Address address);
 
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
+    void setFixedPositionRSU(double latitude_deg, double longitude_deg);
     void setStationID(unsigned long fixed_stationid);
     void setStationType(long fixed_stationtype);
 

@@ -27,6 +27,7 @@ namespace ns3
     virtual ~btp();
     void setGeoNet(Ptr<GeoNet> geoNet){m_geonet = geoNet;}
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype){m_geonet->setStationProperties(fixed_stationid,fixed_stationtype);}
+    void setFixedPositionRSU(double latitude_deg, double longitude_deg) {m_geonet->setFixedPositionRSU(latitude_deg,longitude_deg);}
     void setStationID(unsigned long fixed_stationid) {m_geonet->setStationID(fixed_stationid);}
     void setStationType(long fixed_stationtype) {m_geonet->setStationType(fixed_stationtype);}
     void setVDP(CURRENT_VDP_TYPE vdp){m_geonet->setVDP(vdp);}

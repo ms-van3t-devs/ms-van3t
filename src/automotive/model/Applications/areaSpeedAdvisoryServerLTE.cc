@@ -173,6 +173,16 @@ namespace ns3
     m_caService.setStationProperties (777888999, StationType_roadSideUnit);
     m_caService.addCARxCallback (std::bind(&areaSpeedAdvisoryServerLTE::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
+    // Set the central position for the service (i.e. a reference fixed position used by GeoNetworking)
+    // As reference position for GeoNetworking, we can take the center of the map (i.e. (0,0)), as if an RSU was there
+    // As the position must be specified in (lat, lon), we must convert it to Latitude and Longitude
+    // As SUMO is used here, we can rely on the TraCIAPI for this conversion
+    // As functions to set this position to the CA/DEN Basic Service, we can use "setFixedPositionRSU", even if no 802.11p RSU exists
+    // Then, it will be the Basic Services that will take care of setting this position in the GeoNet object
+    libsumo::TraCIPosition servicePos = m_client->TraCIAPI::simulation.convertXYtoLonLat (0,0);
+    m_denService.setFixedPositionRSU (servicePos.y,servicePos.x);
+    m_caService.setFixedPositionRSU (servicePos.y,servicePos.x);
+
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);

@@ -54,7 +54,7 @@ main (int argc, char *argv[])
 
   double simTime = 100;
 
-  uint16_t numberOfNodes;
+  int numberOfNodes;
   uint32_t nodeCounter = 0;
 
   CommandLine cmd;
@@ -174,6 +174,10 @@ main (int argc, char *argv[])
   /*** 6. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
   mobility.Install (obuNodes);
+
+  /* Set the RSU to a fixed position (i.e. on the center of the map, in this case) */
+  Ptr<MobilityModel> mobilityRSU = obuNodes.Get (0)->GetObject<MobilityModel> ();
+  mobilityRSU->SetPosition (Vector (0, 0, 20.0)); // Normally, in SUMO, (0,0) is the center of the map
 
   /*** 5. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();

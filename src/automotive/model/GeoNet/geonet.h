@@ -63,6 +63,7 @@ namespace ns3
       GeoNet();
       virtual ~GeoNet();
       void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
+      void setFixedPositionRSU(double latitude_deg, double longitude_deg);
       void setStationID(unsigned long fixed_stationid);
       void setStationType(long fixed_stationtype);
       void setVDP(CURRENT_VDP_TYPE vdp);
@@ -156,6 +157,7 @@ namespace ns3
       uint16_t m_GnBcForwardingPacketBufferSize = 1024;
       uint16_t m_FnCbfPacketBufferSize = 256;
       uint16_t m_GnDefaultTrafficClass = 0;
+      bool m_RSU_epv_set = false;
 
   };
 }

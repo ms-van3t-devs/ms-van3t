@@ -62,7 +62,7 @@ main (int argc, char *argv[])
 
   double emuTime = 100;
 
-  uint16_t numberOfNodes = 0;
+  int numberOfNodes = 0;
   uint32_t nodeCounter = 0;
 
   CommandLine cmd;

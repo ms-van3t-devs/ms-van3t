@@ -62,7 +62,7 @@ main (int argc, char *argv[])
 
   double simTime = 100;
 
-  uint16_t numberOfNodes;
+  int numberOfNodes;
   uint32_t nodeCounter = 0;
 
   xmlDocPtr rou_xml_file;

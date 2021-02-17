@@ -50,6 +50,8 @@ namespace ns3 {
     m_GNAddress = GNAddress();
     // ETSI EN 302 636-4-1 [8.2.3] : At start-up all elements of egoPV should be set to 0
     m_egoPV = {};
+
+    m_RSU_epv_set=false;
   }
 
   void
@@ -67,13 +69,26 @@ namespace ns3 {
     if(fixed_stationtype==StationType_roadSideUnit)
       {
         m_GnIsMobile=false;
-        //Set the position of the RSU in the center of the map
-        m_egoPV.POS_EPV.x = 7.6560725626713264;
-        m_egoPV.POS_EPV.y = 45.053163795600362;
       }
     // ETSI EN 302 636-4-1 [10.2.2] : the egoPV shall be updated with a minimum freq of th GN constant itsGNminUpdateFrequencyEPV
     m_GNAddress = m_GNAddress.MakeManagedconfiguredAddress (m_GnLocalGnAddr,m_stationtype); //! Initial address config on MANAGED(1) mode ETSI EN 302 636-4-1 [10.2.1.3]
     m_event_Beacon = Simulator::Schedule(MilliSeconds(1),&GeoNet::setBeacon,this); //Should be at start-up but set with a little delay
+  }
+
+  void
+  GeoNet::setFixedPositionRSU(double latitude_deg, double longitude_deg)
+  {
+    if(m_stationtype==StationType_roadSideUnit)
+    {
+        //Set the position of the RSU
+        m_egoPV.POS_EPV.x = longitude_deg;
+        m_egoPV.POS_EPV.y = latitude_deg;
+        m_RSU_epv_set = true;
+    }
+    else
+    {
+      NS_FATAL_ERROR("Error: trying to set fixed RSU position on a non-RSU node");
+    }
   }
 
   void
@@ -206,6 +221,11 @@ namespace ns3 {
     GNBasicHeader basicHeader;
     GNCommonHeader commonHeader;
     GNlpv_t longPV;
+
+    if(m_stationtype==StationType_roadSideUnit && m_RSU_epv_set==false)
+    {
+      NS_FATAL_ERROR("Error: no position has been set for an RSU object. Please use setFixedPositionRSU() on the Facilities Layer object.");
+    }
 
     if(dataRequest.lenght > m_GnMaxSduSize)
     {
@@ -533,6 +553,11 @@ namespace ns3 {
     Address from;
     GNBasicHeader basicHeader;
     GNCommonHeader commonHeader;
+
+    if(m_stationtype==StationType_roadSideUnit && m_RSU_epv_set==false)
+    {
+      NS_FATAL_ERROR("Error: no position has been set for an RSU object. Please use setFixedPositionRSU() on the Facilities Layer object.");
+    }
 
     dataIndication.data = socket->RecvFrom (from);
 

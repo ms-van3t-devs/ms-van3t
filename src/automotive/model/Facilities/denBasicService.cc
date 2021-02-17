@@ -209,6 +209,12 @@ namespace ns3 {
   }
 
   void
+  DENBasicService::setFixedPositionRSU(double latitude_deg, double longitude_deg)
+  {
+    m_btp->setFixedPositionRSU(latitude_deg,longitude_deg);
+  }
+
+  void
   DENBasicService::setStationID(unsigned long fixed_stationid)
   {
     m_station_id=fixed_stationid;
