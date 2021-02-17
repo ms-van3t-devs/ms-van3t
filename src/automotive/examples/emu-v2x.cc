@@ -1,7 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2012 University of Washington, 2012 INRIA 
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation;
@@ -14,7 +12,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
+*/
+
 #include <fstream>
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
@@ -35,6 +39,13 @@ NS_LOG_COMPONENT_DEFINE ("emu-v2x");
 int
 main (int argc, char *argv[])
 {
+  /* In this example the vehicles generated will redirect all their V2X messages toward the physical
+   * interface specified in the --interface option. By default, in this example the vehicles generate CAMs with a variable
+   * frequency (see ETSI CAM generation standard) and 1 DENM every second.
+   * To start this application, you need to set the interface where the V2X messages are relayed into promiscuous mode!
+   * command -> sudo ip link set <interface name> promisc on
+   */
+
   // Physical interface parameters
   std::string deviceName ("eth1");
   std::string encapMode ("Dix");
@@ -47,7 +58,6 @@ main (int argc, char *argv[])
   bool verbose = true;
   bool sumo_gui = true;
   double sumo_updates = 0.01;
-  bool send_cam = true;
   bool print_summary = false;
 
   double emuTime = 100;
@@ -61,7 +71,6 @@ main (int argc, char *argv[])
   /* Cmd Line option for vehicular application */
   cmd.AddValue ("sumo-gui", "Use SUMO gui or not", sumo_gui);
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
-  cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
@@ -86,8 +95,7 @@ main (int argc, char *argv[])
    * and the real-time constraint will not be respected anymore (causing, for
    * instance, the vehicles to look as if they were moving more slowly and
    * sending CAMs with a lower frequency) */
-  GlobalValue::Bind ("SimulatorImplementationType",
-                     StringValue ("ns3::RealtimeSimulatorImpl"));
+  GlobalValue::Bind ("SimulatorImplementationType", StringValue ("ns3::RealtimeSimulatorImpl"));
 
   GlobalValue::Bind ("ChecksumEnabled", BooleanValue (true));
 
@@ -143,7 +151,6 @@ main (int argc, char *argv[])
 
   /* Create the OBU application (obuEmu, see also model/obuEmu.cc/.h) */
   obuEmuHelper emuHelper;
-  emuHelper.SetAttribute ("SendCam", (BooleanValue) send_cam);
   emuHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
   /* Create the FdNetDevice to send packets over a physical interface */

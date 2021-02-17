@@ -1,9 +1,31 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
+*/
+
 #include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/sumo_xml_parser.h"
+#include "ns3/packet-socket-helper.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2i-80211p");
@@ -25,7 +47,6 @@ main (int argc, char *argv[])
   bool sumo_gui = true;
   bool aggregate_out = false;
   double sumo_updates = 0.01;
-  bool send_cam = true;
   std::string csv_name;
   bool print_summary = false;
   int txPower=26;
@@ -45,7 +66,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-gui", "Use SUMO gui or not", sumo_gui);
   cmd.AddValue ("server-aggregate-output", "Print an aggregate output for server", aggregate_out);
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
-  cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
@@ -81,6 +101,7 @@ main (int argc, char *argv[])
       LogComponentEnable ("v2i-80211p", LOG_LEVEL_INFO);
       LogComponentEnable ("CABasicService", LOG_LEVEL_INFO);
       LogComponentEnable ("DENBasicService", LOG_LEVEL_INFO);
+      LogComponentEnable ("areaSpeedAdvisoryServer80211p", LOG_LEVEL_INFO);
     }
 
   /* Use the realtime scheduler of ns3 */
@@ -142,19 +163,13 @@ main (int argc, char *argv[])
   Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
+
   //wifi80211p.EnableLogComponents ();
-  /* To be removed when BPT is implemented */
-  Config::SetDefault ("ns3::ArpCache::DeadTimeout", TimeValue (Seconds (1)));
 
-  /*** 4. Add Internet layers stack and routing ***/
-  InternetStackHelper internet;
-  internet.Install (obuNodes);
-
-  /*** 5. Assign IP address to each device ***/
-  Ipv4AddressHelper address;
-  address.SetBase ("10.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer ipv4Interfaces;
-  ipv4Interfaces = address.Assign (netDevices);
+  //wifiPhy.EnablePcap ("v2i-test",netDevices);
+  /* Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
+  PacketSocketHelper packetSocket;
+  packetSocket.Install (obuNodes);
 
   /*** 6. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
@@ -177,31 +192,27 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 6. Create and Setup application for the server ***/
-  AppServerHelper appServerHelper;
-  appServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
-  appServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  appServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  appServerHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisoryServer80211pHelper AreaSpeedAdvisoryServer80211pHelper;
+  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
 
-  ApplicationContainer AppServer = appServerHelper.Install (obuNodes.Get (0));
+  ApplicationContainer AppServer = AreaSpeedAdvisoryServer80211pHelper.Install (obuNodes.Get (0));
 
   AppServer.Start (Seconds (0.0));
   AppServer.Stop (simulationTime - Seconds (0.1));
   ++nodeCounter;
 
   /*** 7. Setup interface and application for dynamic nodes ***/
-  AppClientHelper appClientHelper;
+  areaSpeedAdvisoryClient80211pHelper AreaSpeedAdvisoryClient80211pHelper;
+  Ipv4Address remoteHostAddr;
 
-  /* Extract the server address */
-  Ptr<Ipv4> ipv4 = obuNodes.Get (0)->GetObject<Ipv4> ();
-  Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-  Ipv4Address remoteHostAddr = iaddr.GetLocal ();
-  appClientHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
-  appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
-  appClientHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
-  appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  appClientHelper.SetAttribute ("CSV", StringValue(csv_name));
+  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
+  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -209,12 +220,12 @@ main (int argc, char *argv[])
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
 
-      /* don't create and install the protocol stack of the node at simulation time -> take from "node pool" */
+      /* Don't create and install the protocol stack of the node at simulation time -> take from "node pool" */
       Ptr<Node> includedNode = obuNodes.Get(nodeCounter);
       ++nodeCounter; //increment counter for next node
 
       /* Install Application */
-      ApplicationContainer ClientApp = appClientHelper.Install (includedNode);
+      ApplicationContainer ClientApp = AreaSpeedAdvisoryClient80211pHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));
       ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
@@ -224,19 +235,19 @@ main (int argc, char *argv[])
   /* callback function for node shutdown */
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
-      /* stop all applications */
-      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
-      if(appClient_)
-        appClient_->StopApplicationNow ();
+      /* Stop all applications */
+      Ptr<areaSpeedAdvisoryClient80211p> areaSpeedAdvisoryClient80211p_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisoryClient80211p>();
+      if(areaSpeedAdvisoryClient80211p_)
+        areaSpeedAdvisoryClient80211p_->StopApplicationNow ();
 
-       /* set position outside communication range */
+       /* Set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
       mob->SetPosition(Vector(-1000.0+(rand()%25),320.0+(rand()%25),250.0));// rand() for visualization purposes
 
       /* NOTE: further actions could be required for a safe shut down! */
     };
 
-  /* start traci client with given function pointers */
+  /* Start traci client with given function pointers */
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
   /*** 8. Start Simulation ***/

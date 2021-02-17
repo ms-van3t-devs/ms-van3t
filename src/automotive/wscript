@@ -13,25 +13,44 @@ def configure(conf):
 
 def build(bld):
     module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci'])
-
     module.source = [
-        'helper/appClient-helper.cc',
-        'helper/appServer-helper.cc',
-        'helper/appSample-helper.cc',
+        'helper/areaSpeedAdvisoryClient80211p-helper.cc',
+        'helper/areaSpeedAdvisoryServer80211p-helper.cc',
+        'helper/areaSpeedAdvisoryClientLTE-helper.cc',
+        'helper/areaSpeedAdvisoryServerLTE-helper.cc',
+        'helper/emergencyVehicleAlert-helper.cc',
         'helper/obuEmu-helper.cc',
 
-        'model/applications/appClient.cc',
-        'model/applications/appServer.cc',
-        'model/applications/appSample.cc',
-        'model/facilities/denBasicService.cc',
-        'model/facilities/denData.cc',
-        'model/facilities/ITSSOriginatingTableEntry.cc',
-        'model/facilities/ITSSReceivingTableEntry.cc',
-        'model/facilities/asn_utils.cc',
-        'model/facilities/vdpTraci.cc',
-        'model/facilities/caBasicService.cc',
+        'model/Applications/areaSpeedAdvisoryClient80211p.cc',
+        'model/Applications/areaSpeedAdvisoryServer80211p.cc',
+        'model/Applications/areaSpeedAdvisoryClientLTE.cc',
+        'model/Applications/areaSpeedAdvisoryServerLTE.cc',
+
+        'model/Applications/emergencyVehicleAlert.cc',
+        'model/Facilities/denBasicService.cc',
+        'model/Facilities/denData.cc',
+        'model/Facilities/ITSSOriginatingTableEntry.cc',
+        'model/Facilities/ITSSReceivingTableEntry.cc',
+        'model/Facilities/asn_utils.cc',
+        'model/Facilities/vdpTraci.cc',
+        'model/Facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
-        'model/applications/obuEmu.cc',
+        'model/Applications/obuEmu.cc',
+
+        # BTP
+        '/model/BTP/btp.cc',
+        '/model/BTP/btpHeader.cc',
+        
+        #GeoNet
+        '/model/GeoNet/geonet.cc',
+        '/model/GeoNet/gn-address.cc',
+        '/model/GeoNet/tsb-header.cc',
+        '/model/GeoNet/shb-header.cc',
+        '/model/GeoNet/gbc-header.cc',
+        '/model/GeoNet/basic-header.cc',
+        '/model/GeoNet/common-header.cc',
+        '/model/GeoNet/beacon-header.cc',
+        '/model/GeoNet/gn-utils.cc',
 
          #CAM+DENM sources
         '/model/asn1-legacy/AccelerationConfidence.c',
@@ -254,24 +273,47 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'automotive'
     headers.source = [
-        'helper/appClient-helper.h',
-        'helper/appServer-helper.h',
-        'helper/appSample-helper.h',
+        'helper/areaSpeedAdvisoryClientLTE-helper.h',
+        'helper/areaSpeedAdvisoryServerLTE-helper.h',
+        'helper/areaSpeedAdvisoryClient80211p-helper.h',
+        'helper/areaSpeedAdvisoryServer80211p-helper.h',
+        'helper/emergencyVehicleAlert-helper.h',
         'helper/obuEmu-helper.h',
 
-        'model/applications/appClient.h',
-        'model/applications/appServer.h',
-        'model/applications/appSample.h',
-        'model/facilities/denBasicService.h',
-        'model/facilities/denData.h',
-        'model/facilities/asn_utils.h',
-        'model/facilities/ITSSOriginatingTableEntry.h',
-        'model/facilities/ITSSReceivingTableEntry.h',
-        'model/facilities/vdpTraci.h',
-        'model/facilities/vdp.h',
-        'model/facilities/caBasicService.h',
+        'model/Applications/areaSpeedAdvisoryClient80211p.h',
+        'model/Applications/areaSpeedAdvisoryServer80211p.h',
+        'model/Applications/areaSpeedAdvisoryClientLTE.h',
+        'model/Applications/areaSpeedAdvisoryServerLTE.h',
+        'model/Applications/emergencyVehicleAlert.h',
+        'model/Facilities/denBasicService.h',
+        'model/Facilities/denData.h',
+        'model/Facilities/asn_utils.h',
+        'model/Facilities/ITSSOriginatingTableEntry.h',
+        'model/Facilities/ITSSReceivingTableEntry.h',
+        'model/Facilities/vdpTraci.h',
+        'model/Facilities/vdp.h',
+        'model/Facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',
-        'model/applications/obuEmu.h',
+        'model/Applications/obuEmu.h',
+
+        # BTP
+        '/model/BTP/btp.h',
+        '/model/BTP/btpHeader.h',
+        '/model/BTP/simple-btp-application.h',
+        '/model/BTP/btpdatarequest.h',
+
+        #GeoNet
+        '/model/GeoNet/geonet.h',
+        '/model/GeoNet/gn-address.h',
+        '/model/GeoNet/tsb-header.h',
+        '/model/GeoNet/shb-header.h',
+        '/model/GeoNet/gbc-header.h',
+        '/model/GeoNet/basic-header.h',
+        '/model/GeoNet/common-header.h',
+        '/model/GeoNet/longpositionvector.h',
+        '/model/GeoNet/shortpositionvector.h',
+        '/model/GeoNet/beacon-header.h',
+        '/model/GeoNet/gn-utils.h',
 
         #CAM+DENM headers
         '/model/asn1-legacy/AccelerationConfidence.h',

@@ -19,22 +19,22 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "obuEmu-helper.h"
+#include "areaSpeedAdvisoryClient80211p-helper.h"
 
-#include "ns3/obuEmu.h"
+#include "ns3/areaSpeedAdvisoryClient80211p.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
 namespace ns3 {
 
-obuEmuHelper::obuEmuHelper ()
+areaSpeedAdvisoryClient80211pHelper::areaSpeedAdvisoryClient80211pHelper ()
 {
-  m_factory.SetTypeId (obuEmu::GetTypeId ());
+  m_factory.SetTypeId (areaSpeedAdvisoryClient80211p::GetTypeId ());
 }
 
 
 void 
-obuEmuHelper::SetAttribute (
+areaSpeedAdvisoryClient80211pHelper::SetAttribute (
   std::string name, 
   const AttributeValue &value)
 {
@@ -42,20 +42,20 @@ obuEmuHelper::SetAttribute (
 }
 
 ApplicationContainer
-obuEmuHelper::Install (Ptr<Node> node) const
+areaSpeedAdvisoryClient80211pHelper::Install (Ptr<Node> node) const
 {
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-obuEmuHelper::Install (std::string nodeName) const
+areaSpeedAdvisoryClient80211pHelper::Install (std::string nodeName) const
 {
   Ptr<Node> node = Names::Find<Node> (nodeName);
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-obuEmuHelper::Install (NodeContainer c) const
+areaSpeedAdvisoryClient80211pHelper::Install (NodeContainer c) const
 {
   ApplicationContainer apps;
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
@@ -67,9 +67,9 @@ obuEmuHelper::Install (NodeContainer c) const
 }
 
 Ptr<Application>
-obuEmuHelper::InstallPriv (Ptr<Node> node) const
+areaSpeedAdvisoryClient80211pHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<obuEmu> ();
+  Ptr<Application> app = m_factory.Create<areaSpeedAdvisoryClient80211p> ();
   node->AddApplication (app);
 
   return app;

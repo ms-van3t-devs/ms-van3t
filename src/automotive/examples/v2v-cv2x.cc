@@ -1,3 +1,24 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
+*/
+
 #include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/cv2x_lte-v2x-helper.h"
@@ -13,8 +34,6 @@ NS_LOG_COMPONENT_DEFINE("v2v-cv2x");
 int
 main (int argc, char *argv[])
 {
-  double baseline= 320.0;                  // Baseline distance in meter (150m for urban, 320m for freeway)
-
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
@@ -24,8 +43,6 @@ main (int argc, char *argv[])
   bool realtime = false;
   bool sumo_gui = true;
   double sumo_updates = 0.01;
-  bool send_cam = true;
-  bool send_denm = true;
   std::string csv_name;
 
   /*** 0.b LENA + V2X Options ***/
@@ -56,8 +73,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("realtime", "Use the realtime scheduler or not", realtime);
   cmd.AddValue ("sumo-gui", "Use SUMO gui or not", sumo_gui);
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
-  cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
-  cmd.AddValue ("send-denm", "Enable car to send cam", send_denm);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
@@ -74,7 +89,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("mcs", "Modulation and Coding Scheme", mcs);
   cmd.AddValue ("pRsvp", "Resource Reservation Interval", pRsvp);
   cmd.AddValue ("probResourceKeep", "Probability for selecting previous resource again", probResourceKeep);
-  cmd.AddValue ("baseline", "Distance in which messages are transmitted and must be received", baseline);
 
   cmd.AddValue("sim-time", "Total duration of the simulation [s])", simTime);
 
@@ -269,6 +283,7 @@ main (int argc, char *argv[])
   Ipv4Address clientRespondersAddress = Ipv4AddressGenerator::NextAddress (Ipv4Mask ("255.0.0.0"));
   NetDeviceContainer activeTxUes;
 
+
   for(gIt=txGroups.begin(); gIt != txGroups.end(); gIt++)
       {
           /* Create Sidelink bearers */
@@ -332,14 +347,12 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
   /*** 7. Setup interface and application for dynamic nodes ***/
-  appSampleHelper AppSampleHelper;
-  AppSampleHelper.SetAttribute ("Client", PointerValue (sumoClient));
-  AppSampleHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AppSampleHelper.SetAttribute ("SendDenm", BooleanValue (send_denm));
-  AppSampleHelper.SetAttribute ("SendCam", BooleanValue (send_cam));
-  AppSampleHelper.SetAttribute ("PrintSummary", BooleanValue (true));
-  AppSampleHelper.SetAttribute ("CSV", StringValue(csv_name));
-  AppSampleHelper.SetAttribute ("Model", StringValue ("cv2x"));
+  emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;
+  EmergencyVehicleAlertHelper.SetAttribute ("Client", PointerValue (sumoClient));
+  EmergencyVehicleAlertHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  EmergencyVehicleAlertHelper.SetAttribute ("PrintSummary", BooleanValue (true));
+  EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
+  EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("cv2x"));
 
   /* callback function for node creation */
   int i=0;
@@ -352,11 +365,11 @@ main (int argc, char *argv[])
       ++nodeCounter; // increment counter for next node
 
       /* Install Application */
-      AppSampleHelper.SetAttribute ("IpAddr", Ipv4AddressValue(ipAddresses[i]));
+      EmergencyVehicleAlertHelper.SetAttribute ("IpAddr", Ipv4AddressValue(ipAddresses[i]));
       i++;
 
       //ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
-      ApplicationContainer AppSample = AppSampleHelper.Install (includedNode);
+      ApplicationContainer AppSample = EmergencyVehicleAlertHelper.Install (includedNode);
 
       AppSample.Start (Seconds (0.0));
       AppSample.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
@@ -368,7 +381,7 @@ main (int argc, char *argv[])
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
       /* stop all applications */
-      Ptr<appSample> appSample_ = exNode->GetApplication(0)->GetObject<appSample>();
+      Ptr<emergencyVehicleAlert> appSample_ = exNode->GetApplication(0)->GetObject<emergencyVehicleAlert>();
 
       if(appSample_)
         appSample_->StopApplicationNow();

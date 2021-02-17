@@ -19,22 +19,22 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "obuEmu-helper.h"
+#include "areaSpeedAdvisoryServerLTE-helper.h"
 
-#include "ns3/obuEmu.h"
+#include "ns3/areaSpeedAdvisoryServerLTE.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
 namespace ns3 {
 
-obuEmuHelper::obuEmuHelper ()
+areaSpeedAdvisoryServerLTEHelper::areaSpeedAdvisoryServerLTEHelper ()
 {
-  m_factory.SetTypeId (obuEmu::GetTypeId ());
+  m_factory.SetTypeId (areaSpeedAdvisoryServerLTE::GetTypeId ());
 }
 
 
 void 
-obuEmuHelper::SetAttribute (
+areaSpeedAdvisoryServerLTEHelper::SetAttribute (
   std::string name, 
   const AttributeValue &value)
 {
@@ -42,20 +42,20 @@ obuEmuHelper::SetAttribute (
 }
 
 ApplicationContainer
-obuEmuHelper::Install (Ptr<Node> node) const
+areaSpeedAdvisoryServerLTEHelper::Install (Ptr<Node> node) const
 {
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-obuEmuHelper::Install (std::string nodeName) const
+areaSpeedAdvisoryServerLTEHelper::Install (std::string nodeName) const
 {
   Ptr<Node> node = Names::Find<Node> (nodeName);
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-obuEmuHelper::Install (NodeContainer c) const
+areaSpeedAdvisoryServerLTEHelper::Install (NodeContainer c) const
 {
   ApplicationContainer apps;
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
@@ -67,9 +67,9 @@ obuEmuHelper::Install (NodeContainer c) const
 }
 
 Ptr<Application>
-obuEmuHelper::InstallPriv (Ptr<Node> node) const
+areaSpeedAdvisoryServerLTEHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<obuEmu> ();
+  Ptr<Application> app = m_factory.Create<areaSpeedAdvisoryServerLTE> ();
   node->AddApplication (app);
 
   return app;

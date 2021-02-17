@@ -1,9 +1,31 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
+*/
+
 #include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/sumo_xml_parser.h"
+#include "ns3/packet-socket-helper.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-80211p");
@@ -24,8 +46,6 @@ main (int argc, char *argv[])
   bool realtime = false;
   bool sumo_gui = true;
   double sumo_updates = 0.01;
-  bool send_cam = true;
-  bool send_denm = true;
   std::string csv_name;
   int txPower=26;
   float datarate=12;
@@ -43,8 +63,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("realtime", "Use the realtime scheduler or not", realtime);
   cmd.AddValue ("sumo-gui", "Use SUMO gui or not", sumo_gui);
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
-  cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
-  cmd.AddValue ("send-denm", "Enable car to send cam", send_denm);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
@@ -128,7 +146,7 @@ main (int argc, char *argv[])
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
   wifiPhy.SetChannel (channel);
   /* To be removed when BPT is implemented */
-  Config::SetDefault ("ns3::ArpCache::DeadTimeout", TimeValue (Seconds (1)));
+  //Config::SetDefault ("ns3::ArpCache::DeadTimeout", TimeValue (Seconds (1)));
 
   /*** 3. Create and setup MAC ***/
   wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
@@ -137,21 +155,17 @@ main (int argc, char *argv[])
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
-  /*** 4. Create Internet and ipv4 helpers ***/
-  InternetStackHelper internet;
-  internet.Install (obuNodes);
+  //wifiPhy.EnablePcap ("v2v-test",netDevices);
 
-  /*** 5. Assign IP address to each device ***/
-  Ipv4AddressHelper address;
-  address.SetBase ("10.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer ipv4Interfaces;
-  ipv4Interfaces = address.Assign (netDevices);
+  /*** 4. Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
+  PacketSocketHelper packetSocket;
+  packetSocket.Install (obuNodes);
 
-  /*** 6. Setup Mobility and position node pool ***/
+  /*** 5. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
   mobility.Install (obuNodes);
 
-  /*** 7. Setup Traci and start SUMO ***/
+  /*** 6. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
   sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
@@ -167,14 +181,12 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
   /*** 7. Setup interface and application for dynamic nodes ***/
-  appSampleHelper AppSampleHelper;
-  AppSampleHelper.SetAttribute ("Client", PointerValue (sumoClient));
-  AppSampleHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AppSampleHelper.SetAttribute ("SendDenm", BooleanValue (send_denm));
-  AppSampleHelper.SetAttribute ("SendCam", BooleanValue (send_cam));
-  AppSampleHelper.SetAttribute ("PrintSummary", BooleanValue (true));
-  AppSampleHelper.SetAttribute ("Model", StringValue ("80211p"));
-  AppSampleHelper.SetAttribute ("CSV", StringValue(csv_name));
+  emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;
+  EmergencyVehicleAlertHelper.SetAttribute ("Client", PointerValue (sumoClient));
+  EmergencyVehicleAlertHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  EmergencyVehicleAlertHelper.SetAttribute ("PrintSummary", BooleanValue (true));
+  EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("80211p"));
+  EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -186,7 +198,7 @@ main (int argc, char *argv[])
       ++nodeCounter; // increment counter for next node
 
       /* Install Application */
-      ApplicationContainer AppSample = AppSampleHelper.Install (includedNode);
+      ApplicationContainer AppSample = EmergencyVehicleAlertHelper.Install (includedNode);
 
       AppSample.Start (Seconds (0.0));
       AppSample.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
@@ -194,16 +206,16 @@ main (int argc, char *argv[])
       return includedNode;
     };
 
-  /* callback function for node shutdown */
+  /* Callback function for node shutdown */
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
       /* stop all applications */
-      Ptr<appSample> appSample_ = exNode->GetApplication(0)->GetObject<appSample>();
+      Ptr<emergencyVehicleAlert> appSample_ = exNode->GetApplication(0)->GetObject<emergencyVehicleAlert>();
 
       if(appSample_)
         appSample_->StopApplicationNow();
 
-       /* set position outside communication range */
+       /* Set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
       mob->SetPosition(Vector(-1000.0+(rand()%25),320.0+(rand()%25),250.0));// rand() for visualization purposes
 

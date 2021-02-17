@@ -18,35 +18,28 @@
  *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
 */
 
-#include "sumo_xml_parser.h"
+#include "ITSSOriginatingTableEntry.h"
 
-namespace ns3
-{
-  int XML_rou_count_vehicles(xmlDocPtr doc)
+namespace ns3 {
+  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry() {
+    m_status = STATE_UNSET;
+    m_actionid.originatingStationID = 0;
+    m_actionid.sequenceNumber = -1;
+    m_referenceTime = -1;
+  }
+
+  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID)
   {
-      xmlXPathContextPtr xpathCtx;
-      xmlXPathObjectPtr xpathObj;
+    m_denm_encoded = asnDenmPacket;
+    m_status = status;
+    m_actionid = actionID;
+  }
 
-      int num_vehicles=-1;
-
-      // Create xPath to select all the 'vehicle' nodes in the rou.xml file
-      xpathCtx = xmlXPathNewContext(doc);
-      if(xpathCtx == NULL) {
-          return -1;
-      }
-
-      // Evaluate the xPath expression "//vehicle" to look for all the "<vehicle>" elements
-      xpathObj = xmlXPathEvalExpression((xmlChar *)"//vehicle",xpathCtx);
-      if(xpathObj == NULL || xpathObj->nodesetval==NULL) {
-          xmlXPathFreeContext(xpathCtx);
-          return -1;
-      }
-
-      num_vehicles = xpathObj->nodesetval->nodeNr;
-
-      xmlXPathFreeObject(xpathObj);
-      xmlXPathFreeContext(xpathCtx);
-
-      return num_vehicles;
+  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime)
+  {
+    m_denm_encoded = asnDenmPacket;
+    m_status = status;
+    m_actionid = actionID;
+    m_referenceTime = referenceTime;
   }
 }

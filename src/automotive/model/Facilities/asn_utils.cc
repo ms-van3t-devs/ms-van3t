@@ -18,35 +18,24 @@
  *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
 */
 
-#include "sumo_xml_parser.h"
+#include "ns3/asn_utils.h"
+#include <chrono>
 
-namespace ns3
-{
-  int XML_rou_count_vehicles(xmlDocPtr doc)
+namespace ns3 {
+  long compute_timestampIts (bool real_time)
   {
-      xmlXPathContextPtr xpathCtx;
-      xmlXPathObjectPtr xpathObj;
+    if (real_time)
+      {
+        /* To get millisec since  2004-01-01T00:00:00:000Z */
+        auto time = std::chrono::system_clock::now(); // get the current time
+        auto since_epoch = time.time_since_epoch(); // get the duration since epoch
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch); // convert it in millisecond since epoch
 
-      int num_vehicles=-1;
-
-      // Create xPath to select all the 'vehicle' nodes in the rou.xml file
-      xpathCtx = xmlXPathNewContext(doc);
-      if(xpathCtx == NULL) {
-          return -1;
+        long elapsed_since_2004 = millis.count() - TIME_SHIFT; // in TIME_SHIFT we saved the millisec from epoch to 2004-01-01
+        return elapsed_since_2004;
       }
+    else
+        return Simulator::Now ().GetMilliSeconds ();
 
-      // Evaluate the xPath expression "//vehicle" to look for all the "<vehicle>" elements
-      xpathObj = xmlXPathEvalExpression((xmlChar *)"//vehicle",xpathCtx);
-      if(xpathObj == NULL || xpathObj->nodesetval==NULL) {
-          xmlXPathFreeContext(xpathCtx);
-          return -1;
-      }
-
-      num_vehicles = xpathObj->nodesetval->nodeNr;
-
-      xmlXPathFreeObject(xpathObj);
-      xmlXPathFreeContext(xpathCtx);
-
-      return num_vehicles;
   }
 }

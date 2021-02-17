@@ -1,3 +1,24 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
+*/
+
 #include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/lte-helper.h"
@@ -23,7 +44,6 @@ main (int argc, char *argv[])
   bool sumo_gui = true;
   bool aggregate_out = false;
   double sumo_updates = 0.01;
-  bool send_cam = true;
   std::string csv_name;
   bool print_summary = false;
 
@@ -45,7 +65,6 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-gui", "Use SUMO gui or not", sumo_gui);
   cmd.AddValue ("server-aggregate-output", "Print an aggregate output for server", aggregate_out);
   cmd.AddValue ("sumo-updates", "SUMO granularity", sumo_updates);
-  cmd.AddValue ("send-cam", "Enable car to send cam", send_cam);
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
@@ -152,7 +171,6 @@ main (int argc, char *argv[])
   ueNodes.Create(numberOfNodes);
 
   /*** 4. Create and install mobility (SUMO will be attached later) ***/
-  /*** 6. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
@@ -170,6 +188,7 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer ueIpIface;
 
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+
   /* Assign IP address to UEs */
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
@@ -202,25 +221,24 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 7. Create and Setup application for the server ***/
-  AppServerHelper appServerHelper;
-  appServerHelper.SetAttribute ("Client", (PointerValue) sumoClient);
-  appServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  appServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  appServerHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisoryServerLTEHelper AreaSpeedAdvisoryServerLTEHelper;
+  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
 
-  ApplicationContainer AppServer = appServerHelper.Install (remoteHostContainer.Get (0));
+  ApplicationContainer AppServer = AreaSpeedAdvisoryServerLTEHelper.Install (remoteHostContainer.Get (0));
 
   AppServer.Start (Seconds (0.0));
   AppServer.Stop (simulationTime - Seconds (0.1));
 
   /*** 8. Setup interface and application for dynamic nodes ***/
-  AppClientHelper appClientHelper;
-  appClientHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
-  appClientHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  appClientHelper.SetAttribute ("SendCam", BooleanValue(send_cam));
-  appClientHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
-  appClientHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  appClientHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisoryClientLTEHelper AreaSpeedAdvisoryClientLTEHelper;
+  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
+  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -228,28 +246,28 @@ main (int argc, char *argv[])
       if (nodeCounter >= ueNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
 
-      /* don't create and install the protocol stack of the node at simulation time -> take from "node pool" */
+      /* Don't create and install the protocol stack of the node at simulation time -> take from "node pool" */
       Ptr<Node> includedNode = ueNodes.Get(nodeCounter);
       ++nodeCounter; // increment counter for next node
 
       /* Install Application */
-      ApplicationContainer ClientApp = appClientHelper.Install (includedNode);
+      ApplicationContainer ClientApp = AreaSpeedAdvisoryClientLTEHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));
       ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
       return includedNode;
     };
 
-  /* callback function for node shutdown */
+  /* Callback function for node shutdown */
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
-      /* stop all applications */
-      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
+      /* Stop all applications */
+      Ptr<areaSpeedAdvisoryClientLTE> appClient_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisoryClientLTE>();
 
       if(appClient_)
         appClient_->StopApplicationNow ();
 
-       /* set position outside communication range */
+       /* Set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
       mob->SetPosition(Vector(-1000.0+(rand()%25),320.0+(rand()%25),250.0));// rand() for visualization purposes
 
