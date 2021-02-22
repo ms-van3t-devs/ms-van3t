@@ -33,6 +33,20 @@ NS_LOG_COMPONENT_DEFINE("v2i-80211p");
 int
 main (int argc, char *argv[])
 {
+  /*
+   * In this example the generated vehicles will broadcast their CAMs, that will be also received by a RSU placed in the middle
+   * of the simulated scenario. Both vehicles and RSU transmit V2X messages through a 802.11p interface.
+   * The RSU broadcasts DENM messages with a frequency of 1 Hz, using the ETSI ITS-G5 stack, and the GeoNet
+   * dissemination area is set as a circular area around the RSU (90 meters of diameter).
+   * The dissemination of DENMs starts only after the RSU receives a CAM. If for 5 seconds
+   * the RSU does not receive any CAM, the DENM dissemination stops.
+   * Each DENM includes an optional container (à la carte), where there is a field named RoadWorks->SpeedLimit, in which
+   * the maximum speed allowed in the dissemination area is specified (25km/h).
+   * Whenever a vehicle receives a DENM at application layer (meaning that the information traverses GeoNet without being
+   * filtered), it reads the information inside the à la carte container and corrects its speed accordingly.
+   * If a vehicle doesn't receive any DENM for more than 1.5 seconds, it resumes its old speed.
+   */
+
   // Admitted data rates for 802.11p
   std::vector<float> rate_admitted_values{3,4.5,6,9,12,18,24,27};
   std::string datarate_config;
@@ -101,7 +115,7 @@ main (int argc, char *argv[])
       LogComponentEnable ("v2i-80211p", LOG_LEVEL_INFO);
       LogComponentEnable ("CABasicService", LOG_LEVEL_INFO);
       LogComponentEnable ("DENBasicService", LOG_LEVEL_INFO);
-      LogComponentEnable ("areaSpeedAdvisoryServer80211p", LOG_LEVEL_INFO);
+      LogComponentEnable ("areaSpeedAdvisorServer80211p", LOG_LEVEL_INFO);
     }
 
   /* Use the realtime scheduler of ns3 */
@@ -196,27 +210,27 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 6. Create and Setup application for the server ***/
-  areaSpeedAdvisoryServer80211pHelper AreaSpeedAdvisoryServer80211pHelper;
-  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient);
-  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  AreaSpeedAdvisoryServer80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisorServer80211pHelper AreaSpeedAdvisorServer80211pHelper;
+  AreaSpeedAdvisorServer80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  AreaSpeedAdvisorServer80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisorServer80211pHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AreaSpeedAdvisorServer80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
 
-  ApplicationContainer AppServer = AreaSpeedAdvisoryServer80211pHelper.Install (obuNodes.Get (0));
+  ApplicationContainer AppServer = AreaSpeedAdvisorServer80211pHelper.Install (obuNodes.Get (0));
 
   AppServer.Start (Seconds (0.0));
   AppServer.Stop (simulationTime - Seconds (0.1));
   ++nodeCounter;
 
   /*** 7. Setup interface and application for dynamic nodes ***/
-  areaSpeedAdvisoryClient80211pHelper AreaSpeedAdvisoryClient80211pHelper;
+  areaSpeedAdvisorClient80211pHelper AreaSpeedAdvisorClient80211pHelper;
   Ipv4Address remoteHostAddr;
 
-  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
-  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
-  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AreaSpeedAdvisoryClient80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
+  AreaSpeedAdvisorClient80211pHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+  AreaSpeedAdvisorClient80211pHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  AreaSpeedAdvisorClient80211pHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
+  AreaSpeedAdvisorClient80211pHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisorClient80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -229,7 +243,7 @@ main (int argc, char *argv[])
       ++nodeCounter; //increment counter for next node
 
       /* Install Application */
-      ApplicationContainer ClientApp = AreaSpeedAdvisoryClient80211pHelper.Install (includedNode);
+      ApplicationContainer ClientApp = AreaSpeedAdvisorClient80211pHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));
       ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
@@ -240,9 +254,9 @@ main (int argc, char *argv[])
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
       /* Stop all applications */
-      Ptr<areaSpeedAdvisoryClient80211p> areaSpeedAdvisoryClient80211p_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisoryClient80211p>();
-      if(areaSpeedAdvisoryClient80211p_)
-        areaSpeedAdvisoryClient80211p_->StopApplicationNow ();
+      Ptr<areaSpeedAdvisorClient80211p> areaSpeedAdvisorClient80211p_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisorClient80211p>();
+      if(areaSpeedAdvisorClient80211p_)
+        areaSpeedAdvisorClient80211p_->StopApplicationNow ();
 
        /* Set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();

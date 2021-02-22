@@ -34,6 +34,19 @@ NS_LOG_COMPONENT_DEFINE("v2i-lte");
 int
 main (int argc, char *argv[])
 {
+  /*
+   * In this example the generated vehicles will send their CAMs toward their LTE Uu interface. The messages will be directed
+   * to a server connected to the EPC of the LTE network. In this case, as opposed to 802.11p, it is not possible
+   * to broadcast the V2X messages, that will instead be encapsulated inside UDP-IPv4. Thus, each message will have the
+   * following encapsulation: BTP+GeoNet+UDP+IPv4+{LTE}. Due to the impossibility of broadcasting messages, also the
+   * application logic changes a bit (with respect to 802.11p).
+   * In this case, the server computes (at the beginning of the simulation) two areas: the inner area, where the maximum
+   * speed is meant to be 25 km/h, and an outer area, where the maximum speed is meant to be 75 km/h. The server monitors
+   * the position of the vehicles by reading the CAMs information. As soon as a vehicle performs a transition between the
+   * two areas, the server will generate a DENM including an optional container (à la carte), where there is a field named
+   * RoadWorks->SpeedLimit that is used to tell the vehicle the maximum allowed speed.
+   */
+
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_map/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2i_map/map.sumo.cfg";
@@ -221,24 +234,24 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
   /*** 7. Create and Setup application for the server ***/
-  areaSpeedAdvisoryServerLTEHelper AreaSpeedAdvisoryServerLTEHelper;
-  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient);
-  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
-  AreaSpeedAdvisoryServerLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisorServerLTEHelper AreaSpeedAdvisorServerLTEHelper;
+  AreaSpeedAdvisorServerLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient);
+  AreaSpeedAdvisorServerLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisorServerLTEHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
+  AreaSpeedAdvisorServerLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
 
-  ApplicationContainer AppServer = AreaSpeedAdvisoryServerLTEHelper.Install (remoteHostContainer.Get (0));
+  ApplicationContainer AppServer = AreaSpeedAdvisorServerLTEHelper.Install (remoteHostContainer.Get (0));
 
   AppServer.Start (Seconds (0.0));
   AppServer.Stop (simulationTime - Seconds (0.1));
 
   /*** 8. Setup interface and application for dynamic nodes ***/
-  areaSpeedAdvisoryClientLTEHelper AreaSpeedAdvisoryClientLTEHelper;
-  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
-  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
-  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
-  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  AreaSpeedAdvisoryClientLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
+  areaSpeedAdvisorClientLTEHelper AreaSpeedAdvisorClientLTEHelper;
+  AreaSpeedAdvisorClientLTEHelper.SetAttribute ("ServerAddr", Ipv4AddressValue(remoteHostAddr));
+  AreaSpeedAdvisorClientLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  AreaSpeedAdvisorClientLTEHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
+  AreaSpeedAdvisorClientLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+  AreaSpeedAdvisorClientLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
 
   /* callback function for node creation */
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
@@ -251,7 +264,7 @@ main (int argc, char *argv[])
       ++nodeCounter; // increment counter for next node
 
       /* Install Application */
-      ApplicationContainer ClientApp = AreaSpeedAdvisoryClientLTEHelper.Install (includedNode);
+      ApplicationContainer ClientApp = AreaSpeedAdvisorClientLTEHelper.Install (includedNode);
       ClientApp.Start (Seconds (0.0));
       ClientApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
@@ -262,7 +275,7 @@ main (int argc, char *argv[])
   std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
     {
       /* Stop all applications */
-      Ptr<areaSpeedAdvisoryClientLTE> appClient_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisoryClientLTE>();
+      Ptr<areaSpeedAdvisorClientLTE> appClient_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisorClientLTE>();
 
       if(appClient_)
         appClient_->StopApplicationNow ();

@@ -19,8 +19,8 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "areaSpeedAdvisoryClientLTE.h"
-#include "areaSpeedAdvisoryServerLTE.h" // Needed in order to use the "speedmode_t" enum
+#include "areaSpeedAdvisorClientLTE.h"
+#include "areaSpeedAdvisorServerLTE.h" // Needed in order to use the "speedmode_t" enum
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -30,47 +30,47 @@
 
 namespace ns3
 {
-  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisoryClientLTE");
+  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisorClientLTE");
 
-  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisoryClientLTE);
+  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisorClientLTE);
 
   TypeId
-  areaSpeedAdvisoryClientLTE::GetTypeId (void)
+  areaSpeedAdvisorClientLTE::GetTypeId (void)
   {
     static TypeId tid =
-        TypeId ("ns3::areaSpeedAdvisoryClientLTE")
+        TypeId ("ns3::areaSpeedAdvisorClientLTE")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<areaSpeedAdvisoryClientLTE> ()
+        .AddConstructor<areaSpeedAdvisorClientLTE> ()
         .AddAttribute ("PrintSummary",
             "To print summary at the end of simulation",
             BooleanValue(false),
-            MakeBooleanAccessor (&areaSpeedAdvisoryClientLTE::m_print_summary),
+            MakeBooleanAccessor (&areaSpeedAdvisorClientLTE::m_print_summary),
             MakeBooleanChecker ())
         .AddAttribute ("RealTime",
             "To compute properly timestamps",
             BooleanValue(false),
-            MakeBooleanAccessor (&areaSpeedAdvisoryClientLTE::m_real_time),
+            MakeBooleanAccessor (&areaSpeedAdvisorClientLTE::m_real_time),
             MakeBooleanChecker ())
         .AddAttribute ("CSV",
             "CSV log name",
             StringValue (),
-            MakeStringAccessor (&areaSpeedAdvisoryClientLTE::m_csv_name),
+            MakeStringAccessor (&areaSpeedAdvisorClientLTE::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("ServerAddr",
             "Ip Addr of the server",
             Ipv4AddressValue("10.0.0.1"),
-            MakeIpv4AddressAccessor (&areaSpeedAdvisoryClientLTE::m_server_addr),
+            MakeIpv4AddressAccessor (&areaSpeedAdvisorClientLTE::m_server_addr),
             MakeIpv4AddressChecker ())
         .AddAttribute ("Client",
             "TraCI client for SUMO",
             PointerValue (0),
-            MakePointerAccessor (&areaSpeedAdvisoryClientLTE::m_client),
+            MakePointerAccessor (&areaSpeedAdvisorClientLTE::m_client),
             MakePointerChecker<TraciClient> ());
         return tid;
   }
 
-  areaSpeedAdvisoryClientLTE::areaSpeedAdvisoryClientLTE ()
+  areaSpeedAdvisorClientLTE::areaSpeedAdvisorClientLTE ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
@@ -81,25 +81,25 @@ namespace ns3
     m_denm_received = 0;
   }
 
-  areaSpeedAdvisoryClientLTE::~areaSpeedAdvisoryClientLTE ()
+  areaSpeedAdvisorClientLTE::~areaSpeedAdvisorClientLTE ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  areaSpeedAdvisoryClientLTE::DoDispose (void)
+  areaSpeedAdvisorClientLTE::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
 
   void
-  areaSpeedAdvisoryClientLTE::StartApplication (void)
+  areaSpeedAdvisorClientLTE::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
 
     /*
-     * This application works as client for the areaSpeedAdvisoryServerLTE. It is intended to be installed over vehicular nodes,
+     * This application works as client for the areaSpeedAdvisorServerLTE. It is intended to be installed over vehicular nodes,
      * and it is set to generate unicast CAM messages toward the centralized server on top of BTP-GeoNet-UDP-IPv4.
      * As soon as a DENM is received, it reads the information inside the RoadWorks container and
      * sets the speed accordingly (see receiveDENM() function)
@@ -134,13 +134,13 @@ namespace ns3
     /* Set sockets, callback and station properties in DENBasicService */
     m_denService.setSocketRx (m_socket);
     m_denService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
-    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisoryClientLTE::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisorClientLTE::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
     m_denService.setRealTime (m_real_time);
 
     /* Set sockets, callback, station properties and TraCI VDP in CABasicService */
     m_caService.setSocketTx (m_socket);
     m_caService.setSocketRx (m_socket);
-    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisoryClientLTE::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorClientLTE::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
     m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
     m_caService.setRealTime (m_real_time);
 
@@ -161,7 +161,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryClientLTE::StopApplication ()
+  areaSpeedAdvisorClientLTE::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel(m_sendCamEvent);
@@ -185,14 +185,14 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryClientLTE::StopApplicationNow ()
+  areaSpeedAdvisorClientLTE::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  areaSpeedAdvisoryClientLTE::receiveDENM (denData denm, Address from)
+  areaSpeedAdvisorClientLTE::receiveDENM (denData denm, Address from)
   {
     m_denm_received++;
 
@@ -207,7 +207,7 @@ namespace ns3
     */
     if(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit == NULL)
     {
-      NS_FATAL_ERROR("Error in areaSpeedAdvisoryClientLTE.cc. Received a NULL pointer for speedLimit.");
+      NS_FATAL_ERROR("Error in areaSpeedAdvisorClientLTE.cc. Received a NULL pointer for speedLimit.");
     }
 
     double speedLimit = *(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit);
@@ -241,7 +241,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryClientLTE::receiveCAM (CAM_t *cam, Address from)
+  areaSpeedAdvisorClientLTE::receiveCAM (CAM_t *cam, Address from)
   {
     /* Implement CAM strategy here */
 
@@ -250,7 +250,7 @@ namespace ns3
   }
 
   long
-  areaSpeedAdvisoryClientLTE::compute_timestampIts ()
+  areaSpeedAdvisorClientLTE::compute_timestampIts ()
   {
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time

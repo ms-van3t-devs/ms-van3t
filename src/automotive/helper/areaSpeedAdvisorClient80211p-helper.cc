@@ -19,22 +19,22 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "areaSpeedAdvisoryClient80211p-helper.h"
+#include "areaSpeedAdvisorClient80211p-helper.h"
 
-#include "ns3/areaSpeedAdvisoryClient80211p.h"
+#include "ns3/areaSpeedAdvisorClient80211p.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
 namespace ns3 {
 
-areaSpeedAdvisoryClient80211pHelper::areaSpeedAdvisoryClient80211pHelper ()
+areaSpeedAdvisorClient80211pHelper::areaSpeedAdvisorClient80211pHelper ()
 {
-  m_factory.SetTypeId (areaSpeedAdvisoryClient80211p::GetTypeId ());
+  m_factory.SetTypeId (areaSpeedAdvisorClient80211p::GetTypeId ());
 }
 
 
 void 
-areaSpeedAdvisoryClient80211pHelper::SetAttribute (
+areaSpeedAdvisorClient80211pHelper::SetAttribute (
   std::string name, 
   const AttributeValue &value)
 {
@@ -42,20 +42,20 @@ areaSpeedAdvisoryClient80211pHelper::SetAttribute (
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClient80211pHelper::Install (Ptr<Node> node) const
+areaSpeedAdvisorClient80211pHelper::Install (Ptr<Node> node) const
 {
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClient80211pHelper::Install (std::string nodeName) const
+areaSpeedAdvisorClient80211pHelper::Install (std::string nodeName) const
 {
   Ptr<Node> node = Names::Find<Node> (nodeName);
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClient80211pHelper::Install (NodeContainer c) const
+areaSpeedAdvisorClient80211pHelper::Install (NodeContainer c) const
 {
   ApplicationContainer apps;
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
@@ -67,9 +67,9 @@ areaSpeedAdvisoryClient80211pHelper::Install (NodeContainer c) const
 }
 
 Ptr<Application>
-areaSpeedAdvisoryClient80211pHelper::InstallPriv (Ptr<Node> node) const
+areaSpeedAdvisorClient80211pHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<areaSpeedAdvisoryClient80211p> ();
+  Ptr<Application> app = m_factory.Create<areaSpeedAdvisorClient80211p> ();
   node->AddApplication (app);
 
   return app;

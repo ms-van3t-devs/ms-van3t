@@ -1,5 +1,5 @@
-#ifndef AREASPEEDADVISORYSERVERLTE_HELPER_H
-#define AREASPEEDADVISORYSERVERLTE_HELPER_H
+#ifndef V2XEMULATOR_HELPER_H
+#define V2XEMULATOR_HELPER_H
 
 #include <stdint.h>
 #include "ns3/application-container.h"
@@ -15,25 +15,18 @@
 namespace ns3 {
 
 /**
- * \ingroup TrafficInfo
- * \brief Create an application which sends a UDP packet and waits for an echo of this packet
+ * \ingroup v2xEmulator
+ * \brief Create an application that emulates the presence of real vehicles (and their OBUs), sending CAMs and able to receive DENMs
  */
-class areaSpeedAdvisoryServerLTEHelper
+class v2xEmulatorHelper
 {
 public:
-  /**
-   * Create TrafficInfoClientHelper which will make life easier for people trying
-   * to set up simulations with echos.
-   *
-   * \param ip The IP address of the remote Traffic Info server
-   * \param port The port number of the remote Traffic Info server
-   */
-  areaSpeedAdvisoryServerLTEHelper ();
+  v2xEmulatorHelper ();
 
   void SetAttribute (std::string name, const AttributeValue &value);
 
   /**
-   * Create a TrafficInfoServerApplication on the specified Node.
+   * Create an v2xEmulator application on the specified Node.
    *
    * \param node The node on which to create the Application.  The node is
    *             specified by a Ptr<Node>.
@@ -43,7 +36,7 @@ public:
   ApplicationContainer Install (Ptr<Node> node) const;
 
   /**
-   * Create a Traffic Info client application on the specified node.  The Node
+   * Create an v2xEmulator application on the specified Node.  The Node
    * is provided as a string name of a Node that has been previously 
    * associated using the Object Name Service.
    *
@@ -57,24 +50,17 @@ public:
   /**
    * \param c the nodes
    *
-   * Create one Traffic Info client application on each of the input nodes
+   * Create one v2xEmulator application on each of the input nodes
    *
    * \returns the applications created, one application per input node.
    */
   ApplicationContainer Install (NodeContainer c) const;
 
 private:
-  /**
-   * Install an ns3::TrafficInfoClient on the node configured with all the
-   * attributes set with SetAttribute.
-   *
-   * \param node The node on which an TrafficInfoClient will be installed.
-   * \returns Ptr to the application installed.
-   */
   Ptr<Application> InstallPriv (Ptr<Node> node) const;
   ObjectFactory m_factory; //!< Object factory.
 };
 
 } // namespace ns3
 
-#endif /* AREASPEEDADVISORYSERVERLTE_HELPER_H */
+#endif /* V2XEMULATOR_H */

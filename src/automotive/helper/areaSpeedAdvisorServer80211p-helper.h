@@ -1,5 +1,5 @@
-#ifndef AREASPEEDADVISORYCLIENTLTE_HELPER_H
-#define AREASPEEDADVISORYCLIENTLTE_HELPER_H
+#ifndef AREASPEEDADVISORSERVER80211P_HELPER_H
+#define AREASPEEDADVISORSERVER80211P_HELPER_H
 
 #include <stdint.h>
 #include "ns3/application-container.h"
@@ -18,7 +18,7 @@ namespace ns3 {
  * \ingroup TrafficInfo
  * \brief Create an application which sends a UDP packet and waits for an echo of this packet
  */
-class areaSpeedAdvisoryClientLTEHelper
+class areaSpeedAdvisorServer80211pHelper
 {
 public:
   /**
@@ -28,7 +28,7 @@ public:
    * \param ip The IP address of the remote Traffic Info server
    * \param port The port number of the remote Traffic Info server
    */
-  areaSpeedAdvisoryClientLTEHelper ();
+  areaSpeedAdvisorServer80211pHelper ();
 
   void SetAttribute (std::string name, const AttributeValue &value);
 
@@ -77,4 +77,4 @@ private:
 
 } // namespace ns3
 
-#endif /* AREASPEEDADVISORYCLIENTLTE */
+#endif /* AREASPEEDADVISORSERVER80211P_HELPER_H */

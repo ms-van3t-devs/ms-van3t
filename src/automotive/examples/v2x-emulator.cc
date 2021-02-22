@@ -27,14 +27,14 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/mobility-module.h"
 #include "ns3/traci-module.h"
-#include "ns3/obuEmu-helper.h"
+#include "ns3/v2xEmulator-helper.h"
 #include "ns3/emu-fd-net-device-helper.h"
-#include "ns3/obuEmu.h"
+#include "ns3/v2xEmulator.h"
 #include "ns3/packet-socket-helper.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("emu-v2x");
+NS_LOG_COMPONENT_DEFINE ("v2x-emulator");
 
 int
 main (int argc, char *argv[])
@@ -42,6 +42,15 @@ main (int argc, char *argv[])
   /* In this example the vehicles generated will redirect all their V2X messages toward the physical
    * interface specified in the --interface option. By default, in this example the vehicles generate CAMs with a variable
    * frequency (see ETSI CAM generation standard) and 1 DENM every second.
+   * Both CAM and DENM dissemination che be stopped by specifying
+   * --send-cam = false
+   * --send-denm = false
+   *
+   * Normally each message is encapsulated into BTP+GeoNetworking and broadcasted. However, you can also specify:
+   * --udp = <ip address>:<port>
+   * to encapsulate all the messages inside BTP+GeoNetworking+UDP+IPv4 and send them in an unicast fashion (UDP mode).
+   * Additionally, in UDP mode, you can also configure subnet, netmask and gateway in the emulated nodes.
+   *
    * To start this application, you need to set the interface where the V2X messages are relayed into promiscuous mode!
    * command -> sudo ip link set <interface name> promisc on
    */
@@ -50,10 +59,21 @@ main (int argc, char *argv[])
   std::string deviceName ("eth1");
   std::string encapMode ("Dix");
 
+  // UDP mode parameters
+  std::string udpIp = "";
+  std::string gwstr = "192.168.1.1";
+  std::string subnet = "192.168.1.0";
+  std::string netmask = "255.255.255.0";
+  int destPort=0;
+  Ipv4Address destAddr;
+  Ipv4AddressHelper ipv4helper;
+
   // Simulation parameters
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  bool sendCam = true;
+  bool sendDenm = true;
 
   bool verbose = true;
   bool sumo_gui = true;
@@ -78,13 +98,19 @@ main (int argc, char *argv[])
   cmd.AddValue ("verbose", "Enable verbose printing on stdout", verbose);
   cmd.AddValue ("interface", "Name of the physical interface to send V2X messages to", deviceName);
   cmd.AddValue ("sim-time", "Total duration of the emulation [s]", emuTime);
+  cmd.AddValue ("send-cam", "To trigger the CAM dissemination", sendCam);
+  cmd.AddValue ("send-denm", "To trigger the DENM dissemination", sendDenm);
+  cmd.AddValue ("udp", "[UDP mode] To enable UDP mode and specify UDP port and IP address where the V2X messages are redirected (format: <IP>:<port>)", udpIp);
+  cmd.AddValue ("gateway", "[UDP mode] To specify the gateway at which the UDP/IP packets will be sent", gwstr);
+  cmd.AddValue ("subnet", "[UDP mode] To specify the subnet which will be used to assign the IP addresses of emulated nodes (the .1 address is automatically excluded)", subnet);
+  cmd.AddValue ("netmask", "[UDP mode] To specify the netmask of the network", netmask);
 
   cmd.Parse (argc, argv);
 
   /* If verbose is true, enable some additional logging */
   if (verbose)
     {
-      LogComponentEnable ("emu-v2x", LOG_LEVEL_INFO);
+      LogComponentEnable ("v2x-emulator", LOG_LEVEL_INFO);
       LogComponentEnable ("CABasicService", LOG_LEVEL_INFO);
       LogComponentEnable ("DENBasicService", LOG_LEVEL_INFO);
     }
@@ -121,6 +147,28 @@ main (int argc, char *argv[])
     }
   NS_LOG_INFO("The .rou file has been read: " << numberOfNodes << " vehicles will be present in the simulation.");
 
+  // When --udp is specified, parse the IPv4 and port parameters
+  if (udpIp != "")
+    {
+      std::istringstream udpIpStream(udpIp);
+      std::string curr_str;
+      // IP address
+      std::getline(udpIpStream, curr_str, ':');
+
+      destAddr = Ipv4Address(curr_str.c_str());
+
+      // Port
+      std::getline(udpIpStream, curr_str, ':');
+      destPort=std::stoi(curr_str);
+
+      if(destPort<=0 || destPort > 65535)
+        {
+          NS_FATAL_ERROR("Error: "<<destPort<<" is not a valid port for UDP operations.");
+        }
+
+      std::cout<< "V2X Messages will be sent to:"<<destAddr<<":"<<destPort << std::endl;
+    }
+
   /* Set the emulation total time (in seconds) */
   NS_LOG_INFO("Simulation will last " << emuTime << " seconds");
   ns3::Time simulationTime (ns3::Seconds(emuTime));
@@ -128,6 +176,15 @@ main (int argc, char *argv[])
   /* Create containers for OBUs */
   NodeContainer obuNodes;
   obuNodes.Create(numberOfNodes);
+
+  if (udpIp != "")
+    {
+      InternetStackHelper internet;
+      internet.SetIpv4StackInstall (true);
+      internet.Install (obuNodes);
+      ipv4helper.SetBase (subnet.c_str(), netmask.c_str());
+      ipv4helper.NewAddress (); // "Burn" the first IP as it may be assigned to a router in the local network
+    }
 
   /* Setup Mobility and position node pool */
   MobilityHelper mobility;
@@ -149,9 +206,17 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
 
-  /* Create the OBU application (obuEmu, see also model/obuEmu.cc/.h) */
-  obuEmuHelper emuHelper;
+  /* Create the OBU application (v2xEmulator, see also model/v2xEmulator.cc/.h) */
+  v2xEmulatorHelper emuHelper;
   emuHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
+  emuHelper.SetAttribute ("SendCAM", (BooleanValue) sendCam);
+  emuHelper.SetAttribute ("SendDENM", (BooleanValue) sendDenm);
+  if(udpIp!="")
+  {
+    emuHelper.SetAttribute ("DestinationIPv4", Ipv4AddressValue(destAddr));
+    emuHelper.SetAttribute ("DestinationPort", IntegerValue(destPort));
+    emuHelper.SetAttribute ("UDPmode",(BooleanValue) true);
+  }
 
   /* Create the FdNetDevice to send packets over a physical interface */
   EmuFdNetDeviceHelper emuDev;
@@ -159,8 +224,16 @@ main (int argc, char *argv[])
   emuDev.SetAttribute ("EncapsulationMode", StringValue (encapMode));
 
   /* Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
-  PacketSocketHelper packetSocket;
-  packetSocket.Install (obuNodes);
+  if (udpIp=="")
+  {
+    PacketSocketHelper packetSocket;
+    packetSocket.Install (obuNodes);
+  }
+
+  NetDeviceContainer fdnetContainer;
+  Ipv4InterfaceContainer ipv4ic;
+  Ipv4Address gateway (gwstr.c_str());
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
   /* Callback function for node creation */
   std::function<Ptr<Node> ()> setupNewEmuNode = [&] () -> Ptr<Node>
@@ -175,7 +248,6 @@ main (int argc, char *argv[])
       ++nodeCounter; //increment counter for next node
 
       /* Install FdNetDevice and set MAC address (using 00:00:00:00:00:01, 00:00:00:00:00:02, and so on, for each vehicle) */
-      NetDeviceContainer fdnetContainer;
       std::ostringstream veh_mac;
       veh_mac << "00:00:00:00:00:" << std::setfill('0') << std::setw(2) << nodeCounter;
       fdnetContainer = emuDev.Install(includedNode);
@@ -184,10 +256,26 @@ main (int argc, char *argv[])
 
       std::cout<<"MAC of node "<<nodeCounter-1<<": "<<veh_mac.str()<<std::endl;
 
+      /* When in UDP mode, configure the IP stack of the nodes/vehicles */
+      if(udpIp!="")
+      {
+         Ptr<Ipv4> ipv4 = includedNode->GetObject<Ipv4> ();
+         uint32_t interface = ipv4->AddInterface (dev);
+         ipv4ic = ipv4helper.Assign (fdnetContainer);
+         Ipv4InterfaceAddress address = Ipv4InterfaceAddress (ipv4ic.GetAddress (0,0), netmask.c_str());
+         ipv4->AddAddress (interface, address);
+         ipv4->SetMetric (interface, 1);
+         ipv4->SetUp (interface);
+
+         Ptr<Ipv4StaticRouting> staticRouting = ipv4RoutingHelper.GetStaticRouting (ipv4);
+         staticRouting->SetDefaultRoute (gateway, interface);
+         std::cout<<"IPv4 of node "<<nodeCounter-1<<": "<<ipv4ic.GetAddress (0,0)<<std::endl;
+      }
+
       /* Install Application */
-      ApplicationContainer obuEmuApp = emuHelper.Install (includedNode);
-      obuEmuApp.Start (Seconds (0.0));
-      obuEmuApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
+      ApplicationContainer v2xEmulatorApp = emuHelper.Install (includedNode);
+      v2xEmulatorApp.Start (Seconds (0.0));
+      v2xEmulatorApp.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
 
       std::cout<<"New node: "<<nodeCounter-1<<std::endl;
 
@@ -198,9 +286,9 @@ main (int argc, char *argv[])
   std::function<void (Ptr<Node>)> shutdownEmuNode = [] (Ptr<Node> exNode)
     {
       /* stop all applications */
-      Ptr<obuEmu> obuEmuApp_ = exNode->GetApplication(0)->GetObject<obuEmu>();
-      if(obuEmuApp_)
-        obuEmuApp_->StopApplicationNow ();
+      Ptr<v2xEmulator> v2xEmulatorApp_ = exNode->GetApplication(0)->GetObject<v2xEmulator>();
+      if(v2xEmulatorApp_)
+        v2xEmulatorApp_->StopApplicationNow ();
 
        /* set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();

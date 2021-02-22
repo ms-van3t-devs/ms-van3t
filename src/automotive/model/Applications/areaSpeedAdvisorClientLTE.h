@@ -1,5 +1,5 @@
-#ifndef AREASPEEDADVISORYCLIENT80211P_H
-#define AREASPEEDADVISORYCLIENT80211P_H
+#ifndef AREASPEEDADVISORCLIENTLTE_H
+#define AREASPEEDADVISORCLIENTLTE_H
 
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
@@ -13,7 +13,7 @@
 
 namespace ns3 {
 
-class areaSpeedAdvisoryClient80211p : public Application
+class areaSpeedAdvisorClientLTE : public Application
 {
   public:
     /**
@@ -22,12 +22,14 @@ class areaSpeedAdvisoryClient80211p : public Application
      */
     static TypeId GetTypeId (void);
 
-    areaSpeedAdvisoryClient80211p ();
+    areaSpeedAdvisorClientLTE ();
 
-    virtual ~areaSpeedAdvisoryClient80211p ();
+    virtual ~areaSpeedAdvisorClientLTE ();
 
     void receiveDENM(denData denm, Address from);
+
     void receiveCAM (CAM_t *cam, Address from);
+
     void StopApplicationNow ();
 
   protected:
@@ -47,10 +49,12 @@ class areaSpeedAdvisoryClient80211p : public Application
     virtual void StopApplication (void);
 
     void TriggerCam(void);
+
     /**
      * @brief This function compute the milliseconds elapsed from 2004-01-01
     */
     long compute_timestampIts ();
+
     void denmTimeout(void);
 
     Ptr<TraciClient> m_client; //!< TraCI client
@@ -63,7 +67,6 @@ class areaSpeedAdvisoryClient80211p : public Application
     Ipv4Address m_server_addr; //!< Remote addr
 
     EventId m_sendCamEvent; //!< Event to send the CAM
-    EventId m_denmTimeout; //!< Event to set high speed limit back
 
     /* Counters */
     int m_cam_sent;
@@ -72,5 +75,5 @@ class areaSpeedAdvisoryClient80211p : public Application
 
 } // namespace ns3
 
-#endif /* AREASPEEDADVISORYCLIENT80211P_H */
+#endif /* AREASPEEDADVISORCLIENTLTE_H */
 

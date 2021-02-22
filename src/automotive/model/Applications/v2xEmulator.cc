@@ -19,7 +19,7 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "obuEmu.h"
+#include "v2xEmulator.h"
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -29,75 +29,125 @@
 
 namespace ns3
 {
-  NS_LOG_COMPONENT_DEFINE("obuEmu");
+  NS_LOG_COMPONENT_DEFINE("v2xEmulator");
 
-  NS_OBJECT_ENSURE_REGISTERED(obuEmu);
+  NS_OBJECT_ENSURE_REGISTERED(v2xEmulator);
 
   TypeId
-  obuEmu::GetTypeId (void)
+  v2xEmulator::GetTypeId (void)
   {
     static TypeId tid =
-        TypeId ("ns3::obuEmu")
+        TypeId ("ns3::v2xEmulator")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<obuEmu> ()
+        .AddConstructor<v2xEmulator> ()
         .AddAttribute ("Client",
             "TraCI client for SUMO",
             PointerValue (0),
-            MakePointerAccessor (&obuEmu::m_client),
-            MakePointerChecker<TraciClient> ());
+            MakePointerAccessor (&v2xEmulator::m_client),
+            MakePointerChecker<TraciClient> ())
+        .AddAttribute ("SendCAM",
+            "Enable the CAM transmission",
+            BooleanValue (true),
+            MakeBooleanAccessor (&v2xEmulator::m_send_cam),
+            MakeBooleanChecker ())
+        .AddAttribute ("SendDENM",
+            "Enable the DENM transmission",
+            BooleanValue (true),
+            MakeBooleanAccessor (&v2xEmulator::m_send_denm),
+            MakeBooleanChecker ())
+        .AddAttribute ("DestinationIPv4",
+            "Destination IPv4 address when working in UDP mode",
+            Ipv4AddressValue ("192.168.1.1"),
+            MakeIpv4AddressAccessor (&v2xEmulator::m_udpmode_ipAddress),
+            MakeIpv4AddressChecker ())
+        .AddAttribute ("DestinationPort",
+            "Destination port when working in UDP mode",
+            IntegerValue (65510),
+            MakeIntegerAccessor (&v2xEmulator::m_udpmode_port),
+            MakeIntegerChecker <int>(1,65535))
+        .AddAttribute ("UDPmode",
+            "Flag set to true to enable UDP mode",
+            BooleanValue (false),
+            MakeBooleanAccessor (&v2xEmulator::m_udpmode_enabled),
+            MakeBooleanChecker ());
         return tid;
   }
 
-  obuEmu::obuEmu ()
+  v2xEmulator::v2xEmulator ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
+    m_udpmode_enabled = false;
   }
 
-  obuEmu::~obuEmu ()
+  v2xEmulator::~v2xEmulator ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  obuEmu::DoDispose (void)
+  v2xEmulator::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
 
   void
-  obuEmu::StartApplication (void)
+  v2xEmulator::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
+    TypeId tid;
     m_id = m_client->GetVehicleId (this->GetNode ());
 
-    /* Create the socket for TX and RX (must be a PacketSocket in order to use GeoNet instead of IP) */
-    TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
+    /* Create the socket for TX and RX (must be a P */
+    if(!m_udpmode_enabled)
+    {
+      // PacketSocket in order to use GeoNet instead of IP)
+      tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
+    }
+    else
+    {
+      // UDP socket in BTP+GeoNetworking+UDP+IPv4 mode
+      tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    }
 
     /* Socket used to send CAMs and receive DENMs */
     m_socket = Socket::CreateSocket (GetNode (), tid);
 
-    /* Bind the socket to local address */
-    PacketSocketAddress local;
-    local.SetSingleDevice (GetNode ()->GetDevice (0)->GetIfIndex ());
-    local.SetPhysicalAddress (GetNode ()->GetDevice (0)->GetAddress ());
-    local.SetProtocol (0x8947);
-    if (m_socket->Bind (local) == -1)
-      {
-        NS_FATAL_ERROR ("Failed to bind client socket");
-      }
+    if(!m_udpmode_enabled)
+    {
+        /* UDP mode */
+        /* Bind the socket to local address */
+        PacketSocketAddress local;
+        local.SetSingleDevice (GetNode ()->GetDevice (0)->GetIfIndex ());
+        local.SetPhysicalAddress (GetNode ()->GetDevice (0)->GetAddress ());
+        local.SetProtocol (0x8947);
+        if (m_socket->Bind (local) == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind client socket");
+        }
 
-    // Set the socket to broadcast
-    PacketSocketAddress remote;
-    remote.SetSingleDevice (GetNode ()->GetDevice (0)->GetIfIndex ());
-    remote.SetPhysicalAddress (GetNode ()->GetDevice (0)->GetBroadcast ());
-    remote.SetProtocol (0x8947);
+        // Set the socket to broadcast
+        PacketSocketAddress remote;
+        remote.SetSingleDevice (GetNode ()->GetDevice (0)->GetIfIndex ());
+        remote.SetPhysicalAddress (GetNode ()->GetDevice (0)->GetBroadcast ());
+        remote.SetProtocol (0x8947);
+        m_socket->Connect(remote);
+    }
+    else
+    {
+        if (m_socket->Bind () == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind UDP socket");
+        }
+        if(m_socket->Connect (InetSocketAddress(m_udpmode_ipAddress,m_udpmode_port))!=0)
+        {
+          NS_FATAL_ERROR ("Error: cannot connect UDP socket.");
+        }
+    }
 
-    m_socket->Connect(remote);
-
-    //Create new btp and geoNet objects and set them in DENBasicService and CABasicService
+    // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
     m_btp->setGeoNet(m_geoNet);
@@ -108,14 +158,14 @@ namespace ns3
     m_denService.setSocketRx (m_socket);
     m_denService.setSocketTx (m_socket);
     m_denService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
-    m_denService.addDENRxCallback (std::bind(&obuEmu::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+    m_denService.addDENRxCallback (std::bind(&v2xEmulator::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
     m_denService.setRealTime (true);
 
     /* Set sockets, callback, station properties and TraCI VDP in CABasicService */
     m_caService.setSocketRx (m_socket);
     m_caService.setSocketTx (m_socket);
     m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
-    m_caService.addCARxCallback (std::bind(&obuEmu::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&v2xEmulator::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
     m_caService.setRealTime (true);
 
     /* Set TraCI vdp for GeoNet object */
@@ -125,14 +175,16 @@ namespace ns3
     /* Schedule CAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());
     double desync = ((double)std::rand()/RAND_MAX);
-    m_caService.startCamDissemination(desync);
+    if (m_send_cam)
+      m_caService.startCamDissemination(desync);
 
     /* Schedule DENM dissemination */
-    obuEmu::TriggerDenm ();
+    if (m_send_denm)
+      v2xEmulator::TriggerDenm ();
   }
 
   void
-  obuEmu::StopApplication ()
+  v2xEmulator::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
 
@@ -145,14 +197,14 @@ namespace ns3
   }
 
   void
-  obuEmu::StopApplicationNow ()
+  v2xEmulator::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  obuEmu::TriggerDenm()
+  v2xEmulator::TriggerDenm()
   {
     denData data;
     ActionID_t actionid;
@@ -183,11 +235,11 @@ namespace ns3
     }
 
     data.denDataFree ();
-    m_sendDenmEvent = Simulator::Schedule (Seconds (1), &obuEmu::UpdateDenm, this, actionid);
+    m_sendDenmEvent = Simulator::Schedule (Seconds (1), &v2xEmulator::UpdateDenm, this, actionid);
   }
 
   void
-  obuEmu::UpdateDenm (ActionID actionid)
+  v2xEmulator::UpdateDenm (ActionID actionid)
   {
     denData data;
     DENBasicService_error_t update_retval;
@@ -217,12 +269,12 @@ namespace ns3
 
     data.denDataFree ();
 
-    m_sendDenmEvent = Simulator::Schedule (Seconds (1), &obuEmu::UpdateDenm, this, actionid);
+    m_sendDenmEvent = Simulator::Schedule (Seconds (1), &v2xEmulator::UpdateDenm, this, actionid);
 
   }
 
   void
-  obuEmu::receiveCAM (CAM_t *cam, Address from)
+  v2xEmulator::receiveCAM (CAM_t *cam, Address from)
   {
     /* Implement CAM strategy here */
    std::cout << "Vehicle with ID "<< m_id << " received a new CAM." << std::endl;
@@ -231,10 +283,10 @@ namespace ns3
    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
-  /* This is just a sample dummy receiveDENM function. The user can customize it to parse the content of a DENM when it is received. */
   void
-  obuEmu::receiveDENM (denData denm, Address from)
+  v2xEmulator::receiveDENM (denData denm, Address from)
   {
+    /* This is just a sample dummy receiveDENM function. The user can customize it to parse the content of a DENM when it is received. */
     std::cout << "Vehicle with ID "<< m_id << " received a new DENM." << std::endl;
 
     (void) denm; // Contains the data received from the DENM
@@ -242,7 +294,7 @@ namespace ns3
   }
 
   long
-  obuEmu::compute_timestampIts ()
+  v2xEmulator::compute_timestampIts ()
   {
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time

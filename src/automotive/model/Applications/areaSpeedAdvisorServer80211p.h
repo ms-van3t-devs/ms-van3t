@@ -1,5 +1,5 @@
-#ifndef AREASPEEDADVISORYSERVER80211P_H
-#define AREASPEEDADVISORYSERVER80211P_H
+#ifndef AREASPEEDADVISORSERVER80211P_H
+#define AREASPEEDADVISORSERVER80211P_H
 
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
@@ -12,7 +12,7 @@
 
 namespace ns3 {
 
-class areaSpeedAdvisoryServer80211p : public Application
+class areaSpeedAdvisorServer80211p : public Application
 {
   public:
     /**
@@ -21,9 +21,9 @@ class areaSpeedAdvisoryServer80211p : public Application
      */
     static TypeId GetTypeId (void);
 
-    areaSpeedAdvisoryServer80211p ();
+    areaSpeedAdvisorServer80211p ();
 
-    virtual ~areaSpeedAdvisoryServer80211p ();
+    virtual ~areaSpeedAdvisorServer80211p ();
 
     /**
      * \brief Callback to handle a CAM reception.
@@ -96,5 +96,5 @@ class areaSpeedAdvisoryServer80211p : public Application
 
 } // namespace ns3
 
-#endif /* AREASPEEDADVISORYSERVER80211P_H */
+#endif /* AREASPEEDADVISORSERVER80211P_H */
 

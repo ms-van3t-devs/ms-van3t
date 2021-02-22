@@ -13,12 +13,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
- * Created by Carlos Risma, Politecnico di Torino
- * (carlosrisma@gmail.com)
+ * Created by:
+ *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
+ *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+ *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
+
 #include "geonet.h"
 #include "ns3/log.h"
 #include "ns3/network-module.h"
+#include "ns3/gn-utils.h"
 #include <cmath>
 #define SN_MAX 65536
 
@@ -109,7 +113,6 @@ namespace ns3 {
   {
     m_vdp = vdp;
     EPVupdate ();// Update EPV at startup
-
   }
 
   void
@@ -117,8 +120,7 @@ namespace ns3 {
   {
     m_socket_tx = socket_tx;
     // ETSI EN 302 636-4-1 [10.2.1.3.2]
-    Ptr<NetDevice> device = m_socket_tx->GetNode ()->GetDevice (0);
-    m_GnLocalGnAddr = Mac48Address::ConvertFrom (device->GetAddress());
+    m_GnLocalGnAddr = getGNMac48(m_socket_tx->GetNode ()->GetDevice (0)->GetAddress ());
   }
 
   void
@@ -685,8 +687,7 @@ namespace ns3 {
     if((address == m_GNAddress) && (address.GetLLAddress ()==m_GNAddress.GetLLAddress ()))
     {
       //ETSI EN 302 636-4-1 [10.2.1.5] : If conflict is detected, request new MID field
-      Ptr<NetDevice> device = m_socket_tx->GetNode ()->GetDevice (0);
-      m_GnLocalGnAddr = Mac48Address::ConvertFrom (device->GetAddress());
+      m_GnLocalGnAddr = getGNMac48(m_socket_tx->GetNode ()->GetDevice (0)->GetAddress ());
       m_GNAddress = m_GNAddress.MakeManagedconfiguredAddress (m_GnLocalGnAddr,m_stationtype);
       return true;
     }

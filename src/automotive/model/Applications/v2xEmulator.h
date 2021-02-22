@@ -1,5 +1,5 @@
-#ifndef APPCLIENT_H
-#define APPCLIENT_H
+#ifndef V2XEMULATOR_H
+#define V2XEMULATOR_H
 
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
@@ -13,7 +13,7 @@
 
 namespace ns3 {
 
-class obuEmu : public Application
+class v2xEmulator : public Application
 {
 public:
   /**
@@ -22,9 +22,9 @@ public:
    */
   static TypeId GetTypeId (void);
 
-  obuEmu ();
+  v2xEmulator ();
 
-  virtual ~obuEmu ();
+  virtual ~v2xEmulator ();
 
   void receiveCAM (CAM_t *cam, Address from);
 
@@ -55,6 +55,12 @@ private:
   Ptr<TraciClient> m_client; //!< TraCI client
   std::string m_id; //!< vehicle id
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
+  bool m_send_denm; //!< To decide if CAM dissemination is active or not
+
+  // UDP mode parameters
+  Ipv4Address m_udpmode_ipAddress;
+  int m_udpmode_port;
+  bool m_udpmode_enabled;
 
   EventId m_sendDenmEvent; //!< Event to send the DENM
 
@@ -62,5 +68,5 @@ private:
 
 } // namespace ns3
 
-#endif /* APPCLIENT_H */
+#endif /* V2XEMULATOR_H */
 

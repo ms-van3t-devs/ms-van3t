@@ -19,7 +19,7 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "areaSpeedAdvisoryServerLTE.h"
+#include "areaSpeedAdvisorServerLTE.h"
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -29,42 +29,42 @@
 
 namespace ns3
 {
-  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisoryServerLTE");
+  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisorServerLTE");
 
-  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisoryServerLTE);
+  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisorServerLTE);
 
   TypeId
-  areaSpeedAdvisoryServerLTE::GetTypeId (void)
+  areaSpeedAdvisorServerLTE::GetTypeId (void)
   {
     static TypeId tid =
-        TypeId ("ns3::areaSpeedAdvisoryServerLTE")
+        TypeId ("ns3::areaSpeedAdvisorServerLTE")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<areaSpeedAdvisoryServerLTE> ()
+        .AddConstructor<areaSpeedAdvisorServerLTE> ()
         .AddAttribute ("AggregateOutput",
            "If it is true, the server will print every second an aggregate output about cam and denm",
            BooleanValue (false),
-           MakeBooleanAccessor (&areaSpeedAdvisoryServerLTE::m_aggregate_output),
+           MakeBooleanAccessor (&areaSpeedAdvisorServerLTE::m_aggregate_output),
            MakeBooleanChecker ())
         .AddAttribute ("RealTime",
            "To compute properly timestamps",
            BooleanValue(false),
-           MakeBooleanAccessor (&areaSpeedAdvisoryServerLTE::m_real_time),
+           MakeBooleanAccessor (&areaSpeedAdvisorServerLTE::m_real_time),
            MakeBooleanChecker ())
         .AddAttribute ("CSV",
             "CSV log name.",
             StringValue (),
-            MakeStringAccessor (&areaSpeedAdvisoryServerLTE::m_csv_name),
+            MakeStringAccessor (&areaSpeedAdvisorServerLTE::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("Client",
            "TraCI client for SUMO",
            PointerValue (0),
-           MakePointerAccessor (&areaSpeedAdvisoryServerLTE::m_client),
+           MakePointerAccessor (&areaSpeedAdvisorServerLTE::m_client),
            MakePointerChecker<TraciClient> ());
         return tid;
   }
 
-  areaSpeedAdvisoryServerLTE::areaSpeedAdvisoryServerLTE ()
+  areaSpeedAdvisorServerLTE::areaSpeedAdvisorServerLTE ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
@@ -72,20 +72,20 @@ namespace ns3
     m_denm_sent = 0;
   }
 
-  areaSpeedAdvisoryServerLTE::~areaSpeedAdvisoryServerLTE ()
+  areaSpeedAdvisorServerLTE::~areaSpeedAdvisorServerLTE ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  areaSpeedAdvisoryServerLTE::DoDispose (void)
+  areaSpeedAdvisorServerLTE::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
 
   void
-  areaSpeedAdvisoryServerLTE::StartApplication (void)
+  areaSpeedAdvisorServerLTE::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
 
@@ -162,7 +162,7 @@ namespace ns3
     /* Set sockets, callback and station properties in DENBasicService */
     m_denService.setSocketTx (m_socket);
     m_denService.setSocketRx (m_socket);
-    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisoryServerLTE::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisorServerLTE::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
     // Setting geoArea address for DENMs
     m_denService.setGeoArea (geoArea);
     // Setting a station ID (for instance, 777888999)
@@ -171,7 +171,7 @@ namespace ns3
     /* Set callback and station properties in CABasicService (which will only be used to receive CAMs) */
     m_caService.setSocketRx (m_socket);
     m_caService.setStationProperties (777888999, StationType_roadSideUnit);
-    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisoryServerLTE::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorServerLTE::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
     // Set the central position for the service (i.e. a reference fixed position used by GeoNetworking)
     // As reference position for GeoNetworking, we can take the center of the map (i.e. (0,0)), as if an RSU was there
@@ -182,7 +182,7 @@ namespace ns3
     libsumo::TraCIPosition servicePos = m_client->TraCIAPI::simulation.convertXYtoLonLat (0,0);
     m_denService.setFixedPositionRSU (servicePos.y,servicePos.x);
     m_caService.setFixedPositionRSU (servicePos.y,servicePos.x);
-
+    
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);
@@ -191,11 +191,11 @@ namespace ns3
 
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
-      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisoryServerLTE::aggregateOutput, this);
+      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisorServerLTE::aggregateOutput, this);
   }
 
   void
-  areaSpeedAdvisoryServerLTE::StopApplication ()
+  areaSpeedAdvisorServerLTE::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_aggegateOutputEvent);
@@ -210,14 +210,14 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServerLTE::StopApplicationNow ()
+  areaSpeedAdvisorServerLTE::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  areaSpeedAdvisoryServerLTE::TriggerDenm (speedmode_t speedmode, Address from)
+  areaSpeedAdvisorServerLTE::TriggerDenm (speedmode_t speedmode, Address from)
   {
     denData data;
     denData::denDataAlacarte alacartedata;
@@ -229,7 +229,7 @@ namespace ns3
     /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
-    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed advisory, we rely on the
+    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
     // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
     alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
 
@@ -248,7 +248,7 @@ namespace ns3
       return;
     }
 
-    // Set a speed limit advisory inside the DENM message
+    // Set a speed limit Advisor inside the DENM message
     *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) speedmode;
 
     data.setDenmAlacarteData_asn_types (alacartedata);
@@ -272,7 +272,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServerLTE::receiveCAM (CAM_t *cam, Address address)
+  areaSpeedAdvisorServerLTE::receiveCAM (CAM_t *cam, Address address)
   {
     m_cam_received++;
 
@@ -292,7 +292,7 @@ namespace ns3
     /* If is the first time the this veh sends a CAM, just check if it is inside or outside, then return */
     if (m_veh_position.find (address) == m_veh_position.end ())
     {
-      if (areaSpeedAdvisoryServerLTE::isInside (lon,lat))
+      if (areaSpeedAdvisorServerLTE::isInside (lon,lat))
         m_veh_position[address] = INSIDE;
       else
         m_veh_position[address] = OUTSIDE;
@@ -300,14 +300,14 @@ namespace ns3
     }
 
     /* Otherwise, check if a transition between INSIDE->OUTSIDE or viceversa happened */
-    if (areaSpeedAdvisoryServerLTE::isInside (lon,lat))
+    if (areaSpeedAdvisorServerLTE::isInside (lon,lat))
     {
       /* The vehice is now in the low-speed area
        * If it was registered as in the high-speed area, then send a DENM telling him to slow down */
       if (m_veh_position[address] == OUTSIDE)
       {
         m_veh_position[address] = INSIDE;
-        areaSpeedAdvisoryServerLTE::TriggerDenm (slowSpeedkmph,address);
+        areaSpeedAdvisorServerLTE::TriggerDenm (slowSpeedkmph,address);
       }
     }
     else
@@ -317,7 +317,7 @@ namespace ns3
       if (m_veh_position[address] == INSIDE)
       {
         m_veh_position[address] = OUTSIDE;
-        areaSpeedAdvisoryServerLTE::TriggerDenm (highSpeedkmph,address);
+        areaSpeedAdvisorServerLTE::TriggerDenm (highSpeedkmph,address);
       }
     }
 
@@ -326,7 +326,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServerLTE::receiveDENM (denData denm, Address from)
+  areaSpeedAdvisorServerLTE::receiveDENM (denData denm, Address from)
   {
     /* This is just a sample dummy receiveDENM function. The user can customize it to parse the content of a DENM when it is received. */
     (void) denm; // Contains the data received from the DENM
@@ -335,7 +335,7 @@ namespace ns3
   }
 
   bool
-  areaSpeedAdvisoryServerLTE::isInside(double x, double y)
+  areaSpeedAdvisorServerLTE::isInside(double x, double y)
   {
     if (x > m_lowerLimit.x && x < m_upperLimit.x && y > m_lowerLimit.y && y < m_upperLimit.y)
       return true;
@@ -344,7 +344,7 @@ namespace ns3
   }
 
   long
-  areaSpeedAdvisoryServerLTE::compute_timestampIts ()
+  areaSpeedAdvisorServerLTE::compute_timestampIts ()
   {
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time
@@ -356,10 +356,10 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServerLTE::aggregateOutput()
+  areaSpeedAdvisorServerLTE::aggregateOutput()
   {
     std::cout << Simulator::Now () << "," << m_cam_received << "," << m_denm_sent << std::endl;
-    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisoryServerLTE::aggregateOutput, this);
+    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisorServerLTE::aggregateOutput, this);
   }
 
 }

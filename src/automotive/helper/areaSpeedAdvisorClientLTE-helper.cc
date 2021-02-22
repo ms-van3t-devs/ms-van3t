@@ -19,22 +19,22 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "areaSpeedAdvisoryClientLTE-helper.h"
+#include "areaSpeedAdvisorClientLTE-helper.h"
 
-#include "ns3/areaSpeedAdvisoryClientLTE.h"
+#include "ns3/areaSpeedAdvisorClientLTE.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
 namespace ns3 {
 
-areaSpeedAdvisoryClientLTEHelper::areaSpeedAdvisoryClientLTEHelper ()
+areaSpeedAdvisorClientLTEHelper::areaSpeedAdvisorClientLTEHelper ()
 {
-  m_factory.SetTypeId (areaSpeedAdvisoryClientLTE::GetTypeId ());
+  m_factory.SetTypeId (areaSpeedAdvisorClientLTE::GetTypeId ());
 }
 
 
 void 
-areaSpeedAdvisoryClientLTEHelper::SetAttribute (
+areaSpeedAdvisorClientLTEHelper::SetAttribute (
   std::string name, 
   const AttributeValue &value)
 {
@@ -42,20 +42,20 @@ areaSpeedAdvisoryClientLTEHelper::SetAttribute (
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClientLTEHelper::Install (Ptr<Node> node) const
+areaSpeedAdvisorClientLTEHelper::Install (Ptr<Node> node) const
 {
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClientLTEHelper::Install (std::string nodeName) const
+areaSpeedAdvisorClientLTEHelper::Install (std::string nodeName) const
 {
   Ptr<Node> node = Names::Find<Node> (nodeName);
   return ApplicationContainer (InstallPriv (node));
 }
 
 ApplicationContainer
-areaSpeedAdvisoryClientLTEHelper::Install (NodeContainer c) const
+areaSpeedAdvisorClientLTEHelper::Install (NodeContainer c) const
 {
   ApplicationContainer apps;
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
@@ -67,9 +67,9 @@ areaSpeedAdvisoryClientLTEHelper::Install (NodeContainer c) const
 }
 
 Ptr<Application>
-areaSpeedAdvisoryClientLTEHelper::InstallPriv (Ptr<Node> node) const
+areaSpeedAdvisorClientLTEHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<areaSpeedAdvisoryClientLTE> ();
+  Ptr<Application> app = m_factory.Create<areaSpeedAdvisorClientLTE> ();
   node->AddApplication (app);
 
   return app;

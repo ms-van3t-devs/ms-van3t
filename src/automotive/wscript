@@ -14,17 +14,17 @@ def configure(conf):
 def build(bld):
     module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci'])
     module.source = [
-        'helper/areaSpeedAdvisoryClient80211p-helper.cc',
-        'helper/areaSpeedAdvisoryServer80211p-helper.cc',
-        'helper/areaSpeedAdvisoryClientLTE-helper.cc',
-        'helper/areaSpeedAdvisoryServerLTE-helper.cc',
+        'helper/areaSpeedAdvisorClient80211p-helper.cc',
+        'helper/areaSpeedAdvisorServer80211p-helper.cc',
+        'helper/areaSpeedAdvisorClientLTE-helper.cc',
+        'helper/areaSpeedAdvisorServerLTE-helper.cc',
         'helper/emergencyVehicleAlert-helper.cc',
-        'helper/obuEmu-helper.cc',
+        'helper/v2xEmulator-helper.cc',
 
-        'model/Applications/areaSpeedAdvisoryClient80211p.cc',
-        'model/Applications/areaSpeedAdvisoryServer80211p.cc',
-        'model/Applications/areaSpeedAdvisoryClientLTE.cc',
-        'model/Applications/areaSpeedAdvisoryServerLTE.cc',
+        'model/Applications/areaSpeedAdvisorClient80211p.cc',
+        'model/Applications/areaSpeedAdvisorServer80211p.cc',
+        'model/Applications/areaSpeedAdvisorClientLTE.cc',
+        'model/Applications/areaSpeedAdvisorServerLTE.cc',
 
         'model/Applications/emergencyVehicleAlert.cc',
         'model/Facilities/denBasicService.cc',
@@ -35,7 +35,7 @@ def build(bld):
         'model/Facilities/vdpTraci.cc',
         'model/Facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
-        'model/Applications/obuEmu.cc',
+        'model/Applications/v2xEmulator.cc',
 
         # BTP
         '/model/BTP/btp.cc',
@@ -273,17 +273,17 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'automotive'
     headers.source = [
-        'helper/areaSpeedAdvisoryClientLTE-helper.h',
-        'helper/areaSpeedAdvisoryServerLTE-helper.h',
-        'helper/areaSpeedAdvisoryClient80211p-helper.h',
-        'helper/areaSpeedAdvisoryServer80211p-helper.h',
+        'helper/areaSpeedAdvisorClientLTE-helper.h',
+        'helper/areaSpeedAdvisorServerLTE-helper.h',
+        'helper/areaSpeedAdvisorClient80211p-helper.h',
+        'helper/areaSpeedAdvisorServer80211p-helper.h',
         'helper/emergencyVehicleAlert-helper.h',
-        'helper/obuEmu-helper.h',
+        'helper/v2xEmulator-helper.h',
 
-        'model/Applications/areaSpeedAdvisoryClient80211p.h',
-        'model/Applications/areaSpeedAdvisoryServer80211p.h',
-        'model/Applications/areaSpeedAdvisoryClientLTE.h',
-        'model/Applications/areaSpeedAdvisoryServerLTE.h',
+        'model/Applications/areaSpeedAdvisorClient80211p.h',
+        'model/Applications/areaSpeedAdvisorServer80211p.h',
+        'model/Applications/areaSpeedAdvisorClientLTE.h',
+        'model/Applications/areaSpeedAdvisorServerLTE.h',
         'model/Applications/emergencyVehicleAlert.h',
         'model/Facilities/denBasicService.h',
         'model/Facilities/denData.h',
@@ -294,7 +294,7 @@ def build(bld):
         'model/Facilities/vdp.h',
         'model/Facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',
-        'model/Applications/obuEmu.h',
+        'model/Applications/v2xEmulator.h',
 
         # BTP
         '/model/BTP/btp.h',

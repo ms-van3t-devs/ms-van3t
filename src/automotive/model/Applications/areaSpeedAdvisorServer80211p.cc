@@ -19,7 +19,7 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "areaSpeedAdvisoryServer80211p.h"
+#include "areaSpeedAdvisorServer80211p.h"
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -29,42 +29,42 @@
 
 namespace ns3
 {
-  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisoryServer80211p");
+  NS_LOG_COMPONENT_DEFINE("areaSpeedAdvisorServer80211p");
 
-  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisoryServer80211p);
+  NS_OBJECT_ENSURE_REGISTERED(areaSpeedAdvisorServer80211p);
 
   TypeId
-  areaSpeedAdvisoryServer80211p::GetTypeId (void)
+  areaSpeedAdvisorServer80211p::GetTypeId (void)
   {
     static TypeId tid =
-        TypeId ("ns3::areaSpeedAdvisoryServer80211p")
+        TypeId ("ns3::areaSpeedAdvisorServer80211p")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<areaSpeedAdvisoryServer80211p> ()
+        .AddConstructor<areaSpeedAdvisorServer80211p> ()
         .AddAttribute ("AggregateOutput",
            "If it is true, the server will print every second an aggregate output about cam and denm",
            BooleanValue (false),
-           MakeBooleanAccessor (&areaSpeedAdvisoryServer80211p::m_aggregate_output),
+           MakeBooleanAccessor (&areaSpeedAdvisorServer80211p::m_aggregate_output),
            MakeBooleanChecker ())
         .AddAttribute ("RealTime",
            "To compute properly timestamps",
            BooleanValue(false),
-           MakeBooleanAccessor (&areaSpeedAdvisoryServer80211p::m_real_time),
+           MakeBooleanAccessor (&areaSpeedAdvisorServer80211p::m_real_time),
            MakeBooleanChecker ())
         .AddAttribute ("CSV",
             "CSV log name",
             StringValue (),
-            MakeStringAccessor (&areaSpeedAdvisoryServer80211p::m_csv_name),
+            MakeStringAccessor (&areaSpeedAdvisorServer80211p::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("Client",
            "TraCI client for SUMO",
            PointerValue (0),
-           MakePointerAccessor (&areaSpeedAdvisoryServer80211p::m_client),
+           MakePointerAccessor (&areaSpeedAdvisorServer80211p::m_client),
            MakePointerChecker<TraciClient> ());
         return tid;
   }
 
-  areaSpeedAdvisoryServer80211p::areaSpeedAdvisoryServer80211p ()
+  areaSpeedAdvisorServer80211p::areaSpeedAdvisorServer80211p ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
@@ -73,20 +73,20 @@ namespace ns3
     m_isTransmittingDENM = false;
   }
 
-  areaSpeedAdvisoryServer80211p::~areaSpeedAdvisoryServer80211p ()
+  areaSpeedAdvisorServer80211p::~areaSpeedAdvisorServer80211p ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  areaSpeedAdvisoryServer80211p::DoDispose (void)
+  areaSpeedAdvisorServer80211p::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
 
   void
-  areaSpeedAdvisoryServer80211p::StartApplication (void)
+  areaSpeedAdvisorServer80211p::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
 
@@ -155,7 +155,7 @@ namespace ns3
     /* Set sockets, callback and station properties in DENBasicService */
     m_denService.setSocketTx (m_socket);
     m_denService.setSocketRx (m_socket);
-    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisoryServer80211p::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
+    m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
 
     // Setting geoArea address for denms
     m_denService.setGeoArea (geoArea);
@@ -166,7 +166,7 @@ namespace ns3
     /* Set callback and station properties in CABasicService (which will only be used to receive CAMs) */
     m_caService.setStationProperties (777888999, StationType_roadSideUnit);
     m_caService.setSocketRx (m_socket);
-    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisoryServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
     // Set the RSU position in the CA and DEN basic service (mandatory for any RSU object)
     // As the position must be specified in (lat, lon), we must take it from the mobility model and then convert it to Latitude and Longitude
@@ -184,11 +184,11 @@ namespace ns3
 
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
-      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisoryServer80211p::aggregateOutput, this);
+      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisorServer80211p::aggregateOutput, this);
   }
 
   void
-  areaSpeedAdvisoryServer80211p::StopApplication ()
+  areaSpeedAdvisorServer80211p::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_aggegateOutputEvent);
@@ -204,14 +204,14 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServer80211p::StopApplicationNow ()
+  areaSpeedAdvisorServer80211p::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  areaSpeedAdvisoryServer80211p::TriggerDenm ()
+  areaSpeedAdvisorServer80211p::TriggerDenm ()
   {
     denData data;
     denData::denDataAlacarte alacartedata;
@@ -222,7 +222,7 @@ namespace ns3
     /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
-    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed advisory, we rely on the
+    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
     // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
     alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
 
@@ -241,7 +241,7 @@ namespace ns3
         return;
       }
 
-    // Set a speed limit advisory inside the DENM message
+    // Set a speed limit Advisor inside the DENM message
     *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) 25;
 
     data.setDenmAlacarteData_asn_types (alacartedata);
@@ -262,11 +262,11 @@ namespace ns3
 
     data.denDataFree ();
 
-    m_update_denm_ev = Simulator::Schedule (Seconds (1), &areaSpeedAdvisoryServer80211p::UpdateDenm, this);
+    m_update_denm_ev = Simulator::Schedule (Seconds (1), &areaSpeedAdvisorServer80211p::UpdateDenm, this);
   }
 
   void
-  areaSpeedAdvisoryServer80211p::UpdateDenm()
+  areaSpeedAdvisorServer80211p::UpdateDenm()
   {
     denData data;
     denData::denDataAlacarte alacartedata;
@@ -277,7 +277,7 @@ namespace ns3
     /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
-    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed advisory, we rely on the
+    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
     // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
     alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
 
@@ -296,7 +296,7 @@ namespace ns3
       return;
     }
 
-    // Set a speed limit advisory inside the DENM message
+    // Set a speed limit Advisor inside the DENM message
     *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) 25;
 
     data.setDenmAlacarteData_asn_types (alacartedata);
@@ -312,19 +312,19 @@ namespace ns3
       }
 
     data.denDataFree ();
-    m_update_denm_ev = Simulator::Schedule (Seconds (1.1), &areaSpeedAdvisoryServer80211p::UpdateDenm, this);
+    m_update_denm_ev = Simulator::Schedule (Seconds (1), &areaSpeedAdvisorServer80211p::UpdateDenm, this);
 
   }
 
   void
-  areaSpeedAdvisoryServer80211p::TerminateDenmTransmission()
+  areaSpeedAdvisorServer80211p::TerminateDenmTransmission()
   {
     m_isTransmittingDENM=false;
     Simulator::Cancel (m_update_denm_ev);
   }
 
   void
-  areaSpeedAdvisoryServer80211p::receiveCAM (CAM_t *cam, Address address)
+  areaSpeedAdvisorServer80211p::receiveCAM (CAM_t *cam, Address address)
   {
     /* The reception of a CAM, in this case, woarks as a trigger to generate DENMs.
      * If no CAMs are received, then no DENMs are generated */
@@ -334,15 +334,15 @@ namespace ns3
     {
       /* If a CAM is received when the server is already sending DENMs, then reset the "timer" to stop the DENM generation */
       Simulator::Cancel (m_terminate_denm_ev);
-      m_terminate_denm_ev = Simulator::Schedule (Seconds (5), &areaSpeedAdvisoryServer80211p::TerminateDenmTransmission, this);
+      m_terminate_denm_ev = Simulator::Schedule (Seconds (5), &areaSpeedAdvisorServer80211p::TerminateDenmTransmission, this);
     }
     else
     {
         /* If a CAM is received when the server is not sending DENMs, then start the DENM generation and call the
          * TerminateDenmTransmission after 5 seconds */
         m_isTransmittingDENM=true;
-        areaSpeedAdvisoryServer80211p::TriggerDenm();
-        m_terminate_denm_ev = Simulator::Schedule (Seconds (5), &areaSpeedAdvisoryServer80211p::TerminateDenmTransmission, this);
+        areaSpeedAdvisorServer80211p::TriggerDenm();
+        m_terminate_denm_ev = Simulator::Schedule (Seconds (5), &areaSpeedAdvisorServer80211p::TerminateDenmTransmission, this);
     }
 
     if (!m_csv_name.empty ())
@@ -359,7 +359,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServer80211p::receiveDENM (denData denm, Address from)
+  areaSpeedAdvisorServer80211p::receiveDENM (denData denm, Address from)
   {
     /* This is just a sample dummy receiveDENM function. The user can customize it to parse the content of a DENM when it is received. */
     (void) denm; // Contains the data received from the DENM
@@ -368,7 +368,7 @@ namespace ns3
   }
 
   long
-  areaSpeedAdvisoryServer80211p::compute_timestampIts ()
+  areaSpeedAdvisorServer80211p::compute_timestampIts ()
   {
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time
@@ -380,10 +380,10 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisoryServer80211p::aggregateOutput()
+  areaSpeedAdvisorServer80211p::aggregateOutput()
   {
     std::cout << Simulator::Now () << "," << m_cam_received << "," << m_denm_sent << std::endl;
-    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisoryServer80211p::aggregateOutput, this);
+    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &areaSpeedAdvisorServer80211p::aggregateOutput, this);
   }
 
 }

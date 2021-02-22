@@ -34,6 +34,16 @@ NS_LOG_COMPONENT_DEFINE("v2v-cv2x");
 int
 main (int argc, char *argv[])
 {
+  /*
+   * In this example the generated vehicles will broadcast their CAMs. Every vehicle transmits its messages
+   * through a C-V2X mode 4 interface. There are two types of vehicles: normal "passenger" cars and emergency vehicles.
+   * When a normal vehicle receives a CAM from an emergency vehicle it performs the following checks:
+   * 1) It checks if the distance between itself and the emergency vehicle is under a certain threshold
+   * 2) It checks if the difference in the heading angle between itself and the emergency vehicle is under a certain threshold
+   * In case the two conditions are met, then the receiving vehicle will take some actions to facilitate the takover
+   * maneuver (like slow down). When the emergency vehicle is far away, the normal vehicle will resume its old speed
+   */
+
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
   std::string mob_trace = "cars.rou.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";

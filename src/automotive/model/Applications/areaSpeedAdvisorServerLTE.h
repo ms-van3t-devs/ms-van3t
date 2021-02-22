@@ -1,5 +1,5 @@
-#ifndef AREASPEEDADVISORYSERVERLTE_H
-#define AREASPEEDADVISORYSERVERLTE_H
+#ifndef AREASPEEDADVISORSERVERLTE_H
+#define AREASPEEDADVISORSERVERLTE_H
 
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
@@ -23,7 +23,7 @@ namespace ns3 {
       highSpeedkmph=75
   } speedmode_t;
 
-  class areaSpeedAdvisoryServerLTE : public Application
+  class areaSpeedAdvisorServerLTE : public Application
   {
   public:
     /**
@@ -32,9 +32,9 @@ namespace ns3 {
      */
     static TypeId GetTypeId (void);
 
-    areaSpeedAdvisoryServerLTE ();
+    areaSpeedAdvisorServerLTE ();
 
-    virtual ~areaSpeedAdvisoryServerLTE ();
+    virtual ~areaSpeedAdvisorServerLTE ();
 
     /**
      * \brief Callback to handle a CAM reception.
@@ -103,5 +103,5 @@ namespace ns3 {
 
 } // namespace ns3
 
-#endif /* AREASPEEDADVISORYSERVERLTE_H */
+#endif /* AREASPEEDADVISORSERVERLTE_H */
 
