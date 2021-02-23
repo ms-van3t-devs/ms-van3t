@@ -71,7 +71,7 @@ namespace ns3 {
     /* 3. Set all the containers [to be continued] */
     /* Header */
     denm->header.messageID = FIX_DENMID;
-    denm->header.protocolVersion = FIX_PROT_VERS;
+    denm->header.protocolVersion = protocolVersion_currentVersion;
     denm->header.stationID = m_station_id;
 
     /* Management Container */

@@ -69,6 +69,8 @@ The final project path-tree should look like (referring to the `src` directory):
 
 The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_map` folders to save there the SUMO-related files for his/her own applications.
 
+**The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_CAM_DENM_version.sh` script. This script relies on the `ns-3.33/src/automotive/currmode.txt` file. Please **never** modify it manually or delete it!
+
 
 # Sample V2I example and V2I/V2N applications
 
@@ -192,7 +194,7 @@ You can run it with:
 
 Where `<interface name>` is the name of the physical interface, on your PC, where CAMs will be sent.
 
-**Please note** that the interface, in order to work with ns-3, should be put in promiscuous mode.
+**Please note that the interface, in order to work with ns-3, should be put in promiscuous mode.**
 
 You can put an interface in promiscuous mode with:
 `sudo ip link set <interface name> promisc on`
@@ -208,7 +210,7 @@ The logic of the application is contained inside model/Applications/v2x-helper.c
 
 In the default emulation mode, messages will be sent, through the specified interface, as broadcast packets encapsulated inside BTP and GeoNetworking.
 
-The user can also specify, however, a __UDP mode__, enabling the transmission of messages to an external UDP server. In this case, the ETSI V2X messages (i.e. CAM, DENM) will be encapsulated inside BTP --> GeoNetworking --> UDP --> IPv4, and sent to a host with a specified IPv4 and port.
+The user can also specify, however, a _UDP mode_, enabling the transmission of messages to an external UDP server. In this case, the ETSI V2X messages (i.e. CAM, DENM) will be encapsulated inside BTP --> GeoNetworking --> UDP --> IPv4, and sent to a host with a specified IPv4 and port.
 
 *Any host is fine, but the following limitations apply:*
 

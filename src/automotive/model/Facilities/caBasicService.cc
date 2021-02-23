@@ -19,6 +19,7 @@
 */
 
 #include "caBasicService.h"
+#include "ns3/ItsPduHeader.h"
 
 namespace ns3
 {
@@ -147,7 +148,7 @@ namespace ns3
     packet = dataIndication.data;
     uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
     buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
-    packet->CopyData (buffer, packet->GetSize ()-1);
+    packet->CopyData (buffer, packet->GetSize ());
 
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
@@ -161,9 +162,9 @@ namespace ns3
     void *decoded_=NULL;
     asn_dec_rval_t decode_result;
 
-    do {
-      decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ()-1);
-    } while(decode_result.code==RC_WMORE);
+    //do {
+      decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ());
+    //} while(decode_result.code==RC_WMORE);
 
     free(buffer);
 
@@ -342,7 +343,7 @@ namespace ns3
 
     /* Fill the header */
     cam->header.messageID = FIX_CAMID;
-    cam->header.protocolVersion = FIX_PROT_VERS;
+    cam->header.protocolVersion = protocolVersion_currentVersion;
     cam->header.stationID = m_station_id;
 
     /*
@@ -464,7 +465,7 @@ namespace ns3
         goto error;
       }
 
-    packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded+1);
+    packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded);
 
     dataRequest.BTPType = BTP_B; //!< BTP-B
     dataRequest.destPort = CA_PORT;
