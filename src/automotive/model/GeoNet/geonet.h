@@ -22,7 +22,6 @@
 #include "ns3/longpositionvector.h"
 #include "ns3/btpdatarequest.h"
 
-#define CURRENT_VDP_TYPE VDPTraCI
 #define TS_MAX 4294967295 //(2^32)-1
 
 namespace ns3
@@ -51,7 +50,7 @@ namespace ns3
         /**
         *   ETSI EN 302 636-4-1 [8.2.2]
         */
-        libsumo::TraCIPosition POS_EPV;
+        VDP::VDP_position_latlon_t POS_EPV;
         double S_EPV;
         double H_EPV;
         long TST_EPV;
@@ -66,7 +65,7 @@ namespace ns3
       void setFixedPositionRSU(double latitude_deg, double longitude_deg);
       void setStationID(unsigned long fixed_stationid);
       void setStationType(long fixed_stationtype);
-      void setVDP(CURRENT_VDP_TYPE vdp);
+      void setVDP(VDP* vdp);
       void setSocketTx(Ptr<Socket> socket_tx);
       void addRxCallback(std::function<void(GNDataIndication_t,Address)> rx_callback) {m_ReceiveCallback=rx_callback;}
       GNDataConfirm_t sendGN(GNDataRequest_t dataRequest);
@@ -114,7 +113,7 @@ namespace ns3
 
       std::function<void(GNDataIndication_t,Address)> m_ReceiveCallback;
 
-      CURRENT_VDP_TYPE m_vdp;
+      VDP* m_vdp;
       StationID_t m_station_id;
       StationType_t m_stationtype;
 

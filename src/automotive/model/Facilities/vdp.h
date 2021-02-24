@@ -3,6 +3,7 @@
 
 #include "ns3/CAM.h"
 #include "asn_utils.h"
+#include <float.h>
 
 namespace ns3
 {
@@ -25,6 +26,14 @@ namespace ns3
         YawRate_t yawRate;
       } CAM_mandatory_data_t;
 
+      typedef struct VDP_position_cartesian {
+        double x,y,z;
+      } VDP_position_cartesian_t;
+
+      typedef struct VDP_position_latlon {
+        double lat,lon,alt;
+      } VDP_position_latlon_t;
+
       virtual CAM_mandatory_data_t getCAMMandatoryData() = 0;
 
       // These methods are used by the CAM generation frequency management mechanism,
@@ -40,6 +49,15 @@ namespace ns3
       virtual double getSpeedValue() = 0;
       virtual double getTravelledDistance() = 0;
       virtual double getHeadingValue() = 0;
+
+      // These methods shall return a position either cartesian or geodetic (needed mainly by the GeoNetworking module)
+      // getPositionLatLon() shall return the current position of the object as (Latitude,Longitude,Altitude)
+      // getPositionXY() shall return the current position as cartesian projected coordinates (x,y,z)
+      // If the Altitude (or z) is not available, it must be set to DBL_MAX
+      // getXY() shall be a utility function converting from Lat,Lon to x,y on a projected coordinate system (e.g. using Transverse Mercator)
+      virtual VDP_position_latlon_t getPosition() = 0;
+      virtual VDP_position_cartesian_t getPositionXY() = 0;
+      virtual VDP_position_cartesian_t getXY(double lon, double lat) = 0;
 
       // These methods refer to optional fields in mandatory containers
       // If the information is not provided, they should be implemented

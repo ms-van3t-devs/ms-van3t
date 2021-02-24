@@ -54,7 +54,7 @@ namespace ns3 {
     void setStationID(unsigned long fixed_stationid);
     void setStationType(long fixed_stationtype);
 
-    void setVDP(CURRENT_VDP_TYPE vdp) {m_btp->setVDP(vdp);}
+    void setVDP(VDP* vdp) {m_btp->setVDP(vdp);}
     void setBTP(Ptr<btp> btp){m_btp = btp;}
 
     void setSocketTx(Ptr<Socket> socket_tx);

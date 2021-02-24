@@ -1,17 +1,21 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-    obj = bld.create_ns3_program('v2i-areaSpeedAdvisor-lte', ['automotive', 'lte', 'traci','visualizer'])
+    obj = bld.create_ns3_program('v2i-areaSpeedAdvisor-lte', ['automotive', 'lte', 'traci'])
     obj.source = 'v2i-areaSpeedAdvisor-lte.cc'
     
-    obj = bld.create_ns3_program('v2i-areaSpeedAdvisor-80211p', ['automotive', 'wave', 'traci','visualizer'])
+    obj = bld.create_ns3_program('v2i-areaSpeedAdvisor-80211p', ['automotive', 'wave', 'traci'])
     obj.source = 'v2i-areaSpeedAdvisor-80211p.cc'
 
-    obj = bld.create_ns3_program('v2v-emergencyVehicleAlert-cv2x', ['automotive', 'cv2x', 'traci','visualizer'])
+    obj = bld.create_ns3_program('v2v-emergencyVehicleAlert-cv2x', ['automotive', 'cv2x', 'traci'])
     obj.source = 'v2v-emergencyVehicleAlert-cv2x.cc'
 
-    obj = bld.create_ns3_program('v2v-emergencyVehicleAlert-80211p', ['automotive', 'wave', 'traci','visualizer'])
+    obj = bld.create_ns3_program('v2v-emergencyVehicleAlert-80211p', ['automotive', 'wave', 'traci'])
     obj.source = 'v2v-emergencyVehicleAlert-80211p.cc'
 
     obj = bld.create_ns3_program('v2x-emulator', ['automotive', 'fd-net-device', 'traci'])
     obj.source = 'v2x-emulator.cc'
+
+    obj = bld.create_ns3_program('v2v-80211p-gps-tc-example', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-gps-tc-example.cc'
+

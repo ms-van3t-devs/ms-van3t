@@ -12,7 +12,7 @@ def configure(conf):
     conf.env.append_value('LIBPATH', ["/usr/local/lib"])
 
 def build(bld):
-    module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci'])
+    module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci', 'gps-tc'])
     module.source = [
         'helper/areaSpeedAdvisorClient80211p-helper.cc',
         'helper/areaSpeedAdvisorServer80211p-helper.cc',
@@ -20,11 +20,13 @@ def build(bld):
         'helper/areaSpeedAdvisorServerLTE-helper.cc',
         'helper/emergencyVehicleAlert-helper.cc',
         'helper/v2xEmulator-helper.cc',
+        'helper/simpleCAMSender-helper.cc',
 
         'model/Applications/areaSpeedAdvisorClient80211p.cc',
         'model/Applications/areaSpeedAdvisorServer80211p.cc',
         'model/Applications/areaSpeedAdvisorClientLTE.cc',
         'model/Applications/areaSpeedAdvisorServerLTE.cc',
+        'model/Applications/simpleCAMSender-gps-tc.cc',
 
         'model/Applications/emergencyVehicleAlert.cc',
         'model/Facilities/denBasicService.cc',
@@ -33,6 +35,7 @@ def build(bld):
         'model/Facilities/ITSSReceivingTableEntry.cc',
         'model/Facilities/asn_utils.cc',
         'model/Facilities/vdpTraci.cc',
+        'model/Facilities/vdpGPSTraceClient.cc',
         'model/Facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
         'model/Applications/v2xEmulator.cc',
@@ -279,18 +282,22 @@ def build(bld):
         'helper/areaSpeedAdvisorServer80211p-helper.h',
         'helper/emergencyVehicleAlert-helper.h',
         'helper/v2xEmulator-helper.h',
+        'helper/simpleCAMSender-helper.h',
 
         'model/Applications/areaSpeedAdvisorClient80211p.h',
         'model/Applications/areaSpeedAdvisorServer80211p.h',
         'model/Applications/areaSpeedAdvisorClientLTE.h',
         'model/Applications/areaSpeedAdvisorServerLTE.h',
         'model/Applications/emergencyVehicleAlert.h',
+        'model/Applications/simpleCAMSender-gps-tc.h',
+
         'model/Facilities/denBasicService.h',
         'model/Facilities/denData.h',
         'model/Facilities/asn_utils.h',
         'model/Facilities/ITSSOriginatingTableEntry.h',
         'model/Facilities/ITSSReceivingTableEntry.h',
         'model/Facilities/vdpTraci.h',
+        'model/Facilities/vdpGPSTraceClient.h',
         'model/Facilities/vdp.h',
         'model/Facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',

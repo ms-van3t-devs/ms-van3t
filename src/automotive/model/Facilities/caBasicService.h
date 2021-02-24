@@ -3,12 +3,12 @@
 
 #include "ns3/socket.h"
 #include "ns3/core-module.h"
-#include "ns3/vdpTraci.h"
+#include "ns3/vdp.h"
 #include "ns3/asn_utils.h"
 #include "ns3/btp.h"
 #include "ns3/btpHeader.h"
 
-#define CURRENT_VDP_TYPE VDPTraCI
+//#define CURRENT_VDP_TYPE VDPTraCI
 
 namespace ns3
 {
@@ -25,8 +25,8 @@ namespace ns3
   {
   public:
     CABasicService();
-    CABasicService(unsigned long fixed_stationid,long fixed_stationtype,CURRENT_VDP_TYPE vdp,bool real_time,bool is_vehicle);
-    CABasicService(unsigned long fixed_stationid,long fixed_stationtype,CURRENT_VDP_TYPE vdp,bool real_time,bool is_vehicle,Ptr<Socket> socket_tx);
+    CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp,bool real_time,bool is_vehicle);
+    CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp,bool real_time,bool is_vehicle,Ptr<Socket> socket_tx);
 
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
     void setFixedPositionRSU(double latitude_deg, double longitude_deg);
@@ -35,7 +35,7 @@ namespace ns3
     void setSocketTx(Ptr<Socket> socket_tx) {m_btp->setSocketTx (socket_tx);}
     void setSocketRx(Ptr<Socket> socket_rx);
     void setRSU() {m_vehicle=false;}
-    void setVDP(CURRENT_VDP_TYPE vdp) {m_vdp=vdp; m_btp->setVDP(vdp);}
+    void setVDP(VDP* vdp) {m_vdp=vdp;}
     void setBTP(Ptr<btp> btp){m_btp = btp;}
 
     void receiveCam(BTPDataIndication_t dataIndication, Address from);
@@ -76,7 +76,7 @@ namespace ns3
 
     bool m_real_time;
     bool m_vehicle;
-    CURRENT_VDP_TYPE m_vdp;
+    VDP* m_vdp;
 
     Ptr<Socket> m_socket_tx; // Socket TX
 

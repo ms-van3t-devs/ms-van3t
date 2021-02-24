@@ -144,8 +144,9 @@ namespace ns3
     m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
     m_caService.setRealTime (m_real_time);
 
-    VDPTraCI traci_vdp(m_client,m_id);
+    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
     m_caService.setVDP(traci_vdp);
+    m_denService.setVDP(traci_vdp);
 
     /* Create CSV file, if requested */
     if (!m_csv_name.empty ())

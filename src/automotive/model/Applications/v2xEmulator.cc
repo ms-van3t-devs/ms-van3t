@@ -169,8 +169,9 @@ namespace ns3
     m_caService.setRealTime (true);
 
     /* Set TraCI vdp for GeoNet object */
-    VDPTraCI traci_vdp(m_client,m_id);
+    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
     m_caService.setVDP(traci_vdp);
+    m_denService.setVDP(traci_vdp);
 
     /* Schedule CAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());

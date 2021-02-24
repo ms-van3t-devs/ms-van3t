@@ -51,27 +51,48 @@ namespace ns3
       }
   }
 
-  libsumo::TraCIPosition
+  VDP::VDP_position_latlon_t
   VDPTraCI::getPosition()
   {
+    VDP_position_latlon_t vdppos;
+
     libsumo::TraCIPosition pos=m_traci_client->TraCIAPI::vehicle.getPosition(m_id);
     pos=m_traci_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
-    return pos;
+
+    vdppos.lat=pos.y;
+    vdppos.lon=pos.x;
+    vdppos.alt=DBL_MAX;
+
+    return vdppos;
   }
 
-  libsumo::TraCIPosition
+  VDP::VDP_position_cartesian_t
   VDPTraCI::getPositionXY()
   {
+    VDP_position_cartesian_t vdppos;
+
     libsumo::TraCIPosition pos=m_traci_client->TraCIAPI::vehicle.getPosition(m_id);
-    return pos;
+
+    vdppos.x=pos.x;
+    vdppos.y=pos.y;
+    vdppos.z=pos.z;
+
+    return vdppos;
   }
 
-  libsumo::TraCIPosition
+  VDP::VDP_position_cartesian_t
   VDPTraCI::getXY(double lon, double lat)
   {
+    VDP_position_cartesian_t vdppos;
+
     libsumo::TraCIPosition pos;
     pos=m_traci_client->TraCIAPI::simulation.convertLonLattoXY (lon,lat);
-    return pos;
+
+    vdppos.x=pos.x;
+    vdppos.y=pos.y;
+    vdppos.z=pos.z;
+
+    return vdppos;
   }
 
   VDPTraCI::CAM_mandatory_data_t

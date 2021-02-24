@@ -1,23 +1,21 @@
-#ifndef VDPTRACI_H
-#define VDPTRACI_H
+#ifndef VDPGPSTRACECLIENT_H
+#define VDPGPSTRACECLIENT_H
 
 #include "vdp.h"
-#include "ns3/traci-client.h"
+#include "ns3/gps-tc.h"
 
 namespace ns3 {
-  class VDPTraCI : public VDP
+  class VDPGPSTraceClient : public VDP
   {
   public:
-    VDPTraCI(Ptr<TraciClient> traci_client, std::string node_id);
-    VDPTraCI();
-
-    void setProperties(Ptr<TraciClient> traci_client,std::string node_id) {m_traci_client=traci_client; m_id=node_id;}
+    VDPGPSTraceClient(Ptr<GPSTraceClient>,std::string);
+    VDPGPSTraceClient();
 
     CAM_mandatory_data_t getCAMMandatoryData();
 
-    double getSpeedValue() {return m_traci_client->TraCIAPI::vehicle.getSpeed (m_id);}
-    double getTravelledDistance() {return m_traci_client->TraCIAPI::vehicle.getDistance (m_id);}
-    double getHeadingValue() {return m_traci_client->TraCIAPI::vehicle.getAngle (m_id);}
+    double getSpeedValue() {return m_gps_trace_client->getSpeedms ();}
+    double getTravelledDistance() {return m_gps_trace_client->getTravelledDistance ();}
+    double getHeadingValue() {return m_gps_trace_client->getHeadingdeg ();}
 
     // Added for GeoNet functionalities
     VDP_position_latlon_t getPosition();
@@ -25,7 +23,7 @@ namespace ns3 {
     VDP_position_cartesian_t getXY(double lon, double lat);
 
     AccelerationControl_t *getAccelerationControl() {return NULL;}
-    LanePosition_t *getLanePosition();
+    LanePosition_t *getLanePosition() {return NULL;}
     SteeringWheelAngle_t *getSteeringWheelAngle() {return NULL;}
     LateralAcceleration_t *getLateralAcceleration() {return NULL;}
     VerticalAcceleration_t *getVerticalAcceleration() {return NULL;}
@@ -46,8 +44,8 @@ namespace ns3 {
 
     private:
       std::string m_id;
-      Ptr<TraciClient> m_traci_client;
+      Ptr<GPSTraceClient> m_gps_trace_client;
   };
 }
 
-#endif // VDPTRACI_H
+#endif // VDPGPSTRACECLIENT_H

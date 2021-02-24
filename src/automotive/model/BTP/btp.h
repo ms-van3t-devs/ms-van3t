@@ -11,8 +11,6 @@
 #include "ns3/gn-address.h"
 #include "ns3/btpdatarequest.h"
 
-
-#define CURRENT_VDP_TYPE VDPTraCI
 #define CA_PORT 2001
 #define DEN_PORT 2002
 
@@ -30,7 +28,7 @@ namespace ns3
     void setFixedPositionRSU(double latitude_deg, double longitude_deg) {m_geonet->setFixedPositionRSU(latitude_deg,longitude_deg);}
     void setStationID(unsigned long fixed_stationid) {m_geonet->setStationID(fixed_stationid);}
     void setStationType(long fixed_stationtype) {m_geonet->setStationType(fixed_stationtype);}
-    void setVDP(CURRENT_VDP_TYPE vdp){m_geonet->setVDP(vdp);}
+    void setVDP(VDP* vdp){m_geonet->setVDP(vdp);}
     void setSocketTx(Ptr<Socket> socket_tx) {m_geonet->setSocketTx(socket_tx);}
     void setSocketRx(Ptr<Socket> socket_rx);
     void addCAMRxCallback(std::function<void(BTPDataIndication_t,Address)> rx_callback) {m_cam_ReceiveCallback=rx_callback;}

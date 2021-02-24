@@ -85,8 +85,8 @@ namespace ns3 {
     if(m_stationtype==StationType_roadSideUnit)
     {
         //Set the position of the RSU
-        m_egoPV.POS_EPV.x = longitude_deg;
-        m_egoPV.POS_EPV.y = latitude_deg;
+        m_egoPV.POS_EPV.lon = longitude_deg;
+        m_egoPV.POS_EPV.lat = latitude_deg;
         m_RSU_epv_set = true;
     }
     else
@@ -109,7 +109,7 @@ namespace ns3 {
   }
 
   void
-  GeoNet::setVDP (VDPTraCI vdp)
+  GeoNet::setVDP (VDP* vdp)
   {
     m_vdp = vdp;
     EPVupdate ();// Update EPV at startup
@@ -145,9 +145,9 @@ namespace ns3 {
   {
     if(!(m_stationtype==StationType_roadSideUnit))
     {
-      m_egoPV.S_EPV = m_vdp.getSpeedValue ();
-      m_egoPV.H_EPV = m_vdp.getHeadingValue ();
-      m_egoPV.POS_EPV = m_vdp.getPosition();
+      m_egoPV.S_EPV = m_vdp->getSpeedValue ();
+      m_egoPV.H_EPV = m_vdp->getHeadingValue ();
+      m_egoPV.POS_EPV = m_vdp->getPosition();
       m_egoPV.TST_EPV = compute_timestampIts (true);
 
     }
@@ -293,8 +293,8 @@ namespace ns3 {
 
     longPV.GnAddress = m_GNAddress;
     longPV.TST = m_egoPV.TST_EPV;
-    longPV.latitude = (int32_t) (m_egoPV.POS_EPV.y*DOT_ONE_MICRO);
-    longPV.longitude = (int32_t) (m_egoPV.POS_EPV.x*DOT_ONE_MICRO);
+    longPV.latitude = (int32_t) (m_egoPV.POS_EPV.lat*DOT_ONE_MICRO);
+    longPV.longitude = (int32_t) (m_egoPV.POS_EPV.lon*DOT_ONE_MICRO);
     longPV.positionAccuracy = false;
     longPV.speed = (int16_t) m_egoPV.S_EPV;
     longPV.heading = (uint16_t) m_egoPV.H_EPV;
@@ -465,13 +465,13 @@ namespace ns3 {
     //forwarding algorithm selection as specified in  ETSI EN 302 636-4-1 [Annex D]
     //Compute function F specified in ETSI EN 302 931, for this implementation only Circular Area function is used
     double x,y,r,f,geoLon,geoLat;
-    libsumo::TraCIPosition egoPos, geoPos;
-    if((m_egoPV.POS_EPV.x==0)||(m_egoPV.POS_EPV.y==0))return false;//In case egoPV hasnt updated for the first time yet
+    VDP::VDP_position_cartesian_t egoPos, geoPos;
+    if((m_egoPV.POS_EPV.lat==0)||(m_egoPV.POS_EPV.lon==0))return false;//In case egoPV hasnt updated for the first time yet
 
-    egoPos = m_vdp.getXY(m_egoPV.POS_EPV.x,m_egoPV.POS_EPV.y);
+    egoPos = m_vdp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat);
     geoLon = ((double) geoArea.posLong)/DOT_ONE_MICRO;
     geoLat = ((double)geoArea.posLat)/DOT_ONE_MICRO;
-    geoPos = m_vdp.getXY(geoLon, geoLat);
+    geoPos = m_vdp->getXY(geoLon, geoLat);
 
     x = egoPos.x - geoPos.x;
     y = egoPos.y - geoPos.y;
