@@ -3,7 +3,6 @@
 
 #include "ns3/simulator.h"
 
-#define FIX_PROT_VERS       0x01
 #define FIX_DENMID          0x01
 #define FIX_CAMID           0x02
 #define DECI                10

@@ -277,8 +277,17 @@ namespace ns3
   void
   v2xEmulator::receiveCAM (CAM_t *cam, Address from)
   {
+
+   // Ignore messages coming from itself
+   // This is needed as broadcasted packets over a promiscuous inteface are also received back on the same socket
+   if(cam->header.stationID==std::stoul(m_id.substr (3)))
+   {
+       ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+       return;
+   }
+
     /* Implement CAM strategy here */
-   std::cout << "Vehicle with ID "<< m_id << " received a new CAM." << std::endl;
+    std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< cam->header.stationID << std::endl;
 
    // Free the received CAM data structure
    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
@@ -287,6 +296,13 @@ namespace ns3
   void
   v2xEmulator::receiveDENM (denData denm, Address from)
   {
+    // Ignore messages coming from itself
+    // This is needed as broadcasted packets over a promiscuous inteface are also received back on the same socket
+    if(denm.getDenmHeaderStationID()==std::stol(m_id.substr (3)))
+    {
+        return;
+    }
+
     /* This is just a sample dummy receiveDENM function. The user can customize it to parse the content of a DENM when it is received. */
     std::cout << "Vehicle with ID "<< m_id << " received a new DENM." << std::endl;
 
