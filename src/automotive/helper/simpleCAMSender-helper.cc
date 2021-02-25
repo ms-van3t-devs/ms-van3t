@@ -1,6 +1,6 @@
 #include "simpleCAMSender-helper.h"
 
-#include "ns3/simpleCAMSender.h"
+#include "ns3/simpleCAMSender-gps-tc.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
