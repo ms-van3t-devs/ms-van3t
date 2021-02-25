@@ -10,17 +10,31 @@ Back compatibility **is not** ensured with new versions of TraCI.
 To build the project:
 * Install SUMO following the guide at [https://sumo.dlr.de/wiki/Downloads](https://sumo.dlr.de/wiki/Downloads)
     * You can use 
+    
     	`sudo add-apt-repository ppa:sumo/stable`  
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
     * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.8.0** )
+    * Test sumo by opening a terminal and running "sumo-gui".
+    ***Possible problems**:
+    
+    `sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
+    
+    To solve it, remove all the reference to GEOS inside /usr/local/lib/ (**do not** do it if you need the GEOS library):
+    
+    `sudo rm /usr/local/lib/libgeos*`    
 
-* Clone this repository in your pc.
+* Clone this repository in your pc:
+
+`git clone https://github.com/marcomali/ms-van3t`
 
 * Run, from this repository either:
-`./sandbox_builder.sh install-dependencies` -> if this is the first time you install ns-3 or ms-van3t on your system (it will also try to install the needed dependencies with `apt`)
+
+`./sandbox_builder.sh install-dependencies` -> if this is the first time you install ns-3 or ms-van3t on your system
+
 or
-`./sandbox_builder.sh` -> if this is **not** the first time you install ns-3 (no dependencies installation is performed)
+
+`./sandbox_builder.sh` -> if this is **not** the first time you install ns-3 
 
 This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
