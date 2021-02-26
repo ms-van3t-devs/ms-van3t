@@ -1,6 +1,6 @@
 # ms-van3t
 
-![](img/MS-VAN3T_logo_small.png)
+![](img/MS-VAN3T_logo-V2_small.png)
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
 
