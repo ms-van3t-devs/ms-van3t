@@ -16,7 +16,8 @@ To build the project:
     	`sudo apt install sumo sumo-tools sumo-doc`  
     * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.8.0** )
     * Test sumo by opening a terminal and running "sumo-gui".
-    ***Possible problems**:
+	
+    * **Possible problems**:
     
     `sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
     
