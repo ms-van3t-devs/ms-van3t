@@ -19,11 +19,11 @@ To build the project:
 	
     * **Possible problems**:
     
-    `sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
+        	`sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
     
-    To solve it, remove all the reference to GEOS inside /usr/local/lib/ (**do not** do it if you need the GEOS library):
+        	To solve it, remove all the reference to GEOS inside /usr/local/lib/ (**do not** do it if you need the GEOS library):
     
-    `sudo rm /usr/local/lib/libgeos*`    
+        	`sudo rm /usr/local/lib/libgeos*`    
 
 * Clone this repository in your pc:
 
