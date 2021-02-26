@@ -18,12 +18,14 @@ To build the project:
     * Test sumo by opening a terminal and running "sumo-gui".
 	
     * **Possible problems**:
+			
+			You may get the following error when running SUMO:
+			
+        	"sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r"
     
-        	`sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
+        	To solve it, remove all the reference to GEOS inside /usr/local/lib/ (do NOT do it if you need the GEOS library):
     
-        	To solve it, remove all the reference to GEOS inside /usr/local/lib/ (**do not** do it if you need the GEOS library):
-    
-        	`sudo rm /usr/local/lib/libgeos*`    
+        	"sudo rm /usr/local/lib/libgeos*"
 
 * Clone this repository in your pc:
 
@@ -71,6 +73,12 @@ The final project path-tree should look like (referring to the `src` directory):
           model/
           patching_scripts/
           test/
+	gps-tc/
+		  doc/
+		  examples/
+		  helper/
+		  model/
+		  test/
     traci/
           doc/
           examples/
