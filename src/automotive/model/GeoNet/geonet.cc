@@ -269,14 +269,18 @@ namespace ns3 {
     //Common Header field setting according to ETSI EN 302 636-4-1 [10.3.4]
     commonHeader.SetNextHeader(dataRequest.upperProtocol); //0 if ANY(beacon) 1 if btp-a or 2 if btp-b
     commonHeader.SetHeaderType(dataRequest.GNType);
-    if(dataRequest.GNMaxHL>1)
-    {
-      commonHeader.SetHeaderSubType(1);
-    }
+
+    if((dataRequest.GNType == GBC) || (dataRequest.GNType == GAC) )
+      commonHeader.SetHeaderSubType(dataRequest.GnAddress.shape);
+    else if(dataRequest.GNType == TSB)
+      {
+        if(dataRequest.GNMaxHL>1)
+          commonHeader.SetHeaderSubType(1);//For now shouldn't happen
+      }
     else
-    {
-      commonHeader.SetHeaderSubType(0);//SHB or Circular area
-    }
+      commonHeader.SetHeaderSubType(0);
+
+
     commonHeader.SetTrafficClass (dataRequest.GNTraClass);
     commonHeader.SetFlag(m_GnIsMobile);
 
@@ -305,7 +309,7 @@ namespace ns3 {
       if(commonHeader.GetHeaderSubType ()==0) dataConfirm = sendBeacon (dataRequest,commonHeader,basicHeader,longPV);
       break;
     case GBC:
-      if(commonHeader.GetHeaderSubType ()==0) dataConfirm = sendGBC (dataRequest,commonHeader,basicHeader,longPV);
+      dataConfirm = sendGBC (dataRequest,commonHeader,basicHeader,longPV);
       break;
     case TSB:
       if(commonHeader.GetHeaderSubType ()==0) dataConfirm = sendSHB (dataRequest,commonHeader,basicHeader,longPV);
@@ -463,20 +467,46 @@ namespace ns3 {
   GeoNet::isInsideGeoArea (GeoArea_t geoArea)
   {
     //forwarding algorithm selection as specified in  ETSI EN 302 636-4-1 [Annex D]
-    //Compute function F specified in ETSI EN 302 931, for this implementation only Circular Area function is used
+    //Compute function F specified in ETSI EN 302 931
     double x,y,r,f,geoLon,geoLat;
     VDP::VDP_position_cartesian_t egoPos, geoPos;
     if((m_egoPV.POS_EPV.lat==0)||(m_egoPV.POS_EPV.lon==0))return false;//In case egoPV hasnt updated for the first time yet
 
-    egoPos = m_vdp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat);
+    egoPos = m_vdp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat); //Compute cartesian position of the vehicle
     geoLon = ((double) geoArea.posLong)/DOT_ONE_MICRO;
     geoLat = ((double)geoArea.posLat)/DOT_ONE_MICRO;
-    geoPos = m_vdp->getXY(geoLon, geoLat);
+    geoPos = m_vdp->getXY(geoLon, geoLat); // Compute cartesian position of the geoArea center
 
+    /*(x,y) is the cartesian position relative to the center of the geoArea shape -> if vehicle is indeed in the center of
+     * the shape, (x,y)=(0,0)
+    */
     x = egoPos.x - geoPos.x;
     y = egoPos.y - geoPos.y;
-    r = geoArea.distA;
-    f = 1 - pow((x/r),2) - pow((y/r),2);
+
+    if(geoArea.shape == 0)
+      {
+        //Circular area
+        r = geoArea.distA;
+        f = 1.0 - pow((x/r),2.0) - pow((y/r),2.0);
+      }
+    else
+      {
+        //Rotate (x,y) clockwise around the center of the shape by the zenith angle = 90 deg - azimuth
+        double xr,yr,zenith;
+        zenith = (90.0 - geoArea.angle)* (M_PI/180.0); // zenith in radians
+        xr = x * cos(zenith) + y * sin(zenith);
+        yr = -(x * sin(zenith)) + y * cos(zenith);
+        if (geoArea.shape == 1)
+        {
+          //Rectangular area function ETSI EN 302 931
+          f = std::min(1.0 - pow(xr/geoArea.distA,2.0), 1.0 - pow(yr/geoArea.distB,2.0));
+        }
+        else
+          {
+            //Ellipsoidal area
+            f = 1.0 - pow((xr/geoArea.distA),2.0) - pow((yr/geoArea.distB),2.0);
+          }
+      }
 
     if(f>=0)
     {
@@ -484,7 +514,7 @@ namespace ns3 {
     }
     else
     {
-      return false; // incomplete but for this implementation not needed
+      return false; // Local router outside the geographical target
     }
   }
 
@@ -601,7 +631,7 @@ namespace ns3 {
         if(commonHeader.GetHeaderSubType ()==0) processSHB (dataIndication,from);
         break;
       case GBC:
-        if(commonHeader.GetHeaderSubType ()==0) processGBC (dataIndication,from);
+          processGBC (dataIndication,from,commonHeader.GetHeaderSubType ());
         break;
       case TSB:
         if((commonHeader.GetHeaderSubType ()==0)) processSHB (dataIndication,from);
@@ -612,12 +642,14 @@ namespace ns3 {
   }
 
   void
-  GeoNet::processGBC (GNDataIndication_t dataIndication,Address from)
+  GeoNet::processGBC (GNDataIndication_t dataIndication,Address from, uint8_t shape)
   {
     // GBC Processing according to ETSI EN 302 636-4-1 [10.3.11.3] 1 and 2 already done in receiveGN method
     GBCheader header;
     dataIndication.data->RemoveHeader (header,56);
     dataIndication.SourcePV = header.GetLongPositionV ();
+    dataIndication.GnAddressDest = header.GetGeoArea ();
+    dataIndication.GnAddressDest.shape = shape;
 
     //3)Determine function F as specified in ETSI EN 302 931
     m_LocT_Mutex.lock ();
@@ -625,7 +657,7 @@ namespace ns3 {
     if(entry_map_it != m_GNLocT.end())
     {
       //a)
-      if((!isInsideGeoArea (header.GetGeoArea ())) && ((m_GNNonAreaForwardingAlgorithm==0)||(m_GNNonAreaForwardingAlgorithm==1)))
+      if((!isInsideGeoArea (dataIndication.GnAddressDest)) && ((m_GNNonAreaForwardingAlgorithm==0)||(m_GNNonAreaForwardingAlgorithm==1)))
       {
         //execute DPD as specified in A.2
         if(DPD(header.GetSeqNumber (),dataIndication.SourcePV.GnAddress))
@@ -635,7 +667,7 @@ namespace ns3 {
         }
       }
       //b)
-      if((isInsideGeoArea (header.GetGeoArea ())) && ((m_GNAreaForwardingAlgorithm==0)||(m_GNAreaForwardingAlgorithm==1)))
+      if((isInsideGeoArea (dataIndication.GnAddressDest)) && ((m_GNAreaForwardingAlgorithm==0)||(m_GNAreaForwardingAlgorithm==1)))
       {
         //execute DPD as specified in A.2
         if(DPD(header.GetSeqNumber (),dataIndication.SourcePV.GnAddress))
@@ -668,7 +700,7 @@ namespace ns3 {
     }
     m_LocT_Mutex.unlock ();
     //7)Determine function F(x,y) as specified in ETSI EN 302 931
-    if(isInsideGeoArea (header.GetGeoArea ()))
+    if(isInsideGeoArea (dataIndication.GnAddressDest))
     {
       //a) Pass the payload to the upper protocol entity
       dataIndication.GNType = GBC;

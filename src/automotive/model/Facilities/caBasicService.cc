@@ -474,7 +474,6 @@ namespace ns3
     dataRequest.GNCommProfile = UNSPECIFIED;
     dataRequest.GNRepInt =0;
     dataRequest.GNMaxRepInt=0;
-    //dataRequest.GNMaxLife = 0x05; //1 second
     dataRequest.GNMaxLife = 1;
     dataRequest.GNMaxHL = 1;
     dataRequest.GNTraClass = 0x02; // Store carry foward: no - Channel offload: no - Traffic Class ID: 2

@@ -5,6 +5,12 @@
 #include "ns3/gn-address.h"
 #include "ns3/longpositionvector.h"
 
+
+
+#define CIRCULAR 0
+#define RECTANGULAR 1
+#define ELLIPSOIDAL 2
+
 namespace ns3 {
 
   typedef enum {
@@ -15,7 +21,6 @@ namespace ns3 {
     GBC=4,
     TSB=5,
     LS=6,
-    SHB=7
   } TransportType_t;
 
   typedef enum {
@@ -29,12 +34,14 @@ namespace ns3 {
     BTP_B=2,
     GN6ASL=3
   } BTPType_t;
+
   typedef struct _geoarea {
     int32_t posLong;
     int32_t posLat;
     uint16_t distA;
     uint16_t distB;
     uint16_t angle;
+    uint8_t shape;
   }GeoArea_t;
 
   typedef enum {

@@ -78,7 +78,7 @@ namespace ns3
       void newLocTE(GNlpv_t longPositionVector);
       void LocTUpdate(GNlpv_t lpv,std::map<GNAddress,GNLocTE>::iterator locte_it);
       void processSHB(GNDataIndication_t dataIndication,Address address);
-      void processGBC(GNDataIndication_t dataIndication,Address address);
+      void processGBC(GNDataIndication_t dataIndication,Address address,uint8_t shape);
       uint8_t encodeLT(double seconds);
       double decodeLT(uint8_t lifeTime);
       bool hasNeighbour();

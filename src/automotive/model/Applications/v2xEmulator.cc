@@ -226,6 +226,7 @@ namespace ns3
     // DistB [m] and angle [deg] equal to zero because we are defining a circular area as specified in ETSI EN 302 636-4-1 [9.8.5.2]
     geoArea.distB = 0;
     geoArea.angle = 0;
+    geoArea.shape = CIRCULAR;
     m_denService.setGeoArea (geoArea);
 
     trigger_retval=m_denService.appDENM_trigger(data,actionid);
@@ -260,6 +261,7 @@ namespace ns3
     // DistB [m] and angle [deg] equal to zero because we are defining a circular area as specified in ETSI EN 302 636-4-1 [9.8.5.2]
     geoArea.distB = 0;
     geoArea.angle = 0;
+    geoArea.shape = CIRCULAR;
     m_denService.setGeoArea (geoArea);
 
     update_retval = m_denService.appDENM_update (data,actionid);
