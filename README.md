@@ -1,6 +1,6 @@
 # ms-van3t
 
-![](img/MS-VAN3T_logo_small.png)
+![](img/MS-VAN3T_logo-V2_small.png)
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
 
@@ -16,13 +16,16 @@ To build the project:
     	`sudo apt install sumo sumo-tools sumo-doc`  
     * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.8.0** )
     * Test sumo by opening a terminal and running "sumo-gui".
-    ***Possible problems**:
+	
+    * **Possible problems**:
+			
+			You may get the following error when running SUMO:
+			
+        	"sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r"
     
-    `sumo-gui: symbol lookup error: /usr/lib/libgdal.so.26: undefined symbol: GEOSMakeValid_r`
+        	To solve it, remove all the reference to GEOS inside /usr/local/lib/ (do NOT do it if you need the GEOS library):
     
-    To solve it, remove all the reference to GEOS inside /usr/local/lib/ (**do not** do it if you need the GEOS library):
-    
-    `sudo rm /usr/local/lib/libgeos*`    
+        	"sudo rm /usr/local/lib/libgeos*"
 
 * Clone this repository in your pc:
 
@@ -70,6 +73,12 @@ The final project path-tree should look like (referring to the `src` directory):
           model/
           patching_scripts/
           test/
+	gps-tc/
+		  doc/
+		  examples/
+		  helper/
+		  model/
+		  test/
     traci/
           doc/
           examples/
