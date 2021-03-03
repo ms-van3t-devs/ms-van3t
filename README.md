@@ -48,51 +48,15 @@ This script will download ns-3.33 and install this framework. The folder `ns-3.3
 
 **Important**
 
-The final project path-tree should look like (referring to the `src` directory):
+`src/automotive/` contains all the application related files and all the source code implementing the ETSI ITS-G5 stack for vehicular communications. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application. 
 
-    automotive/
-          doc/
-          examples/
-            sumo_files_v2v_map/
-            sumo_files_v2i_map/
-          helper/
-          model/
-            Applications/
-            asn1-legacy/
-            asn1-modern/
-            BTP/
-            Facilities/
-            GeoNet/
-            utilities/
-          test/
-    cv2x/
-          bindings/
-          doc/
-          examples/
-          helper/
-          model/
-          patching_scripts/
-          test/
-	gps-tc/
-		  doc/
-		  examples/
-		  helper/
-		  model/
-		  test/
-    traci/
-          doc/
-          examples/
-          model/
-    traci-applications/
-          examples/
-          helper/
-          model/
+`src/traci/` and `src/traci-applications/` contain instead all the logic to link ns-3 and SUMO. 
 
-`automotive/` contains all the application related files and all the source code implementing the ETSI ITS-G5 stack for vehicular communications. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application. `traci/` and `traci-applications/` contain instead all the logic to link ns-3 and SUMO. `cv2x/` contains the model for C-V2X in transmission mode 4.
+`src/cv2x/` contains the model for C-V2X in transmission mode 4.
 
 The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_map` folders to save there the SUMO-related files for his/her own applications.
 
-**The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_CAM_DENM_version.sh` script. This script relies on the `ns-3.33/src/automotive/currmode.txt` file. Please **never** modify it manually or delete it!
+**The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_CAM_DENM_version.sh` script. This script relies on the `ns-3.33/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
 
 
 # Sample V2I example and V2I/V2N applications
