@@ -270,16 +270,16 @@ namespace ns3 {
     commonHeader.SetNextHeader(dataRequest.upperProtocol); //0 if ANY(beacon) 1 if btp-a or 2 if btp-b
     commonHeader.SetHeaderType(dataRequest.GNType);
 
+    // Initialize the header subtype to 0
+    commonHeader.SetHeaderSubType(0);
+
     if((dataRequest.GNType == GBC) || (dataRequest.GNType == GAC) )
       commonHeader.SetHeaderSubType(dataRequest.GnAddress.shape);
     else if(dataRequest.GNType == TSB)
       {
         if(dataRequest.GNMaxHL>1)
-          commonHeader.SetHeaderSubType(1);//For now shouldn't happen
+          commonHeader.SetHeaderSubType(1); //For now shouldn't happen
       }
-    else
-      commonHeader.SetHeaderSubType(0);
-
 
     commonHeader.SetTrafficClass (dataRequest.GNTraClass);
     commonHeader.SetFlag(m_GnIsMobile);
@@ -597,31 +597,32 @@ namespace ns3 {
     dataIndication.GNRemainingLife = basicHeader.GetLifeTime ();
     dataIndication.GNRemainingHL = basicHeader.GetRemainingHL ();
 
-    //Basic Header Procesing according to ETSI EN 302 636-4-1 [10.3.3]
-    //1)Check version field
+    // Basic Header Procesing according to ETSI EN 302 636-4-1 [10.3.3]
+    // 1) Check version field
     if(basicHeader.GetVersion() != m_GnPtotocolVersion)
     {
       NS_LOG_ERROR("Incorrect version of GN protocol");
     }
-    //2)Check NH field
-    if(basicHeader.GetNextHeader()==2) //a) if NH=0 or NH=1 proceed with common header procesing
+    // 2) Check NH field
+    if(basicHeader.GetNextHeader()==2) // a) if NH=0 or NH=1 proceed with common header procesing
     {
-      //Secured packet
+      // Secured packet
     }
     dataIndication.GNRemainingLife = decodeLT(basicHeader.GetLifeTime ());
 
-    //Common Header Processing according to ETSI EN 302 636-4-1 [10.3.5]
+    // Common Header Processing according to ETSI EN 302 636-4-1 [10.3.5]
     dataIndication.data->RemoveHeader (commonHeader, 8);
     dataIndication.upperProtocol = commonHeader.GetNextHeader (); //!Information needed for step 7
     dataIndication.GNTraClass = commonHeader.GetTrafficClass (); //!Information needed for step 7
-    //1) Check MHL field
+
+    // 1) Check MHL field
     if(commonHeader.GetMaxHopLimit() < basicHeader.GetRemainingHL())
     {
       NS_LOG_ERROR("Max hop limit greater than remaining hop limit"); //a) if MHL<RHL discard packet and omit execution of further steps
       return;
     }
-    //2) process the BC forwarding buffer, for now not implemented (SCF in traffic class disabled)
-    //3) check HT field
+    // 2) process the BC forwarding buffer, for now not implemented (SCF in traffic class disabled)
+    // 3) check HT field
     dataIndication.GNType = commonHeader.GetHeaderType();
     dataIndication.lenght = commonHeader.GetPayload ();
 
