@@ -40,6 +40,7 @@ namespace ns3
       m_vehID=vehID;
       m_updatefirstiter=true;
       m_travelled_distance=0;
+      m_vehicle_visualizer=nullptr;
   }
 
   GPSTraceClient::~GPSTraceClient()
@@ -83,6 +84,12 @@ namespace ns3
   GPSTraceClient::setLon(std::string lon)
   {
       vehiclesdata[vehiclesdata.size()-1].lon = std::stod(lon);
+  }
+
+  void
+  GPSTraceClient::setLat0(double lat0)
+  {
+      m_lat0 = lat0;
   }
 
   void
@@ -138,6 +145,12 @@ namespace ns3
   GPSTraceClient::getLon()
   {
       return vehiclesdata[m_lastvehicledataidx].lon;
+  }
+
+  double
+  GPSTraceClient::getLat0()
+  {
+      return m_lat0;
   }
 
   double
@@ -245,7 +258,11 @@ namespace ns3
   {
     if(m_vehNode==NULL)
     {
-      NS_FATAL_ERROR("NULL vehicle node pointer passed to GPSTraceClient::UpdatePositions (vehicle ID: "<<m_vehID<<".");
+        if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+        {
+            m_vehicle_visualizer->terminateServer ();
+        }
+        NS_FATAL_ERROR("NULL vehicle node pointer passed to GPSTraceClient::UpdatePositions (vehicle ID: "<<m_vehID<<".");
     }
     Ptr<MobilityModel> mob = m_vehNode->GetObject<MobilityModel>();
 
@@ -264,6 +281,15 @@ namespace ns3
       }
 
     mob->SetPosition(Vector(vehiclesdata[m_lastvehicledataidx].tm_x,vehiclesdata[m_lastvehicledataidx].tm_y,1.5));
+
+    if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+    {
+        int rval = m_vehicle_visualizer->sendObjectUpdate (m_vehID,vehiclesdata[m_lastvehicledataidx].lat,vehiclesdata[m_lastvehicledataidx].lon,vehiclesdata[m_lastvehicledataidx].heading);
+        if (rval<0)
+        {
+            NS_FATAL_ERROR("Error: cannot send the object update to the vehicle visualizer for vehicle: "<<m_vehID);
+        }
+    }
     if(m_lastvehicledataidx+1==vehiclesdata.size())
       {
         m_excludeNode(m_vehNode);

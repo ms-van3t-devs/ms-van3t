@@ -38,6 +38,8 @@
 #include "sumo-TraCIAPI.h"
 #include "sumo-TraCIDefs.h"
 
+#include "ns3/vehicle-visualizer.h"
+
 namespace ns3 {
 
 class TraciClient : public TraCIAPI, public Object
@@ -107,6 +109,9 @@ private:
   double m_altitude;
   int m_sumoSeed;
   ns3::Time m_sumoWaitForSocket;
+
+  Ptr<vehicleVisualizer> m_vehicle_visualizer;
+  void terminateVehicleVisualizer (void);
 
 };
 

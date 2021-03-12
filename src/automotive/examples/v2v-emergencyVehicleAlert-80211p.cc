@@ -26,6 +26,7 @@
 #include "ns3/mobility-module.h"
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/packet-socket-helper.h"
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-80211p");
@@ -58,7 +59,8 @@ main (int argc, char *argv[])
   double sumo_updates = 0.01;
   std::string csv_name;
   int txPower=26;
-  float datarate=12;
+  float datarate=12;  
+  bool vehicle_vis = false;
 
   double simTime = 100;
 
@@ -77,6 +79,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
+  cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
 
   /* Cmd Line option for 802.11p */
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
@@ -189,6 +192,16 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
+
+  /* Create and setup the web-based vehicle visualizer of ms-van3t */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  if (vehicle_vis)
+  {
+      vehicleVis->startServer();
+      vehicleVis->connectToServer ();
+      sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
+  }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
   emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;

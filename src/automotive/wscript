@@ -12,7 +12,7 @@ def configure(conf):
     conf.env.append_value('LIBPATH', ["/usr/local/lib"])
 
 def build(bld):
-    module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci', 'gps-tc'])
+    module = bld.create_ns3_module('automotive', ['core','fd-net-device','wifi', 'applications', 'mobility','internet', 'config-store','stats', 'traci', 'gps-tc', 'vehicle-visualizer'])
     module.source = [
         'helper/areaSpeedAdvisorClient80211p-helper.cc',
         'helper/areaSpeedAdvisorServer80211p-helper.cc',

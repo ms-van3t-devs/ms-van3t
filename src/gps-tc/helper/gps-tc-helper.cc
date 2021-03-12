@@ -47,11 +47,12 @@ namespace {
         return result;
     }
 
-    double getAverageLon(std::ifstream &inFileStream, bool header)
+    std::tuple<double,double> getAverageLatLon(std::ifstream &inFileStream, bool header)
     {
         std::string line;
         std::vector<std::string> result;
 
+        double lat0=0;
         double lon0=0;
 
         // Skip the header
@@ -68,19 +69,22 @@ namespace {
             std::istringstream iss(line);
             result = getNextLineAndSplitIntoTokens(line);
 
+            double curr_lat=std::stod(result[2]);
             double curr_lon=std::stod(result[3]);
 
             linecount++;
 
             // Computing the "running" average as we get samples, instead of summing up a very large value and then dividing by linecount
+            lat0+=(curr_lat-lat0)/linecount;
             lon0+=(curr_lon-lon0)/linecount;
+
         }
 
         // "Rewind" the file, in order to read it if needed
         inFileStream.clear();
         inFileStream.seekg(0);
 
-        return lon0;
+        return std::tuple<double,double>(lat0,lon0);
     }
 }
 namespace ns3 {
@@ -89,6 +93,7 @@ namespace ns3 {
     GPSTraceClientHelper::GPSTraceClientHelper()
     {
         m_verbose=false;
+        m_vehicle_vis_ptr=nullptr;
     }
 
     std::map<std::string,GPSTraceClient*> GPSTraceClientHelper::createTraceClientsFromCSV(std::string filepath)
@@ -111,7 +116,9 @@ namespace ns3 {
           NS_FATAL_ERROR("Unable to open the file: "<<filepath);
       }
 
-      double lon0=getAverageLon (inFile, header);
+      std::tuple<double,double> latlon0=getAverageLatLon (inFile, header);
+      double lat0 = std::get<0>(latlon0);
+      double lon0 = std::get<1>(latlon0);
 
       // Skip the header
       if (header) {
@@ -140,7 +147,12 @@ namespace ns3 {
           if ( m_GPSTraceClient.find(currentVehId) == m_GPSTraceClient.end() ) {
             // Not found - needed to create the entry for such a vector
             GPSTraceClient* gpsclient = new GPSTraceClient(currentVehId);
+            gpsclient->setLat0 (lat0);
             gpsclient->setLon0 (lon0);
+            if(m_vehicle_vis_ptr!=nullptr && m_vehicle_vis_ptr->isConnected())
+            {
+              gpsclient->setVehicleVisualizer (m_vehicle_vis_ptr);
+            }
             m_GPSTraceClient.insert(std::make_pair(currentVehId, gpsclient));
           }
 
@@ -164,7 +176,9 @@ namespace ns3 {
           m_GPSTraceClient[currentVehId]->setY(tm_y);
 
           m_GPSTraceClient[currentVehId]->setSpeedms(result[4]);
-          m_GPSTraceClient[currentVehId]->setheading(result[5]); //define if rad or deg: 5:rad - 6:deg
+
+          // Only degrees should be used for the heading in gps-tc ([5] is discarded as it contains the heading in radians)
+          m_GPSTraceClient[currentVehId]->setheading(result[6]);
           m_GPSTraceClient[currentVehId]->setAccelmsq(result[7]);
 
           // Find the minimum x and y values
@@ -193,6 +207,15 @@ namespace ns3 {
               std::cout << "Key: " << it->first << std::endl;
               it->second->printVehiclesdata();
               std::cout << std::endl;
+          }
+      }
+
+      if(m_vehicle_vis_ptr!=nullptr && m_vehicle_vis_ptr->isConnected())
+      {
+          int rval = m_vehicle_vis_ptr->sendMapDraw(lat0,lon0);
+          if (rval<0)
+          {
+              NS_FATAL_ERROR("Error: cannot send the map coordinates to the vehicle visualizer.");
           }
       }
       //*/

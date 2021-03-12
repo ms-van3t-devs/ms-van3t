@@ -27,6 +27,7 @@
 #include "ns3/cv2x-module.h"
 #include "ns3/sumo_xml_parser.h"
 #include <ns3/node-list.h>
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-cv2x");
@@ -54,6 +55,7 @@ main (int argc, char *argv[])
   bool sumo_gui = true;
   double sumo_updates = 0.01;
   std::string csv_name;
+  bool vehicle_vis = false;
 
   /*** 0.b LENA + V2X Options ***/
   double ueTxPower = 23.0;                // Transmission power in dBm
@@ -87,8 +89,9 @@ main (int argc, char *argv[])
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
+  cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
 
-  /* Cmd Line option for v2x */
+  /* Cmd Line option for C-V2X */
   cmd.AddValue ("tx-power", "UEs transmission power [dBm]", ueTxPower);
   cmd.AddValue ("adjacencyPscchPssch", "Scheme for subchannelization", adjacencyPscchPssch);
   cmd.AddValue ("sizeSubchannel", "Number of RBs per Subchannel", sizeSubchannel);
@@ -355,6 +358,16 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
+
+  /* Create and setup the web-based vehicle visualizer of ms-van3t */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  if (vehicle_vis)
+  {
+      vehicleVis->startServer();
+      vehicleVis->connectToServer ();
+      sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
+  }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
   emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;

@@ -26,6 +26,7 @@
 #include "ns3/mobility-module.h"
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/packet-socket-helper.h"
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2i-80211p");
@@ -65,6 +66,7 @@ main (int argc, char *argv[])
   bool print_summary = false;
   int txPower=26;
   float datarate=12;
+  bool vehicle_vis = false;
 
   double simTime = 100;
 
@@ -85,6 +87,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
   cmd.AddValue ("summary", "Print a summary for each vehicle at the end of the simulation", print_summary);
+  cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
 
   /* Cmd Line option for 802.11p */
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
@@ -208,6 +211,16 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
+
+  /* Create and setup the web-based vehicle visualizer of ms-van3t */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  if (vehicle_vis)
+  {
+      vehicleVis->startServer();
+      vehicleVis->connectToServer ();
+      sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
+  }
 
   /*** 6. Create and Setup application for the server ***/
   areaSpeedAdvisorServer80211pHelper AreaSpeedAdvisorServer80211pHelper;

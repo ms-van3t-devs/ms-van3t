@@ -25,6 +25,7 @@
 #include "ns3/wave-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/packet-socket-helper.h"
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-80211p-gps-tc-example");
@@ -59,6 +60,7 @@ main (int argc, char *argv[])
   bool realtime = false;
   int txPower=26;
   float datarate=12;
+  bool vehicle_vis = false;
 
   double simTime = 100;
 
@@ -70,6 +72,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("realtime", "Use the realtime scheduler or not", realtime);
   cmd.AddValue ("trace-folder","Position of GPS trace files",trace_file_path);
   cmd.AddValue ("gps-trace", "Name of the GPS trace file", gps_trace);
+  cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
 
   /* Cmd Line option for 802.11p */
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
@@ -116,6 +119,16 @@ main (int argc, char *argv[])
   GPSTraceClientHelper GPSTCHelper;
 
   GPSTCHelper.setVerbose(verbose);
+
+  /* Create and setup the web-based vehicle visualizer of ms-van3t */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  if (vehicle_vis)
+  {
+      vehicleVis->startServer();
+      vehicleVis->connectToServer ();
+  }
+  GPSTCHelper.setVehicleVisualizer(vehicleVis);
 
   GPSTCMap=GPSTCHelper.createTraceClientsFromCSV(path);
 

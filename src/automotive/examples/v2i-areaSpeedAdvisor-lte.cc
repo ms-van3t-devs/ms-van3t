@@ -27,6 +27,7 @@
 #include "ns3/lte-module.h"
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/point-to-point-helper.h"
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2i-lte");
@@ -69,6 +70,8 @@ main (int argc, char *argv[])
 
   xmlDocPtr rou_xml_file;
 
+  bool vehicle_vis = false;
+
   double simTime = 100;
 
   CommandLine cmd;
@@ -82,6 +85,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
+  cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
 
   /* Cmd Line option for Lena */
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms]", interPacketInterval);
@@ -232,6 +236,16 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
+
+  /* Create and setup the web-based vehicle visualizer of ms-van3t */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  if (vehicle_vis)
+  {
+      vehicleVis->startServer();
+      vehicleVis->connectToServer ();
+      sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
+  }
 
   /*** 7. Create and Setup application for the server ***/
   areaSpeedAdvisorServerLTEHelper AreaSpeedAdvisorServerLTEHelper;

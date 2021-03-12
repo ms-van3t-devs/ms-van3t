@@ -14,6 +14,8 @@
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
 
+#include "ns3/vehicle-visualizer.h"
+
 namespace ns3 {
 
   class GPSTraceClient : public Object
@@ -32,8 +34,10 @@ namespace ns3 {
           void setX(double);
           void setY(double);
           void setSpeedms(std::string);
+          // This heading value should always be set in degrees, from 0 to 360, in a clockwise direction
           void setheading(std::string);
           void setAccelmsq(std::string);
+          void setLat0(double);
           void setLon0(double);
 
           // Getter
@@ -48,6 +52,7 @@ namespace ns3 {
           double getTravelledDistance();
           std::string getID();
           uint64_t getLastIndex();
+          double getLat0();
           double getLon0();
 
           // Start "playing" the trace
@@ -58,6 +63,7 @@ namespace ns3 {
 
           // Stop "playing" the trace
           void StopUpdates();
+          void setVehicleVisualizer(Ptr<vehicleVisualizer> vehicleVis) {m_vehicle_visualizer = vehicleVis;}
 
       private:
           typedef struct _positioning_data {
@@ -78,6 +84,7 @@ namespace ns3 {
 
           } positioning_data_t;
 
+          double m_lat0;
           double m_lon0;
 
           std::vector<positioning_data_t> vehiclesdata;
@@ -96,6 +103,10 @@ namespace ns3 {
 
           void CreateNode(void);
           void UpdatePositions(void);
+
+          Ptr<vehicleVisualizer> m_vehicle_visualizer;
+
+
   };
 
 

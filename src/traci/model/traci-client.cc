@@ -105,6 +105,11 @@ namespace ns3
                   DoubleValue (1.5),
                   MakeDoubleAccessor (&TraciClient::m_altitude),
                   MakeDoubleChecker<double> ())
+    .AddAttribute ("VehicleVisualizer",
+                  "Vehicle visualizer client",
+                  PointerValue (0),
+                  MakePointerAccessor (&TraciClient::m_vehicle_visualizer),
+                  MakePointerChecker<vehicleVisualizer> ());
   ;
     return tid;
   }
@@ -121,6 +126,7 @@ namespace ns3
     m_sumoLogFile = false;
     m_sumoStepLog = false;
     m_sumoWaitForSocket = ns3::Seconds(1.0);
+    m_vehicle_visualizer = nullptr;
   }
 
   TraciClient::~TraciClient(void)
@@ -140,6 +146,7 @@ namespace ns3
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("Problem while closing traci socket: " << e.what());
       }
   }
@@ -171,6 +178,7 @@ namespace ns3
 
     if (m_sumoConfigPath == "")
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("Error: No path specified for sumo configuration! Use .SetAttribute('m_sumoConfigPath', ...) before calling .SetupSUMO");
       }
 
@@ -253,8 +261,31 @@ namespace ns3
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("Can not connect to sumo via traci: " << e.what());
       }
+
+    if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+    {
+        /* Compute central position of the map to be sent to the web visualizer */
+        libsumo::TraCIPositionVector net_boundaries = this->TraCIAPI::simulation.getNetBoundary ();
+        libsumo::TraCIPosition pos1;
+        libsumo::TraCIPosition pos2;
+        double lon,lat;
+        /* Convert (x,y) to (long,lat) */
+        // Long = x, Lat = y
+        pos1 = this->TraCIAPI::simulation.convertXYtoLonLat (net_boundaries[0].x,net_boundaries[0].y);
+        pos2 = this->TraCIAPI::simulation.convertXYtoLonLat (net_boundaries[1].x,net_boundaries[1].y);
+        /* Check the center of the map */
+        lon = (pos1.x + pos2.x)/2;
+        lat = (pos1.y + pos2.y)/2;
+        int rval = m_vehicle_visualizer->sendMapDraw(lat,lon);
+        if (rval<0)
+        {
+            NS_FATAL_ERROR("Error: cannot send the map coordinates to the vehicle visualizer.");
+        }
+    }
+
 
     // start sumo and simulate until the specified time
     this->TraCIAPI::simulationStep(m_startTime.GetSeconds());
@@ -293,6 +324,7 @@ namespace ns3
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("Sumo was closed unexpectedly during simulation: " << e.what());
       }
   }
@@ -317,10 +349,21 @@ namespace ns3
             Ptr<MobilityModel> mob = m_vehicleNodeMap.at(veh)->GetObject<MobilityModel>();
             // set ns3 node position with user defined altitude
             mob->SetPosition(Vector(pos.x, pos.y, m_altitude));
+
+            if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+            {
+                libsumo::TraCIPosition lonlat = this->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+                int rval = m_vehicle_visualizer->sendObjectUpdate (veh,lonlat.y,lonlat.x,this->TraCIAPI::vehicle.getAngle (veh));
+                if (rval<0)
+                {
+                    NS_FATAL_ERROR("Error: cannot send the object update to the vehicle visualizer for vehicle: "<<veh);
+                }
+            }
           }
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("SUMO was closed unexpectedly while asking for vehicle positions: " << e.what());
       }
   }
@@ -386,6 +429,7 @@ namespace ns3
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("SUMO was closed unexpectedly while asking for arrived/departed vehicles: " << e.what());
       }
   }
@@ -434,6 +478,7 @@ namespace ns3
       }
     catch (std::exception& e)
       {
+        terminateVehicleVisualizer();
         NS_FATAL_ERROR("SUMO was closed unexpectedly while updating the vehicle node map: " << e.what());
       }
   }
@@ -442,6 +487,15 @@ uint32_t
 TraciClient::GetVehicleMapSize()
 {
 return m_vehicleNodeMap.size();
+}
+
+void
+TraciClient::terminateVehicleVisualizer(void)
+{
+  if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+  {
+      m_vehicle_visualizer->terminateServer ();
+  }
 }
 
 bool
