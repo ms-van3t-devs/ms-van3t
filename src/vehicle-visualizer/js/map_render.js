@@ -178,7 +178,6 @@ function draw_map(lat,lon,mapbox_token) {
 
 	// Create standard (street view), hybrid and satellite layers based on Mapbox
 	// They are normally not enabled as you need an access token to use them
-	// You can insert your access token after "var mapbox_token=" at the beginning of this file, replacing "null"
 	let hybridlayer, satellitelayer;
 
 	if(mapbox_token != null) {
