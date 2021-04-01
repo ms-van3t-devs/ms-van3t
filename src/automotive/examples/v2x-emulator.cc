@@ -71,7 +71,8 @@ main (int argc, char *argv[])
   // Simulation parameters
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  std::string sumo_config = "src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  std::string sumo_netns = "";
   bool sendCam = true;
   bool sendDenm = true;
 
@@ -94,6 +95,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-folder","Position of sumo config files",sumo_folder);
   cmd.AddValue ("mob-trace", "Name of the mobility trace file", mob_trace);
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
+  cmd.AddValue ("sumo-netns","[Advanced users] Name of the network namespace SUMO shall be launched in. If not specified, SUMO is launched normally.",sumo_netns);
   cmd.AddValue ("summary", "Print a summary for each vehicle at the end of the simulation", print_summary);
   cmd.AddValue ("verbose", "Enable verbose printing on stdout", verbose);
   cmd.AddValue ("interface", "Name of the physical interface to send V2X messages to", deviceName);
@@ -205,6 +207,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--collision.action warn --collision.check-junctions --error-log=sumo-errors-or-collisions.xml"));
+  sumoClient->SetAttribute ("UseNetworkNamespace", StringValue(sumo_netns));
 
   /* Create the OBU application (v2xEmulator, see also model/v2xEmulator.cc/.h) */
   v2xEmulatorHelper emuHelper;

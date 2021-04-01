@@ -111,6 +111,7 @@ private:
   ns3::Time m_sumoWaitForSocket;
 
   Ptr<vehicleVisualizer> m_vehicle_visualizer;
+  std::string m_netns_name;
   void terminateVehicleVisualizer (void);
 
 };

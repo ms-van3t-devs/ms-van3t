@@ -109,7 +109,12 @@ namespace ns3
                   "Vehicle visualizer client",
                   PointerValue (0),
                   MakePointerAccessor (&TraciClient::m_vehicle_visualizer),
-                  MakePointerChecker<vehicleVisualizer> ());
+                  MakePointerChecker<vehicleVisualizer> ())
+    .AddAttribute ("UseNetworkNamespace",
+                  "Name of the network namespace to be used to launch SUMO",
+                   StringValue (""),
+                   MakeStringAccessor (&TraciClient::m_netns_name),
+                   MakeStringChecker ());
   ;
     return tid;
   }
@@ -127,6 +132,7 @@ namespace ns3
     m_sumoStepLog = false;
     m_sumoWaitForSocket = ns3::Seconds(1.0);
     m_vehicle_visualizer = nullptr;
+    m_netns_name = "";
   }
 
   TraciClient::~TraciClient(void)
@@ -242,6 +248,16 @@ namespace ns3
     m_includeNode = includeNode;
     m_excludeNode = excludeNode;
     m_sumoCommand = GetSumoCmdString();
+
+    if(m_netns_name != "")
+    {
+        if(geteuid() != 0)
+        {
+            NS_FATAL_ERROR("Error. Setting a network namespace for SUMO requires root privileges or 'sudo'");
+        }
+        m_sumoCommand = "sudo ip netns exec " + m_netns_name + " " + m_sumoCommand;
+        NS_LOG_INFO("SUMO will be launched on Network namespace: " + m_netns_name);
+    }
 
     // start up sumo
     int startCmd = std::system(m_sumoCommand.c_str());

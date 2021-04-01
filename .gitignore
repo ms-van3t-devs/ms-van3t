@@ -21,6 +21,9 @@
 *.patch
 *.rej
 
+/*.cflags
+/*.cxxflags
+
 *.o
 *.pyc
 *.pyo
