@@ -58,6 +58,21 @@ The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_
 
 **The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_CAM_DENM_version.sh` script. This script relies on the `ns-3.33/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
 
+# Working with an IDE
+
+Although not necessarily required, you can also configure an IDE in order to more comfortably work with ms-van3t.
+
+The suggested IDE, which has also been used for the development of ms-van3t, is _QtCreator_.
+
+You can find all the instructions for setting up QtCreator with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) on the [official ns-3 Wiki](https://www.nsnam.org/wiki/HOWTO_configure_QtCreator_with_ns-3).
+
+QtCreator can be installed on Debian/Ubuntu with:
+`sudo apt install qtcreator`
+
+If you are using Ubuntu (or any of its variant) 20.04 LTS (or greater), you need also to install the `libclang-common-8-dev` package:
+`sudo apt install libclang-common-8-dev`
+
+Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlighting several errors and not recognizing some types, when opening any source or header file, even if the code compiles correctly.
 
 # Sample V2I example and V2I/V2N applications
 
