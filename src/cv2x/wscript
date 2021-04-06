@@ -7,6 +7,7 @@ def build(bld):
         cv2x_module_dependencies.append('fd-net-device')
     module = bld.create_ns3_module('cv2x', cv2x_module_dependencies)
     module.cxxflags = ['-Wno-maybe-uninitialized']
+    module.cxxflags = ['-Wno-uninitialized']
     module.source = [
         'model/cv2x_lte-common.cc',
         'model/cv2x_lte-spectrum-phy.cc',

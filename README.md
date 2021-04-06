@@ -69,7 +69,7 @@ You can find all the instructions for setting up QtCreator with ns-3 (and the sa
 QtCreator can be installed on Debian/Ubuntu with:
 `sudo apt install qtcreator`
 
-If you are using Ubuntu (or any of its variant) 20.04 LTS (or greater), you need also to install the `libclang-common-8-dev` package:
+You need also to install the `libclang-common-8-dev` package (the command for Debian/Ubuntu is reported below):
 `sudo apt install libclang-common-8-dev`
 
 Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlighting several errors and not recognizing some types, when opening any source or header file, even if the code compiles correctly.
