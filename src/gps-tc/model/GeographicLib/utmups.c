@@ -2,7 +2,7 @@
 	The MIT License (MIT)
 
 	Copyright (c) 2008-2019, Charles Karney (original code and GeographicLib)
-	Copyright (c) 2020, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS module)
+	Copyright (c) 2020-2021, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS and TransverseMercator modules)
 
 	Permission is hereby granted, free of charge, to any person
 	obtaining a copy of this software and associated documentation
@@ -30,6 +30,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <complex.h>
+#include <stdbool.h>
 
 // UTMUPS access these enums
 enum mgrs_utmups_data {
@@ -120,7 +121,7 @@ transverse_mercator_t UTMUPS_init_TransverseMercator(double a, double f, double 
     for (int l = 1; l <= transmerc.maxpow_; ++l) {
 		m = transmerc.maxpow_ - l;
 		transmerc._alp[l] = d * UTMUPS_Math_polyval(m, alpcoeff_ord6 + o, transmerc._n) / alpcoeff_ord6[o + m + 1];
-		transmerc._bet[l] = d * UTMUPS_Math_polyval(m, alpcoeff_ord6 + o, transmerc._n) / betcoeff_ord6[o + m + 1];
+		transmerc._bet[l] = d * UTMUPS_Math_polyval(m, betcoeff_ord6 + o, transmerc._n) / betcoeff_ord6[o + m + 1];
 		o += m + 2;
 		d *= transmerc._n;
     }
@@ -542,4 +543,115 @@ int UTMUPS_Forward(double lat, double lon,
 	*k = k1;
 
 	return UTMUPS_OK;
+}
+
+int TransverseMercator_Reverse(transverse_mercator_t *transmercp, double lon0, double x, double y, double *lat, double *lon, double *gamma, double *k) {
+   	if(transmercp==NULL || transmercp->isinit!=UINT8_MAX) {
+		return ERR_TMERC_UNINITIALIZED;
+	}
+
+    // This undoes the steps in Forward.  The wrinkles are: (1) Use of the
+    // reverted series to express zeta' in terms of zeta. (2) Newton's method
+    // to solve for phi in terms of tan(phi).
+    double xi = y / (transmercp->_a1 * transmercp->_k0);
+    double eta = x / (transmercp->_a1 * transmercp->_k0);
+
+    // Explicitly enforce the parity
+    int xisign = (xi < 0) ? -1 : 1;
+    int etasign = (eta < 0) ? -1 : 1;
+
+    xi *= xisign;
+    eta *= etasign;
+
+    bool backside = xi > M_PI/2;
+
+    if (backside) {
+    	xi = M_PI - xi;
+   	}
+
+    double c0 = cos(2 * xi), ch0 = cosh(2 * eta);
+    double s0 = sin(2 * xi), sh0 = sinh(2 * eta);
+
+    double complex a = (2 * c0 * ch0) + (-2 * s0 * sh0)*I; // 2 * cos(2*zeta)
+
+    int n = transmercp->maxpow_;
+
+    double complex y0 = n & 1 ?       -transmercp->_bet[n] : 0 + 0*I;
+    double complex y1 = 0 + 0*I;
+    double complex z0 = n & 1 ? -2*n * transmercp->_bet[n] : 0 + 0*I;
+    double complex z1 = 0 + 0*I;
+
+    if(n & 1) {
+    	--n;
+    }
+
+    while (n) {
+		y1 = a * y0 - y1 -       transmercp->_bet[n];
+		z1 = a * z0 - z1 - 2*n * transmercp->_bet[n];
+		--n;
+		y0 = a * y1 - y0 -       transmercp->_bet[n];
+		z0 = a * z1 - z0 - 2*n * transmercp->_bet[n];
+		--n;
+    }
+
+    a /= (double) 2.0;               // cos(2*zeta)
+    z1 = ((double) 1.0) - z1 + a * z0;
+
+    a = (double complex)(s0 * ch0 + (c0 * sh0)*I); // sin(2*zeta)
+
+    y1 = ((double complex)(xi + eta*I)) + a * y0;
+
+    // Convergence and scale for Gauss-Schreiber TM to Gauss-Krueger TM.
+    *gamma = UTMUPS_Math_atan2d(cimag(z1),creal(z1));
+    *k = transmercp->_b1 / cabs(z1);
+
+    // JHS 154 has
+    //
+    //   phi' = asin(sin(xi') / cosh(eta')) (Krueger p 17 (25))
+    //   lam = asin(tanh(eta') / cos(phi')
+    //   psi = asinh(tan(phi'))
+    double xip = creal(y1);
+    double etap = cimag(y1);
+    double s = sinh(etap);
+    double c = fmax((double) 0.0, cos(xip)); // cos(pi/2) might be negative
+    double r = hypot(s, c);
+
+    if (r != 0) {
+		*lon = UTMUPS_Math_atan2d(s, c); // Krueger p 17 (25)
+		// Use Newton's method to solve for tau
+
+		double sxip = sin(xip);
+
+		double tau = UTMUPS_Math_tauf(sxip/r, transmercp->_es);
+
+		*gamma += UTMUPS_Math_atan2d(sxip * tanh(etap), c); // Krueger p 19 (31)
+
+		*lat = UTMUPS_Math_atand(tau);
+
+		// Note cos(phi') * cosh(eta') = r
+		*k *= sqrt(transmercp->_e2m + transmercp->_e2 / (1 + UTMUPS_Math_sq(tau))) * hypot((double) (1.0), tau) * r;
+	} else {
+		*lat = 90;
+		*lon = 0;
+		*k *= transmercp->_c;
+	}
+
+    *lat *= xisign;
+
+    if (backside) {
+    	*lon = 180 - *lon;
+    }
+
+    *lon *= etasign;
+
+    *lon = UTMUPS_Math_AngNormalize(*lon + lon0);
+
+    if (backside) {
+		*gamma = 180 - *gamma;
+    }
+    *gamma *= xisign * etasign;
+    *gamma = UTMUPS_Math_AngNormalize(*gamma);
+    *k *= transmercp->_k0;
+
+    return UTMUPS_OK;
 }

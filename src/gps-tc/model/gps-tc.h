@@ -27,6 +27,30 @@ namespace ns3 {
           void shiftOrigin(double,double);
           void printVehiclesdata();
 
+          // This function can be used to artificially add GNSS Trace points, after setting up the GPS Trace Client module
+          // with data coming from a real GPS/GNSS trace (i.e. this function should be called only AFTER "vehiclesdata"
+          // had been filled up thanks to the setter methods - this function is actually automatically called, if needed,
+          // inside the gps-tc-helper module, thus the user, normally, does not need to call it directly)
+          // Adding additional points can be useful to make a GPS Trace more "smooth", when it is obtained through a device
+          // which, for instance, can provide updates only at a rate of 1 Hz or lower
+          // This function will add additional points in between two real GPS/GNSS Trace points, in order to have new data
+          // every around interval_ms milliseconds; the additional points are inserted by linearly interpolating all the
+          // involved variables (timestamps, latitude, longitude, heading, speed, ...), except the acceleration which is
+          // supposed constant between the two real points
+          // For instance, if a trace from a device updating every around 1 s is used, and interval_ms is 100 ms, this
+          // function will add around 9/10 points between each couple of real points, in order to have, after the computation,
+          // 1 point every around 100 ms
+          // IMPORTANT: keep in mind that this is a very simple and purely linear interpolation between actual GNSS data, which
+          // will very probably not correspond to the physical reality between each couple of real points (in which, very probably,
+          // the acceleration is not constant, nor the speed or the position variation; in the physical world, it would also be
+          // impossible to have a position and a speed which both increase linearly between couple of points)
+          // Thus, never use setInterpolationPoints() when the physics involving speed and acceleration are involved, but rely
+          // instead on the actual points given by the GNSS device only (or use another device providing more frequent updates)
+          // It can be useful, instead, for applications in which only the actual position and heading of vehicles matters
+          void setInterpolationPoints(int interval_ms);
+
+          void generateAccelerationValues();
+
           // Setter
           void setTimestamp(std::string);
           void setLat(std::string);
@@ -90,6 +114,7 @@ namespace ns3 {
           std::vector<positioning_data_t> vehiclesdata;
           long unsigned int m_lastvehicledataidx;
           bool m_updatefirstiter;
+          bool m_accelerationset;
           std::string m_vehID;
           double m_travelled_distance;
 

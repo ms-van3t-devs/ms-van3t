@@ -2,7 +2,7 @@
 	The MIT License (MIT)
 
 	Copyright (c) 2008-2019, Charles Karney (original code and GeographicLib)
-	Copyright (c) 2020, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS module)
+	Copyright (c) 2020-2021, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS and TransverseMercator modules)
 
 	Permission is hereby granted, free of charge, to any person
 	obtaining a copy of this software and associated documentation
@@ -164,6 +164,9 @@ int PolarStereographic_Forward(polar_stereographic_t *polsterp, uint8_t northp, 
 int TransverseMercator_Forward(transverse_mercator_t *transmercp, double lon0, double lat, double lon,
 	double *x, double *y,
 	double *gamma,double *k);
+int TransverseMercator_Reverse(transverse_mercator_t *transmercp, double lon0, double x, double y, 
+  double *lat, double *lon, 
+  double *gamma, double *k);
 
 // Function returning the WGS84_f constant value
 double UTMUPS_WGS84_f(void);

@@ -2,7 +2,7 @@
 	The MIT License (MIT)
 
 	Copyright (c) 2008-2019, Charles Karney (original code and GeographicLib)
-	Copyright (c) 2020, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS module)
+	Copyright (c) 2020-2021, Francesco Raviglione, Marco Malinverno (C adapation of the UTMUPS and TransverseMercator modules)
 
 	Permission is hereby granted, free of charge, to any person
 	obtaining a copy of this software and associated documentation
@@ -31,6 +31,12 @@
 #include "float.h"
 #include "inttypes.h"
 
+// Ignore convergence failures with standard floating points types by allowing
+// loop to exit cleanly
+// As we are using here standard floating point types (GEOGRAPHICLIB_PRECISION == 2), 
+// we can safely define GEOGRAPHICLIB_PANIC as 'false', i.e., as '0'
+#define GEOGRAPHICLIB_PANIC 0
+
 // Acting as an invalid value (like Math::NaN in GeographicLib)
 #define COORD_NAN DBL_MAX
 
@@ -53,6 +59,8 @@ double UTMUPS_Math_eatanhe(double x, double es);
 double UTMUPS_Math_taupf(double tau, double es);
 // C version of Math::atan2d
 double UTMUPS_Math_atan2d(double y, double x);
+// C version of Math::atand
+double UTMUPS_Math_atand(double x);
 // C version of Math::sincosd
 void UTMUPS_Math_sincosd(double x, double *sinx, double *cosx);
 // C version of Math::tand
@@ -69,5 +77,8 @@ double UTMUPS_Math_LatFix(double x);
 
 // Additional function to compute the (approximated) distance between two points on Earth, using the Haversine formula
 double UTMUPS_Math_haversineDist(double lat_a, double lon_a, double lat_b, double lon_b);
+
+// C version of Math::tauf
+double UTMUPS_Math_tauf(double taup, double es);
 
 #endif // UTMUPS_MATH_H_INCLUDED

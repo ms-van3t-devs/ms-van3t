@@ -37,9 +37,14 @@ main (int argc, char *argv[])
    * In this example instead of relying on SUMO, the vehicles' mobility will be managed by the "gps-tc" module.
    * "gps-tc" is a module that is able to load GPS traces in a specific CSV format, with few prerequisites, and use
    * them to simulate the presence of N vehicles from pre-recorded real GPS traces.
-   * For the time being, the CSV format should be equal to the one available in "/src/gps-tc/examples/GPS-Traces-Sample" and
-   * the positioning updates should occur, if possible at least at around 5-10 Hz (1 Hz would not be enough for an effective
-   * dynamic frequency management for the CAMs).
+   * For the time being, the CSV format should be similar to the one available in "/src/gps-tc/examples/GPS-Traces-Sample" and
+   * the positioning updates should occur, if possible, at least at around 5-10 Hz (1 Hz may impact the effectiveness of the dynamic
+   * CAM generation). You can also select an example trace, however, taken from a low-end GNSS device, embedded inside a consumer
+   * smartphone (in this case the trace is taken at 1 Hz).
+   * This also showcases how the GPS Trace Client module is able to accept as input any kind of CSV trace, no matter if it is taken
+   * with more professional devices (updating at least at 5-10 Hz - always the best option) or if it comes from the user's smartphone,
+   * updating at 1 Hz (which can be used, for instance, to analyze the behaviour of a vehicular application when non-professional and
+   * cheap GNSS devices are used, providing a low update rate).
    *
    * In this example the generated vehicles will simply broadcast their CAMs, relying on the application named simpleCAMSender-gps.
    * 802.11p is used as access technology.
@@ -54,7 +59,14 @@ main (int argc, char *argv[])
 
   /*** 0.a App Options ***/
   std::string trace_file_path = "src/gps-tc/examples/GPS-Traces-Sample/";
+  // If you want to use a sample GPS trace obtained using a high-end expensive device (with
+  // high update rate and inertial sensors - 3 vehicles), uncomment this line (and comment
+  // the "BiellaTrace.csv" one)
   std::string gps_trace = "sampletrace.csv";
+  // If you want to use a sample GPS trace obtained using a normal smartphone, with the
+  // Ultra GPS Logger app (update rate: 1 Hz, no acceleration, 2 vehicles), uncomment this
+  // line (and comment the "sampletrace.csv" one)
+  // std::string gps_trace = "BiellaTrace.csv";
 
   bool verbose = false;
   bool realtime = false;
@@ -127,8 +139,26 @@ main (int argc, char *argv[])
   {
       vehicleVis->startServer();
       vehicleVis->connectToServer ();
+
+      GPSTCHelper.setVehicleVisualizer(vehicleVis);
   }
-  GPSTCHelper.setVehicleVisualizer(vehicleVis);
+
+  // If you want to use set up the GPS Trace Client Helper to read data from "BiellaTrace.csv", obtainer on a regular smartphone with
+  // the Ultra GPS Logger app (update rate: 1 Hz, no acceleration), uncomment these lines
+  // They will set the right columns names for the data inside the CSV file and turn on interpolation to get a more "smooth" trace
+//  GPSTCHelper.setVehicleIDColumnName ("VehID");
+//  GPSTCHelper.setLatitudeColumnName ("Lat");
+//  GPSTCHelper.setLongitudeColumnName ("Lng");
+//  // As not all the apps/low-end GNSS devices are able to output an acceleration value, you can also specify
+//  // "unavailable": in this case, the acceleration will be estimated, between points, as contant, and calculated simply as delta(v)/delta(t)
+//  // Of course this is an approximation of the acceleration and may not reflect the actual acceleration experienced by the vehicle
+//  // in between two data points
+//  GPSTCHelper.setAccelerationColumnName ("unavailable");
+//  GPSTCHelper.setHeadingColumnName ("Bearing");
+//  GPSTCHelper.setSpeedColumnName ("Speed");
+//  GPSTCHelper.setTimestampColumnName ("TimeWithMS",true,"%H:%M:%S.%MSEC",{.tm_year=2020,.tm_mon=9,.tm_mday=28});
+
+  GPSTCHelper.setVerbose (false);
 
   GPSTCMap=GPSTCHelper.createTraceClientsFromCSV(path);
 
@@ -199,14 +229,24 @@ main (int argc, char *argv[])
       return includedNode;
     };
 
+  // We can create a variable here and use it in the lambda functions below and main() will not terminate before the whole
+  // simulation is terminated (thus the value of remainingNodes will always be accessible)
+  int remainingNodes = obuNodes.GetN();
+
   /* callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
+  std::function<void (Ptr<Node>)> shutdownWifiNode = [&] (Ptr<Node> exNode)
     {
       /* stop all applications */
       Ptr<simpleCAMSender> AppSimpleSender_ = exNode->GetApplication(0)->GetObject<simpleCAMSender>();
 
-      if(AppSimpleSender_)
-        AppSimpleSender_->StopApplicationNow();
+      if(AppSimpleSender_) {
+          AppSimpleSender_->StopApplicationNow();
+          remainingNodes--;
+      }
+
+      if(remainingNodes==0) {
+          Simulator::Stop();
+      }
 
        /* set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
