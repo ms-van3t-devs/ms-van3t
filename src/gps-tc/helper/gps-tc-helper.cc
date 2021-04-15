@@ -21,6 +21,7 @@
 
 #include "gps-tc-helper.h"
 #include <iomanip>
+#include <climits>
 
 extern "C" {
     #include "ns3/utmups.h"
