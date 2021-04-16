@@ -690,7 +690,7 @@ namespace ns3 {
     asn_dec_rval_t decode_result;
 
     //do {
-      decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_DENM, &decoded_, buffer, packet->GetSize ()-1);
+      decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_DENM, &decoded_, buffer, packet->GetSize ());
     //} while(decode_result.code==RC_WMORE);
 
     free(buffer);
