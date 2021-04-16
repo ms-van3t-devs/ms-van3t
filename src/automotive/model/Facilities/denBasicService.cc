@@ -305,7 +305,7 @@ namespace ns3 {
         return DENM_ASN1_UPER_ENC_ERROR;
       }
 
-    Ptr<Packet> packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded+1);
+    Ptr<Packet> packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded);
     free(encode_result.buffer);
 
     BTPDataRequest_t dataRequest = {};
@@ -425,7 +425,7 @@ namespace ns3 {
         return DENM_ASN1_UPER_ENC_ERROR;
       }
 
-    Ptr<Packet> packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded+1);
+    Ptr<Packet> packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded);
     free(encode_result.buffer);
 
     BTPDataRequest_t dataRequest = {};
@@ -668,7 +668,7 @@ namespace ns3 {
 
     uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
     buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
-    packet->CopyData (buffer, packet->GetSize ()-1);
+    packet->CopyData (buffer, packet->GetSize ());
 
     if(!CheckMainAttributes ())
       {
@@ -689,9 +689,9 @@ namespace ns3 {
     void *decoded_=NULL;
     asn_dec_rval_t decode_result;
 
-    do {
+    //do {
       decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_DENM, &decoded_, buffer, packet->GetSize ()-1);
-    } while(decode_result.code==RC_WMORE);
+    //} while(decode_result.code==RC_WMORE);
 
     free(buffer);
 
