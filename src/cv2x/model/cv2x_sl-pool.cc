@@ -1393,6 +1393,7 @@ namespace ns3 {
     uint16_t startRbSubch = cv2x_LteRrcSap::startRbSubchannelAsInt(m_startRbSubchannel); // start of the resource pool for transmission
     uint8_t* tmp = GetValsFromRiv(riv);
     uint8_t subchLen = tmp[0]; // number of contigious subchannels 
+    delete[] tmp;
 
     // 36.213 14.1.1.4C
     std::list<SidelinkCommResourcePoolV2x::SidelinkTransmissionInfo> txInfo;
