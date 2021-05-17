@@ -88,6 +88,7 @@ namespace ns3 {
         m_egoPV.POS_EPV.lon = longitude_deg;
         m_egoPV.POS_EPV.lat = latitude_deg;
         m_RSU_epv_set = true;
+        EPVupdate ();// Update EPV at startup, only for the timestamp
     }
     else
     {
@@ -143,13 +144,14 @@ namespace ns3 {
   void
   GeoNet::EPVupdate ()
   {
+    
+    m_egoPV.TST_EPV = compute_timestampIts (true);
+    
     if(!(m_stationtype==StationType_roadSideUnit))
     {
       m_egoPV.S_EPV = m_vdp->getSpeedValue ();
       m_egoPV.H_EPV = m_vdp->getHeadingValue ();
       m_egoPV.POS_EPV = m_vdp->getPosition();
-      m_egoPV.TST_EPV = compute_timestampIts (true);
-
     }
     // ETSI EN 302 636-4-1 [10.2.2]
     //Schedule the next egoPV update with GNMinUpdateFrequencyEPV protocol constant (1000ms)
