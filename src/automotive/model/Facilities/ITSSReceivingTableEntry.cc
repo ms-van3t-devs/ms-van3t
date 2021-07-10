@@ -30,7 +30,7 @@ namespace ns3 {
     m_termination = ITSS_RX_ENTRY_TERMINATION_UNSET;
   }
 
-  ITSSReceivingTableEntry::ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime, long detectionTime)
+  ITSSReceivingTableEntry::ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime, long detectionTime)
   {
     m_denm_encoded = asnDenmPacket;
     m_status = status;
@@ -40,7 +40,7 @@ namespace ns3 {
     m_termination = ITSS_RX_ENTRY_TERMINATION_UNSET;
   }
 
-  ITSSReceivingTableEntry::ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime, long detectionTime, Termination_t *termination_ptr)
+  ITSSReceivingTableEntry::ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime, long detectionTime, long *termination_ptr)
   {
     m_denm_encoded = asnDenmPacket;
     m_status = status;

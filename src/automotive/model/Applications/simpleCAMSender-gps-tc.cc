@@ -170,16 +170,14 @@ namespace ns3
   }
 
   void
-  simpleCAMSender::receiveCAM (CAM_t *cam, Address from)
+  simpleCAMSender::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* Implement CAM strategy here */
     std::cout <<"VehicleID: " << m_id
             <<" | Rx CAM from "<<cam->header.stationID
-            <<" | Remote vehicle position: ("<<(double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO<<","
-            <<(double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO<<")"<<std::endl;
+            <<" | Remote vehicle position: ("<<asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO<<","
+            <<asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO<<")"<<std::endl;
 
-    // Free the received CAM data structure
-    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
   void

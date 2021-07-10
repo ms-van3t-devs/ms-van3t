@@ -44,9 +44,9 @@ namespace ns3 {
 
     void addDENRxCallback(std::function<void(denData,Address)> rx_callback) {m_DENReceiveCallback=rx_callback;}
 
-    DENBasicService_error_t appDENM_trigger(denData data, ActionID_t &actionid);
-    DENBasicService_error_t appDENM_update(denData data, const ActionID_t actionid);
-    DENBasicService_error_t appDENM_termination(denData data, const ActionID_t actionid);
+    DENBasicService_error_t appDENM_trigger(denData data, DEN_ActionID_t &actionid);
+    DENBasicService_error_t appDENM_update(denData data, const DEN_ActionID_t actionid);
+    DENBasicService_error_t appDENM_termination(denData data, const DEN_ActionID_t actionid);
     void receiveDENM(BTPDataIndication_t dataIndication, Address address);
 
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
@@ -69,16 +69,15 @@ namespace ns3 {
   private:
     bool CheckMainAttributes(void);
 
-    DENBasicService_error_t fillDENM(DENM_t *denm, denData &data, const ActionID_t actionID, long referenceTimeLong);
-    void freeDENM(DENM_t *denm);
+    DENBasicService_error_t fillDENM(asn1cpp::Seq<DENM> &denm, denData &data, const DEN_ActionID_t actionID, long referenceTimeLong);
 
-    template<typename MEM_PTR> void setDENTimer(Timer &timer,Time delay,MEM_PTR callback_fcn,ActionID_t actionID);
+    template<typename MEM_PTR> void setDENTimer(Timer &timer,Time delay,MEM_PTR callback_fcn,DEN_ActionID_t actionID);
 
-    void T_O_ValidityStop(ActionID_t entry_actionid);
-    void T_RepetitionDurationStop(ActionID_t entry_actionid);
-    void T_RepetitionStop(ActionID_t entry_actionid);
+    void T_O_ValidityStop(DEN_ActionID_t entry_actionid);
+    void T_RepetitionDurationStop(DEN_ActionID_t entry_actionid);
+    void T_RepetitionStop(DEN_ActionID_t entry_actionid);
 
-    void T_R_ValidityStop(ActionID_t entry_actionid);
+    void T_R_ValidityStop(DEN_ActionID_t entry_actionid);
 
     template <typename T> static int asn_maybe_assign_optional_data(T *data, T **asn_structure,std::queue<void *> &ptr_queue);
 
@@ -88,8 +87,8 @@ namespace ns3 {
     bool m_real_time;
     std::string m_model;
 
-    StationID_t m_station_id;
-    StationType_t m_stationtype;
+    unsigned long m_station_id;
+    long m_stationtype;
     uint16_t m_seq_number;
 
     Ptr<btp> m_btp;
@@ -105,11 +104,11 @@ namespace ns3 {
     std::map<std::pair<unsigned long,long>,Timer> m_T_R_Validity_Table;
 
     /* den_data private fillers (ASN.1 types), used within "receiveDENM" */
-    void fillDenDataHeader(ItsPduHeader_t denm_header, denData &denm_data);
-    void fillDenDataManagement(ManagementContainer_t denm_mgmt_container, denData &denm_data);
-    void fillDenDataSituation(SituationContainer_t denm_situation_container, denData &denm_data);
-    void fillDenDataLocation(LocationContainer_t denm_location_container, denData &denm_data);
-    void fillDenDataAlacarte(AlacarteContainer_t denm_alacarte_container, denData &denm_data);
+    void fillDenDataHeader(asn1cpp::Seq<ItsPduHeader> denm_header, denData &denm_data);
+    void fillDenDataManagement(asn1cpp::Seq<ManagementContainer> denm_mgmt_container, denData &denm_data);
+    void fillDenDataSituation(asn1cpp::Seq<SituationContainer> denm_situation_container, denData &denm_data);
+    void fillDenDataLocation(asn1cpp::Seq<LocationContainer> denm_location_container, denData &denm_data);
+    void fillDenDataAlacarte(asn1cpp::Seq<AlacarteContainer> denm_alacarte_container, denData &denm_data);
 
     /*
     * Mutex to protect m_originatingITSSTable when appDENM_update() and the callback for the expiration of the T_Repetion timer may try to

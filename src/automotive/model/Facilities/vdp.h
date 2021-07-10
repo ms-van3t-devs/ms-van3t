@@ -1,29 +1,77 @@
 #ifndef VDP_H
 #define VDP_H
 
-#include "ns3/CAM.h"
 #include "asn_utils.h"
 #include <float.h>
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+#include "ns3/Setter.hpp"
+#include "ns3/SetOf.hpp"
+#include "ns3/SequenceOf.hpp"
+
+extern "C" {
+  #include "ns3/CAM.h"
+}
 
 namespace ns3
 {
+  template <class T>
+  class VDPDataItem
+  {
+      private:
+        bool m_available;
+        T m_dataitem;
+
+      public:
+        VDPDataItem(T data): m_dataitem(data) {m_available=true;}
+        VDPDataItem(bool availability) {m_available=availability;}
+        VDPDataItem() {m_available=false;}
+        T getData() {return m_dataitem;}
+        bool isAvailable() {return m_available;}
+        T setData(T data) {m_dataitem=data; m_available=true;}
+  };
+
+  template <class V = int, class C = int>
+  class VDPValueConfidence
+  {
+      private:
+        V m_value;
+        C m_confidence;
+
+      public:
+        VDPValueConfidence() {}
+        VDPValueConfidence(V value,C confidence):
+          m_value(value), m_confidence(confidence) {}
+
+        V getValue() {return m_value;}
+        C getConfidence() {return m_confidence;}
+        void setValue(V value) {m_value=value;}
+        void setConfidence(C confidence) {m_confidence=confidence;}
+  };
+
   class VDP
   {
     public:
+      typedef struct VDP_PosConfidenceEllipse {
+        long semiMajorConfidence;
+        long semiMinorConfidence;
+        long semiMajorOrientation;
+      } VDP_PosConfidenceEllipse_t;
+
       typedef struct CAM_mandatory_data {
-        Speed_t speed;
-        Longitude_t longitude;
-        Latitude_t latitude;
-        Altitude_t altitude;
-        PosConfidenceEllipse_t posConfidenceEllipse;
-        LongitudinalAcceleration_t longAcceleration;
-        Heading_t heading;
-        DriveDirection_t driveDirection;
-        Curvature_t curvature;
-        CurvatureCalculationMode_t curvature_calculation_mode;
-        VehicleLength_t VehicleLength;
-        VehicleWidth_t VehicleWidth;
-        YawRate_t yawRate;
+        VDPValueConfidence<> speed;
+        long longitude;
+        long latitude;
+        VDPValueConfidence<> altitude;
+        VDP_PosConfidenceEllipse_t posConfidenceEllipse;
+        VDPValueConfidence<> longAcceleration;
+        VDPValueConfidence<> heading;
+        int driveDirection; // enum
+        VDPValueConfidence<> curvature;
+        int curvature_calculation_mode; // enum
+        VDPValueConfidence<long,long> VehicleLength;
+        int VehicleWidth;
+        VDPValueConfidence<> yawRate;
       } CAM_mandatory_data_t;
 
       typedef struct VDP_position_cartesian {
@@ -33,6 +81,56 @@ namespace ns3
       typedef struct VDP_position_latlon {
         double lat,lon,alt;
       } VDP_position_latlon_t;
+
+      typedef struct VDP_CEN_DSRC_tolling_zone {
+        long latitude;
+        long longitude;
+        unsigned long cenDsrcTollingZoneID;
+      } VDP_CEN_DSRC_tolling_zone_t;
+
+      typedef struct VDP_ProtectedCommunicationsZonesRSU{
+        long protectedZoneType;
+        VDPDataItem<int> expiryTime	/* OPTIONAL */;
+        long protectedZoneLatitude;
+        long protectedZoneLongitude;
+        VDPDataItem<long> protectedZoneRadius	/* OPTIONAL */;
+        VDPDataItem<long> protectedZoneID	/* OPTIONAL */;
+      } VDP_ProtectedCommunicationsZonesRSU_t;
+
+      typedef struct VDP_PublicTransportContainerData {
+        int embarkationStatus;
+        VDPDataItem<uint32_t> ptActivationData;
+        VDPDataItem<long> ptActivationType;
+      } VDP_PublicTransportContainerData_t;
+
+      typedef struct VDP_SpecialTransportContainerData {
+        uint8_t specialTransportType;
+        uint8_t lightBarSirenInUse;
+      } VDP_SpecialTransportContainerData_t;
+
+      typedef struct VDP_RoadWorksContainerBasicData {
+        uint8_t lightBarSirenInUse;
+        VDPDataItem<long> roadWorksSubCauseCode;
+        VDPDataItem<long> innerhardShoulderStatus;
+        VDPDataItem<long> outerhardShoulderStatus;
+        VDPDataItem<uint16_t> drivingLaneStatus; // Up to 14 lanes require at least 14 bits (as this value corresponds to an ASN.1 BIT FIELD)
+      } VDP_RoadWorksContainerBasicData_t;
+
+
+      typedef struct VDP_EmergencyContainerData {
+        uint8_t lightBarSirenInUse;
+        VDPDataItem<long> causeCode;
+        VDPDataItem<long> subCauseCode;
+        VDPDataItem<uint8_t> emergencyPriority; // Bit field
+      } VDP_EmergencyContainerData_t;
+
+      typedef struct VDP_SafetyCarContainerData {
+        uint8_t lightBarSirenInUse;
+        VDPDataItem<long> incidentIndicationCauseCode;
+        VDPDataItem<long> incidentIndicationSubCauseCode;
+        VDPDataItem<long> trafficRule; // optional ASN.1 enum
+        VDPDataItem<long> speedLimit; // optional speed limit (in km/h - the ASN.1 unit is already km/h)
+      } VDP_SafetyCarContainerData_t;
 
       virtual CAM_mandatory_data_t getCAMMandatoryData() = 0;
 
@@ -59,44 +157,81 @@ namespace ns3
       virtual VDP_position_cartesian_t getPositionXY() = 0;
       virtual VDP_position_cartesian_t getXY(double lon, double lat) = 0;
 
+
+
       // These methods refer to optional fields in mandatory containers
       // If the information is not provided, they should be implemented
-      // such that NULL is returned for each unavailable information
-      // The derived class shall manage the memory allocation for all
-      // these methods, including memory cleanup
-      virtual AccelerationControl_t *getAccelerationControl() = 0;
-      virtual LanePosition_t *getLanePosition() = 0;
-      virtual SteeringWheelAngle_t *getSteeringWheelAngle() = 0;
-      virtual LateralAcceleration_t *getLateralAcceleration() = 0;
-      virtual VerticalAcceleration_t *getVerticalAcceleration() = 0;
-      virtual PerformanceClass_t *getPerformanceClass() = 0;
-      virtual CenDsrcTollingZone_t *getCenDsrcTollingZone() = 0;
+      // such that the returned VDPDataItem has m_available = false
 
-      // As all the above methods, returning a pointer, perform
-      // a memory allocation, the derived class should implement
-      // a way to let the CA Basic Service free the memory after
-      // encoding (with ASN.1) a certain optional field
-      virtual void vdpFree(void* optional_field) = 0;
+      VDPDataItem<uint8_t> getAccelerationControl() {return VDPDataItem<uint8_t>(false);}
+      virtual VDPDataItem<int> getLanePosition() = 0;
 
-      // Optional container methods. As before, they can return NULL
-      // if these containers are unavailable
-      virtual RSUContainerHighFrequency_t *getRsuContainerHighFrequency() = 0;
-      virtual LowFrequencyContainer_t *getLowFrequencyContainer() = 0;
-      virtual SpecialVehicleContainer_t *getSpecialVehicleContainer() = 0;
+//      virtual VDPDataItem<VDPValueConfidence<int,int>> getSteeringWheelAngle() = 0;
+//      virtual VDPDataItem<VDPValueConfidence<int,int>> getLateralAcceleration() = 0;
+//      virtual VDPDataItem<VDPValueConfidence<int,int>> getVerticalAcceleration() = 0;
+//      virtual VDPDataItem<int> getPerformanceClass() = 0;
+//      virtual VDPDataItem<VDP_CEN_DSRC_tolling_zone_t> getCenDsrcTollingZone() = 0;
 
-      void setFixedVehicleLength(VehicleLength_t vehicle_length)
+      VDPDataItem<VDPValueConfidence<int,int>> getSteeringWheelAngle() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+      VDPDataItem<VDPValueConfidence<int,int>> getLateralAcceleration() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+      VDPDataItem<VDPValueConfidence<int,int>> getVerticalAcceleration() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+      VDPDataItem<int> getPerformanceClass() {return VDPDataItem<int>(false);}
+      VDPDataItem<VDP_CEN_DSRC_tolling_zone_t> getCenDsrcTollingZone() {return VDPDataItem<VDP_CEN_DSRC_tolling_zone_t>(false);}
+
+
+      // Low frequency container data (PH should be computed by the CA Basic Service and not provided here)
+      virtual VDPDataItem<unsigned int> getVehicleRole() {return m_vehicleRole;}
+      virtual VDPDataItem<uint8_t> getExteriorLights() = 0;
+
+      // Special vehicle container
+      virtual VDPDataItem<VDP_PublicTransportContainerData_t> getPublicTransportContainerData() {return m_publicTransportContainerData;}
+      virtual VDPDataItem<VDP_SpecialTransportContainerData_t> getSpecialTransportContainerData() {return m_specialTransportContainerData;}
+      virtual VDPDataItem<int> getDangerousGoodsBasicType() {return m_dangerousGoodsBasicType;} // For the DangerousGoodsContainer
+      virtual VDPDataItem<VDP_RoadWorksContainerBasicData_t> getRoadWorksContainerBasicData_t() {return m_roadWorksContainerBasicData;}
+      virtual VDPDataItem<uint8_t> getRescueContainerLightBarSirenInUse() {return m_rescueContainerLightBarSirenInUse;}
+      virtual VDPDataItem<VDP_EmergencyContainerData_t> getEmergencyContainerData() {return m_emergencyContainerData;}
+      virtual VDPDataItem<VDP_SafetyCarContainerData_t> getSafetyCarContainerData() {return m_safetyCarContainerData;}
+
+
+      virtual void setVehicleRole(unsigned int data){m_vehicleRole = VDPDataItem<unsigned int>(data);}
+
+      // Special vehicle container setters
+      virtual void setPublicTransportContainerData(VDP_PublicTransportContainerData_t data) {m_publicTransportContainerData = VDPDataItem<VDP_PublicTransportContainerData_t>(data);}
+      virtual void setSpecialTransportContainerData(VDP_SpecialTransportContainerData_t data) {m_specialTransportContainerData = VDPDataItem<VDP_SpecialTransportContainerData_t>(data);}
+      virtual void setDangerousGoodsBasicType (int data) {m_dangerousGoodsBasicType = VDPDataItem<int>(data);} // For the DangerousGoodsContainer
+      virtual void setRoadWorksContainerBasicData(VDP_RoadWorksContainerBasicData_t data) {m_roadWorksContainerBasicData = VDPDataItem<VDP_RoadWorksContainerBasicData_t>(data);}
+      virtual void setRescueContainerLightBarSirenInUse(uint8_t data) {m_rescueContainerLightBarSirenInUse = VDPDataItem<uint8_t>(data);}
+      virtual void setEmergencyContainerData(VDP_EmergencyContainerData_t data) {m_emergencyContainerData = VDPDataItem<VDP_EmergencyContainerData_t>(data);}
+      virtual void setSafetyCarContainerData(VDP_SafetyCarContainerData_t data) {m_safetyCarContainerData = VDPDataItem<VDP_SafetyCarContainerData_t>(data);}
+
+
+      void setFixedVehicleLength(VDPValueConfidence<long,long> vehicle_length)
       {
          m_vehicle_length=vehicle_length;
       }
 
-      void setFixedVehicleWidth(VehicleWidth_t vehicle_width)
+      void setFixedVehicleWidth(long vehicle_width)
       {
          m_vehicle_width=vehicle_width;
       }
 
       protected:
-        VehicleLength_t m_vehicle_length;
-        VehicleWidth_t m_vehicle_width;
+
+
+        VDPValueConfidence<long,long> m_vehicle_length;
+        long m_vehicle_width;
+
+        VDPDataItem<unsigned int> m_vehicleRole;
+
+        // Special vehicle container
+        VDPDataItem<VDP_PublicTransportContainerData_t> m_publicTransportContainerData;
+        VDPDataItem<VDP_SpecialTransportContainerData_t> m_specialTransportContainerData;
+        VDPDataItem<int> m_dangerousGoodsBasicType; // For the DangerousGoodsContainer
+        VDPDataItem<VDP_RoadWorksContainerBasicData_t> m_roadWorksContainerBasicData;
+        VDPDataItem<uint8_t> m_rescueContainerLightBarSirenInUse;
+        VDPDataItem<VDP_EmergencyContainerData_t> m_emergencyContainerData;
+        VDPDataItem<VDP_SafetyCarContainerData_t> m_safetyCarContainerData;
+
   };
 }
 #endif // VDP_H

@@ -20,12 +20,27 @@
 
 #include "vdpTraci.h"
 
+extern "C" {
+  #include "ns3/CAM.h"
+}
+
 namespace ns3
 {
   VDPTraCI::VDPTraCI()
   {
     m_traci_client=NULL;
     m_id="(null)";
+
+    m_vehicleRole = VDPDataItem<unsigned int>(false);
+    // Special vehicle container
+    m_publicTransportContainerData = VDPDataItem<VDP_PublicTransportContainerData_t>(false);
+    m_specialTransportContainerData = VDPDataItem<VDP_SpecialTransportContainerData_t>(false);
+    m_dangerousGoodsBasicType = VDPDataItem<int>(false); // For the DangerousGoodsContainer
+    m_roadWorksContainerBasicData = VDPDataItem<VDP_RoadWorksContainerBasicData_t>(false);
+    m_rescueContainerLightBarSirenInUse = VDPDataItem<uint8_t>(false);
+    m_emergencyContainerData = VDPDataItem<VDP_EmergencyContainerData_t>(false);
+    m_safetyCarContainerData = VDPDataItem<VDP_SafetyCarContainerData_t>(false);
+
   }
 
   VDPTraCI::VDPTraCI(Ptr<TraciClient> traci_client, std::string node_id)
@@ -35,12 +50,14 @@ namespace ns3
     m_id = node_id;
 
     /* Length and width of car [0.1 m] */
-    m_vehicle_length.vehicleLengthValue = m_traci_client->TraCIAPI::vehicle.getLength (m_id)*DECI;
-    m_vehicle_length.vehicleLengthConfidenceIndication = VehicleLengthConfidenceIndication_unavailable;
+    m_vehicle_length = VDPValueConfidence<long,long>(m_traci_client->TraCIAPI::vehicle.getLength (m_id)*DECI,
+                                          VehicleLengthConfidenceIndication_unavailable);
+//    m_vehicle_length.vehicleLengthValue = m_traci_client->TraCIAPI::vehicle.getLength (m_id)*DECI;
+//    m_vehicle_length.vehicleLengthConfidenceIndication = VehicleLengthConfidenceIndication_unavailable;
 
     // ETSI TS 102 894-2 V1.2.1 - A.92 (Length greater than 102,2 m should be set to 102,2 m)
-    if(m_vehicle_length.vehicleLengthValue>1022) {
-        m_vehicle_length.vehicleLengthValue=1022;
+    if(m_vehicle_length.getValue ()>1022) {
+        m_vehicle_length.setValue (1022);
       }
 
     m_vehicle_width = m_traci_client->TraCIAPI::vehicle.getWidth (m_id)*DECI;
@@ -49,6 +66,16 @@ namespace ns3
     if(m_vehicle_width>61) {
         m_vehicle_width=61;
       }
+
+    m_vehicleRole = VDPDataItem<unsigned int>(false);
+    // Special vehicle container
+    m_publicTransportContainerData = VDPDataItem<VDP_PublicTransportContainerData_t>(false);
+    m_specialTransportContainerData = VDPDataItem<VDP_SpecialTransportContainerData_t>(false);
+    m_dangerousGoodsBasicType = VDPDataItem<int>(false); // For the DangerousGoodsContainer
+    m_roadWorksContainerBasicData = VDPDataItem<VDP_RoadWorksContainerBasicData_t>(false);
+    m_rescueContainerLightBarSirenInUse = VDPDataItem<uint8_t>(false);
+    m_emergencyContainerData = VDPDataItem<VDP_EmergencyContainerData_t>(false);
+    m_safetyCarContainerData = VDPDataItem<VDP_SafetyCarContainerData_t>(false);
   }
 
   VDP::VDP_position_latlon_t
@@ -101,8 +128,8 @@ namespace ns3
     CAM_mandatory_data_t CAMdata;
 
     /* Speed [0.01 m/s] */
-    CAMdata.speed.speedValue=m_traci_client->TraCIAPI::vehicle.getSpeed (m_id)*CENTI;
-    CAMdata.speed.speedConfidence=SpeedConfidence_unavailable;
+    CAMdata.speed = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getSpeed (m_id)*CENTI,
+                                       SpeedConfidence_unavailable);
 
     /* Position */
     libsumo::TraCIPosition pos=m_traci_client->TraCIAPI::vehicle.getPosition(m_id);
@@ -114,8 +141,8 @@ namespace ns3
     CAMdata.latitude=(Latitude_t)(pos.y*DOT_ONE_MICRO);
 
     /* Altitude [0,01 m] */
-    CAMdata.altitude.altitudeValue=AltitudeValue_unavailable;
-    CAMdata.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
+    CAMdata.altitude = VDPValueConfidence<>(AltitudeValue_unavailable,
+                                          AltitudeConfidence_unavailable);
 
     /* Position Confidence Ellipse */
     CAMdata.posConfidenceEllipse.semiMajorConfidence=SemiAxisLength_unavailable;
@@ -123,19 +150,19 @@ namespace ns3
     CAMdata.posConfidenceEllipse.semiMajorOrientation=HeadingValue_unavailable;
 
     /* Longitudinal acceleration [0.1 m/s^2] */
-    CAMdata.longAcceleration.longitudinalAccelerationValue=m_traci_client->TraCIAPI::vehicle.getAcceleration (m_id) * DECI;
-    CAMdata.longAcceleration.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
+    CAMdata.longAcceleration = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getAcceleration (m_id) * DECI,
+                                                  AccelerationConfidence_unavailable);
 
     /* Heading WGS84 north [0.1 degree] */
-    CAMdata.heading.headingValue = m_traci_client->TraCIAPI::vehicle.getAngle (m_id) * DECI;
-    CAMdata.heading.headingConfidence = HeadingConfidence_unavailable;
+    CAMdata.heading = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getAngle (m_id) * DECI,
+                                         HeadingConfidence_unavailable);
 
     /* Drive direction (backward driving is not fully supported by SUMO, at the moment */
     CAMdata.driveDirection = DriveDirection_unavailable;
 
     /* Curvature and CurvatureCalculationMode */
-    CAMdata.curvature.curvatureValue = CurvatureValue_unavailable;
-    CAMdata.curvature.curvatureConfidence = CurvatureConfidence_unavailable;
+    CAMdata.curvature = VDPValueConfidence<>(CurvatureValue_unavailable,
+                                             CurvatureConfidence_unavailable);
     CAMdata.curvature_calculation_mode = CurvatureCalculationMode_unavailable;
 
     /* Length and Width [0.1 m] */
@@ -143,34 +170,51 @@ namespace ns3
     CAMdata.VehicleWidth = m_vehicle_width;
 
     /* Yaw Rate */
-    CAMdata.yawRate.yawRateValue = YawRateValue_unavailable;
-    CAMdata.yawRate.yawRateConfidence = YawRateConfidence_unavailable;
+    CAMdata.yawRate = VDPValueConfidence<>(YawRateValue_unavailable,
+                                           YawRateConfidence_unavailable);
 
     return CAMdata;
   }
 
-  LanePosition_t *
+  VDPDataItem<int>
   VDPTraCI::getLanePosition()
   {
-    LanePosition_t * laneposition = (LanePosition_t *) calloc(1,sizeof(LanePosition_t));
     int laneIndex;
-
-    if(!laneposition)
-      {
-        return NULL;
-      }
+    int lanePosition;
 
     laneIndex=m_traci_client->TraCIAPI::vehicle.getLaneIndex (m_id);
 
     // We add '1' as sumo lane indeces start from '0', while
     // LanePosition_t uses '1' as the index for the first rightmost
     // lane ('0' would be reserved to 'hardShoulder')
-    *laneposition = laneIndex+1;
+    lanePosition = laneIndex+1;
     if (laneIndex < 0 || laneIndex > 14)
       {
-        *laneposition = LanePosition_offTheRoad;
+        lanePosition = LanePosition_offTheRoad;
       }
 
-    return laneposition;
+    return VDPDataItem<int>(lanePosition);
+  }
+
+  VDPDataItem<uint8_t>
+  VDPTraCI::getExteriorLights ()
+  {
+    int extLights = m_traci_client->TraCIAPI::vehicle.getSignals (m_id);
+    uint8_t retval = 0;
+    if(extLights & VEH_SIGNAL_BLINKER_RIGHT)
+      retval |= 1<< ExteriorLights_rightTurnSignalOn;
+    if(extLights & VEH_SIGNAL_BLINKER_LEFT)
+      retval |= 1<<ExteriorLights_leftTurnSignalOn;
+    if(extLights & VEH_SIGNAL_FRONTLIGHT)
+      retval |= 1<<ExteriorLights_lowBeamHeadlightsOn;
+    if(extLights & VEH_SIGNAL_FOGLIGHT)
+      retval |= 1<<ExteriorLights_fogLightOn;
+    if(extLights & VEH_SIGNAL_HIGHBEAM)
+      retval |= 1<<ExteriorLights_highBeamHeadlightsOn;
+    if(extLights & VEH_SIGNAL_BACKDRIVE)
+      retval |= 1<<ExteriorLights_reverseLightOn;
+
+    return VDPDataItem<uint8_t> (retval);
+
   }
 }

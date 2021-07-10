@@ -206,17 +206,17 @@ namespace ns3
      * The division by 3.6 is used to convert the value stored in the DENM
      * from km/h to m/s, as required by SUMO
     */
-    if(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit == NULL)
+    if(!denm.getDenmAlacarteData_asn_types ().getData ().roadWorks.getData ().speedLimit.isAvailable ())
     {
       NS_FATAL_ERROR("Error in areaSpeedAdvisorClientLTE.cc. Received a NULL pointer for speedLimit.");
     }
 
-    double speedLimit = *(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit);
+    double speedLimit = denm.getDenmAlacarteData_asn_types ().getData ().roadWorks.getData ().speedLimit.getData ();
 
     m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, speedLimit/3.6);
 
     // Change color for fast-moving vehicles to orange
-    if(speedLimit>=highSpeedkmph)
+   if(speedLimit>=highSpeedkmph)
     {
       libsumo::TraCIColor orange;
       orange.r=255;orange.g=99;orange.b=71;orange.a=255;
@@ -242,12 +242,12 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisorClientLTE::receiveCAM (CAM_t *cam, Address from)
+  areaSpeedAdvisorClientLTE::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* Implement CAM strategy here */
 
-   // Free the received CAM data structure
-   ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+    (void) cam;
+    (void) from;
   }
 
   long

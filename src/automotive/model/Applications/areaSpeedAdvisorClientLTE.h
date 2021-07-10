@@ -28,7 +28,8 @@ class areaSpeedAdvisorClientLTE : public Application
 
     void receiveDENM(denData denm, Address from);
 
-    void receiveCAM (CAM_t *cam, Address from);
+    // void receiveCAM (CAM_t *cam, Address from);
+    void receiveCAM (asn1cpp::Seq<CAM> cam, Address from);
 
     void StopApplicationNow ();
 

@@ -222,35 +222,20 @@ namespace ns3
   {
     denData data;
     denData::denDataAlacarte alacartedata;
-    ActionID_t actionid;
+    DEN_RoadWorksContainerExtended_t roadworks;
+    DEN_ActionID_t actionid;
     DENBasicService_error_t trigger_retval;
-
-    memset(&alacartedata,0,sizeof(denData::denDataAlacarte));
 
     /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
     // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
     // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
-    alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
 
-    if(alacartedata.roadWorks == NULL)
-    {
-      NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks.");
-      return;
-    }
 
-    alacartedata.roadWorks->speedLimit = (SpeedLimit_t *) calloc(sizeof(SpeedLimit_t),1);
+    roadworks.speedLimit.setData (speedmode);
+    alacartedata.roadWorks.setData (roadworks);
 
-    if(alacartedata.roadWorks->speedLimit == NULL)
-    {
-      free(alacartedata.roadWorks);
-      NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks->speedLimit.");
-      return;
-    }
-
-    // Set a speed limit Advisor inside the DENM message
-    *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) speedmode;
 
     data.setDenmAlacarteData_asn_types (alacartedata);
 
@@ -266,28 +251,24 @@ namespace ns3
       m_denm_sent++;
     }
 
-    if(alacartedata.roadWorks && alacartedata.roadWorks->speedLimit) free(alacartedata.roadWorks->speedLimit);
-    if(alacartedata.roadWorks) free(alacartedata.roadWorks);
-
-    data.denDataFree ();
   }
 
   void
-  areaSpeedAdvisorServerLTE::receiveCAM (CAM_t *cam, Address address)
+  areaSpeedAdvisorServerLTE::receiveCAM (asn1cpp::Seq<CAM> cam, Address address)
   {
     m_cam_received++;
 
     /* Convert the values */
-    double lat = (double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO;
-    double lon = (double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO;
+    double lat = asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO;
+    double lon = asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO;
 
     if (!m_csv_name.empty ())
     {
       // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
-      m_csv_ofstream_cam << cam->header.messageID << "," << cam->header.stationID << ",";
-      m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << lat << "," << lon << ",";
-      m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue/DECI << "," << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI << ",";
-      m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue/DECI << std::endl;
+      m_csv_ofstream_cam << asn1cpp::getField(cam->header.messageID,long) << "," << asn1cpp::getField(cam->header.stationID,long) << ",";
+      m_csv_ofstream_cam << asn1cpp::getField(cam->cam.generationDeltaTime,long) << "," << lat << "," << lon << ",";
+      m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
+      m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
     }
 
     /* If is the first time the this veh sends a CAM, just check if it is inside or outside, then return */
@@ -297,7 +278,7 @@ namespace ns3
         m_veh_position[address] = INSIDE;
       else
         m_veh_position[address] = OUTSIDE;
-      goto asn_free;
+      return;
     }
 
     /* Otherwise, check if a transition between INSIDE->OUTSIDE or viceversa happened */
@@ -321,9 +302,6 @@ namespace ns3
         areaSpeedAdvisorServerLTE::TriggerDenm (highSpeedkmph,address);
       }
     }
-
-    asn_free:
-    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
   void

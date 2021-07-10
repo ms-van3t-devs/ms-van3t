@@ -22,6 +22,10 @@
 #include "ns3/longpositionvector.h"
 #include "ns3/btpdatarequest.h"
 
+extern "C" {
+  #include "ns3/CAM.h"
+}
+
 #define TS_MAX 4294967295 //(2^32)-1
 
 namespace ns3

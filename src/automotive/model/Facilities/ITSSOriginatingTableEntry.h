@@ -2,6 +2,7 @@
 #define ITSSORIGINATINGTABLEENTRY_H
 
 #include "ns3/DENM.h"
+#include "ns3/asn_utils.h"
 #include "ns3/packet.h"
 
 namespace ns3 {
@@ -16,8 +17,8 @@ namespace ns3 {
     } denm_table_state_t;
 
     ITSSOriginatingTableEntry();
-    ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID);
-    ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime);
+    ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID);
+    ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime);
 
     /* Setters */
     void setStatus(denm_table_state_t status) {m_status=status;}
@@ -29,7 +30,7 @@ namespace ns3 {
     long getReferenceTime(void) {return m_referenceTime;}
 
   private:
-    ActionID_t m_actionid;
+    DEN_ActionID_t m_actionid;
     Packet m_denm_encoded;
     denm_table_state_t m_status;
     long m_referenceTime;

@@ -126,6 +126,8 @@ namespace ns3
       m_cam_ReceiveCallback(btpDataIndication,address);
     else if(btpDataIndication.destPort == DEN_PORT)
       m_denm_ReceiveCallback(btpDataIndication,address);
+    else if(btpDataIndication.destPort == IVIM_PORT)
+      m_ivim_ReceiveCallback(btpDataIndication,address);
     else
       NS_LOG_ERROR("BTP : Unknown port");
   }

@@ -20,6 +20,16 @@
 
 #include "caBasicService.h"
 #include "ns3/ItsPduHeader.h"
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+#include "ns3/Setter.hpp"
+#include "ns3/Encoding.hpp"
+#include "ns3/SetOf.hpp"
+#include "ns3/SequenceOf.hpp"
+#include "ns3/BitString.hpp"
+#include "ns3/vdp.h"
+#include "asn_utils.h"
+#include <cmath>
 
 namespace ns3
 {
@@ -56,6 +66,12 @@ namespace ns3
     m_RSU_GenCam_ms=1000;
 
     m_cam_sent=0;
+
+    // All the optional containers are disabled by default
+    m_lowFreqContainerEnabled = false;
+    m_specialVehContainerEnabled = false;
+
+    m_refPositions.clear ();
   }
 
   CABasicService::CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp, bool real_time, bool is_vehicle)
@@ -89,6 +105,16 @@ namespace ns3
   void
   CABasicService::setFixedPositionRSU(double latitude_deg, double longitude_deg)
   {
+    m_vehicle = false;
+    m_RSUlon = longitude_deg;
+    m_RSUlat = latitude_deg;
+    //High frequency RSU container
+    m_protectedCommunicationsZonesRSU = asn1cpp::makeSeq(RSUContainerHighFrequency);
+    auto protectedComm = asn1cpp::makeSeq(ProtectedCommunicationZone);
+    asn1cpp::setField(protectedComm->protectedZoneType,ProtectedZoneType_permanentCenDsrcTolling);
+    asn1cpp::setField(protectedComm->protectedZoneLatitude,Latitude_unavailable);
+    asn1cpp::setField(protectedComm->protectedZoneLongitude,Longitude_unavailable);
+    asn1cpp::sequenceof::pushList(m_protectedCommunicationsZonesRSU->protectedCommunicationZonesRSU,protectedComm);
     m_btp->setFixedPositionRSU(latitude_deg,longitude_deg);
   }
 
@@ -143,12 +169,12 @@ namespace ns3
   CABasicService::receiveCam (BTPDataIndication_t dataIndication, Address from)
   {
     Ptr<Packet> packet;
-    CAM_t *decoded_cam;
+    asn1cpp::Seq<CAM> decoded_cam;
 
-    packet = dataIndication.data;
     uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
-    buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
-    packet->CopyData (buffer, packet->GetSize ());
+    buffer=(uint8_t *)malloc((dataIndication.data->GetSize ())*sizeof(uint8_t));
+    dataIndication.data->CopyData (buffer, dataIndication.data->GetSize ());
+    std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
 
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
@@ -158,23 +184,15 @@ namespace ns3
         return;
       }
 
-    /** Decoding **/
-    void *decoded_=NULL;
-    asn_dec_rval_t decode_result;
-
-    //do {
-      decode_result = asn_decode(0, ATS_UNALIGNED_BASIC_PER, &asn_DEF_CAM, &decoded_, buffer, packet->GetSize ());
-    //} while(decode_result.code==RC_WMORE);
-
     free(buffer);
 
-    if(decode_result.code!=RC_OK || decoded_==NULL) {
-        NS_LOG_ERROR("Warning: unable to decode a received CAM.");
-        if(decoded_) free(decoded_);
-        return;
-      }
+    /** Decoding **/
+    decoded_cam = asn1cpp::uper::decode(packetContent, CAM);
 
-    decoded_cam = (CAM_t *) decoded_;
+      if(bool(decoded_cam)==false) {
+          NS_LOG_ERROR("Warning: unable to decode a received CAM.");
+          return;
+        }
 
     m_CAReceiveCallback(decoded_cam,from);
   }
@@ -299,52 +317,27 @@ namespace ns3
   CABasicService_error_t
   CABasicService::generateAndEncodeCam()
   {
-    CAM_t *cam;
     VDP::CAM_mandatory_data_t cam_mandatory_data;
     CABasicService_error_t errval=CAM_NO_ERROR;
-
-    // Optional CAM data pointers
-    AccelerationControl_t *accelerationcontrol=NULL;
-    LanePosition_t *laneposition=NULL;
-    SteeringWheelAngle_t *steeringwheelangle=NULL;
-    LateralAcceleration_t *lateralacceleration=NULL;
-    VerticalAcceleration_t *verticalacceleration=NULL;
-    PerformanceClass_t *performanceclass=NULL;
-    CenDsrcTollingZone_t *tollingzone=NULL;
-
-    RSUContainerHighFrequency_t* rsu_container=NULL;
 
     Ptr<Packet> packet;
 
     BTPDataRequest_t dataRequest = {};
 
-    asn_encode_to_new_buffer_result_t encode_result={.buffer=NULL};
-    int64_t now;
-
-    if(m_vehicle==false)
-      {
-        rsu_container=m_vdp->getRsuContainerHighFrequency();
-
-        if(rsu_container==NULL)
-          {
-            NS_LOG_ERROR("Cannot send RSU CAM: the current VDP does not provide any RSU High Frequency Container.");
-            return CAM_NO_RSU_CONTAINER;
-          }
-      }
+    int64_t now,now_centi;
 
     /* Collect data for mandatory containers */
-    cam=(CAM_t*) calloc(1, sizeof(CAM_t));
-    if(cam==NULL)
+    auto cam = asn1cpp::makeSeq(CAM);
+
+    if(bool(cam)==false)
       {
         return CAM_ALLOC_ERROR;
       }
 
-    cam_mandatory_data=m_vdp->getCAMMandatoryData();
-
     /* Fill the header */
-    cam->header.messageID = FIX_CAMID;
-    cam->header.protocolVersion = protocolVersion_currentVersion;
-    cam->header.stationID = m_station_id;
+    asn1cpp::setField(cam->header.messageID, FIX_CAMID);
+    asn1cpp::setField(cam->header.protocolVersion , protocolVersion_currentVersion);
+    asn1cpp::setField(cam->header.stationID, m_station_id);
 
     /*
      * Compute the generationDeltaTime, "computed as the time corresponding to the
@@ -353,119 +346,368 @@ namespace ns3
      * remainder of the corresponding value of TimestampIts divided by 65 536 as below:
      * generationDeltaTime = TimestampIts mod 65 536"
     */
-    cam->cam.generationDeltaTime = compute_timestampIts (m_real_time) % 65536;
+    asn1cpp::setField(cam->cam.generationDeltaTime, compute_timestampIts (m_real_time) % 65536);
 
     /* Fill the basicContainer's station type */
-    cam->cam.camParameters.basicContainer.stationType = m_stationtype;
-
+    asn1cpp::setField(cam->cam.camParameters.basicContainer.stationType, m_stationtype);
     if(m_vehicle==true)
       {
+
+        cam_mandatory_data=m_vdp->getCAMMandatoryData();
+
         /* Fill the basicContainer */
-        cam->cam.camParameters.basicContainer.referencePosition.altitude = cam_mandatory_data.altitude;
-        cam->cam.camParameters.basicContainer.referencePosition.latitude = cam_mandatory_data.latitude;
-        cam->cam.camParameters.basicContainer.referencePosition.longitude = cam_mandatory_data.longitude;
-        cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse = cam_mandatory_data.posConfidenceEllipse;
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue, cam_mandatory_data.altitude.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence, cam_mandatory_data.altitude.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude, cam_mandatory_data.latitude);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude, cam_mandatory_data.longitude);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence, cam_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence, cam_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation, cam_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
 
         /* Fill the highFrequencyContainer */
-        cam->cam.camParameters.highFrequencyContainer.present = HighFrequencyContainer_PR_basicVehicleContainerHighFrequency;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading = cam_mandatory_data.heading;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed = cam_mandatory_data.speed;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.driveDirection = cam_mandatory_data.driveDirection;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength = cam_mandatory_data.VehicleLength;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth = cam_mandatory_data.VehicleWidth;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration = cam_mandatory_data.longAcceleration;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvature = cam_mandatory_data.curvature;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvatureCalculationMode = cam_mandatory_data.curvature_calculation_mode;
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.yawRate = cam_mandatory_data.yawRate;
+
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.present, HighFrequencyContainer_PR_basicVehicleContainerHighFrequency);
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue, cam_mandatory_data.heading.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingConfidence, cam_mandatory_data.heading.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue, cam_mandatory_data.speed.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedConfidence, cam_mandatory_data.speed.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.driveDirection, cam_mandatory_data.driveDirection);
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue, cam_mandatory_data.VehicleLength.getValue());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthConfidenceIndication, cam_mandatory_data.VehicleLength.getConfidence());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth, cam_mandatory_data.VehicleWidth);
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue, cam_mandatory_data.longAcceleration.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationConfidence, cam_mandatory_data.longAcceleration.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvature.curvatureValue, cam_mandatory_data.curvature.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvature.curvatureConfidence, cam_mandatory_data.curvature.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvatureCalculationMode, cam_mandatory_data.curvature_calculation_mode);
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.yawRate.yawRateValue, cam_mandatory_data.yawRate.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.yawRate.yawRateConfidence, cam_mandatory_data.yawRate.getConfidence ());
 
         // Manage optional data
-        accelerationcontrol = m_vdp->getAccelerationControl();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.accelerationControl = accelerationcontrol;
+        auto accControl = m_vdp->getAccelerationControl ();
+        if(accControl.isAvailable ()) {
+            asn1cpp::bitstring::setBit(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.accelerationControl,setByteMask(accControl.getData ()),0);
+        }
 
-        laneposition = m_vdp->getLanePosition();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.lanePosition = laneposition;
+        auto lanePosition = m_vdp->getLanePosition ();
+        if(lanePosition.isAvailable ()) {
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.lanePosition,lanePosition.getData ());
+        }
 
-        steeringwheelangle = m_vdp->getSteeringWheelAngle();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.steeringWheelAngle = steeringwheelangle;
+        auto swa = m_vdp->getSteeringWheelAngle();
+        if(swa.isAvailable()) {
+            auto swa_seq = asn1cpp::makeSeq(SteeringWheelAngle);
+            asn1cpp::setField(swa_seq->steeringWheelAngleValue,swa.getData ().getValue ());
+            asn1cpp::setField(swa_seq->steeringWheelAngleConfidence,swa.getData ().getConfidence ());
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.steeringWheelAngle,swa_seq);
+        }
 
-        lateralacceleration=m_vdp->getLateralAcceleration();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.lateralAcceleration = lateralacceleration;
+        auto latacc = m_vdp->getLateralAcceleration();
+        if(latacc.isAvailable()) {
+            auto latacc_seq = asn1cpp::makeSeq(LateralAcceleration);
+            asn1cpp::setField(latacc_seq->lateralAccelerationValue,latacc.getData ().getValue ());
+            asn1cpp::setField(latacc_seq->lateralAccelerationConfidence,latacc.getData ().getConfidence ());
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.lateralAcceleration,latacc_seq);
+        }
 
-        verticalacceleration=m_vdp->getVerticalAcceleration();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.verticalAcceleration = verticalacceleration;
 
-        performanceclass=m_vdp->getPerformanceClass();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.performanceClass = performanceclass;
+        auto vertacc = m_vdp->getVerticalAcceleration();
+        if(vertacc.isAvailable()) {
+            auto vertacc_seq = asn1cpp::makeSeq(VerticalAcceleration);
+            asn1cpp::setField(vertacc_seq->verticalAccelerationValue,vertacc.getData ().getValue ());
+            asn1cpp::setField(vertacc_seq->verticalAccelerationConfidence,vertacc.getData ().getConfidence ());
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.verticalAcceleration,vertacc_seq);
+        }
 
-        tollingzone=m_vdp->getCenDsrcTollingZone();
-        cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.cenDsrcTollingZone = tollingzone;
+        auto perfClass = m_vdp->getPerformanceClass();
+        if(perfClass.isAvailable ()) {
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.performanceClass,perfClass.getData ());
+        }
+
+        auto tollZone = m_vdp->getCenDsrcTollingZone ();
+        if(tollZone.isAvailable ()) {
+            auto tollZone_seq = asn1cpp::makeSeq(CenDsrcTollingZone);
+            asn1cpp::setField(tollZone_seq->cenDsrcTollingZoneID,tollZone.getData ().cenDsrcTollingZoneID);
+            asn1cpp::setField(tollZone_seq->protectedZoneLatitude,tollZone.getData ().latitude);
+            asn1cpp::setField(tollZone_seq->protectedZoneLongitude,tollZone.getData ().longitude);
+            asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.cenDsrcTollingZone,tollZone_seq);
+        }
+
+        // Store all the "previous" values used in checkCamConditions()
+        m_prev_distance=m_vdp->getTravelledDistance ();
+        m_prev_speed=m_vdp->getSpeedValue ();
+        m_prev_heading=m_vdp->getHeadingValue ();
+
       }
    else
       {
         /* Fill the basicContainer */
         /* There is still no full RSU support in this release */
-        cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence = AltitudeValue_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue = AltitudeValue_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.latitude = Latitude_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.longitude = Longitude_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence = SemiAxisLength_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence = SemiAxisLength_unavailable;
-        cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation = HeadingValue_unavailable;
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence,AltitudeConfidence_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,AltitudeValue_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude,Latitude_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude,Longitude_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence,SemiAxisLength_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence,SemiAxisLength_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation,HeadingValue_unavailable);
         /* Fill the highFrequencyContainer */
-        cam->cam.camParameters.highFrequencyContainer.present = HighFrequencyContainer_PR_rsuContainerHighFrequency;
-        cam->cam.camParameters.highFrequencyContainer.choice.rsuContainerHighFrequency = *rsu_container;
+        //auto RSUContainerHighFreq = asn1cpp::makeSeq(RSUContainerHighFrequency);
+
+        //High frequency RSU container
+
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.present,HighFrequencyContainer_PR_rsuContainerHighFrequency);
+
+        //auto zones = asn1cpp::makeSeq(ProtectedCommunicationZonesRSU);
+        //auto highfreq = asn1cpp::makeSeq(RSUContainerHighFrequency);
+
+        auto protectedComm = asn1cpp::makeSeq(ProtectedCommunicationZone);
+        asn1cpp::setField(protectedComm->protectedZoneType,ProtectedZoneType_permanentCenDsrcTolling);
+        asn1cpp::setField(protectedComm->protectedZoneLatitude,Latitude_unavailable);
+        asn1cpp::setField(protectedComm->protectedZoneLongitude,Longitude_unavailable);
+
+        asn1cpp::sequenceof::pushList(cam->cam.camParameters.highFrequencyContainer.choice.rsuContainerHighFrequency.protectedCommunicationZonesRSU,protectedComm);
+
       }
 
-    // Store all the "previous" values used in checkCamConditions()
-    m_prev_distance=m_vdp->getTravelledDistance ();
-    m_prev_speed=m_vdp->getSpeedValue ();
-    m_prev_heading=m_vdp->getHeadingValue ();
-
-    LowFrequencyContainer_t *lowfrequencycontainer=m_vdp->getLowFrequencyContainer();
-
-    if(lowfrequencycontainer!=NULL)
+    if(m_lowFreqContainerEnabled == true)
+    {
+      // Send a low frequency container only if at least 500 ms have passed since the last CAM with a low frequency container
+      if(lastCamGenLowFrequency==-1 ||(computeTimestampUInt64 ()-lastCamGenLowFrequency)>=500)
       {
-        // Send a low frequency container only if at least 500 ms have passed since the last CAM with a low frequency container
-        if(lastCamGenLowFrequency==-1 ||(computeTimestampUInt64 ()-lastCamGenLowFrequency)>=500)
-          {
-            cam->cam.camParameters.lowFrequencyContainer = lowfrequencycontainer;
-            lastCamGenLowFrequency=computeTimestampUInt64 ();
+        auto vehicleRole = m_vdp->getVehicleRole ();
+        auto exteriorLights = m_vdp->getExteriorLights ();
+
+        auto lowFreqContainer = asn1cpp::makeSeq(LowFrequencyContainer);
+
+        // It is important to set also the "present" field when an ASN.1 CHOICE is involved, otherwise the setField of the whole container
+        // (i.e. cam->cam.camParameters.lowFrequencyContainer in this case) will fail with a fatal error ("cannot swap null pointers")
+        asn1cpp::setField(lowFreqContainer->present,LowFrequencyContainer_PR_basicVehicleContainerLowFrequency);
+
+        if(vehicleRole.isAvailable ()) {
+          asn1cpp::setField(lowFreqContainer->choice.basicVehicleContainerLowFrequency.vehicleRole,vehicleRole.getData ());
+        }
+
+        if(exteriorLights.isAvailable ()) {
+          asn1cpp::bitstring::setBit(lowFreqContainer->choice.basicVehicleContainerLowFrequency.exteriorLights,setByteMask(exteriorLights.getData ()),0);
+        }
+
+        //Path History management
+        if(!m_refPositions.empty ())
+        {
+          long pathCoverage = 0; // To compute path range which cannot be grater than 500m
+
+          auto curr_ph = asn1cpp::makeSeq(PathPoint);
+          now=computeTimestampUInt64 ()/NANO_TO_CENTI;
+
+          //For first pathpoint
+          asn1cpp::setField(curr_ph->pathPosition.deltaAltitude,cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue - m_refPositions[0].first.altitude.altitudeValue);
+          asn1cpp::setField(curr_ph->pathPosition.deltaLatitude,cam->cam.camParameters.basicContainer.referencePosition.latitude - m_refPositions[0].first.latitude);
+          asn1cpp::setField(curr_ph->pathPosition.deltaLongitude,cam->cam.camParameters.basicContainer.referencePosition.longitude - m_refPositions[0].first.longitude);
+          asn1cpp::setField(curr_ph->pathDeltaTime,m_refPositions[0].second.deltaTime);
+          asn1cpp::sequenceof::pushList(lowFreqContainer->choice.basicVehicleContainerLowFrequency.pathHistory,curr_ph);
+
+          pathCoverage += m_refPositions[0].second.deltaCoverage;
+
+          for(size_t i=1;i<m_refPositions.size ();i++)
+            {
+              auto curr_ph = asn1cpp::makeSeq(PathPoint);
+
+              asn1cpp::setField(curr_ph->pathPosition.deltaAltitude,m_refPositions[i].first.altitude.altitudeValue - m_refPositions[i-1].first.altitude.altitudeValue);
+              asn1cpp::setField(curr_ph->pathPosition.deltaLatitude,m_refPositions[i].first.latitude - m_refPositions[i-1].first.latitude);
+              asn1cpp::setField(curr_ph->pathPosition.deltaLongitude,m_refPositions[i].first.longitude - m_refPositions[i-1].first.longitude);
+              asn1cpp::setField(curr_ph->pathDeltaTime,m_refPositions[i].second.deltaTime);
+
+              asn1cpp::sequenceof::pushList(lowFreqContainer->choice.basicVehicleContainerLowFrequency.pathHistory,curr_ph);
+
+              if((pathCoverage + m_refPositions[i].second.deltaCoverage) >= 500)
+                break; // If path history exceeds 500m of range, stop adding pathpoints
+
+              pathCoverage += m_refPositions[i].second.deltaCoverage;
+
+            }
           }
+
+        if(vehicleRole.isAvailable () || exteriorLights.isAvailable () || m_refPositions.size()>0) {
+          asn1cpp::setField(cam->cam.camParameters.lowFrequencyContainer,lowFreqContainer);
       }
 
-    SpecialVehicleContainer_t *specialvehiclecontainer=m_vdp->getSpecialVehicleContainer();
-
-    if(specialvehiclecontainer!=NULL)
-      {
-        // Send a low frequency container only if at least 500 ms have passed since the last CAM with a low frequency container
-        if(lastCamGenSpecialVehicle==-1 ||(computeTimestampUInt64 ()-lastCamGenSpecialVehicle)>=500)
-          {
-            cam->cam.camParameters.specialVehicleContainer = specialvehiclecontainer;
-            lastCamGenSpecialVehicle=computeTimestampUInt64 ();
-          }
+        lastCamGenLowFrequency=computeTimestampUInt64 ();
       }
-
-    /* Construct CAM and pass it to the lower layers (now UDP, in the future BTP and GeoNetworking, then UDP) */
-    /** Encoding **/
-    char errbuff[ERRORBUFF_LEN];
-    size_t errlen=sizeof(errbuff);
-
-    if(asn_check_constraints(&asn_DEF_CAM,(CAM_t *)cam,errbuff,&errlen) == -1) {
-        NS_LOG_ERROR("Unable to validate the ASN.1 contraints for the current CAM."<<std::endl);
-        NS_LOG_ERROR("Details: " << errbuff << std::endl);
-        errval=CAM_ASN1_UPER_ENC_ERROR;
-        goto error;
     }
 
-    encode_result = asn_encode_to_new_buffer(NULL,ATS_UNALIGNED_BASIC_PER,&asn_DEF_CAM, cam);
-    if (encode_result.result.encoded==-1)
-      {
-        errval=CAM_ASN1_UPER_ENC_ERROR;
-        if(encode_result.buffer) free(encode_result.buffer);
-        goto error;
+//     Special vehicle containers
+
+    if((m_specialVehContainerEnabled) && (m_vdp->getVehicleRole ().getData () != VehicleRole_default))
+    {
+      auto specialVehicleCont = asn1cpp::makeSeq(SpecialVehicleContainer);
+        switch(m_vdp->getVehicleRole ().getData ()) {
+        case VehicleRole_publicTransport:
+          {
+
+            auto publicTransportContainerData = m_vdp->getPublicTransportContainerData ();
+            if(publicTransportContainerData.isAvailable ())
+              {
+                asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_publicTransportContainer);
+                asn1cpp::setField(specialVehicleCont->choice.publicTransportContainer.embarkationStatus,publicTransportContainerData.getData ().embarkationStatus);
+
+                if(publicTransportContainerData.getData ().ptActivationType.isAvailable ())
+                  {
+                    auto ptactivation_seq = asn1cpp::makeSeq(PtActivation);
+                    asn1cpp::setField(ptactivation_seq->ptActivationType,publicTransportContainerData.getData ().ptActivationType.getData ());
+                    asn1cpp::setField(ptactivation_seq->ptActivationData,publicTransportContainerData.getData ().ptActivationData.getData ());
+                    asn1cpp::setField(specialVehicleCont->choice.publicTransportContainer.ptActivation,ptactivation_seq);
+                  }
+              }
+            break;
+          }
+        case VehicleRole_specialTransport:
+          {
+
+            auto specialTransportContainerData = m_vdp->getSpecialTransportContainerData ();
+            if(specialTransportContainerData.isAvailable ())
+              {
+
+                asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_specialTransportContainer);
+                asn1cpp::bitstring::setBit(specialVehicleCont->choice.specialTransportContainer.specialTransportType,setByteMask(specialTransportContainerData.getData ().specialTransportType),0);
+                asn1cpp::bitstring::setBit(specialVehicleCont->choice.specialTransportContainer.lightBarSirenInUse,setByteMask(specialTransportContainerData.getData ().lightBarSirenInUse),0);
+              }
+
+            break;
+          }
+        case VehicleRole_dangerousGoods:
+          {
+          auto dangerousGoodsBasic = m_vdp->getDangerousGoodsBasicType ();
+          if(dangerousGoodsBasic.isAvailable ())
+            {
+
+              asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_dangerousGoodsContainer);
+              asn1cpp::setField(specialVehicleCont->choice.dangerousGoodsContainer.dangerousGoodsBasic,dangerousGoodsBasic.getData ());
+
+            }
+          }
+          break;
+        case VehicleRole_roadWork:
+          {
+
+            auto roadWorksContainerBasicData = m_vdp->getRoadWorksContainerBasicData_t ();
+            if(roadWorksContainerBasicData.isAvailable ())
+              {
+
+                asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_roadWorksContainerBasic);
+                asn1cpp::bitstring::setBit(specialVehicleCont->choice.roadWorksContainerBasic.lightBarSirenInUse,setByteMask(roadWorksContainerBasicData.getData ().lightBarSirenInUse),0);
+
+                if(roadWorksContainerBasicData.getData ().roadWorksSubCauseCode.isAvailable ())
+                  {
+                    asn1cpp::setField(specialVehicleCont->choice.roadWorksContainerBasic.roadworksSubCauseCode,roadWorksContainerBasicData.getData ().roadWorksSubCauseCode.getData ());
+                  }
+
+                if((roadWorksContainerBasicData.getData ().drivingLaneStatus.isAvailable ()) ||
+                   (roadWorksContainerBasicData.getData ().innerhardShoulderStatus.isAvailable ()) ||
+                   (roadWorksContainerBasicData.getData ().outerhardShoulderStatus.isAvailable ()))
+                  {
+                    auto closeLanes_seq = asn1cpp::makeSeq(ClosedLanes);
+                    if(roadWorksContainerBasicData.getData ().drivingLaneStatus.isAvailable ())
+                      {
+                        asn1cpp::bitstring::setBit(closeLanes_seq->drivingLaneStatus,setByteMask(roadWorksContainerBasicData.getData ().drivingLaneStatus.getData (),0),0);
+                        asn1cpp::bitstring::setBit(closeLanes_seq->drivingLaneStatus,setByteMask(roadWorksContainerBasicData.getData ().drivingLaneStatus.getData (),1),1);
+                      }
+
+                    if(roadWorksContainerBasicData.getData ().innerhardShoulderStatus.isAvailable ())
+                        asn1cpp::setField(closeLanes_seq->innerhardShoulderStatus,roadWorksContainerBasicData.getData ().innerhardShoulderStatus.getData ());
+
+                    if(roadWorksContainerBasicData.getData ().outerhardShoulderStatus.isAvailable ())
+                        asn1cpp::setField(closeLanes_seq->outerhardShoulderStatus,roadWorksContainerBasicData.getData ().outerhardShoulderStatus.getData ());
+
+                    asn1cpp::setField(specialVehicleCont->choice.roadWorksContainerBasic.closedLanes,closeLanes_seq);
+                  }
+
+              }
+            break;
+          }
+        case VehicleRole_rescue:
+          {
+
+            auto rescueContainerData = m_vdp->getRescueContainerLightBarSirenInUse ();
+            if(rescueContainerData.isAvailable ())
+              {
+
+                asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_rescueContainer);
+                asn1cpp::bitstring::setBit(specialVehicleCont->choice.rescueContainer.lightBarSirenInUse,setByteMask(rescueContainerData.getData ()),0);
+
+
+              }
+            break;
+          }
+        case VehicleRole_emergency:
+          {
+          auto emergencyContainerData = m_vdp->getEmergencyContainerData ();
+
+          if(emergencyContainerData.isAvailable ())
+            {
+
+              asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_emergencyContainer);
+              asn1cpp::bitstring::setBit(specialVehicleCont->choice.emergencyContainer.lightBarSirenInUse,setByteMask(emergencyContainerData.getData().lightBarSirenInUse),0);
+
+              if(emergencyContainerData.getData().causeCode.isAvailable ())
+                {
+                  auto cause_seq = asn1cpp::makeSeq(CauseCode);
+                  asn1cpp::setField(cause_seq->causeCode,emergencyContainerData.getData ().causeCode.getData ());
+                  asn1cpp::setField(cause_seq->subCauseCode,emergencyContainerData.getData ().subCauseCode.getData ());
+                  asn1cpp::setField(specialVehicleCont->choice.emergencyContainer.incidentIndication,cause_seq);
+                }
+
+              if(emergencyContainerData.getData ().emergencyPriority.isAvailable ())
+                {
+                  asn1cpp::bitstring::setBit(specialVehicleCont->choice.emergencyContainer.emergencyPriority,setByteMask(emergencyContainerData.getData ().emergencyPriority.getData ()),0);
+                }
+
+            }
+          break;
+          }
+        case VehicleRole_safetyCar:
+          {
+
+            auto safetyCarContainerData = m_vdp->getSafetyCarContainerData ();
+            if(safetyCarContainerData.isAvailable ())
+              {
+
+                asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_safetyCarContainer);
+                asn1cpp::bitstring::setBit(specialVehicleCont->choice.safetyCarContainer.lightBarSirenInUse,setByteMask(safetyCarContainerData.getData ().lightBarSirenInUse),0);
+
+                if(safetyCarContainerData.getData ().trafficRule.isAvailable ())
+                  {
+                    asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.trafficRule,safetyCarContainerData.getData ().trafficRule.getData ());
+                  }
+                if(safetyCarContainerData.getData ().speedLimit.isAvailable ())
+                  {
+                    asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.speedLimit,safetyCarContainerData.getData ().speedLimit.getData ());
+                  }
+                if(safetyCarContainerData.getData ().incidentIndicationCauseCode.isAvailable ())
+                  {
+                    auto causeCode_seq = asn1cpp::makeSeq(CauseCode);
+                    asn1cpp::setField(causeCode_seq->causeCode,safetyCarContainerData.getData ().incidentIndicationCauseCode.getData ());
+                    asn1cpp::setField(causeCode_seq->subCauseCode,safetyCarContainerData.getData ().incidentIndicationSubCauseCode.getData ());
+                    asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.incidentIndication,causeCode_seq);
+                  }
+
+              }
+            break;
+          }
+        default:
+          NS_FATAL_ERROR("CA Basic Service error. The user specified an invalid Special Vehicle Container type.");
       }
 
-    packet = Create<Packet> ((uint8_t*) encode_result.buffer, encode_result.result.encoded);
+        asn1cpp::setField(cam->cam.camParameters.specialVehicleContainer,specialVehicleCont);
+    }
+
+    std::string encode_result = asn1cpp::uper::encode(cam);
+
+    if(encode_result.size()<1)
+    {
+      return CAM_ASN1_UPER_ENC_ERROR;
+    }
+
+    packet = Create<Packet> ((uint8_t*) encode_result.c_str(), encode_result.size());
 
     dataRequest.BTPType = BTP_B; //!< BTP-B
     dataRequest.destPort = CA_PORT;
@@ -485,33 +727,54 @@ namespace ns3
 
     // Store the time in which the last CAM (i.e. this one) has been generated and successfully sent
     now=computeTimestampUInt64 ()/NANO_TO_MILLI;
+    now_centi = computeTimestampUInt64 ()/NANO_TO_CENTI; //Time in centiseconds(now[ms]/10->centiseconds) for Reference Position
     m_T_GenCam_ms=now-lastCamGen;
     lastCamGen = now;
 
-    error:
-    if(encode_result.buffer) free(encode_result.buffer);
+    // Save this point in the list of PH points (if the low frequency container transmission is enabled)
+    if(m_lowFreqContainerEnabled == true)
+    {
+      PathHistoryDeltas_t pathDeltas = {};
 
-    // Free all the previously allocated memory
-    if(m_vehicle==true)
-      {
-        // After encoding, we can free the previosly allocated optional data
-        if(accelerationcontrol) m_vdp->vdpFree(accelerationcontrol);
-        if(laneposition) m_vdp->vdpFree(laneposition);
-        if(steeringwheelangle) m_vdp->vdpFree(steeringwheelangle);
-        if(lateralacceleration) m_vdp->vdpFree(lateralacceleration);
-        if(verticalacceleration) m_vdp->vdpFree(verticalacceleration);
-        if(performanceclass) m_vdp->vdpFree(performanceclass);
-        if(tollingzone) m_vdp->vdpFree(tollingzone);
-      }
-    else
-      {
-        if(rsu_container) m_vdp->vdpFree(rsu_container);
+      if(m_refPositions.size() >= m_MaxPHLength) {
+        m_refPositions.pop_back ();
       }
 
-    if(lowfrequencycontainer) m_vdp->vdpFree(lowfrequencycontainer);
-    if(specialvehiclecontainer) m_vdp->vdpFree(specialvehiclecontainer);
+      if(!m_refPositions.empty ())
+        {
+          double delta;
 
-    if(cam) free(cam);
+          delta  = (long) haversineDist (asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO,
+                                                           asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO,
+                                                           (double) m_refPositions[0].first.latitude/DOT_ONE_MICRO, (double) m_refPositions[0].first.longitude/DOT_ONE_MICRO);
+
+          pathDeltas.deltaCoverage = (double) delta;
+
+          if(pathDeltas.deltaCoverage < 500)
+            {
+              /*
+              The idea is to have an total coverage distance of (15[m]*m_MaxPHLength(23))=345m in the PathHistory, and since T_GenCamMin_ms=100ms
+              then 15[m]/100[ms]=540[km/h] so we will hardly have more than 15[m] in between Reference Positions, neither more than 500[m] in the total coverage
+              */
+              // If coverage delta is less than 15 meters and the heading delta is less than 10 degrees.
+              if((pathDeltas.deltaCoverage < 15) &&
+                   (abs(m_refPositions[0].second.heading - cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue) < 100))
+                  {
+                    // Vehicle is not moving/is moving too slow, update deltaTime and timestamp of last pathPoint
+                    m_refPositions[0].second.deltaTime += (now_centi) - m_refPositions[0].second.timestamp;
+                    if(m_refPositions[0].second.deltaTime > 65535)
+                      m_refPositions[0].second.deltaTime = 65535;
+                    m_refPositions[0].second.timestamp = now_centi;
+                    return errval;
+                  }
+                pathDeltas.deltaTime = (now_centi) - m_refPositions[0].second.timestamp;
+            }
+        }
+      // Reference postiion as specified in ETSI TS 102 894-2
+      pathDeltas.timestamp = now_centi;
+      pathDeltas.heading =  asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,long);
+      m_refPositions.insert(m_refPositions.begin (),std::make_pair(cam->cam.camParameters.basicContainer.referencePosition,pathDeltas));
+    }
 
     return errval;
   }

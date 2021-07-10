@@ -2,6 +2,7 @@
 #define ITSSRECEIVINGTABLEENTRY_H
 
 #include "ns3/DENM.h"
+#include "ns3/asn_utils.h"
 #include "ns3/packet.h"
 
 #define ITSS_RX_ENTRY_TERMINATION_UNSET -1
@@ -18,8 +19,8 @@ namespace ns3 {
     } denm_table_state_t;
 
     ITSSReceivingTableEntry();
-    ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime, long detectionTime);
-    ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime, long detectionTime, Termination_t *termination_ptr);
+    ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime, long detectionTime);
+    ITSSReceivingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime, long detectionTime, long *termination_ptr);
 
     /* Setters */
     void setStatus(denm_table_state_t status) {m_status=status;}
@@ -36,7 +37,7 @@ namespace ns3 {
     bool isTerminationSet(void) {return m_termination!=ITSS_RX_ENTRY_TERMINATION_UNSET;}
 
   private:
-    ActionID_t m_actionid;
+    DEN_ActionID_t m_actionid;
     Packet m_denm_encoded;
     denm_table_state_t m_status;
     long m_referenceTime;

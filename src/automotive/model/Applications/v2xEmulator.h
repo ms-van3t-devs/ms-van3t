@@ -26,7 +26,8 @@ public:
 
   virtual ~v2xEmulator ();
 
-  void receiveCAM (CAM_t *cam, Address from);
+//  void receiveCAM (CAM_t *cam, Address from);
+  void receiveCAM (asn1cpp::Seq<CAM> cam, Address from);
 
   void receiveDENM(denData denm, Address from);
 
@@ -48,7 +49,7 @@ private:
   virtual void StartApplication (void);
   virtual void StopApplication (void);
   void TriggerDenm ();
-  void UpdateDenm (ActionID actionid);
+  void UpdateDenm (DEN_ActionID actionid);
 
   long compute_timestampIts ();
 

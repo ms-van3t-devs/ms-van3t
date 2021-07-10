@@ -149,7 +149,9 @@ namespace ns3
     m_caService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
     m_caService.setRealTime (m_real_time);
     VDP* traci_vdp = new VDPTraCI(m_client,m_id);
+
     m_caService.setVDP(traci_vdp);
+
     m_denService.setVDP(traci_vdp);
 
     /* Create CSV file, if requested */
@@ -212,17 +214,17 @@ namespace ns3
      * The division by 3.6 is used to convert the value stored in the DENM
      * from km/h to m/s, as required by SUMO
     */
-    if(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit == NULL)
+    if(!denm.getDenmAlacarteData_asn_types ().getData ().roadWorks.getData ().speedLimit.isAvailable ())
     {
       NS_FATAL_ERROR("Error in areaSpeedAdvisorClient80211p.cc. Received a NULL pointer for speedLimit.");
     }
 
-    double speedLimit = *(denm.getDenmAlacarteData_asn_types ().roadWorks->speedLimit);
+    double speedLimit = denm.getDenmAlacarteData_asn_types ().getData ().roadWorks.getData ().speedLimit.getData ();
 
     m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, speedLimit/3.6);
 
     /* Change color for slow-moving vehicles to green (just for visualization purpose) */
-    libsumo::TraCIColor green;
+   libsumo::TraCIColor green;
     green.r=50;green.g=205;green.b=50;green.a=255;
     m_client->TraCIAPI::vehicle.setColor (m_id,green);
 
@@ -241,12 +243,15 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisorClient80211p::receiveCAM (CAM_t *cam, Address from)
+  areaSpeedAdvisorClient80211p::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* Implement CAM strategy here */
 
+    (void) cam;
+    (void) from;
+
    // Free the received CAM data structure
-   ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+//   ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
   long

@@ -23,6 +23,12 @@
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+#include "ns3/Setter.hpp"
+#include "ns3/Encoding.hpp"
+#include "ns3/SetOf.hpp"
+#include "ns3/SequenceOf.hpp"
 #include "ns3/socket.h"
 #include "ns3/btpdatarequest.h"
 #include "ns3/network-module.h"
@@ -177,6 +183,8 @@ namespace ns3
     m_denService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
     m_caService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
 
+
+
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);
@@ -215,53 +223,35 @@ namespace ns3
   areaSpeedAdvisorServer80211p::TriggerDenm ()
   {
     denData data;
+    DEN_RoadWorksContainerExtended_t roadworks;
     denData::denDataAlacarte alacartedata;
     DENBasicService_error_t trigger_retval;
 
-    memset(&alacartedata,0,sizeof(denData::denDataAlacarte));
-
-    /* Build DENM data */
+//    /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
-    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
-    // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
-    alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
 
-    if(alacartedata.roadWorks == NULL)
-      {
-        NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks.");
-        return;
-      }
-
-    alacartedata.roadWorks->speedLimit = (SpeedLimit_t *) calloc(sizeof(SpeedLimit_t),1);
-
-    if(alacartedata.roadWorks->speedLimit == NULL)
-      {
-        free(alacartedata.roadWorks);
-        NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks->speedLimit.");
-        return;
-      }
+    //Roadworks
+   // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
+   // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
 
     // Set a speed limit Advisor inside the DENM message
-    *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) 25;
+
+    roadworks.speedLimit.setData (25);
+
+    alacartedata.roadWorks.setData (roadworks); 
 
     data.setDenmAlacarteData_asn_types (alacartedata);
 
     trigger_retval=m_denService.appDENM_trigger(data,m_current_action_id);
     if(trigger_retval!=DENM_NO_ERROR)
     {
-      std::cout<<"EH! ERRORE!"<<std::endl;
       NS_LOG_ERROR("Cannot trigger DENM. Error code: " << trigger_retval);
     }
     else
     {
       m_denm_sent++;
     }
-
-    if(alacartedata.roadWorks && alacartedata.roadWorks->speedLimit) free(alacartedata.roadWorks->speedLimit);
-    if(alacartedata.roadWorks) free(alacartedata.roadWorks);
-
-    data.denDataFree ();
 
     m_update_denm_ev = Simulator::Schedule (Seconds (1), &areaSpeedAdvisorServer80211p::UpdateDenm, this);
   }
@@ -270,36 +260,22 @@ namespace ns3
   areaSpeedAdvisorServer80211p::UpdateDenm()
   {
     denData data;
+    DEN_RoadWorksContainerExtended_t roadworks;
     denData::denDataAlacarte alacartedata;
     DENBasicService_error_t update_retval;
-
-    memset(&alacartedata,0,sizeof(denData::denDataAlacarte));
 
     /* Build DENM data */
     data.setDenmMandatoryFields (compute_timestampIts(),Latitude_unavailable,Longitude_unavailable);
 
-    // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
-    // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
-    alacartedata.roadWorks = (sRoadWorksContainerExtended_t *) calloc(sizeof(sRoadWorksContainerExtended_t),1);
-
-    if(alacartedata.roadWorks == NULL)
-    {
-      NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks.");
-      return;
-    }
-
-    alacartedata.roadWorks->speedLimit = (SpeedLimit_t *) calloc(sizeof(SpeedLimit_t),1);
-
-    if(alacartedata.roadWorks->speedLimit == NULL)
-    {
-      free(alacartedata.roadWorks);
-      NS_LOG_ERROR("Cannot send DENM. Unable to allocate memory for alacartedata.roadWorks->speedLimit.");
-      return;
-    }
+    //Roadworks
+   // As there is no proper "SpeedLimit" field inside a DENM message, for an area speed Advisor, we rely on the
+   // RoadWorksContainerExtended, inside the "A la carte" container, which actually has a "SpeedLimit" field
 
     // Set a speed limit Advisor inside the DENM message
-    *(alacartedata.roadWorks->speedLimit) = (SpeedLimit_t) 25;
 
+    roadworks.speedLimit.setData (25);
+
+    alacartedata.roadWorks.setData (roadworks);
     data.setDenmAlacarteData_asn_types (alacartedata);
 
     update_retval = m_denService.appDENM_update (data,m_current_action_id);
@@ -312,7 +288,6 @@ namespace ns3
         m_denm_sent++;
       }
 
-    data.denDataFree ();
     m_update_denm_ev = Simulator::Schedule (Seconds (1), &areaSpeedAdvisorServer80211p::UpdateDenm, this);
 
   }
@@ -325,7 +300,7 @@ namespace ns3
   }
 
   void
-  areaSpeedAdvisorServer80211p::receiveCAM (CAM_t *cam, Address address)
+  areaSpeedAdvisorServer80211p::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* The reception of a CAM, in this case, woarks as a trigger to generate DENMs.
      * If no CAMs are received, then no DENMs are generated */
@@ -350,13 +325,13 @@ namespace ns3
       {
         // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
         m_csv_ofstream_cam << cam->header.messageID << "," << cam->header.stationID << ",";
-        m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << (double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO << ",";
-        m_csv_ofstream_cam << (double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO << "," ;
-        m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue/DECI << "," << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI << ",";
-        m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue/DECI << std::endl;
+        m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO << ",";
+        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO << "," ;
+        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
+        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
       }
 
-    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+//    ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
   void

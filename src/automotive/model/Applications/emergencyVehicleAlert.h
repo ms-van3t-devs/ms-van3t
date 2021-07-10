@@ -37,7 +37,8 @@ class emergencyVehicleAlert : public Application
      *
      * \param the ASN.1 CAM structure containing the info of the packet that was received.
      */
-    void receiveCAM (CAM_t *cam, Address from);
+    // void receiveCAM (CAM_t *cam, Address from);
+    void receiveCAM (asn1cpp::Seq<CAM> cam, Address from);
 
     /**
      * \brief Callback to handle a DENM reception.

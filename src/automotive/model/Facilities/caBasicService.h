@@ -7,6 +7,12 @@
 #include "ns3/asn_utils.h"
 #include "ns3/btp.h"
 #include "ns3/btpHeader.h"
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+
+extern "C" {
+  #include "ns3/CAM.h"
+}
 
 //#define CURRENT_VDP_TYPE VDPTraCI
 
@@ -41,11 +47,18 @@ namespace ns3
     void receiveCam(BTPDataIndication_t dataIndication, Address from);
     void changeNGenCamMax(int16_t N_GenCamMax) {m_N_GenCamMax=N_GenCamMax;}
     void changeRSUGenInterval(long RSU_GenCam_ms) {m_RSU_GenCam_ms=RSU_GenCam_ms;}
-    void addCARxCallback(std::function<void(CAM_t *, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
+    // void addCARxCallback(std::function<void(CAM_t *, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
+    void addCARxCallback(std::function<void(asn1cpp::Seq<CAM>, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
     void setRealTime(bool real_time){m_real_time=real_time;}
+
+    void setLowFrequencyContainer(bool enable) {m_lowFreqContainerEnabled = enable;}
+    void setSpecialVehicleContainer(bool enabled) {m_specialVehContainerEnabled = enabled;}
 
     void startCamDissemination();
     void startCamDissemination(double desync_s);
+
+    //High frequency RSU container setters
+    void setProtectedCommunicationsZonesRSU(asn1cpp::Seq<RSUContainerHighFrequency> sequence) {m_protectedCommunicationsZonesRSU = sequence;}
 
     uint64_t terminateDissemination();
 
@@ -53,13 +66,16 @@ namespace ns3
     const long T_GenCamMax_ms = 1000;
 
   private:
+    const size_t m_MaxPHLength = 23;
+
     void initDissemination();
     void RSUDissemination();
     void checkCamConditions();
     CABasicService_error_t generateAndEncodeCam();
     int64_t computeTimestampUInt64();
 
-    std::function<void(CAM_t *, Address)> m_CAReceiveCallback;
+    // std::function<void(CAM_t *, Address)> m_CAReceiveCallback;
+    std::function<void(asn1cpp::Seq<CAM>, Address)> m_CAReceiveCallback;
 
     Ptr<btp> m_btp;
 
@@ -97,7 +113,16 @@ namespace ns3
     EventId m_event_camCheckConditions;
     EventId m_event_camRsuDissemination;
 
+    std::vector<std::pair<ReferencePosition_t,PathHistoryDeltas_t>> m_refPositions;
 
+    //High frequency RSU container
+    asn1cpp::Seq<RSUContainerHighFrequency> m_protectedCommunicationsZonesRSU;
+    double m_RSUlon;
+    double m_RSUlat;
+
+    // Boolean/Enum variables to enable/disable the presence of certain optional containers in the CAM messages
+    bool m_lowFreqContainerEnabled;
+    bool m_specialVehContainerEnabled;
   };
 }
 

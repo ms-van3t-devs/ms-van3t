@@ -54,7 +54,7 @@ namespace ns3
     Buffer::Iterator i = start;
     //Source long position vector aux varaibles
     uint16_t pai_speed = 0;
-    pai_speed = (m_sourcePV.positionAccuracy << 15) | ((m_sourcePV.speed)>>1); //Speed >> 1 so that sign isnt lost
+    pai_speed = (m_sourcePV.positionAccuracy << 15) | (((m_sourcePV.speed>>1)*2)&0x7FFF); //Speed >> 1 so that sign isnt lost but multiplied by 2 to compensate bit shift
 
     //Source long position vector
     WriteTo (i,m_sourcePV.GnAddress.ConvertTo ());
@@ -82,7 +82,7 @@ namespace ns3
     uint16_t pai_speed = 0;
     pai_speed = i.ReadU16 ();
     m_sourcePV.positionAccuracy = pai_speed >> 15;
-    m_sourcePV.speed = pai_speed & 0x7f;
+    m_sourcePV.speed = pai_speed & 0x7fff;
     m_sourcePV.heading = i.ReadNtohU16 ();
 
     //Reserved

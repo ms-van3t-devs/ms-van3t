@@ -20,6 +20,7 @@
 
 #include "ns3/asn_utils.h"
 #include <chrono>
+#include <cmath>
 
 namespace ns3 {
   long compute_timestampIts (bool real_time)
@@ -37,5 +38,66 @@ namespace ns3 {
     else
         return Simulator::Now ().GetMilliSeconds ();
 
+  }
+
+  double haversineDist(double lat_a, double lon_a, double lat_b, double lon_b) {
+      // 12742000 is the mean Earth radius (6371 km) * 2 * 1000 (to convert from km to m)
+      return 12742000.0*asin(sqrt(sin(DEG_2_RAD(lat_b-lat_a)/2)*sin(DEG_2_RAD(lat_b-lat_a)/2)+cos(DEG_2_RAD(lat_a))*cos(DEG_2_RAD(lat_b))*sin(DEG_2_RAD(lon_b-lon_a)/2)*sin(DEG_2_RAD(lon_b-lon_a)/2)));
+  }
+
+  uint8_t
+  setByteMask(uint8_t mask)
+  {
+    uint8_t out = 0;
+
+    for (int i = 0; i < 8; i++) {
+        out <<= 1;
+        if (mask & 1)
+            out |= 1;
+        mask >>= 1;
+    }
+    return out;
+  }
+  uint8_t
+  setByteMask(uint16_t mask, unsigned int i)
+  {
+    uint8_t  out = 0;
+    uint8_t in = (mask >> (i*8)) & 0x000000FF;
+
+    for (int j = 0; j < 8; j++) {
+        out <<= 1;
+        if (in & 1)
+            out |= 1;
+        in >>= 1;
+    }
+    return out;
+  }
+  uint8_t
+  setByteMask(uint32_t mask, unsigned int i)
+  {
+    uint8_t  out = 0;
+    uint8_t in = (mask >> (i*8)) & 0x000000FF;
+
+    for (int j = 0; j< 8; j++) {
+        out <<= 1;
+        if (in & 1)
+            out |= 1;
+        in >>= 1;
+    }
+    return out;
+  }
+
+  uint8_t
+  getFromMask(uint8_t mask)
+  {
+    uint8_t out = 0;
+
+    for (int i = 0; i < 8; i++) {
+        out <<= 1;
+        if (mask & 1)
+            out |= 1;
+        mask >>= 1;
+    }
+    return out;
   }
 }

@@ -101,7 +101,7 @@ namespace ns3
     uint16_t pai_speed = 0;
     pai_speed = i.ReadU16 ();
     m_sourcePV.positionAccuracy = pai_speed >> 15;
-    m_sourcePV.speed = pai_speed & 0x7f;
+    m_sourcePV.speed = pai_speed & 0x7fff;
     m_sourcePV.heading = i.ReadNtohU16 ();
 
     //GeoArea position latitude

@@ -262,22 +262,25 @@ namespace ns3
   }
 
   void
-  emergencyVehicleAlert::receiveCAM (CAM_t *cam, Address from)
+  emergencyVehicleAlert::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* Implement CAM strategy here */
    m_cam_received++;
 
    /* If the CAM is received from an emergency vehicle, and the host vehicle is a "passenger" car, then process the CAM */
-   if (cam->cam.camParameters.basicContainer.stationType==StationType_specialVehicles && m_type!="emergency")
+   if (asn1cpp::getField(cam->cam.camParameters.basicContainer.stationType,StationType_t)==StationType_specialVehicles && m_type!="emergency")
    {
      libsumo::TraCIPosition pos=m_client->TraCIAPI::vehicle.getPosition(m_id);
      pos=m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
 
      /* If the distance between the "passenger" car and the emergency vehicle and the difference in the heading angles
       * are below certain thresholds, then actuate the slow-down strategy */
-     if (appUtil_haversineDist (pos.y,pos.x,(double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO,(double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO) < m_distance_threshold
+     if (appUtil_haversineDist (pos.y,pos.x,
+                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO,
+                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO)
+         < m_distance_threshold
          &&
-         appUtil_angDiff (m_client->TraCIAPI::vehicle.getAngle (m_id),(double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue/DECI)<m_heading_threshold)
+         appUtil_angDiff (m_client->TraCIAPI::vehicle.getAngle (m_id),(double)asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,HeadingValue_t)/DECI)<m_heading_threshold)
      {
        /* Slowdown only if you are not in the takeover lane,
         * otherwise the emergency vechicle may get stuck behind */
@@ -310,14 +313,12 @@ namespace ns3
      {
        // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
        m_csv_ofstream_cam << cam->header.messageID << "," << cam->header.stationID << ",";
-       m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << (double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO << ",";
-       m_csv_ofstream_cam << (double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO << "," ;
-       m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue/DECI << "," << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI << ",";
-       m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue/DECI << std::endl;
+       m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO << ",";
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO << "," ;
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
      }
 
-   // Free the received CAM data structure
-   ASN_STRUCT_FREE(asn_DEF_CAM,cam);
   }
 
   void

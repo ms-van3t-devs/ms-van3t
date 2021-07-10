@@ -25,7 +25,9 @@ public:
 
   virtual ~simpleCAMSender ();
 
-  void receiveCAM(CAM_t *cam, Address address);
+  // void receiveCAM(CAM_t *cam, Address address);
+  void receiveCAM(asn1cpp::Seq<CAM> cam, Address address);
+
   void receiveDENM(denData denm, Address from);
 
   void StopApplicationNow ();

@@ -208,7 +208,7 @@ namespace ns3
   v2xEmulator::TriggerDenm()
   {
     denData data;
-    ActionID_t actionid;
+    DEN_ActionID_t actionid;
     DENBasicService_error_t trigger_retval;
 
     /* Set DENM mandatpry fields */
@@ -236,12 +236,11 @@ namespace ns3
       NS_LOG_ERROR("Cannot trigger DENM. Error code: " << trigger_retval);
     }
 
-    data.denDataFree ();
     m_sendDenmEvent = Simulator::Schedule (Seconds (1), &v2xEmulator::UpdateDenm, this, actionid);
   }
 
   void
-  v2xEmulator::UpdateDenm (ActionID actionid)
+  v2xEmulator::UpdateDenm (DEN_ActionID actionid)
   {
     denData data;
     DENBasicService_error_t update_retval;
@@ -270,29 +269,21 @@ namespace ns3
       NS_LOG_ERROR("Cannot update DENM. Error code: " << update_retval);
     }
 
-    data.denDataFree ();
-
     m_sendDenmEvent = Simulator::Schedule (Seconds (1), &v2xEmulator::UpdateDenm, this, actionid);
 
   }
 
   void
-  v2xEmulator::receiveCAM (CAM_t *cam, Address from)
+  v2xEmulator::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
 
    // Ignore messages coming from itself
    // This is needed as broadcasted packets over a promiscuous inteface are also received back on the same socket
-   if(cam->header.stationID==std::stoul(m_id.substr (3)))
-   {
-       ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+   if(asn1cpp::getField(cam->header.stationID,StationID_t)==std::stoul(m_id.substr (3)))
        return;
-   }
 
     /* Implement CAM strategy here */
-    std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< cam->header.stationID << std::endl;
-
-   // Free the received CAM data structure
-   ASN_STRUCT_FREE(asn_DEF_CAM,cam);
+    std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< asn1cpp::getField(cam->header.stationID,StationID_t) << std::endl;
   }
 
   void

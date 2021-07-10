@@ -2,6 +2,7 @@
 
 extern "C" {
     #include "ns3/utmups.h"
+    #include "ns3/CAM.h"
 }
 
 namespace ns3
@@ -18,8 +19,10 @@ namespace ns3
     m_id=id;
 
     /* Length and width of car [0.1 m] */
-    m_vehicle_length.vehicleLengthValue = VehicleLengthValue_unavailable;
-    m_vehicle_length.vehicleLengthConfidenceIndication = VehicleLengthConfidenceIndication_unavailable;
+    m_vehicle_length = VDPValueConfidence<long,long>(VehicleLengthValue_unavailable,
+                                          VehicleLengthConfidenceIndication_unavailable);
+//    m_vehicle_length.vehicleLengthValue = VehicleLengthValue_unavailable;
+//    m_vehicle_length.vehicleLengthConfidenceIndication = VehicleLengthConfidenceIndication_unavailable;
 
     m_vehicle_width = VehicleWidth_unavailable;
   }
@@ -30,8 +33,10 @@ namespace ns3
     CAM_mandatory_data_t CAMdata;
 
     /* Speed [0.01 m/s] */
-    CAMdata.speed.speedValue=m_gps_trace_client->getSpeedms ()*CENTI;
-    CAMdata.speed.speedConfidence=SpeedConfidence_unavailable;
+    CAMdata.speed = VDPValueConfidence<>(m_gps_trace_client->getSpeedms ()*CENTI,
+                                         SpeedConfidence_unavailable);
+//    CAMdata.speed.speedValue=m_gps_trace_client->getSpeedms ()*CENTI;
+//    CAMdata.speed.speedConfidence=SpeedConfidence_unavailable;
 
     // longitude WGS84 [0,1 microdegree]
     CAMdata.longitude=(Longitude_t)(m_gps_trace_client->getLon ()*DOT_ONE_MICRO);
@@ -39,8 +44,10 @@ namespace ns3
     CAMdata.latitude=(Latitude_t)(m_gps_trace_client->getLat ()*DOT_ONE_MICRO);
 
     /* Altitude [0,01 m] */
-    CAMdata.altitude.altitudeValue=AltitudeValue_unavailable;
-    CAMdata.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
+    CAMdata.altitude = VDPValueConfidence<>(AltitudeValue_unavailable,
+                                            AltitudeConfidence_unavailable);
+//    CAMdata.altitude.altitudeValue=AltitudeValue_unavailable;
+//    CAMdata.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
 
     /* Position Confidence Ellipse */
     CAMdata.posConfidenceEllipse.semiMajorConfidence=SemiAxisLength_unavailable;
@@ -48,19 +55,24 @@ namespace ns3
     CAMdata.posConfidenceEllipse.semiMajorOrientation=HeadingValue_unavailable;
 
     /* Longitudinal acceleration [0.1 m/s^2] */
-    CAMdata.longAcceleration.longitudinalAccelerationValue=m_gps_trace_client->getAccelmsq ()* DECI;
-    CAMdata.longAcceleration.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
+    CAMdata.longAcceleration = VDPValueConfidence<>(m_gps_trace_client->getAccelmsq ()* DECI,
+                                                  AccelerationConfidence_unavailable);
+//    CAMdata.longAcceleration.longitudinalAccelerationValue=m_gps_trace_client->getAccelmsq ()* DECI;
+//    CAMdata.longAcceleration.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
 
     /* Heading WGS84 north [0.1 degree] */
-    CAMdata.heading.headingValue = m_gps_trace_client->getHeadingdeg ()* DECI;
-    CAMdata.heading.headingConfidence = HeadingConfidence_unavailable;
+    CAMdata.heading = VDPValueConfidence<>(m_gps_trace_client->getHeadingdeg ()* DECI,
+                                                      HeadingConfidence_unavailable);
+//    CAMdata.heading.headingConfidence = HeadingConfidence_unavailable;
 
     /* Drive direction */
     CAMdata.driveDirection = DriveDirection_unavailable;
 
     /* Curvature and CurvatureCalculationMode */
-    CAMdata.curvature.curvatureValue = CurvatureValue_unavailable;
-    CAMdata.curvature.curvatureConfidence = CurvatureConfidence_unavailable;
+    CAMdata.curvature = VDPValueConfidence<>(CurvatureValue_unavailable,
+                                           CurvatureConfidence_unavailable);
+//    CAMdata.curvature.curvatureValue = CurvatureValue_unavailable;
+//    CAMdata.curvature.curvatureConfidence = CurvatureConfidence_unavailable;
     CAMdata.curvature_calculation_mode = CurvatureCalculationMode_unavailable;
 
     /* Length and Width [0.1 m] */
@@ -68,8 +80,10 @@ namespace ns3
     CAMdata.VehicleWidth = m_vehicle_width;
 
     /* Yaw Rate */
-    CAMdata.yawRate.yawRateValue = YawRateValue_unavailable;
-    CAMdata.yawRate.yawRateConfidence = YawRateConfidence_unavailable;
+    CAMdata.yawRate = VDPValueConfidence<>(YawRateValue_unavailable,
+                                           YawRateConfidence_unavailable);
+//    CAMdata.yawRate.yawRateValue = YawRateValue_unavailable;
+//    CAMdata.yawRate.yawRateConfidence = YawRateConfidence_unavailable;
 
     return CAMdata;
   }

@@ -19,59 +19,62 @@
 */
 
 #include "denData.h"
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+#include "ns3/Setter.hpp"
+#include "ns3/Encoding.hpp"
+#include "ns3/SetOf.hpp"
+#include "ns3/SequenceOf.hpp"
+
+
+namespace ns3 {
 
 denData::denData()
 {
+  denDataAlacarte alacarte = {};
   // m_management optional fields initialization
-  m_management.validityDuration=NULL;
-  m_management.transmissionInterval=NULL;
-  m_management.termination=NULL;
-  m_management.relevanceDistance=NULL;
-  m_management.relevanceTrafficDirection=NULL;
-
-  memset(&m_management.eventPosition,0,sizeof(ReferencePosition_t));
-  memset(&m_management.detectionTime,0,sizeof(TimestampIts_t));
-  memset(&m_management.actionID,0,sizeof(ActionID_t));
-  memset(&m_management.referenceTime,0,sizeof(TimestampIts_t));
+  m_management.termination = DENDataItem<long>(false);
+  m_management.relevanceDistance = DENDataItem<long>(false);
+  m_management.relevanceTrafficDirection = DENDataItem<long>(false);
+  m_management.validityDuration = DENDataItem<long>(false);
+  m_management.transmissionInterval = DENDataItem<long>(false);
 
   // m_situation optional fields initialization
-  m_situation.linkedCause=NULL;
-  m_situation.eventHistory=NULL;
-
-  memset(&m_situation.informationQuality,0,sizeof(InformationQuality_t));
-  memset(&m_situation.eventType,0,sizeof(CauseCode_t));
+  m_situation = DENDataItem<denDataSituation>();
 
   // m_location optional fields initialization
-  m_location.eventSpeed=NULL;
-  m_location.eventPositionHeading=NULL;
-  m_location.roadType=NULL;
+  m_location = DENDataItem<denDataLocation>();
 
-  memset(&m_location.traces,0,sizeof(Traces_t));
 
   // m_alacarte optional fields initialization
-  m_alacarte.lanePosition=NULL;
-  m_alacarte.impactReduction=NULL;
-  m_alacarte.externalTemperature=NULL;
-  m_alacarte.roadWorks=NULL;
-  m_alacarte.positioningSolution=NULL;
-  m_alacarte.stationaryVehicle=NULL;
+  m_alacarte = DENDataItem<denDataAlacarte>();
 
   // Set m_internals isMandatorySet to false during the object creation
   m_internals.isMandatorySet=false;
-
   // Initialize the repetition parameters to 0
   m_internals.repetitionDuration=0;
   m_internals.repetitionInterval=0;
 }
 
+ActionID_t
+denData::getDenmActionID()
+{
+  ActionID retval;
+  retval.originatingStationID = m_management.stationID;
+  retval.sequenceNumber = m_management.sequenceNumber;
+  return retval;
+}
 void
 denData::setDenmMandatoryFields (long detectionTime_ms, double latReference_deg, double longReference_deg)
 {
-  m_management.detectionTime = asnTimeConvert(detectionTime_ms);
-  m_management.eventPosition.latitude = (Latitude_t) (latReference_deg);
-  m_management.eventPosition.longitude = (Longitude_t) (longReference_deg);
-  m_management.eventPosition.altitude.altitudeValue = AltitudeValue_unavailable;
-  m_management.eventPosition.altitude.altitudeConfidence = AltitudeConfidence_unavailable;
+  m_management.detectionTime = detectionTime_ms;
+  m_management.latitude = (long) latReference_deg;
+  m_management.longitude = (long) longReference_deg;
+  m_management.altitude.setValue (AltitudeValue_unavailable);
+  m_management.altitude.setConfidence (AltitudeConfidence_unavailable);
+  m_management.posConfidenceEllipse.semiMajorConfidence = SemiAxisLength_unavailable;
+  m_management.posConfidenceEllipse.semiMinorConfidence = SemiAxisLength_unavailable;
+  m_management.posConfidenceEllipse.semiMajorOrientation = HeadingValue_unavailable;
 
   m_internals.isMandatorySet=true;
 }
@@ -79,33 +82,40 @@ denData::setDenmMandatoryFields (long detectionTime_ms, double latReference_deg,
 void
 denData::setDenmMandatoryFields (long detectionTime_ms, double latReference_deg, double longReference_deg, double altitude_m)
 {
+
   setDenmMandatoryFields (detectionTime_ms,latReference_deg,longReference_deg);
-  m_management.eventPosition.altitude.altitudeValue = altitude_m;
+  m_management.altitude.setValue (altitude_m);
 }
 
 void
 denData::setDenmMandatoryFields_asn_types (TimestampIts_t detectionTime, ReferencePosition_t eventPosition)
 {
-  m_management.detectionTime = detectionTime;
-  m_management.eventPosition = eventPosition;
+  asn_INTEGER2long (&detectionTime,&m_management.detectionTime);
+  m_management.longitude = (long) eventPosition.longitude;
+  m_management.latitude = (long) eventPosition.latitude;
+  m_management.posConfidenceEllipse.semiMajorConfidence = eventPosition.positionConfidenceEllipse.semiMajorConfidence;
+  m_management.posConfidenceEllipse.semiMinorConfidence = eventPosition.positionConfidenceEllipse.semiMinorConfidence;
+  m_management.posConfidenceEllipse.semiMajorOrientation = eventPosition.positionConfidenceEllipse.semiMajorOrientation;
+  m_management.altitude.setValue (eventPosition.altitude.altitudeValue);
+  m_management.altitude.setConfidence (eventPosition.altitude.altitudeConfidence);
 
   m_internals.isMandatorySet=true;
 }
 
 void
-denData::setDenmMandatoryFields (long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg)
+denData::setDenmMandatoryFields (unsigned long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg)
 {
   setDenmMandatoryFields (detectionTime_ms,latReference_deg,longReference_deg);
-  m_management.actionID.originatingStationID = (StationID_t) originatingStationID;
-  m_management.actionID.sequenceNumber = (SequenceNumber_t) sequenceNumber;
+  m_management.stationID = originatingStationID;
+  m_management.sequenceNumber = sequenceNumber;
 }
 
 void
-denData::setDenmMandatoryFields (long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg, double altitude_m)
+denData::setDenmMandatoryFields (unsigned long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg, double altitude_m)
 {
   setDenmMandatoryFields (detectionTime_ms,latReference_deg,longReference_deg, altitude_m);
-  m_management.actionID.originatingStationID = (StationID_t) originatingStationID;
-  m_management.actionID.sequenceNumber = (SequenceNumber_t) sequenceNumber;
+  m_management.stationID = originatingStationID;
+  m_management.sequenceNumber = sequenceNumber;
 
 }
 
@@ -113,27 +123,36 @@ void
 denData::setDenmMandatoryFields_asn_types (ActionID_t actionID, TimestampIts_t detectionTime, ReferencePosition_t eventPosition)
 {
   setDenmMandatoryFields_asn_types(detectionTime,eventPosition);
-  m_management.actionID = actionID;
+  m_management.stationID = (long) actionID.originatingStationID;
+  m_management.sequenceNumber = (long) actionID.sequenceNumber;
+}
+
+void
+denData::setDenmHeader(long messageID, long protocolVersion, unsigned long stationID)
+{
+  m_header.messageID=messageID;
+  m_header.protocolVersion=protocolVersion;
+  m_header.stationID=stationID;
+}
+
+void
+denData::setDenmActionID(DEN_ActionID_t actionID)
+{
+  m_management.stationID = actionID.originatingStationID;
+  m_management.sequenceNumber = actionID.sequenceNumber;
 }
 
 int
 denData::setValidityDuration (long validityDuration_s)
 {
-  if(m_management.validityDuration) free(m_management.validityDuration);
+  //if(m_management.validityDuration) free(m_management.validityDuration);
 
   if(validityDuration_s<0 || validityDuration_s>86400)
     {
       return -2;
     }
 
-  m_management.validityDuration=(ValidityDuration_t*) calloc(1, sizeof(ValidityDuration_t));
-
-  if(m_management.validityDuration==NULL)
-    {
-      return -1;
-    }
-
-  *m_management.validityDuration=validityDuration_s;
+  m_management.validityDuration = DENDataItem<long> (validityDuration_s);
 
   return 1;
 }
@@ -158,9 +177,4 @@ denData::isDenDataRight()
   return true;
 }
 
-void
-denData::denDataFree()
-{
-  if(m_management.detectionTime.buf) free(m_management.detectionTime.buf);
-  if(m_management.validityDuration) free(m_management.validityDuration);
 }

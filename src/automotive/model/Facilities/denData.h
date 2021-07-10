@@ -3,6 +3,9 @@
 
 #include "asn_utils.h"
 #include "ns3/DENM.h"
+#include "ns3/Seq.hpp"
+#include "ns3/Getter.hpp"
+#include "ns3/BitString.hpp"
 #include <cstring>
 
 typedef struct CauseCode sCauseCode_t;
@@ -16,6 +19,7 @@ typedef struct RoadWorksContainerExtended sRoadWorksContainerExtended_t;
 typedef struct StationaryVehicleContainer sStationaryVehicleContainer_t;
 
 #define DEN_DEFAULT_VALIDITY_S 600
+namespace ns3 {
 
 class denData
 {
@@ -27,47 +31,59 @@ public:
       bool isMandatorySet;
   } denDataInternals;
 
+
+
   typedef struct _header {
     long messageID;
     long protocolVersion;
-    StationID_t stationID;
+    unsigned long stationID;
   } denDataHeader;
 
   typedef struct _management {
-      TimestampIts_t detectionTime;
-      ReferencePosition_t eventPosition;
-      ValidityDuration_t *validityDuration;
-      TransmissionInterval_t *transmissionInterval;
-      ActionID_t actionID;
-      Termination_t *termination;
-      RelevanceDistance_t *relevanceDistance;
-      RelevanceTrafficDirection_t *relevanceTrafficDirection;
-      TimestampIts_t referenceTime;
-      // StationType_t stationType; // Defined during the creation of the DEN Basic service object
+    //ActionID_t actionID;
+    unsigned long stationID;
+    long sequenceNumber;
+    long detectionTime;
+    long referenceTime;
+    DENDataItem<long> termination;
+    //ReferencePosition_t eventPosition;
+    long longitude;
+    long latitude;
+    DENValueConfidence<long,long> altitude;
+    DEN_PosConfidenceEllipse_t posConfidenceEllipse;
+    DENDataItem<long> relevanceDistance;
+    DENDataItem<long> relevanceTrafficDirection;
+    DENDataItem<long> validityDuration;
+    DENDataItem<long> transmissionInterval;
+    // StationType_t stationType; // Defined during the creation of the DEN Basic service object
   } denDataManagement;
 
   typedef struct _situation {
-      InformationQuality_t informationQuality;
-      CauseCode_t eventType;
-      sCauseCode_t *linkedCause;
-      sEventHistory_t *eventHistory;
+      long informationQuality;
+      long causeCode;
+      long subCauseCode;
+      DENDataItem<long> linkedCauseCode;
+      DENDataItem<long> linkedSubCauseCode;
+      DENDataItem<std::vector<DEN_EventPoint_t>> eventHistory;
   } denDataSituation;
 
   typedef struct _location {
-      sSpeed_t *eventSpeed;
-      sHeading_t *eventPositionHeading;
-      Traces_t traces;
-      RoadType_t *roadType;
+      DENDataItem<DENValueConfidence<long,long>> eventSpeed;
+      DENDataItem<DENValueConfidence<long,long>> eventPositionHeading;
+      std::vector<std::vector<DEN_PathPoint_t>> traces;
+      DENDataItem<long> roadType;
   } denDataLocation;
 
   typedef struct _alacarte {
-      LanePosition_t *lanePosition;
-      sImpactReductionContainer_t *impactReduction;
-      Temperature_t *externalTemperature;
-      sRoadWorksContainerExtended_t *roadWorks;
-      PositioningSolutionType_t *positioningSolution;
-      sStationaryVehicleContainer_t *stationaryVehicle;
+      DENDataItem<long> lanePosition;
+      DENDataItem<DEN_ImpactReductionContainer_t> impactReduction;
+      DENDataItem<long> externalTemperature;
+      DENDataItem<DEN_RoadWorksContainerExtended_t> roadWorks;
+      DENDataItem<long> positioningSolution;
+      DENDataItem<DEN_StationaryVehicleContainer_t> stationaryVehicle;
   } denDataAlacarte;
+
+
 
 public:
   denData();
@@ -81,19 +97,19 @@ public:
    * Header setters (they can be used for experimentation purposes, but they shall not be called normally, as the header is typically
    * set inside the DEN Basic Service, without the need of a manual user intervention
   */
-  void setDenmHeader(long messageID, long protocolVersion, StationID_t stationID) {m_header.messageID=messageID; m_header.protocolVersion=protocolVersion; m_header.stationID=stationID;}
-  void setDenmMessageID(long messageID) {m_header.messageID=messageID;}
-  void setDenmProtocolVersion(long protocolVersion) {m_header.protocolVersion=protocolVersion;}
-  void setDenmStationID(StationID_t stationID) {m_header.stationID=stationID;}
+  void setDenmHeader(long messageID, long protocolVersion, unsigned long stationID);
+  void setDenmMessageID(long messageID){m_header.messageID=messageID;}
+  void setDenmProtocolVersion(long protocolVersion){m_header.protocolVersion=protocolVersion;}
+  void setDenmStationID(unsigned long stationID){m_header.stationID=stationID;}
 
   /* AppDENM_update mandatory setters */
   /* AppDENM_terminate mandatory setters */
-  void setDenmMandatoryFields(long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg);
-  void setDenmMandatoryFields(long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg, double altitude_m);
+  void setDenmMandatoryFields(unsigned long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg);
+  void setDenmMandatoryFields(unsigned long originatingStationID, long sequenceNumber, long detectionTime_ms, double latReference_deg, double longReference_deg, double altitude_m);
   void setDenmMandatoryFields_asn_types(ActionID_t actionID, TimestampIts_t detectionTime, ReferencePosition_t eventPosition);
 
   /* receiveDENM setters */
-  void setDenmActionID(ActionID_t actionID) {m_management.actionID=actionID;}
+  void setDenmActionID(DEN_ActionID_t actionID);
 
   /* Optional information setters */
 
@@ -103,42 +119,34 @@ public:
   long getDenmHeaderStationID() {return m_header.stationID;}
 
   /* Container getters */
-  denDataHeader getDenmHeader_asn_types() const{return m_header;}
-  denDataManagement getDenmMgmtData_asn_types() const{return m_management;}
-  denDataSituation getDenmSituationData_asn_types() const{return m_situation;}
-  denDataLocation getDenmLocationData_asn_types() const{return m_location;}
-  denDataAlacarte getDenmAlacarteData_asn_types() const{return m_alacarte;}
+  denDataHeader getDenmHeader_asn_types() {return m_header;}
+  denDataManagement getDenmMgmtData_asn_types() {return m_management;}
+  DENDataItem<denDataSituation> getDenmSituationData_asn_types() {return m_situation;}
+  DENDataItem<denDataLocation> getDenmLocationData_asn_types() {return m_location;}
+  DENDataItem<denDataAlacarte> getDenmAlacarteData_asn_types() {return m_alacarte;}
 
-  bool isDenmSituationDataSet() const{return m_situation_set;}
-  bool isDenmLocationDataSet() const{return m_location_set;}
-  bool isDenmAlacarteDataSet() const{return m_alacarte_set;}
+  bool isDenmSituationDataSet() {return m_situation.isAvailable ();}
+  bool isDenmLocationDataSet() {return m_location.isAvailable ();}
+  bool isDenmAlacarteDataSet() {return m_alacarte.isAvailable ();}
 
-  long getDenmMgmtDetectionTime() const{long detectionTime=0;
-                                        asn_INTEGER2long (&m_management.detectionTime,&detectionTime);
-                                        return detectionTime;}
+  long getDenmMgmtDetectionTime() {return m_management.detectionTime;}
 
-  long getDenmMgmtValidityDuration() const{long validityDuration = m_management.validityDuration!=NULL ? *(m_management.validityDuration) : DEN_DEFAULT_VALIDITY_S;
-                                           return validityDuration;}
+  long getDenmMgmtValidityDuration() {if(m_management.validityDuration.isAvailable())return m_management.validityDuration.getData ();
+                                     else return DEN_DEFAULT_VALIDITY_S;}
 
-  long getDenmMgmtReferenceTime() const{long referenceTime=0;
-                                        asn_INTEGER2long (&m_management.referenceTime,&referenceTime);
-                                        return referenceTime;}
+  long getDenmMgmtReferenceTime() {return m_management.validityDuration.getData ();}
 
-  long getDenmMgmtLatitude() const{return m_management.eventPosition.latitude;}
-  long getDenmMgmtLongitude() const{return m_management.eventPosition.longitude;}
-  long getDenmMgmtAltitude() const{return m_management.eventPosition.altitude.altitudeValue;}
+  long getDenmMgmtLatitude() {return m_management.latitude;}
+  long getDenmMgmtLongitude() {return m_management.longitude;}
+  long getDenmMgmtAltitude() {return m_management.altitude.getValue ();}
 
-  long getDenmHeaderMessageID() const{return m_header.messageID;}
-  long getDenmHeaderProtocolVersion () const{return m_header.protocolVersion;}
-  unsigned long getDenmHeaderStationID () const{return (unsigned long)m_header.stationID;}
-
-  ActionID_t getDenmActionID() const{return m_management.actionID;}
+  ActionID_t getDenmActionID();
 
   /* Internals setters */
   // Units are milliseconds
-  void setDenmRepetition(uint32_t repetitionDuration,uint32_t repetitionInterval) {m_internals.repetitionInterval=repetitionInterval; m_internals.repetitionDuration=repetitionDuration;}
-  void setDenmRepetitionInterval(uint32_t repetitionInterval) {m_internals.repetitionInterval=repetitionInterval;}
-  void setDenmRepetitionDuration(uint32_t repetitionDuration) {m_internals.repetitionDuration=repetitionDuration;}
+  void setDenmRepetition(uint32_t repetitionDuration,uint32_t repetitionInterval){m_internals.repetitionInterval=repetitionInterval; m_internals.repetitionDuration = repetitionDuration;}
+  void setDenmRepetitionInterval(uint32_t repetitionInterval){m_internals.repetitionInterval=repetitionInterval;}
+  void setDenmRepetitionDuration(uint32_t repetitionDuration){m_internals.repetitionDuration=repetitionDuration;}
   int setValidityDuration(long validityDuration_s);
 
   /* Internal getters */
@@ -147,9 +155,9 @@ public:
 
   /* Container setters */
   void setDenmMgmtData_asn_types(denDataManagement management) {m_management = management;}
-  void setDenmSituationData_asn_types(denDataSituation situation) {m_situation = situation; m_situation_set=true;}
-  void setDenmLocationData_asn_types(denDataLocation location) {m_location = location; m_location_set=true;}
-  void setDenmAlacarteData_asn_types(denDataAlacarte alacarte) {m_alacarte = alacarte; m_alacarte_set=true;}
+  void setDenmSituationData_asn_types(denDataSituation situation) {m_situation.setData (situation);}
+  void setDenmLocationData_asn_types(denDataLocation location) {m_location.setData (location);}
+  void setDenmAlacarteData_asn_types(denDataAlacarte alacarte) {m_alacarte.setData(alacarte);}
 
   /* Object integrity check */
   bool isDenDataRight();
@@ -163,14 +171,17 @@ private:
   denDataHeader m_header;
   denDataManagement m_management;
 
-  bool m_situation_set=false;
-  denDataSituation m_situation;
+  //bool m_situation_set=false;
+  //denDataSituation m_situation;
+  DENDataItem<denDataSituation> m_situation;
 
-  bool m_location_set=false;
-  denDataLocation m_location;
+  //bool m_location_set=false;
+  //denDataLocation m_location;
+  DENDataItem<denDataLocation> m_location;
 
-  bool m_alacarte_set=false;
-  denDataAlacarte m_alacarte;
+  //bool m_alacarte_set=false;
+  //denDataAlacarte m_alacarte;
+  DENDataItem<denDataAlacarte> m_alacarte;
 };
-
+}
 #endif // DENDATA_H

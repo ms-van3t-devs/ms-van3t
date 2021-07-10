@@ -145,7 +145,7 @@ namespace ns3 {
   GeoNet::EPVupdate ()
   {
     
-    m_egoPV.TST_EPV = compute_timestampIts (true);
+    m_egoPV.TST_EPV = compute_timestampIts (true) + 37000;
     
     if(!(m_stationtype==StationType_roadSideUnit))
     {
@@ -302,8 +302,8 @@ namespace ns3 {
     longPV.latitude = (int32_t) (m_egoPV.POS_EPV.lat*DOT_ONE_MICRO);
     longPV.longitude = (int32_t) (m_egoPV.POS_EPV.lon*DOT_ONE_MICRO);
     longPV.positionAccuracy = false;
-    longPV.speed = (int16_t) m_egoPV.S_EPV;
-    longPV.heading = (uint16_t) m_egoPV.H_EPV;
+    longPV.speed = (int16_t) (m_egoPV.S_EPV*100); // [m/s] to [0.01 m/s]
+    longPV.heading = (uint16_t) (m_egoPV.H_EPV*10);// [degrees] to [0.1 degrees]
 
     switch(dataRequest.GNType)
     {

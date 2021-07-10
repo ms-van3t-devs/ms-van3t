@@ -32,7 +32,8 @@ class areaSpeedAdvisorServer80211p : public Application
      *
      * \param the ASN.1 CAM structure containing the info of the packet that was received.
      */
-    void receiveCAM (CAM_t *cam, Address address);
+    // void receiveCAM (CAM_t *cam, Address address);
+    void receiveCAM (asn1cpp::Seq<CAM> cam, Address from);
 
     void receiveDENM(denData denm, Address from);
 
@@ -81,7 +82,7 @@ class areaSpeedAdvisorServer80211p : public Application
     std::string m_csv_name; //!< CSV log file name
     std::ofstream m_csv_ofstream_cam;
 
-    ActionID_t m_current_action_id;
+    DEN_ActionID_t m_current_action_id;
 
     bool m_isTransmittingDENM;
 

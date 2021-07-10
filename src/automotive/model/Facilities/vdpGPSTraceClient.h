@@ -22,25 +22,23 @@ namespace ns3 {
     VDP_position_cartesian_t getPositionXY();
     VDP_position_cartesian_t getXY(double lon, double lat);
 
-    AccelerationControl_t *getAccelerationControl() {return NULL;}
-    LanePosition_t *getLanePosition() {return NULL;}
-    SteeringWheelAngle_t *getSteeringWheelAngle() {return NULL;}
-    LateralAcceleration_t *getLateralAcceleration() {return NULL;}
-    VerticalAcceleration_t *getVerticalAcceleration() {return NULL;}
-    PerformanceClass_t *getPerformanceClass() {return NULL;}
-    CenDsrcTollingZone_t *getCenDsrcTollingZone() {return NULL;}
+    VDPDataItem<uint8_t> getAccelerationControl() {return VDPDataItem<uint8_t>(false);}
+    VDPDataItem<int> getLanePosition() {return VDPDataItem<int>(false);}
+    VDPDataItem<VDPValueConfidence<int,int>> getSteeringWheelAngle() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+    VDPDataItem<VDPValueConfidence<int,int>> getLateralAcceleration() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+    VDPDataItem<VDPValueConfidence<int,int>> getVerticalAcceleration() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
+    VDPDataItem<int> getPerformanceClass() {return VDPDataItem<int>(false);}
+    VDPDataItem<VDP_CEN_DSRC_tolling_zone_t> getCenDsrcTollingZone() {return VDPDataItem<VDP_CEN_DSRC_tolling_zone_t>(false);}
 
-    void vdpFree(void* optional_field)
-    {
-      if(optional_field!=NULL)
-        {
-          free(optional_field);
-        }
-    }
-
-    RSUContainerHighFrequency_t *getRsuContainerHighFrequency() {return NULL;}
-    LowFrequencyContainer_t *getLowFrequencyContainer() {return NULL;}
-    SpecialVehicleContainer_t *getSpecialVehicleContainer() {return NULL;}
+    VDPDataItem<unsigned int> getVehicleRole() {return VDPDataItem<unsigned int>(false);}
+    VDPDataItem<uint8_t> getExteriorLights() {return VDPDataItem<uint8_t>(false);}
+    VDPDataItem<VDP_PublicTransportContainerData_t> getPublicTransportContainerData() {return VDPDataItem<VDP_PublicTransportContainerData_t>(false);}
+    VDPDataItem<VDP_SpecialTransportContainerData_t> getSpecialTransportContainerData() {return VDPDataItem<VDP_SpecialTransportContainerData_t>(false);}
+    VDPDataItem<int> getDangerousGoodsBasicType() {return VDPDataItem<int>(false);}
+    VDPDataItem<VDP_RoadWorksContainerBasicData_t> getRoadWorksContainerBasicData_t() {return VDPDataItem<VDP_RoadWorksContainerBasicData_t>(false);}
+    VDPDataItem<uint8_t> getRescueContainerLightBarSirenInUse() {return VDPDataItem<uint8_t>(false);}
+    VDPDataItem<VDP_EmergencyContainerData_t> getEmergencyContainerData() {return VDPDataItem<VDP_EmergencyContainerData_t>(false);}
+    VDPDataItem<VDP_SafetyCarContainerData_t> getSafetyCarContainerData() {return VDPDataItem<VDP_SafetyCarContainerData_t>(false);}
 
     private:
       std::string m_id;

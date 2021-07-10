@@ -28,14 +28,14 @@ namespace ns3 {
     m_referenceTime = -1;
   }
 
-  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID)
+  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID)
   {
     m_denm_encoded = asnDenmPacket;
     m_status = status;
     m_actionid = actionID;
   }
 
-  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, ActionID_t actionID, long referenceTime)
+  ITSSOriginatingTableEntry::ITSSOriginatingTableEntry(Packet asnDenmPacket, denm_table_state_t status, DEN_ActionID_t actionID, long referenceTime)
   {
     m_denm_encoded = asnDenmPacket;
     m_status = status;
