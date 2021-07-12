@@ -27,6 +27,7 @@ extern "C" {
 }
 
 #define TS_MAX 4294967295 //(2^32)-1
+#define TS_MAX1 4294967296 //(2^32)
 
 namespace ns3
 {

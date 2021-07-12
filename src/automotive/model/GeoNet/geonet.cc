@@ -145,7 +145,7 @@ namespace ns3 {
   GeoNet::EPVupdate ()
   {
     
-    m_egoPV.TST_EPV = compute_timestampIts (true) + 37000;
+    m_egoPV.TST_EPV = (compute_timestampIts (true) + 37000) % TS_MAX1;
     
     if(!(m_stationtype==StationType_roadSideUnit))
     {
