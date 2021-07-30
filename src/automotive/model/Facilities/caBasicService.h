@@ -47,7 +47,6 @@ namespace ns3
     void receiveCam(BTPDataIndication_t dataIndication, Address from);
     void changeNGenCamMax(int16_t N_GenCamMax) {m_N_GenCamMax=N_GenCamMax;}
     void changeRSUGenInterval(long RSU_GenCam_ms) {m_RSU_GenCam_ms=RSU_GenCam_ms;}
-    // void addCARxCallback(std::function<void(CAM_t *, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
     void addCARxCallback(std::function<void(asn1cpp::Seq<CAM>, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
     void setRealTime(bool real_time){m_real_time=real_time;}
 
@@ -76,6 +75,7 @@ namespace ns3
 
     // std::function<void(CAM_t *, Address)> m_CAReceiveCallback;
     std::function<void(asn1cpp::Seq<CAM>, Address)> m_CAReceiveCallback;
+    std::function<void(asn1cpp::Seq<CAM>, Address, Ptr<Packet>)> m_CAReceiveCallbackPkt;
 
     Ptr<btp> m_btp;
 

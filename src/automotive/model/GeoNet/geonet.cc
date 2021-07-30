@@ -24,6 +24,7 @@
 #include "ns3/network-module.h"
 #include "ns3/gn-utils.h"
 #include <cmath>
+#include "ns3/ipv4-header.h"
 #define SN_MAX 65536
 
 namespace ns3 {
@@ -56,6 +57,7 @@ namespace ns3 {
     m_egoPV = {};
 
     m_RSU_epv_set=false;
+    m_PRRSupervisor_ptr = NULL;
   }
 
   void
@@ -63,6 +65,7 @@ namespace ns3 {
   {
     Simulator::Cancel(m_event_EPVupdate);
     Simulator::Cancel(m_event_Beacon);
+    m_socket_tx->ShutdownRecv ();
   }
 
   void
@@ -358,6 +361,18 @@ namespace ns3 {
       NS_LOG_ERROR("GeoNet: SOCKET NOT FOUND ");
       return UNSPECIFIED_ERROR;
     }
+
+    if(m_PRRSupervisor_ptr!=nullptr)
+    {
+      uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
+
+      dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
+
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+
+      delete[] buffer;
+    }
+
     if(m_socket_tx->Send (dataRequest.data)==-1)
       {
         NS_LOG_ERROR("Cannot send SHB packet ");
@@ -416,6 +431,17 @@ namespace ns3 {
       return UNSPECIFIED_ERROR;
     }
 
+    if(m_PRRSupervisor_ptr!=nullptr)
+    {
+      uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
+
+      dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
+
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+
+      delete[] buffer;
+    }
+
     if(m_socket_tx->Send (dataRequest.data)==-1)
     {
       NS_LOG_ERROR("Cannot send GBC packet ");
@@ -452,6 +478,18 @@ namespace ns3 {
       NS_LOG_ERROR("GeoNet: SOCKET NOT FOUND ");
       return UNSPECIFIED_ERROR;
     }
+
+    if(m_PRRSupervisor_ptr!=nullptr)
+    {
+      uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
+
+      dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
+
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+
+      delete[] buffer;
+    }
+
     //if(!m_GnIsMobile)return ACCEPTED;
     if(m_socket_tx->Send (dataRequest.data)==-1)
     {
@@ -595,6 +633,17 @@ namespace ns3 {
 
     dataIndication.data = socket->RecvFrom (from);
 
+    if(m_PRRSupervisor_ptr!=nullptr)
+    {
+      uint8_t *buffer = new uint8_t[dataIndication.data->GetSize ()];
+
+      dataIndication.data->CopyData (buffer,dataIndication.data->GetSize ());
+
+      m_PRRSupervisor_ptr->signalReceivedPacket (PRRSupervisor::bufToString (buffer,dataIndication.data->GetSize ()),m_station_id);
+
+      delete[] buffer;
+    }
+
     dataIndication.data->RemoveHeader (basicHeader, 4);
     dataIndication.GNRemainingLife = basicHeader.GetLifeTime ();
     dataIndication.GNRemainingHL = basicHeader.GetRemainingHL ();
@@ -637,7 +686,7 @@ namespace ns3 {
           processGBC (dataIndication,from,commonHeader.GetHeaderSubType ());
         break;
       case TSB:
-        if((commonHeader.GetHeaderSubType ()==0)) processSHB (dataIndication,from);
+            if((commonHeader.GetHeaderSubType ()==0)) processSHB (dataIndication,from);
         break;
       default:
         NS_LOG_ERROR("GeoNet packet not supported");

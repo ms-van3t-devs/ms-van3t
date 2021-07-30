@@ -9,6 +9,7 @@
 #include "ns3/caBasicService.h"
 
 #include "ns3/btp.h"
+#include "ns3/PRRSupervisor.h"
 
 
 namespace ns3 {
@@ -69,6 +70,10 @@ class areaSpeedAdvisorClient80211p : public Application
     /* Counters */
     int m_cam_sent;
     int m_denm_received;
+
+    bool m_send_cam;
+
+    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
   };
 
 } // namespace ns3

@@ -11,6 +11,7 @@
 #include "ns3/caBasicService.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
+#include "ns3/PRRSupervisor.h"
 
 namespace ns3 {
 
@@ -115,6 +116,10 @@ class emergencyVehicleAlert : public Application
     EventId m_send_denm_ev; //!< Event to send the DENM
     EventId m_send_cam_ev; //!< Event to send the CAM
     EventId m_update_denm_ev; //!< Event to update the DENM
+
+    bool m_send_cam;
+
+    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
 
   };
 

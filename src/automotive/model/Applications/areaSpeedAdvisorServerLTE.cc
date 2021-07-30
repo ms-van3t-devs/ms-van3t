@@ -60,7 +60,12 @@ namespace ns3
            "TraCI client for SUMO",
            PointerValue (0),
            MakePointerAccessor (&areaSpeedAdvisorServerLTE::m_client),
-           MakePointerChecker<TraciClient> ());
+           MakePointerChecker<TraciClient> ())
+        .AddAttribute ("PRRSupervisor",
+            "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
+            PointerValue (0),
+            MakePointerAccessor (&areaSpeedAdvisorServerLTE::m_PRR_supervisor),
+            MakePointerChecker<PRRSupervisor> ());
         return tid;
   }
 
@@ -156,6 +161,12 @@ namespace ns3
     // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
+
+    if(m_PRR_supervisor!=nullptr)
+    {
+      m_geoNet->setPRRSupervisor(m_PRR_supervisor);
+    }
+
     m_btp->setGeoNet(m_geoNet);
     m_denService.setBTP(m_btp);
     m_caService.setBTP(m_btp);

@@ -171,16 +171,10 @@ private:
   denDataHeader m_header;
   denDataManagement m_management;
 
-  //bool m_situation_set=false;
-  //denDataSituation m_situation;
   DENDataItem<denDataSituation> m_situation;
 
-  //bool m_location_set=false;
-  //denDataLocation m_location;
   DENDataItem<denDataLocation> m_location;
 
-  //bool m_alacarte_set=false;
-  //denDataAlacarte m_alacarte;
   DENDataItem<denDataAlacarte> m_alacarte;
 };
 }

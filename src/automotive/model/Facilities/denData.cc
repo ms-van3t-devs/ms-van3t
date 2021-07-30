@@ -145,7 +145,6 @@ denData::setDenmActionID(DEN_ActionID_t actionID)
 int
 denData::setValidityDuration (long validityDuration_s)
 {
-  //if(m_management.validityDuration) free(m_management.validityDuration);
 
   if(validityDuration_s<0 || validityDuration_s>86400)
     {

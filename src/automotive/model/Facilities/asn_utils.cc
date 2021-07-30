@@ -25,6 +25,7 @@
 namespace ns3 {
   long compute_timestampIts (bool real_time)
   {
+
     if (real_time)
       {
         /* To get millisec since  2004-01-01T00:00:00:000Z */

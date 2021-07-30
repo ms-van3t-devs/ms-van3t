@@ -26,6 +26,7 @@
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 #include "ns3/network-module.h"
+#include "ns3/asn_utils.h"
 
 namespace ns3
 {
@@ -188,13 +189,15 @@ namespace ns3
   v2xEmulator::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
-
+    Simulator::Cancel (m_sendDenmEvent);
+    m_socket->ShutdownRecv ();
     uint64_t cam_sent;
     cam_sent = m_caService.terminateDissemination ();
     std::cout<<"Number of CAMs sent for vehicle " <<m_id<< ": "<<cam_sent<<std::endl;;
 
+
     m_denService.cleanup();
-    Simulator::Cancel (m_sendDenmEvent);
+
   }
 
   void
@@ -306,6 +309,7 @@ namespace ns3
   long
   v2xEmulator::compute_timestampIts ()
   {
+
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time
     auto since_epoch = time.time_since_epoch(); // get the duration since epoch

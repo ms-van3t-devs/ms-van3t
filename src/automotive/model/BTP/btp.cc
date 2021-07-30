@@ -53,7 +53,7 @@ namespace ns3
   btp::setSocketRx (Ptr<Socket> socket_rx)
   {
     socket_rx->SetRecvCallback (MakeCallback(&GeoNet::receiveGN, m_geonet));
-    m_geonet->addRxCallback(std::bind(&btp::receiveBTP,this,std::placeholders::_1,std::placeholders::_2));
+    m_geonet->addRxCallback(std::bind(static_cast<void(btp::*)(GNDataIndication_t,Address)>(&btp::receiveBTP),this,std::placeholders::_1,std::placeholders::_2));
   }
 
   void
@@ -131,6 +131,5 @@ namespace ns3
     else
       NS_LOG_ERROR("BTP : Unknown port");
   }
-
 
 }

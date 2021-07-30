@@ -39,6 +39,7 @@ def build(bld):
         'model/Facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
         'model/Applications/v2xEmulator.cc',
+        'model/Measurements/PRRSupervisor.cc',
 
         # BTP
         '/model/BTP/btp.cc',
@@ -302,6 +303,8 @@ def build(bld):
         'model/Facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',
         'model/Applications/v2xEmulator.h',
+        'model/Measurements/PRRSupervisor.h',
+        
 
         # BTP
         '/model/BTP/btp.h',

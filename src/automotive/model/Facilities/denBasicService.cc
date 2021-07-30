@@ -84,7 +84,8 @@ namespace ns3 {
 
     /* Management Container */
     asn1cpp::setField(denm->denm.management.actionID.originatingStationID,actionID.originatingStationID);
-    asn1cpp::setField(denm->denm.management.detectionTime,actionID.sequenceNumber);
+    asn1cpp::setField(denm->denm.management.actionID.sequenceNumber,actionID.sequenceNumber);
+    asn1cpp::setField(denm->denm.management.detectionTime,mgmt_data.detectionTime);
     asn1cpp::setField(denm->denm.management.eventPosition.latitude,mgmt_data.latitude);
     asn1cpp::setField(denm->denm.management.eventPosition.longitude,mgmt_data.longitude);
     asn1cpp::setField(denm->denm.management.eventPosition.positionConfidenceEllipse.semiMajorConfidence,mgmt_data.posConfidenceEllipse.semiMajorConfidence);
@@ -482,6 +483,8 @@ namespace ns3 {
     m_btp->addDENMRxCallback (std::bind(&DENBasicService::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
   }
 
+
+
   DENBasicService_error_t
   DENBasicService::appDENM_trigger(denData data, DEN_ActionID_t &actionid)
   {
@@ -679,9 +682,6 @@ namespace ns3 {
       }
 
     T_Repetition_Mutex.unlock();
-
-    //freeDENM(denm);
-
     return DENM_NO_ERROR;
   }
 
@@ -858,7 +858,6 @@ namespace ns3 {
 
     T_Repetition_Mutex.unlock();
 
-    //freeDENM(denm);
 
     return DENM_NO_ERROR;
   }
@@ -867,7 +866,6 @@ namespace ns3 {
   DENBasicService::receiveDENM(BTPDataIndication_t dataIndication,Address from)
   {
     Ptr<Packet> packet;
-    //DENM_t *decoded_denm;
     asn1cpp::Seq<DENM> decoded_denm;
     denData den_data;
     long validityDuration,termination;

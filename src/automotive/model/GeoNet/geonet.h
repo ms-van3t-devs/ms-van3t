@@ -21,6 +21,7 @@
 #include "ns3/gn-address.h"
 #include "ns3/longpositionvector.h"
 #include "ns3/btpdatarequest.h"
+#include "ns3/PRRSupervisor.h"
 
 extern "C" {
   #include "ns3/CAM.h"
@@ -75,6 +76,7 @@ namespace ns3
       void addRxCallback(std::function<void(GNDataIndication_t,Address)> rx_callback) {m_ReceiveCallback=rx_callback;}
       GNDataConfirm_t sendGN(GNDataRequest_t dataRequest);
       void receiveGN(Ptr<Socket> socket);
+      void setPRRSupervisor(Ptr<PRRSupervisor> PRRSupervisor_ptr) {m_PRRSupervisor_ptr=PRRSupervisor_ptr;}
       void cleanup();
 
 
@@ -117,6 +119,7 @@ namespace ns3
       Ptr<Socket> m_socket_tx;
 
       std::function<void(GNDataIndication_t,Address)> m_ReceiveCallback;
+
 
       VDP* m_vdp;
       StationID_t m_station_id;
@@ -162,6 +165,8 @@ namespace ns3
       uint16_t m_FnCbfPacketBufferSize = 256;
       uint16_t m_GnDefaultTrafficClass = 0;
       bool m_RSU_epv_set = false;
+
+      Ptr<PRRSupervisor> m_PRRSupervisor_ptr = nullptr;
 
   };
 }

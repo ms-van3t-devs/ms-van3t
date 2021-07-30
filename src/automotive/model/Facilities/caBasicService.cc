@@ -189,10 +189,10 @@ namespace ns3
     /** Decoding **/
     decoded_cam = asn1cpp::uper::decode(packetContent, CAM);
 
-      if(bool(decoded_cam)==false) {
-          NS_LOG_ERROR("Warning: unable to decode a received CAM.");
-          return;
-        }
+    if(bool(decoded_cam)==false) {
+        NS_LOG_ERROR("Warning: unable to decode a received CAM.");
+        return;
+      }
 
     m_CAReceiveCallback(decoded_cam,from);
   }

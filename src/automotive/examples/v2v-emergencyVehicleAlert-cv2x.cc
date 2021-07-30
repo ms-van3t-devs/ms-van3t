@@ -28,6 +28,8 @@
 #include "ns3/sumo_xml_parser.h"
 #include <ns3/node-list.h>
 #include "ns3/vehicle-visualizer-module.h"
+#include "ns3/PRRSupervisor.h"
+#include <unistd.h>
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-cv2x");
@@ -55,6 +57,8 @@ main (int argc, char *argv[])
   bool sumo_gui = true;
   double sumo_updates = 0.01;
   std::string csv_name;
+  std::string csv_name_cumulative;
+  std::string sumo_netstate_file_name;
   bool vehicle_vis = false;
 
   /*** 0.b LENA + V2X Options ***/
@@ -71,6 +75,8 @@ main (int argc, char *argv[])
   uint16_t t1 = 4;                        // T1 value of selection window
   uint16_t t2 = 100;                      // T2 value of selection window
   uint16_t slBandwidth;                   // Sidelink bandwidth
+  double m_baseline_prr = 150.0;
+  bool m_prr_sup = false;
 
   double simTime = 100;
 
@@ -90,6 +96,9 @@ main (int argc, char *argv[])
   cmd.AddValue ("sumo-config", "Location and name of SUMO configuration file", sumo_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
   cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
+  cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
+  cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
+
 
   /* Cmd Line option for C-V2X */
   cmd.AddValue ("tx-power", "UEs transmission power [dBm]", ueTxPower);
@@ -102,6 +111,8 @@ main (int argc, char *argv[])
   cmd.AddValue ("mcs", "Modulation and Coding Scheme", mcs);
   cmd.AddValue ("pRsvp", "Resource Reservation Interval", pRsvp);
   cmd.AddValue ("probResourceKeep", "Probability for selecting previous resource again", probResourceKeep);
+  cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
+  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
 
   cmd.AddValue("sim-time", "Total duration of the simulation [s])", simTime);
 
@@ -356,7 +367,15 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
   sumoClient->SetAttribute ("SumoStepLog", BooleanValue (false));
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
-  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
+
+  std::string sumo_additional_options = "--verbose true";
+
+  if(sumo_netstate_file_name!="")
+  {
+    sumo_additional_options += " --netstate-dump " + sumo_netstate_file_name;
+  }
+
+  sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue (sumo_additional_options));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
   /* Create and setup the web-based vehicle visualizer of ms-van3t */
@@ -369,6 +388,13 @@ main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
+  Ptr<PRRSupervisor> prrSup = NULL;
+  PRRSupervisor prrSupObj(m_baseline_prr);
+  if(m_prr_sup)
+    {
+      prrSup = &prrSupObj;
+      prrSup->setTraCIClient(sumoClient);
+    }
   /*** 7. Setup interface and application for dynamic nodes ***/
   emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;
   EmergencyVehicleAlertHelper.SetAttribute ("Client", PointerValue (sumoClient));
@@ -376,6 +402,7 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("PrintSummary", BooleanValue (true));
   EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("cv2x"));
+  EmergencyVehicleAlertHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
   /* callback function for node creation */
   int i=0;
@@ -424,6 +451,31 @@ main (int argc, char *argv[])
 
   Simulator::Run ();
   Simulator::Destroy ();
+
+  if(m_prr_sup)
+    {
+      if(csv_name_cumulative!="")
+      {
+        std::ofstream csv_cum_ofstream;
+        std::string full_csv_name = csv_name_cumulative + ".csv";
+
+        if(access(full_csv_name.c_str(),F_OK)!=-1)
+        {
+          // The file already exists
+          csv_cum_ofstream.open(full_csv_name,std::ofstream::out | std::ofstream::app);
+        }
+        else
+        {
+          // The file does not exist yet
+          csv_cum_ofstream.open(full_csv_name);
+          csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
+        }
+
+        csv_cum_ofstream << ueTxPower << "," << prrSup->getAveragePRR () << "," << prrSup->getAverageLatency () << std::endl;
+      }
+      std::cout << "Average PRR: " << prrSup->getAveragePRR () << std::endl;
+      std::cout << "Average latency (ms): " << prrSup->getAverageLatency () << std::endl;
+    }
 
   return 0;
 }

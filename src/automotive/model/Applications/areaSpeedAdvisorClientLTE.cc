@@ -66,7 +66,17 @@ namespace ns3
             "TraCI client for SUMO",
             PointerValue (0),
             MakePointerAccessor (&areaSpeedAdvisorClientLTE::m_client),
-            MakePointerChecker<TraciClient> ());
+            MakePointerChecker<TraciClient> ())
+        .AddAttribute ("PRRSupervisor",
+            "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
+            PointerValue (0),
+            MakePointerAccessor (&areaSpeedAdvisorClientLTE::m_PRR_supervisor),
+            MakePointerChecker<PRRSupervisor> ())
+        .AddAttribute ("SendCAM",
+            "To enable/disable the transmission of CAM messages",
+            BooleanValue(true),
+            MakeBooleanAccessor (&areaSpeedAdvisorClientLTE::m_send_cam),
+            MakeBooleanChecker ());
         return tid;
   }
 
@@ -127,6 +137,12 @@ namespace ns3
     // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
+
+    if(m_PRR_supervisor!=nullptr)
+    {
+      m_geoNet->setPRRSupervisor(m_PRR_supervisor);
+    }
+
     m_btp->setGeoNet(m_geoNet);
     m_denService.setBTP(m_btp);
     m_caService.setBTP(m_btp);
@@ -156,9 +172,12 @@ namespace ns3
     }
 
     /* Schedule CAM dissemination */
-    std::srand(Simulator::Now().GetNanoSeconds ());
-    double desync = ((double)std::rand()/RAND_MAX);
-    m_caService.startCamDissemination(desync);
+    if(m_send_cam == true)
+    {
+      std::srand(Simulator::Now().GetNanoSeconds ());
+      double desync = ((double)std::rand()/RAND_MAX);
+      m_caService.startCamDissemination(desync);
+    }
   }
 
   void
