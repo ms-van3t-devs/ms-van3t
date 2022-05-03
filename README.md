@@ -4,7 +4,7 @@
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
 
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0 and ns-3 v3.33 on Ubuntu 18.04 and 20.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0 and ns-3 v3.33 on Ubuntu 18.04 and 20.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
@@ -14,7 +14,7 @@ To build the project:
     	`sudo add-apt-repository ppa:sumo/stable`  
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
-    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.8.0** )
+    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.12.0** )
     * Test sumo by opening a terminal and running "sumo-gui".
 	
     * **Possible problems**:
@@ -42,6 +42,8 @@ or
 This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
 * Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time
+
+* **Important**: If you are compiling ms-van3t on Ubuntu 22.04 LTS or later, you need to specify, when calling `./waf configure`, also the `--disable-werror` flag
 
 * Build ns3:
 `./waf build`
