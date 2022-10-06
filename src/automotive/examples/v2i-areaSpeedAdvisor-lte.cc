@@ -365,10 +365,10 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << "," << prrSup->getAveragePRR () << "," << prrSup->getAverageLatency () << std::endl;
+        csv_cum_ofstream << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency () << std::endl;
+      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
     }
 
   return 0;

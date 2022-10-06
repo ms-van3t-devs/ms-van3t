@@ -194,7 +194,10 @@ main (int argc, char *argv[])
   wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
   NqosWaveMacHelper wifi80211pMac = NqosWaveMacHelper::Default ();
   Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
-  wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
+  wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+                                      "DataMode", StringValue (datarate_config),
+                                      "ControlMode", StringValue (datarate_config),
+                                      "NonUnicastMode",StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
   //wifi80211p.EnableLogComponents ();
@@ -344,10 +347,10 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR () << "," << prrSup->getAverageLatency () << std::endl;
+        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency () << std::endl;
+      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
     }
 
   return 0;

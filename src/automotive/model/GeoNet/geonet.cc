@@ -368,7 +368,7 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
 
       delete[] buffer;
     }
@@ -437,7 +437,7 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
 
       delete[] buffer;
     }
@@ -485,7 +485,7 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon);
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
 
       delete[] buffer;
     }

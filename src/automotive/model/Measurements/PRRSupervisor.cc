@@ -74,7 +74,7 @@ namespace ns3 {
   }
 
   void
-  PRRSupervisor::signalSentPacket(std::string buf,double lat,double lon)
+  PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t vehicleID)
   {
     EventId computePRR_id;
 
@@ -101,6 +101,8 @@ namespace ns3 {
     eventList.push_back (computePRR_id);
 
     m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();
+
+    m_vehicleid_map[buf] = vehicleID;
   }
 
   void
@@ -127,10 +129,23 @@ namespace ns3 {
     // Compute latency in ms
     if(m_latency_map.count(buf)>0)
     {
+        uint64_t senderID = m_vehicleid_map[buf];
+
         curr_latency_ms = static_cast<double>(Simulator::Now ().GetNanoSeconds () - m_latency_map[buf])/1000000.0;
         m_count_latency++;
 
         m_avg_latency_ms += (curr_latency_ms-m_avg_latency_ms)/m_count_latency;
+
+        if(m_count_latency_per_veh.count(senderID)<=0) {
+            m_count_latency_per_veh[senderID]=0;
+        }
+
+        if(m_avg_latency_ms_per_veh.count(senderID)<=0) {
+            m_avg_latency_ms_per_veh[senderID]=0;
+        }
+
+        m_count_latency_per_veh[senderID]++;
+        m_avg_latency_ms_per_veh[senderID] += (curr_latency_ms - m_avg_latency_ms_per_veh[senderID])/m_count_latency_per_veh[senderID];
     }
   }
 
@@ -141,11 +156,25 @@ namespace ns3 {
 
     if(m_packetbuff_map[buf].vehList.size()>1)
     {
+      uint64_t senderID = m_vehicleid_map[buf];
+
       PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].vehList.size()-1.0);
       m_count++;
       m_avg_PRR += (PRR-m_avg_PRR)/m_count;
 
+      if(m_count_per_veh.count(senderID)<=0) {
+          m_count_per_veh[senderID]=0;
+      }
+
+      if(m_avg_PRR_per_veh.count(senderID)<=0) {
+          m_avg_PRR_per_veh[senderID]=0;
+      }
+
+      m_count_per_veh[senderID]++;
+      m_avg_PRR_per_veh[senderID] += (PRR-m_avg_PRR_per_veh[senderID])/m_count_per_veh[senderID];
+
       m_packetbuff_map.erase(buf);
+      m_vehicleid_map.erase(buf);
     }
 
     // Some time has passed -> remove the packet from the latency map too
