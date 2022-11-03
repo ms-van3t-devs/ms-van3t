@@ -58,6 +58,8 @@ namespace ns3 {
 
     m_RSU_epv_set=false;
     m_PRRSupervisor_ptr = NULL;
+
+    m_PRRsupervisor_beacons = true;
   }
 
   void
@@ -479,7 +481,7 @@ namespace ns3 {
       return UNSPECIFIED_ERROR;
     }
 
-    if(m_PRRSupervisor_ptr!=nullptr)
+    if(m_PRRSupervisor_ptr!=nullptr && m_PRRsupervisor_beacons==true)
     {
       uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
 
@@ -633,15 +635,15 @@ namespace ns3 {
 
     dataIndication.data = socket->RecvFrom (from);
 
+    uint8_t *buffer;
+    uint32_t dataSize;
     if(m_PRRSupervisor_ptr!=nullptr)
     {
-      uint8_t *buffer = new uint8_t[dataIndication.data->GetSize ()];
+      buffer = new uint8_t[dataIndication.data->GetSize ()];
 
-      dataIndication.data->CopyData (buffer,dataIndication.data->GetSize ());
+      dataSize = dataIndication.data->GetSize ();
 
-      m_PRRSupervisor_ptr->signalReceivedPacket (PRRSupervisor::bufToString (buffer,dataIndication.data->GetSize ()),m_station_id);
-
-      delete[] buffer;
+      dataIndication.data->CopyData (buffer,dataSize);
     }
 
     dataIndication.data->RemoveHeader (basicHeader, 4);
@@ -676,6 +678,16 @@ namespace ns3 {
     // 3) check HT field
     dataIndication.GNType = commonHeader.GetHeaderType();
     dataIndication.lenght = commonHeader.GetPayload ();
+
+    if(m_PRRSupervisor_ptr!=nullptr)
+    {
+        if(dataIndication.GNType!=BEACON || m_PRRsupervisor_beacons==true)
+        {
+            m_PRRSupervisor_ptr->signalReceivedPacket (PRRSupervisor::bufToString (buffer,dataSize),m_station_id);
+        }
+
+        delete[] buffer;
+    }
 
     switch(dataIndication.GNType)
     {

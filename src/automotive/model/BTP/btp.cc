@@ -40,6 +40,10 @@ namespace ns3
   btp::btp()
   {
     m_geonet = NULL;
+
+    m_cam_ReceiveCallback = nullptr;
+    m_denm_ReceiveCallback = nullptr;
+    m_ivim_ReceiveCallback = nullptr;
   }
 
   void
@@ -122,14 +126,21 @@ namespace ns3
     btpDataIndication.data = dataIndication.data;
     btpDataIndication.lenght = dataIndication.data->GetSize ();
 
-    if(btpDataIndication.destPort == CA_PORT)
-      m_cam_ReceiveCallback(btpDataIndication,address);
-    else if(btpDataIndication.destPort == DEN_PORT)
-      m_denm_ReceiveCallback(btpDataIndication,address);
-    else if(btpDataIndication.destPort == IVIM_PORT)
-      m_ivim_ReceiveCallback(btpDataIndication,address);
-    else
+    if(btpDataIndication.destPort == CA_PORT) {
+      if(m_cam_ReceiveCallback!=nullptr) {
+        m_cam_ReceiveCallback(btpDataIndication,address);
+      }
+    } else if(btpDataIndication.destPort == DEN_PORT) {
+      if(m_denm_ReceiveCallback!=nullptr) {
+        m_denm_ReceiveCallback(btpDataIndication,address);
+      }
+    } else if(btpDataIndication.destPort == IVIM_PORT) {
+      if(m_ivim_ReceiveCallback!=nullptr) {
+        m_ivim_ReceiveCallback(btpDataIndication,address);
+      }
+    } else {
       NS_LOG_ERROR("BTP : Unknown port");
+    }
   }
 
 }

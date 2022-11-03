@@ -78,6 +78,8 @@ namespace ns3
       void receiveGN(Ptr<Socket> socket);
       void setPRRSupervisor(Ptr<PRRSupervisor> PRRSupervisor_ptr) {m_PRRSupervisor_ptr=PRRSupervisor_ptr;}
       void cleanup();
+      void disablePRRsupervisorForBeacons() {m_PRRsupervisor_beacons=false;}
+      void enablePRRsupervisorForBeacons() {m_PRRsupervisor_beacons=true;}
 
 
   private:
@@ -167,6 +169,7 @@ namespace ns3
       bool m_RSU_epv_set = false;
 
       Ptr<PRRSupervisor> m_PRRSupervisor_ptr = nullptr;
+      bool m_PRRsupervisor_beacons = true;
 
   };
 }

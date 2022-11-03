@@ -27,10 +27,11 @@ namespace ns3
     CAM_CANNOT_SEND=5
   } CABasicService_error_t;
 
-  class CABasicService
+  class CABasicService: public Object
   {
   public:
     CABasicService();
+    ~CABasicService();
     CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp,bool real_time,bool is_vehicle);
     CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp,bool real_time,bool is_vehicle,Ptr<Socket> socket_tx);
 

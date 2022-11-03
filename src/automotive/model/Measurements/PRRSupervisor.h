@@ -32,6 +32,12 @@ namespace ns3 {
 
       double getAveragePRR_vehicle(uint64_t vehicleID) {return m_avg_PRR_per_veh[vehicleID];}
       double getAverageLatency_vehicle(uint64_t vehicleID) {return m_avg_latency_ms_per_veh[vehicleID];}
+
+      void enableVerboseOnStdout() {m_verbose_stdout=true;}
+      void disableVerboseOnStdout() {m_verbose_stdout=false;}
+
+      void addExcludedID(uint64_t m_vehid) {m_excluded_vehID_list.insert(m_vehid); m_excluded_vehID_enabled=true;}
+      void clearExcludedIDs() {m_excluded_vehID_list.clear(); m_excluded_vehID_enabled=false;}
     private:
       void computePRR(std::string buf);
 
@@ -49,7 +55,12 @@ namespace ns3 {
       Ptr<TraciClient> m_traci_ptr = nullptr;
       double m_baseline_m = 150.0;
 
+      bool m_verbose_stdout = false;
+
       std::list<EventId> eventList;
+
+      std::set<uint64_t> m_excluded_vehID_list;
+      bool m_excluded_vehID_enabled = false;
   };
 }
 

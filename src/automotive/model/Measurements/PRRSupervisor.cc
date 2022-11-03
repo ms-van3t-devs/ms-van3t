@@ -91,9 +91,11 @@ namespace ns3 {
       libsumo::TraCIPosition pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (*it);
       pos=m_traci_ptr->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
 
-      if(PRRSupervisor_haversineDist(lat,lon,pos.y,pos.x)<=m_baseline_m)
-      {
-          m_packetbuff_map[buf].vehList.push_back(stationID);
+      if(m_excluded_vehID_enabled==false || (m_excluded_vehID_list.find(stationID)==m_excluded_vehID_list.end())) {
+        if(PRRSupervisor_haversineDist(lat,lon,pos.y,pos.x)<=m_baseline_m)
+        {
+            m_packetbuff_map[buf].vehList.push_back(stationID);
+        }
       }
     }
 
@@ -146,6 +148,10 @@ namespace ns3 {
 
         m_count_latency_per_veh[senderID]++;
         m_avg_latency_ms_per_veh[senderID] += (curr_latency_ms - m_avg_latency_ms_per_veh[senderID])/m_count_latency_per_veh[senderID];
+
+        if(m_verbose_stdout == true) {
+          std::cout << "|Latency| ID: " << vehicleID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
+        }
     }
   }
 
@@ -161,6 +167,10 @@ namespace ns3 {
       PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].vehList.size()-1.0);
       m_count++;
       m_avg_PRR += (PRR-m_avg_PRR)/m_count;
+
+      if(m_verbose_stdout == true) {
+        std::cout << "|PRR| Current: " << PRR << " - Average: " << m_avg_PRR << std::endl;
+      }
 
       if(m_count_per_veh.count(senderID)<=0) {
           m_count_per_veh[senderID]=0;

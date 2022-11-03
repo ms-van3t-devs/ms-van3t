@@ -35,6 +35,10 @@ namespace ns3
 {
   NS_LOG_COMPONENT_DEFINE("CABasicService");
 
+  CABasicService::~CABasicService() {
+    NS_LOG_INFO("CABasicService object destroyed.");
+  }
+
   CABasicService::CABasicService()
   {
     m_station_id = ULONG_MAX;
@@ -70,6 +74,8 @@ namespace ns3
     // All the optional containers are disabled by default
     m_lowFreqContainerEnabled = false;
     m_specialVehContainerEnabled = false;
+
+    m_CAReceiveCallback = nullptr;
 
     m_refPositions.clear ();
   }
@@ -194,7 +200,9 @@ namespace ns3
         return;
       }
 
-    m_CAReceiveCallback(decoded_cam,from);
+    if(m_CAReceiveCallback!=nullptr) {
+      m_CAReceiveCallback(decoded_cam,from);
+    }
   }
 
   void
