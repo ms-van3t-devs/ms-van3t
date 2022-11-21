@@ -2921,6 +2921,29 @@ TraCIAPI::VehicleScope::setColor(const std::string& vehicleID, const libsumo::Tr
 }
 
 void
+TraCIAPI::VehicleScope::highlight(const std::string& vehicleID, const libsumo::TraCIColor& c, double size, unsigned int alphaMax, double duration, unsigned int typeID) const {
+    tcpip::Storage content;
+    content.writeUnsignedByte(TYPE_COMPOUND);
+    content.writeInt(5);
+    content.writeUnsignedByte(TYPE_COLOR);
+    content.writeUnsignedByte(c.r);
+    content.writeUnsignedByte(c.g);
+    content.writeUnsignedByte(c.b);
+    content.writeUnsignedByte(c.a);
+    content.writeUnsignedByte(TYPE_DOUBLE);
+    content.writeDouble(size);
+    content.writeUnsignedByte(TYPE_UBYTE);
+    content.writeUnsignedByte(alphaMax);
+    content.writeUnsignedByte(TYPE_DOUBLE);
+    content.writeDouble(duration);
+    content.writeUnsignedByte(TYPE_UBYTE);
+    content.writeUnsignedByte(typeID);
+    myParent.send_commandSetValue(CMD_SET_VEHICLE_VARIABLE, VAR_HIGHLIGHT, vehicleID, content);
+    tcpip::Storage inMsg;
+    myParent.check_resultState(inMsg, CMD_SET_VEHICLE_VARIABLE);
+}
+
+void
 TraCIAPI::VehicleScope::setLine(const std::string& vehicleID, const std::string& line) const {
     tcpip::Storage content;
     content.writeUnsignedByte(TYPE_STRING);

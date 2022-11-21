@@ -152,3 +152,8 @@ gitignorer.sh
 # Student applications
 /src/automotive/examples/sumo_files_v2v_map_student/
 /src/automotive/examples/v2v-80211p-student-application.cc
+/src/automotive/examples/sumo_files_v2v_city_map_student/
+/src/automotive/examples/v2v-80211p-student-application-app1.cc
+/src/automotive/examples/v2v-80211p-student-application-app2.cc
+/src/automotive/examples/v2v-80211p-student-application-app3.cc
+/src/automotive/examples/v2v-80211p-student-application-app4.cc

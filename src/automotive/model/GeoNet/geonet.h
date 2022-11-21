@@ -81,6 +81,9 @@ namespace ns3
       void disablePRRsupervisorForBeacons() {m_PRRsupervisor_beacons=false;}
       void enablePRRsupervisorForBeacons() {m_PRRsupervisor_beacons=true;}
 
+      // This static method creates a new GeoNetworking socket, starting from the ns-3 PacketSocket and properly binding/connecting it
+      // It requires as input a pointer to the node to which the socket should be bound
+      static Ptr<Socket> createGNPacketSocket(Ptr<Node> node_ptr);
 
   private:
       void LocTE_timeout(GNAddress entry_address);

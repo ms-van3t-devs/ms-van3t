@@ -928,4 +928,27 @@ namespace ns3 {
       m_GNLocT.erase(entry_address);
       m_LocT_Mutex.unlock ();
   }
+
+  Ptr<Socket>
+  GeoNet::createGNPacketSocket(Ptr<Node> node_ptr)
+  {
+      Ptr<Socket> gn_sock;
+      TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
+
+      if(node_ptr==nullptr)
+      {
+        NS_FATAL_ERROR ("Error. Called createGNPacketSocket() with a null Ptr<Node>!");
+      }
+
+      gn_sock = Socket::CreateSocket (node_ptr, tid);
+      PacketSocketAddress local = getGNAddress(node_ptr->GetDevice(0)->GetIfIndex (), node_ptr->GetDevice(0)->GetAddress());
+      if (gn_sock->Bind (local) == -1)
+      {
+        NS_FATAL_ERROR ("Failed to create GeoNet Packet Socket. Cannot Bind().");
+      }
+      PacketSocketAddress remote = getGNAddress(node_ptr->GetDevice(0)->GetIfIndex(),node_ptr->GetDevice(0)->GetBroadcast());
+      gn_sock->Connect (remote);
+
+      return gn_sock;
+  }
 }

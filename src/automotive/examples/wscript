@@ -19,3 +19,17 @@ def build(bld):
     obj = bld.create_ns3_program('v2v-80211p-gps-tc-example', ['automotive', 'wave', 'gps-tc'])
     obj.source = 'v2v-80211p-gps-tc-example.cc'
 
+    obj = bld.create_ns3_program('v2v-80211p-student-application', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-student-application.cc'
+
+    obj = bld.create_ns3_program('v2v-80211p-student-application-app1', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-student-application-app1.cc'
+
+    obj = bld.create_ns3_program('v2v-80211p-student-application-app2', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-student-application-app2.cc'
+
+    obj = bld.create_ns3_program('v2v-80211p-student-application-app3', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-student-application-app3.cc'
+
+    obj = bld.create_ns3_program('v2v-80211p-student-application-app4', ['automotive', 'wave', 'gps-tc'])
+    obj.source = 'v2v-80211p-student-application-app4.cc'

@@ -620,6 +620,9 @@
 // max. comfortable deceleration (get: vehicles, vehicle types)
 #define VAR_DECEL 0x47
 
+// highlight
+#define VAR_HIGHLIGHT 0x6c
+
 // max. (physically possible) deceleration (get: vehicles, vehicle types)
 #define VAR_EMERGENCY_DECEL 0x7b
 

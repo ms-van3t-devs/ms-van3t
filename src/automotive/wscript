@@ -38,6 +38,8 @@ def build(bld):
         'model/Facilities/vdpGPSTraceClient.cc',
         'model/Facilities/caBasicService.cc',
         'model/utilities/sumo_xml_parser.cc',
+        'model/Facilities/BSMap.cc',
+        'model/Facilities/BSContainer.cc',
         'model/Applications/v2xEmulator.cc',
         'model/Measurements/PRRSupervisor.cc',
 
@@ -302,6 +304,8 @@ def build(bld):
         'model/Facilities/vdp.h',
         'model/Facilities/caBasicService.h',
         'model/utilities/sumo_xml_parser.h',
+        'model/Facilities/BSMap.h',
+        'model/Facilities/BSContainer.h',
         'model/Applications/v2xEmulator.h',
         'model/Measurements/PRRSupervisor.h',
         

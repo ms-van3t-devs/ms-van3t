@@ -40,6 +40,9 @@ namespace ns3 {
     m_socket_tx = NULL;
     m_real_time = false;
     m_btp = NULL;
+
+    m_DENReceiveCallback = nullptr;
+    m_DENReceiveCallbackExtended = nullptr;
   }
 
   bool
@@ -1021,7 +1024,11 @@ namespace ns3 {
     if(alacarte_ok)
         DENBasicService::fillDenDataAlacarte (alacarte, den_data);
 
-    m_DENReceiveCallback(den_data,from);
+    if(m_DENReceiveCallback!=nullptr) {
+      m_DENReceiveCallback(den_data,from);
+    } else if(m_DENReceiveCallbackExtended!=nullptr) {
+      m_DENReceiveCallbackExtended(den_data,from,m_station_id,m_stationtype);
+    }
   }
 
   void

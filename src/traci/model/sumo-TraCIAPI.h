@@ -777,6 +777,7 @@ public:
         void setVia(const std::string& vehicleID, const std::vector<std::string>& via) const;
         void setSignals(const std::string& vehicleID, int signals) const;
         void setRoutingMode(const std::string& vehicleID, int routingMode) const;
+        void highlight(const std::string& vehicleID, const libsumo::TraCIColor& c, double size, unsigned int alphaMax, double duration, unsigned int typeID = 0) const;
         /// @}
 
         /// @name vehicle type attribute changing shortcuts

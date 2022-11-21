@@ -36,13 +36,15 @@ namespace ns3 {
     DENM_TX_SOCKET_NOT_SET=12
   } DENBasicService_error_t;
 
-  class DENBasicService
+  class DENBasicService: public Object
   {
     public:
     DENBasicService();
     DENBasicService(unsigned long fixed_stationid,long fixed_stationtype,Ptr<Socket> socket_tx);
 
+    // Warning: if both the standard and extended callbacks are set, only the standard callback will be called
     void addDENRxCallback(std::function<void(denData,Address)> rx_callback) {m_DENReceiveCallback=rx_callback;}
+    void addDENRxCallbackExtended(std::function<void(denData,Address,unsigned long,long)> rx_callback) {m_DENReceiveCallbackExtended=rx_callback;}
 
     DENBasicService_error_t appDENM_trigger(denData data, DEN_ActionID_t &actionid);
     DENBasicService_error_t appDENM_update(denData data, const DEN_ActionID_t actionid);
@@ -82,6 +84,7 @@ namespace ns3 {
     template <typename T> static int asn_maybe_assign_optional_data(T *data, T **asn_structure,std::queue<void *> &ptr_queue);
 
     std::function<void(denData,Address)> m_DENReceiveCallback;
+    std::function<void(denData,Address,unsigned long,long)> m_DENReceiveCallbackExtended;
 
     uint16_t m_port;
     bool m_real_time;
