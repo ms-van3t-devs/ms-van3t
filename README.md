@@ -41,16 +41,16 @@ or
 
 This script will download ns-3.33 and install this framework. The folder `ns-3.33` will remain linked to this GitHub repository (not to the vanilla ns-3.33 one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
     
-* Configure `waf` to build the framework with `<ns3-folder>./waf configure --build-profile=optimized --enable-examples --enable-tests (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time
+* Configure `ns3` to build the framework with `<ns3-folder>./ns3 configure --build-profile=optimized --enable-examples --enable-tests --disable-python(add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time
 
-* **Important**: If you are compiling ms-van3t on Ubuntu 22.04 LTS or later, you need to specify, when calling `./waf configure`, also the `--disable-werror` flag
+* **Important**: If you are compiling ms-van3t on Ubuntu 22.04 LTS or later, you need to specify, when calling `./ns3 configure`, also the `--disable-werror` flag
 
 * Build ns3:
-`./waf build`
+`./ns3 build`
 
 **Important**
 
-`src/automotive/` contains all the application related files and all the source code implementing the ETSI ITS-G5 stack for vehicular communications. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application. 
+`src/automotive/` contains all the application related files and all the source code implementing the ETSI ITS-G5 stack for vehicular communications. Inside `sumo_files_v2v_map` you can find the SUMO map and trace for the V2V sample application, while inside `sumo_files_v2i_map` you can find the SUMO map and trace for the V2I sample application. Similarly you can find the SUMO map and trace for the Traffic Manager sample application inside `sumo_files_v2i_TM_map` and the ones for the Emergency Vehicle Warning inside `sumo_files_v2i_EVW_map`
 
 `src/traci/` and `src/traci-applications/` contain instead all the logic to link ns-3 and SUMO. 
 
@@ -83,8 +83,8 @@ Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlight
 - LTE, for V2N communications (sample program name: `v2i-areaSpeedAdvisor-lte`)
 
 To run the sample V2I program you can use:
-`./waf --run "v2i-areaSpeedAdvisor-lte"` or
-`./waf --run "v2i-areaSpeedAdvisor-80211p"`
+`./ns3 run "v2i-areaSpeedAdvisor-lte"` or
+`./ns3 run "v2i-areaSpeedAdvisor-80211p"`
 
 *  Nodes are created in the ns3 simulation as vehicles enter the SUMO simulation
 *  A full LTE or 802.11p stack is implemented at lower layers (depending on which example is run)
@@ -142,8 +142,8 @@ If using the LTE version in this very simple toy case, it is possible to connect
 
 To run the program:
 
-`./waf --run "v2v-emergencyVehicleAlert-cv2x"` or
-`./waf --run "v2v-emergencyVehicleAlert-80211p"`
+`./ns3 run "v2v-emergencyVehicleAlert-cv2x"` or
+`./ns3 run "v2v-emergencyVehicleAlert-80211p"`
 
 *  Nodes are created in the ns3 simulation as vehicle enters the SUMO simulation
 *  A full C-V2X or 802.11p stack is implemented at lower layers
@@ -194,7 +194,7 @@ More in details, this application emulates N vehicles, each with its own CA and 
 This should enable, in the future, hardware-in-the-loop testing and evaluation.
 
 You can run it with:
-`./waf --run "v2x-emulator --interface=<interface name>"`
+`./ns3 run "v2x-emulator --interface=<interface name>"`
 
 Where `<interface name>` is the name of the physical interface, on your PC, where CAMs will be sent.
 
@@ -206,7 +206,7 @@ You can put an interface in promiscuous mode with:
 The promiscuous mode can then be disabled with:
 `sudo ip link set <interface name> promisc off`
 
-`sudo` may be needed to use the underlying ns-3 *FdNetDevice*: if you get a "permission denied" error, try to run again the `emu-v2x` application with `sudo`.
+`sudo` may be needed to use the underlying ns-3 *FdNetDevice*: if you get a "permission denied" error, try adding `--enable-sudo` when doing `./ns3 configure` and then running without `sudo` (ns3 will ask for your password if needed).  
 
 The logic of the application is contained inside model/Applications/v2x-helper.c/.h
 
@@ -224,12 +224,12 @@ The user can also specify, however, a _UDP mode_, enabling the transmission of m
 
 **Screenshots**
 
-The following screenshot shows a Wireshark capture of the messages sent by the emulator application, when operating in normal mode and selecting the `ens33` interface (e.g. `./waf --run "v2x-emulator --interface=ens33"`)
+The following screenshot shows a Wireshark capture of the messages sent by the emulator application, when operating in normal mode and selecting the `ens33` interface (e.g. `./ns3 run "v2x-emulator --interface=ens33"`)
 
 ![](img/v2x-emulator-normal-mode.png)
 
 
-The following screenshot shows a Wireshark capture of the messages sent by the emulator application, when operating in UDP mode, targeting a UDP server at 192.168.1.124/24, port 20000, and transmitting over the `ens33` interface (e.g. `./waf --run "v2x-emulator --udp=192.168.1.124:20000 --interface=ens33 netmask=255.255.255.0 gateway=192.168.1.1"`)
+The following screenshot shows a Wireshark capture of the messages sent by the emulator application, when operating in UDP mode, targeting a UDP server at 192.168.1.124/24, port 20000, and transmitting over the `ens33` interface (e.g. `./ns3 run "v2x-emulator --udp=192.168.1.124:20000 --interface=ens33 netmask=255.255.255.0 gateway=192.168.1.1"`)
 
 ![](img/v2x-emulator-udp-mode.png)
 

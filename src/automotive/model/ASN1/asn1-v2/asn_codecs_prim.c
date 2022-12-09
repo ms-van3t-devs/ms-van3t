@@ -4,7 +4,7 @@
  */
 #include "asn_internal.h"
 #include "asn_codecs_prim.h"
-#include "errno.h"
+#include <errno.h>
 
 /*
  * Decode an always-primitive type.

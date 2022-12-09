@@ -1,0 +1,956 @@
+ASN_MODULE_SRCS=	\
+	IVIM.c	\
+	CS5.c	\
+	CountryCode.c	\
+	AVIAEIIssuerIdentifier.c	\
+	GddStructure.c	\
+	GddAttributes.c	\
+	GddAttribute.c	\
+	InternationalSign-applicablePeriod.c	\
+	InternationalSign-exemptedApplicablePeriod.c	\
+	InternationalSign-directionalFlowOfLane.c	\
+	InternationalSign-applicableVehicleDimensions.c	\
+	InternationalSign-speedLimits.c	\
+	InternationalSign-rateOfIncline.c	\
+	InternationalSign-distanceBetweenVehicles.c	\
+	InternationalSign-destinationInformation.c	\
+	InternationalSign-section.c	\
+	InternationalSign-numberOfLane.c	\
+	Code-Units.c	\
+	RepeatingPeriodDayTypes.c	\
+	ActualNumberOfPassengers.c	\
+	AxleWeightLimits.c	\
+	AddRq.c	\
+	ChannelId.c	\
+	ChannelRq.c	\
+	ChannelRs.c	\
+	CopyRq.c	\
+	CreditRq.c	\
+	CreditRs.c	\
+	DebitRq.c	\
+	DebitRs.c	\
+	GetInstanceRq.c	\
+	GetInstanceRs.c	\
+	GetStampedRq.c	\
+	GetStampedRs.c	\
+	SetInstanceRq.c	\
+	SetMMIRq.c	\
+	SetStampedRq.c	\
+	SubRq.c	\
+	CO2EmissionValue.c	\
+	ContractSerialNumber.c	\
+	ContractAuthenticator.c	\
+	ContractValidity.c	\
+	ContractVehicle.c	\
+	DateCompact.c	\
+	DescriptiveCharacteristics.c	\
+	DieselEmissionValues.c	\
+	EFC-ContextMark.c	\
+	EnvironmentalCharacteristics.c	\
+	EuroValue.c	\
+	CopValue.c	\
+	EngineCharacteristics.c	\
+	Engine.c	\
+	EquipmentOBUId.c	\
+	EquipmentStatus.c	\
+	ExhaustEmissionValues.c	\
+	FutureCharacteristics.c	\
+	ICC-Id.c	\
+	Int1.c	\
+	Int2.c	\
+	Int3.c	\
+	Int4.c	\
+	LPN.c	\
+	PassengerCapacity.c	\
+	PaymentFee.c	\
+	PaymentMeans.c	\
+	PaymentMeansBalance.c	\
+	SignedValue.c	\
+	PaymentMeansUnit.c	\
+	PaymentSecurityData.c	\
+	PayUnit.c	\
+	PersonalAccountNumber.c	\
+	Provider.c	\
+	PurseBalance.c	\
+	ReceiptContract.c	\
+	ReceiptData1.c	\
+	ReceiptData2.c	\
+	ReceiptData.c	\
+	ReceiptDistance.c	\
+	ReceiptFinancialPart.c	\
+	ReceiptICC-Id.c	\
+	ReceiptOBUId.c	\
+	ReceiptServicePart.c	\
+	ReceiptServiceSerialNumber.c	\
+	ReceiptAuthenticator.c	\
+	ReceiptText.c	\
+	ResultFin.c	\
+	ResultOp.c	\
+	SessionClass.c	\
+	SessionLocation.c	\
+	EFC-StationType.c	\
+	DateAndTime.c	\
+	SoundLevel.c	\
+	TrailerDetails.c	\
+	TrailerLicencePlateNumber.c	\
+	UnitType.c	\
+	ValidityOfContract.c	\
+	VehicleAuthenticator.c	\
+	VehicleAxles.c	\
+	TrailerAxles.c	\
+	TractorAxles.c	\
+	VehicleClass.c	\
+	VehicleDimensions.c	\
+	VehicleLicencePlateNumber.c	\
+	VehicleIdentificationNumber.c	\
+	VehicleSpecificCharacteristics.c	\
+	VehicleTotalDistance.c	\
+	VehicleWeightLaden.c	\
+	VehicleCurrentMaxTrainWeight.c	\
+	VehicleWeightLimits.c	\
+	AttributeIdList.c	\
+	AttributeList.c	\
+	Attributes.c	\
+	VarLengthNumber.c	\
+	Ext1.c	\
+	Ext2.c	\
+	Ext3.c	\
+	ConnectionManeuverAssist-addGrpC.c	\
+	ConnectionTrajectory-addGrpC.c	\
+	IntersectionState-addGrpC.c	\
+	LaneAttributes-addGrpC.c	\
+	MapData-addGrpC.c	\
+	MovementEvent-addGrpC.c	\
+	Position3D-addGrpC.c	\
+	RestrictionUserType-addGrpC.c	\
+	RequestorDescription-addGrpC.c	\
+	SignalStatusPackage-addGrpC.c	\
+	ItsStationPosition.c	\
+	ItsStationPositionList.c	\
+	PrioritizationResponse.c	\
+	PrioritizationResponseList.c	\
+	SignalHeadLocation.c	\
+	SignalHeadLocationList.c	\
+	BatteryStatus.c	\
+	EmissionType.c	\
+	ExceptionalCondition.c	\
+	RejectedReason.c	\
+	TimeReference.c	\
+	FuelType.c	\
+	VehicleHeight.c	\
+	LaneID.c	\
+	LaneConnectionID.c	\
+	IntersectionID.c	\
+	NodeIVI.c	\
+	NodeLink.c	\
+	NodeAttributeSet-addGrpC.c	\
+	PtvRequestType.c	\
+	DeltaAngle.c	\
+	DeltaTime.c	\
+	LaneDataAttribute.c	\
+	LaneDataAttributeList.c	\
+	MergeDivergeNodeAngle.c	\
+	NodeOffsetPointXY.c	\
+	Node-LLmD-64b.c	\
+	Node-XY-20b.c	\
+	Node-XY-22b.c	\
+	Node-XY-24b.c	\
+	Node-XY-26b.c	\
+	Node-XY-28b.c	\
+	Node-XY-32b.c	\
+	NodeSetXY.c	\
+	NodeXY.c	\
+	NodeAttributeSetXY.c	\
+	NodeAttributeXYList.c	\
+	NodeAttributeXY.c	\
+	Offset-B09.c	\
+	Offset-B10.c	\
+	Offset-B11.c	\
+	Offset-B12.c	\
+	Offset-B13.c	\
+	Offset-B14.c	\
+	Offset-B16.c	\
+	PrioritizationResponseStatus.c	\
+	RegionId.c	\
+	RegionalExtension.c	\
+	RegulatorySpeedLimit.c	\
+	RoadwayCrownAngle.c	\
+	SegmentAttributeXYList.c	\
+	SegmentAttributeXY.c	\
+	SignalGroupID.c	\
+	SpeedLimitList.c	\
+	SpeedLimitType.c	\
+	Velocity.c	\
+	IVI.c	\
+	IviStructure.c	\
+	IviContainer.c	\
+	IVIManagementContainer.c	\
+	GeographicLocationContainer.c	\
+	GlcPart.c	\
+	GeneralIviContainer.c	\
+	GicPart.c	\
+	RoadConfigurationContainer.c	\
+	RccPart.c	\
+	TextContainer.c	\
+	TcPart.c	\
+	LayoutContainer.c	\
+	AbsolutePosition.c	\
+	AbsolutePositionWAltitude.c	\
+	AnyCatalogue.c	\
+	ComparisonOperator.c	\
+	CompleteVehicleCharacteristics.c	\
+	ComputedSegment.c	\
+	DeltaPosition.c	\
+	Direction.c	\
+	Distance.c	\
+	DistanceOrDuration.c	\
+	DriverCharacteristics.c	\
+	GoodsType.c	\
+	ISO14823Attributes.c	\
+	ISO14823Attribute.c	\
+	ISO14823Code.c	\
+	IviIdentificationNumber.c	\
+	IviPurpose.c	\
+	IviStatus.c	\
+	IviType.c	\
+	LaneInformation.c	\
+	LaneStatus.c	\
+	LaneType.c	\
+	IVILaneWidth.c	\
+	LayoutComponent.c	\
+	LoadType.c	\
+	PolygonalLine.c	\
+	RSCode.c	\
+	RSCUnit.c	\
+	Segment.c	\
+	Text.c	\
+	TractorCharacteristics.c	\
+	TrailerCharacteristics.c	\
+	TrainCharacteristics.c	\
+	VcClass.c	\
+	VcCode.c	\
+	VcOption.c	\
+	VehicleCharacteristicsFixValues.c	\
+	VehicleCharacteristicsRanges.c	\
+	Weight.c	\
+	Zid.c	\
+	Zone.c	\
+	DTM.c	\
+	MonthDay.c	\
+	PMD.c	\
+	HoursMinutes.c	\
+	DayOfWeek.c	\
+	EDT.c	\
+	DFL.c	\
+	VED.c	\
+	SPE.c	\
+	ROI.c	\
+	DBV.c	\
+	DDD.c	\
+	DDD-IO.c	\
+	DDD-IO-LIST.c	\
+	DestinationPlace.c	\
+	DestinationPlaces.c	\
+	DestinationRoad.c	\
+	DestinationRoads.c	\
+	DDD-DER.c	\
+	DDD-DEP.c	\
+	EuVehicleCategoryCode.c	\
+	EuVehicleCategoryL.c	\
+	EuVehicleCategoryM.c	\
+	EuVehicleCategoryN.c	\
+	EuVehicleCategoryO.c	\
+	Iso3833VehicleType.c	\
+	CAM.c	\
+	CoopAwareness.c	\
+	CamParameters.c	\
+	HighFrequencyContainer.c	\
+	LowFrequencyContainer.c	\
+	SpecialVehicleContainer.c	\
+	BasicContainer.c	\
+	BasicVehicleContainerHighFrequency.c	\
+	BasicVehicleContainerLowFrequency.c	\
+	PublicTransportContainer.c	\
+	SpecialTransportContainer.c	\
+	DangerousGoodsContainer.c	\
+	RoadWorksContainerBasic.c	\
+	RescueContainer.c	\
+	EmergencyContainer.c	\
+	SafetyCarContainer.c	\
+	RSUContainerHighFrequency.c	\
+	GenerationDeltaTime.c	\
+	DENM.c	\
+	DecentralizedEnvironmentalNotificationMessage.c	\
+	ManagementContainer.c	\
+	SituationContainer.c	\
+	LocationContainer.c	\
+	ImpactReductionContainer.c	\
+	RoadWorksContainerExtended.c	\
+	StationaryVehicleContainer.c	\
+	AlacarteContainer.c	\
+	Termination.c	\
+	ReferenceDenms.c	\
+	ItsPduHeader.c	\
+	StationID.c	\
+	ReferencePosition.c	\
+	DeltaReferencePosition.c	\
+	Longitude.c	\
+	Latitude.c	\
+	Altitude.c	\
+	AltitudeValue.c	\
+	AltitudeConfidence.c	\
+	DeltaLongitude.c	\
+	DeltaLatitude.c	\
+	DeltaAltitude.c	\
+	PosConfidenceEllipse.c	\
+	PathPoint.c	\
+	PathDeltaTime.c	\
+	PtActivation.c	\
+	PtActivationType.c	\
+	PtActivationData.c	\
+	AccelerationControl.c	\
+	SemiAxisLength.c	\
+	CauseCode.c	\
+	CauseCodeType.c	\
+	SubCauseCodeType.c	\
+	TrafficConditionSubCauseCode.c	\
+	AccidentSubCauseCode.c	\
+	RoadworksSubCauseCode.c	\
+	HumanPresenceOnTheRoadSubCauseCode.c	\
+	WrongWayDrivingSubCauseCode.c	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.c	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.c	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.c	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.c	\
+	SlowVehicleSubCauseCode.c	\
+	StationaryVehicleSubCauseCode.c	\
+	HumanProblemSubCauseCode.c	\
+	EmergencyVehicleApproachingSubCauseCode.c	\
+	HazardousLocation-DangerousCurveSubCauseCode.c	\
+	HazardousLocation-SurfaceConditionSubCauseCode.c	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.c	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.c	\
+	CollisionRiskSubCauseCode.c	\
+	SignalViolationSubCauseCode.c	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.c	\
+	DangerousEndOfQueueSubCauseCode.c	\
+	DangerousSituationSubCauseCode.c	\
+	VehicleBreakdownSubCauseCode.c	\
+	PostCrashSubCauseCode.c	\
+	Curvature.c	\
+	CurvatureValue.c	\
+	CurvatureConfidence.c	\
+	CurvatureCalculationMode.c	\
+	Heading.c	\
+	HeadingValue.c	\
+	HeadingConfidence.c	\
+	LanePosition.c	\
+	ClosedLanes.c	\
+	HardShoulderStatus.c	\
+	DrivingLaneStatus.c	\
+	PerformanceClass.c	\
+	SpeedValue.c	\
+	SpeedConfidence.c	\
+	VehicleMass.c	\
+	Speed.c	\
+	DriveDirection.c	\
+	EmbarkationStatus.c	\
+	LongitudinalAcceleration.c	\
+	LongitudinalAccelerationValue.c	\
+	AccelerationConfidence.c	\
+	LateralAcceleration.c	\
+	LateralAccelerationValue.c	\
+	VerticalAcceleration.c	\
+	VerticalAccelerationValue.c	\
+	StationType.c	\
+	ExteriorLights.c	\
+	DangerousGoodsBasic.c	\
+	DangerousGoodsExtended.c	\
+	SpecialTransportType.c	\
+	LightBarSirenInUse.c	\
+	HeightLonCarr.c	\
+	PosLonCarr.c	\
+	PosPillar.c	\
+	PosCentMass.c	\
+	RequestResponseIndication.c	\
+	SpeedLimit.c	\
+	StationarySince.c	\
+	Temperature.c	\
+	TrafficRule.c	\
+	WheelBaseVehicle.c	\
+	TurningRadius.c	\
+	PosFrontAx.c	\
+	PositionOfOccupants.c	\
+	PositioningSolutionType.c	\
+	VehicleIdentification.c	\
+	WMInumber.c	\
+	VDS.c	\
+	EnergyStorageType.c	\
+	VehicleLength.c	\
+	VehicleLengthValue.c	\
+	VehicleLengthConfidenceIndication.c	\
+	VehicleWidth.c	\
+	PathHistory.c	\
+	EmergencyPriority.c	\
+	InformationQuality.c	\
+	RoadType.c	\
+	SteeringWheelAngle.c	\
+	SteeringWheelAngleValue.c	\
+	SteeringWheelAngleConfidence.c	\
+	TimestampIts.c	\
+	VehicleRole.c	\
+	YawRate.c	\
+	YawRateValue.c	\
+	YawRateConfidence.c	\
+	ProtectedZoneType.c	\
+	RelevanceDistance.c	\
+	RelevanceTrafficDirection.c	\
+	TransmissionInterval.c	\
+	ValidityDuration.c	\
+	ActionID.c	\
+	ItineraryPath.c	\
+	ProtectedCommunicationZone.c	\
+	Traces.c	\
+	NumberOfOccupants.c	\
+	SequenceNumber.c	\
+	PositionOfPillars.c	\
+	RestrictedTypes.c	\
+	EventHistory.c	\
+	EventPoint.c	\
+	ProtectedCommunicationZonesRSU.c	\
+	CenDsrcTollingZone.c	\
+	ProtectedZoneRadius.c	\
+	ProtectedZoneID.c	\
+	CenDsrcTollingZoneID.c	\
+	DigitalMap.c	\
+	OpeningDaysHours.c	\
+	PhoneNumber.c
+
+ASN_MODULE_HDRS=	\
+	IVIM.h	\
+	CS5.h	\
+	CountryCode.h	\
+	AVIAEIIssuerIdentifier.h	\
+	GddStructure.h	\
+	GddAttributes.h	\
+	GddAttribute.h	\
+	InternationalSign-applicablePeriod.h	\
+	InternationalSign-exemptedApplicablePeriod.h	\
+	InternationalSign-directionalFlowOfLane.h	\
+	InternationalSign-applicableVehicleDimensions.h	\
+	InternationalSign-speedLimits.h	\
+	InternationalSign-rateOfIncline.h	\
+	InternationalSign-distanceBetweenVehicles.h	\
+	InternationalSign-destinationInformation.h	\
+	InternationalSign-section.h	\
+	InternationalSign-numberOfLane.h	\
+	Code-Units.h	\
+	RepeatingPeriodDayTypes.h	\
+	ActualNumberOfPassengers.h	\
+	AxleWeightLimits.h	\
+	AddRq.h	\
+	ChannelId.h	\
+	ChannelRq.h	\
+	ChannelRs.h	\
+	CopyRq.h	\
+	CreditRq.h	\
+	CreditRs.h	\
+	DebitRq.h	\
+	DebitRs.h	\
+	GetInstanceRq.h	\
+	GetInstanceRs.h	\
+	GetStampedRq.h	\
+	GetStampedRs.h	\
+	SetInstanceRq.h	\
+	SetMMIRq.h	\
+	SetStampedRq.h	\
+	SubRq.h	\
+	CO2EmissionValue.h	\
+	ContractSerialNumber.h	\
+	ContractAuthenticator.h	\
+	ContractValidity.h	\
+	ContractVehicle.h	\
+	DateCompact.h	\
+	DescriptiveCharacteristics.h	\
+	DieselEmissionValues.h	\
+	EFC-ContextMark.h	\
+	EnvironmentalCharacteristics.h	\
+	EuroValue.h	\
+	CopValue.h	\
+	EngineCharacteristics.h	\
+	Engine.h	\
+	EquipmentOBUId.h	\
+	EquipmentStatus.h	\
+	ExhaustEmissionValues.h	\
+	FutureCharacteristics.h	\
+	ICC-Id.h	\
+	Int1.h	\
+	Int2.h	\
+	Int3.h	\
+	Int4.h	\
+	LPN.h	\
+	PassengerCapacity.h	\
+	PaymentFee.h	\
+	PaymentMeans.h	\
+	PaymentMeansBalance.h	\
+	SignedValue.h	\
+	PaymentMeansUnit.h	\
+	PaymentSecurityData.h	\
+	PayUnit.h	\
+	PersonalAccountNumber.h	\
+	Provider.h	\
+	PurseBalance.h	\
+	ReceiptContract.h	\
+	ReceiptData1.h	\
+	ReceiptData2.h	\
+	ReceiptData.h	\
+	ReceiptDistance.h	\
+	ReceiptFinancialPart.h	\
+	ReceiptICC-Id.h	\
+	ReceiptOBUId.h	\
+	ReceiptServicePart.h	\
+	ReceiptServiceSerialNumber.h	\
+	ReceiptAuthenticator.h	\
+	ReceiptText.h	\
+	ResultFin.h	\
+	ResultOp.h	\
+	SessionClass.h	\
+	SessionLocation.h	\
+	EFC-StationType.h	\
+	DateAndTime.h	\
+	SoundLevel.h	\
+	TrailerDetails.h	\
+	TrailerLicencePlateNumber.h	\
+	UnitType.h	\
+	ValidityOfContract.h	\
+	VehicleAuthenticator.h	\
+	VehicleAxles.h	\
+	TrailerAxles.h	\
+	TractorAxles.h	\
+	VehicleClass.h	\
+	VehicleDimensions.h	\
+	VehicleLicencePlateNumber.h	\
+	VehicleIdentificationNumber.h	\
+	VehicleSpecificCharacteristics.h	\
+	VehicleTotalDistance.h	\
+	VehicleWeightLaden.h	\
+	VehicleCurrentMaxTrainWeight.h	\
+	VehicleWeightLimits.h	\
+	AttributeIdList.h	\
+	AttributeList.h	\
+	Attributes.h	\
+	VarLengthNumber.h	\
+	Ext1.h	\
+	Ext2.h	\
+	Ext3.h	\
+	ConnectionManeuverAssist-addGrpC.h	\
+	ConnectionTrajectory-addGrpC.h	\
+	IntersectionState-addGrpC.h	\
+	LaneAttributes-addGrpC.h	\
+	MapData-addGrpC.h	\
+	MovementEvent-addGrpC.h	\
+	Position3D-addGrpC.h	\
+	RestrictionUserType-addGrpC.h	\
+	RequestorDescription-addGrpC.h	\
+	SignalStatusPackage-addGrpC.h	\
+	ItsStationPosition.h	\
+	ItsStationPositionList.h	\
+	PrioritizationResponse.h	\
+	PrioritizationResponseList.h	\
+	SignalHeadLocation.h	\
+	SignalHeadLocationList.h	\
+	BatteryStatus.h	\
+	EmissionType.h	\
+	ExceptionalCondition.h	\
+	RejectedReason.h	\
+	TimeReference.h	\
+	FuelType.h	\
+	VehicleHeight.h	\
+	LaneID.h	\
+	LaneConnectionID.h	\
+	IntersectionID.h	\
+	NodeIVI.h	\
+	NodeLink.h	\
+	NodeAttributeSet-addGrpC.h	\
+	PtvRequestType.h	\
+	DeltaAngle.h	\
+	DeltaTime.h	\
+	LaneDataAttribute.h	\
+	LaneDataAttributeList.h	\
+	MergeDivergeNodeAngle.h	\
+	NodeOffsetPointXY.h	\
+	Node-LLmD-64b.h	\
+	Node-XY-20b.h	\
+	Node-XY-22b.h	\
+	Node-XY-24b.h	\
+	Node-XY-26b.h	\
+	Node-XY-28b.h	\
+	Node-XY-32b.h	\
+	NodeSetXY.h	\
+	NodeXY.h	\
+	NodeAttributeSetXY.h	\
+	NodeAttributeXYList.h	\
+	NodeAttributeXY.h	\
+	Offset-B09.h	\
+	Offset-B10.h	\
+	Offset-B11.h	\
+	Offset-B12.h	\
+	Offset-B13.h	\
+	Offset-B14.h	\
+	Offset-B16.h	\
+	PrioritizationResponseStatus.h	\
+	RegionId.h	\
+	RegionalExtension.h	\
+	RegulatorySpeedLimit.h	\
+	RoadwayCrownAngle.h	\
+	SegmentAttributeXYList.h	\
+	SegmentAttributeXY.h	\
+	SignalGroupID.h	\
+	SpeedLimitList.h	\
+	SpeedLimitType.h	\
+	Velocity.h	\
+	IVI.h	\
+	IviStructure.h	\
+	IviContainer.h	\
+	IVIManagementContainer.h	\
+	GeographicLocationContainer.h	\
+	GlcPart.h	\
+	GeneralIviContainer.h	\
+	GicPart.h	\
+	RoadConfigurationContainer.h	\
+	RccPart.h	\
+	TextContainer.h	\
+	TcPart.h	\
+	LayoutContainer.h	\
+	AbsolutePosition.h	\
+	AbsolutePositionWAltitude.h	\
+	AnyCatalogue.h	\
+	ComparisonOperator.h	\
+	CompleteVehicleCharacteristics.h	\
+	ComputedSegment.h	\
+	DeltaPosition.h	\
+	Direction.h	\
+	Distance.h	\
+	DistanceOrDuration.h	\
+	DriverCharacteristics.h	\
+	GoodsType.h	\
+	ISO14823Attributes.h	\
+	ISO14823Attribute.h	\
+	ISO14823Code.h	\
+	IviIdentificationNumber.h	\
+	IviPurpose.h	\
+	IviStatus.h	\
+	IviType.h	\
+	LaneInformation.h	\
+	LaneStatus.h	\
+	LaneType.h	\
+	IVILaneWidth.h	\
+	LayoutComponent.h	\
+	LoadType.h	\
+	PolygonalLine.h	\
+	RSCode.h	\
+	RSCUnit.h	\
+	Segment.h	\
+	Text.h	\
+	TractorCharacteristics.h	\
+	TrailerCharacteristics.h	\
+	TrainCharacteristics.h	\
+	VcClass.h	\
+	VcCode.h	\
+	VcOption.h	\
+	VehicleCharacteristicsFixValues.h	\
+	VehicleCharacteristicsRanges.h	\
+	Weight.h	\
+	Zid.h	\
+	Zone.h	\
+	DTM.h	\
+	MonthDay.h	\
+	PMD.h	\
+	HoursMinutes.h	\
+	DayOfWeek.h	\
+	EDT.h	\
+	DFL.h	\
+	VED.h	\
+	SPE.h	\
+	ROI.h	\
+	DBV.h	\
+	DDD.h	\
+	DDD-IO.h	\
+	DDD-IO-LIST.h	\
+	DestinationPlace.h	\
+	DestinationPlaces.h	\
+	DestinationRoad.h	\
+	DestinationRoads.h	\
+	DDD-DER.h	\
+	DDD-DEP.h	\
+	EuVehicleCategoryCode.h	\
+	EuVehicleCategoryL.h	\
+	EuVehicleCategoryM.h	\
+	EuVehicleCategoryN.h	\
+	EuVehicleCategoryO.h	\
+	Iso3833VehicleType.h	\
+	CAM.h	\
+	CoopAwareness.h	\
+	CamParameters.h	\
+	HighFrequencyContainer.h	\
+	LowFrequencyContainer.h	\
+	SpecialVehicleContainer.h	\
+	BasicContainer.h	\
+	BasicVehicleContainerHighFrequency.h	\
+	BasicVehicleContainerLowFrequency.h	\
+	PublicTransportContainer.h	\
+	SpecialTransportContainer.h	\
+	DangerousGoodsContainer.h	\
+	RoadWorksContainerBasic.h	\
+	RescueContainer.h	\
+	EmergencyContainer.h	\
+	SafetyCarContainer.h	\
+	RSUContainerHighFrequency.h	\
+	GenerationDeltaTime.h	\
+	DENM.h	\
+	DecentralizedEnvironmentalNotificationMessage.h	\
+	ManagementContainer.h	\
+	SituationContainer.h	\
+	LocationContainer.h	\
+	ImpactReductionContainer.h	\
+	RoadWorksContainerExtended.h	\
+	StationaryVehicleContainer.h	\
+	AlacarteContainer.h	\
+	Termination.h	\
+	ReferenceDenms.h	\
+	ItsPduHeader.h	\
+	StationID.h	\
+	ReferencePosition.h	\
+	DeltaReferencePosition.h	\
+	Longitude.h	\
+	Latitude.h	\
+	Altitude.h	\
+	AltitudeValue.h	\
+	AltitudeConfidence.h	\
+	DeltaLongitude.h	\
+	DeltaLatitude.h	\
+	DeltaAltitude.h	\
+	PosConfidenceEllipse.h	\
+	PathPoint.h	\
+	PathDeltaTime.h	\
+	PtActivation.h	\
+	PtActivationType.h	\
+	PtActivationData.h	\
+	AccelerationControl.h	\
+	SemiAxisLength.h	\
+	CauseCode.h	\
+	CauseCodeType.h	\
+	SubCauseCodeType.h	\
+	TrafficConditionSubCauseCode.h	\
+	AccidentSubCauseCode.h	\
+	RoadworksSubCauseCode.h	\
+	HumanPresenceOnTheRoadSubCauseCode.h	\
+	WrongWayDrivingSubCauseCode.h	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.h	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.h	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.h	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.h	\
+	SlowVehicleSubCauseCode.h	\
+	StationaryVehicleSubCauseCode.h	\
+	HumanProblemSubCauseCode.h	\
+	EmergencyVehicleApproachingSubCauseCode.h	\
+	HazardousLocation-DangerousCurveSubCauseCode.h	\
+	HazardousLocation-SurfaceConditionSubCauseCode.h	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.h	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.h	\
+	CollisionRiskSubCauseCode.h	\
+	SignalViolationSubCauseCode.h	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.h	\
+	DangerousEndOfQueueSubCauseCode.h	\
+	DangerousSituationSubCauseCode.h	\
+	VehicleBreakdownSubCauseCode.h	\
+	PostCrashSubCauseCode.h	\
+	Curvature.h	\
+	CurvatureValue.h	\
+	CurvatureConfidence.h	\
+	CurvatureCalculationMode.h	\
+	Heading.h	\
+	HeadingValue.h	\
+	HeadingConfidence.h	\
+	LanePosition.h	\
+	ClosedLanes.h	\
+	HardShoulderStatus.h	\
+	DrivingLaneStatus.h	\
+	PerformanceClass.h	\
+	SpeedValue.h	\
+	SpeedConfidence.h	\
+	VehicleMass.h	\
+	Speed.h	\
+	DriveDirection.h	\
+	EmbarkationStatus.h	\
+	LongitudinalAcceleration.h	\
+	LongitudinalAccelerationValue.h	\
+	AccelerationConfidence.h	\
+	LateralAcceleration.h	\
+	LateralAccelerationValue.h	\
+	VerticalAcceleration.h	\
+	VerticalAccelerationValue.h	\
+	StationType.h	\
+	ExteriorLights.h	\
+	DangerousGoodsBasic.h	\
+	DangerousGoodsExtended.h	\
+	SpecialTransportType.h	\
+	LightBarSirenInUse.h	\
+	HeightLonCarr.h	\
+	PosLonCarr.h	\
+	PosPillar.h	\
+	PosCentMass.h	\
+	RequestResponseIndication.h	\
+	SpeedLimit.h	\
+	StationarySince.h	\
+	Temperature.h	\
+	TrafficRule.h	\
+	WheelBaseVehicle.h	\
+	TurningRadius.h	\
+	PosFrontAx.h	\
+	PositionOfOccupants.h	\
+	PositioningSolutionType.h	\
+	VehicleIdentification.h	\
+	WMInumber.h	\
+	VDS.h	\
+	EnergyStorageType.h	\
+	VehicleLength.h	\
+	VehicleLengthValue.h	\
+	VehicleLengthConfidenceIndication.h	\
+	VehicleWidth.h	\
+	PathHistory.h	\
+	EmergencyPriority.h	\
+	InformationQuality.h	\
+	RoadType.h	\
+	SteeringWheelAngle.h	\
+	SteeringWheelAngleValue.h	\
+	SteeringWheelAngleConfidence.h	\
+	TimestampIts.h	\
+	VehicleRole.h	\
+	YawRate.h	\
+	YawRateValue.h	\
+	YawRateConfidence.h	\
+	ProtectedZoneType.h	\
+	RelevanceDistance.h	\
+	RelevanceTrafficDirection.h	\
+	TransmissionInterval.h	\
+	ValidityDuration.h	\
+	ActionID.h	\
+	ItineraryPath.h	\
+	ProtectedCommunicationZone.h	\
+	Traces.h	\
+	NumberOfOccupants.h	\
+	SequenceNumber.h	\
+	PositionOfPillars.h	\
+	RestrictedTypes.h	\
+	EventHistory.h	\
+	EventPoint.h	\
+	ProtectedCommunicationZonesRSU.h	\
+	CenDsrcTollingZone.h	\
+	ProtectedZoneRadius.h	\
+	ProtectedZoneID.h	\
+	CenDsrcTollingZoneID.h	\
+	DigitalMap.h	\
+	OpeningDaysHours.h	\
+	PhoneNumber.h
+
+ASN_MODULE_HDRS+=ANY.h
+ASN_MODULE_SRCS+=ANY.c
+ASN_MODULE_HDRS+=OCTET_STRING.h
+ASN_MODULE_HDRS+=OPEN_TYPE.h
+ASN_MODULE_SRCS+=OPEN_TYPE.c
+ASN_MODULE_HDRS+=constr_CHOICE.h
+ASN_MODULE_HDRS+=BOOLEAN.h
+ASN_MODULE_SRCS+=BOOLEAN.c
+ASN_MODULE_HDRS+=IA5String.h
+ASN_MODULE_SRCS+=IA5String.c
+ASN_MODULE_HDRS+=INTEGER.h
+ASN_MODULE_SRCS+=INTEGER.c
+ASN_MODULE_HDRS+=NULL.h
+ASN_MODULE_SRCS+=NULL.c
+ASN_MODULE_HDRS+=NativeEnumerated.h
+ASN_MODULE_SRCS+=NativeEnumerated.c
+ASN_MODULE_HDRS+=NativeInteger.h
+ASN_MODULE_SRCS+=NativeInteger.c
+ASN_MODULE_HDRS+=NumericString.h
+ASN_MODULE_SRCS+=NumericString.c
+ASN_MODULE_HDRS+=UTF8String.h
+ASN_MODULE_SRCS+=UTF8String.c
+ASN_MODULE_HDRS+=VisibleString.h
+ASN_MODULE_SRCS+=VisibleString.c
+ASN_MODULE_HDRS+=asn_SEQUENCE_OF.h
+ASN_MODULE_SRCS+=asn_SEQUENCE_OF.c
+ASN_MODULE_HDRS+=asn_SET_OF.h
+ASN_MODULE_SRCS+=asn_SET_OF.c
+ASN_MODULE_SRCS+=constr_CHOICE.c
+ASN_MODULE_HDRS+=constr_SEQUENCE.h
+ASN_MODULE_SRCS+=constr_SEQUENCE.c
+ASN_MODULE_HDRS+=constr_SEQUENCE_OF.h
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF.c
+ASN_MODULE_HDRS+=constr_SET_OF.h
+ASN_MODULE_SRCS+=constr_SET_OF.c
+ASN_MODULE_HDRS+=asn_application.h
+ASN_MODULE_SRCS+=asn_application.c
+ASN_MODULE_HDRS+=asn_ioc.h
+ASN_MODULE_HDRS+=asn_system.h
+ASN_MODULE_HDRS+=asn_codecs.h
+ASN_MODULE_HDRS+=asn_internal.h
+ASN_MODULE_SRCS+=asn_internal.c
+ASN_MODULE_HDRS+=asn_random_fill.h
+ASN_MODULE_SRCS+=asn_random_fill.c
+ASN_MODULE_HDRS+=asn_bit_data.h
+ASN_MODULE_SRCS+=asn_bit_data.c
+ASN_MODULE_SRCS+=OCTET_STRING.c
+ASN_MODULE_HDRS+=BIT_STRING.h
+ASN_MODULE_SRCS+=BIT_STRING.c
+ASN_MODULE_SRCS+=asn_codecs_prim.c
+ASN_MODULE_HDRS+=asn_codecs_prim.h
+ASN_MODULE_HDRS+=ber_tlv_length.h
+ASN_MODULE_SRCS+=ber_tlv_length.c
+ASN_MODULE_HDRS+=ber_tlv_tag.h
+ASN_MODULE_SRCS+=ber_tlv_tag.c
+ASN_MODULE_HDRS+=ber_decoder.h
+ASN_MODULE_SRCS+=ber_decoder.c
+ASN_MODULE_HDRS+=der_encoder.h
+ASN_MODULE_SRCS+=der_encoder.c
+ASN_MODULE_HDRS+=constr_TYPE.h
+ASN_MODULE_SRCS+=constr_TYPE.c
+ASN_MODULE_HDRS+=constraints.h
+ASN_MODULE_SRCS+=constraints.c
+ASN_MODULE_HDRS+=xer_support.h
+ASN_MODULE_SRCS+=xer_support.c
+ASN_MODULE_HDRS+=xer_decoder.h
+ASN_MODULE_SRCS+=xer_decoder.c
+ASN_MODULE_HDRS+=xer_encoder.h
+ASN_MODULE_SRCS+=xer_encoder.c
+ASN_MODULE_HDRS+=per_support.h
+ASN_MODULE_SRCS+=per_support.c
+ASN_MODULE_HDRS+=per_decoder.h
+ASN_MODULE_SRCS+=per_decoder.c
+ASN_MODULE_HDRS+=per_encoder.h
+ASN_MODULE_SRCS+=per_encoder.c
+ASN_MODULE_HDRS+=per_opentype.h
+ASN_MODULE_SRCS+=per_opentype.c
+ASN_MODULE_HDRS+=oer_decoder.h
+ASN_MODULE_HDRS+=oer_encoder.h
+ASN_MODULE_HDRS+=oer_support.h
+ASN_MODULE_SRCS+=oer_decoder.c
+ASN_MODULE_SRCS+=oer_encoder.c
+ASN_MODULE_SRCS+=oer_support.c
+ASN_MODULE_SRCS+=OPEN_TYPE_oer.c
+ASN_MODULE_SRCS+=INTEGER_oer.c
+ASN_MODULE_SRCS+=BIT_STRING_oer.c
+ASN_MODULE_SRCS+=OCTET_STRING_oer.c
+ASN_MODULE_SRCS+=NativeInteger_oer.c
+ASN_MODULE_SRCS+=NativeEnumerated_oer.c
+ASN_MODULE_SRCS+=constr_CHOICE_oer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_oer.c
+ASN_MODULE_SRCS+=constr_SET_OF_oer.c
+
+ASN_MODULE_CFLAGS=
+
+lib_LTLIBRARIES+=libasncodec.la
+libasncodec_la_SOURCES=$(ASN_MODULE_SRCS) $(ASN_MODULE_HDRS)
+libasncodec_la_CPPFLAGS=-I$(top_srcdir)/
+libasncodec_la_CFLAGS=$(ASN_MODULE_CFLAGS)
+libasncodec_la_LDFLAGS=-lm

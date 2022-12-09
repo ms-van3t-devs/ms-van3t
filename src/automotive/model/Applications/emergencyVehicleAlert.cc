@@ -171,7 +171,7 @@ namespace ns3
     TypeId tid;
     if(m_model=="80211p")
       tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
-    else if(m_model=="cv2x")
+    else if(m_model=="cv2x" || m_model=="nrv2x")
       tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     else
       NS_FATAL_ERROR ("No communication model set - check simulation script - valid models: '80211p' or 'lte'");

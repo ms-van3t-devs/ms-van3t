@@ -7,7 +7,7 @@
 
 #include "asn_internal.h"
 #include "INTEGER.h"
-#include "errno.h"
+#include <errno.h>
 
 asn_dec_rval_t
 INTEGER_decode_oer(const asn_codec_ctx_t *opt_codec_ctx,

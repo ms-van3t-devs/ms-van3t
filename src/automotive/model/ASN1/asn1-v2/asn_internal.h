@@ -7,8 +7,9 @@
  */
 #ifndef	ASN_INTERNAL_H
 #define	ASN_INTERNAL_H
+#ifndef __EXTENSIONS__
 #define __EXTENSIONS__          /* for Sun */
-
+#endif
 #include "asn_application.h"	/* Application-visible API */
 
 #ifndef	__NO_ASSERT_H__		/* Include assert.h only for internal use. */
@@ -40,7 +41,6 @@ int get_asn1c_environment_version(void);	/* Run-time version */
  * A macro for debugging the ASN.1 internals.
  * You may enable or override it.
  */
-#define ASN_EMIT_DEBUG 0
 #ifndef	ASN_DEBUG	/* If debugging code is not defined elsewhere... */
 #if	ASN_EMIT_DEBUG == 1	/* And it was asked to emit this code... */
 #if __STDC_VERSION__ >= 199901L

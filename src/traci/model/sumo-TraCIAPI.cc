@@ -1656,6 +1656,26 @@ TraCIAPI::SimulationScope::convertLonLattoXY(double lon, double lat) {
     return p;
 }
 
+libsumo::TraCIRoadPosition
+TraCIAPI::SimulationScope::convertLonLattoRoadmap(double lon, double lat){
+  tcpip::Storage content;
+  content.writeByte(TYPE_COMPOUND);
+  content.writeInt(2);
+  content.writeByte(POSITION_LON_LAT);
+  content.writeDouble(lon);
+  content.writeDouble(lat);
+  content.writeUnsignedByte (TYPE_UBYTE);
+  content.writeByte(POSITION_ROADMAP);
+  myParent.send_commandGetVariable(CMD_GET_SIM_VARIABLE, POSITION_CONVERSION, "", &content);
+  tcpip::Storage inMsg;
+  myParent.processGET(inMsg, CMD_GET_SIM_VARIABLE, POSITION_ROADMAP);
+  libsumo::TraCIRoadPosition roadMap;
+  roadMap.edgeID = inMsg.readString ();
+  roadMap.pos = inMsg.readDouble();
+  roadMap.laneIndex = inMsg.readByte ();
+  return roadMap;
+}
+
 double
 TraCIAPI::SimulationScope::getDistanceRoad(const std::string& edgeID1, double pos1, const std::string& edgeID2, double pos2, bool isDriving) {
     tcpip::Storage content;

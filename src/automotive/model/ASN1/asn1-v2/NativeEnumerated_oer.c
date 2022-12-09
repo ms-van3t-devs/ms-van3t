@@ -7,7 +7,7 @@
 
 #include "asn_internal.h"
 #include "NativeEnumerated.h"
-#include "errno.h"
+#include <errno.h>
 
 static long
 asn__nativeenumerated_convert(const uint8_t *b, const uint8_t *end) {

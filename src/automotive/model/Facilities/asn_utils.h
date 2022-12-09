@@ -9,6 +9,7 @@
 
 #define FIX_DENMID          0x01
 #define FIX_CAMID           0x02
+#define FIX_IVIMID          0x06
 #define DECI                10
 #define CENTI               100
 #define MILLI               1000
@@ -64,6 +65,23 @@ namespace ns3
         T getDataRef() {return &m_dataitem;}
   };
 
+  template <class T>
+  class IVIDataItem
+  {
+      private:
+        bool m_available;
+        T m_dataitem;
+
+      public:
+        IVIDataItem(T data): m_dataitem(data) {m_available=true;}
+        IVIDataItem(bool availability) {m_available=availability;}
+        IVIDataItem() {m_available=false;m_dataitem = {};}
+        T getData() {return m_dataitem;}
+        bool isAvailable() {return m_available;}
+        void setData(T data) {m_dataitem=data; m_available = true;}
+        T getDataRef() {return &m_dataitem;}
+  };
+
   template <class V = int, class C = int>
   class DENValueConfidence
   {
@@ -81,6 +99,25 @@ namespace ns3
         void setValue(V value) {m_value=value;}
         void setConfidence(C confidence) {m_confidence=confidence;}
   };
+
+  template <class V = int, class C = int>
+  class IVIValueConfidence
+  {
+  private:
+    V m_value;
+    C m_confidence;
+
+  public:
+    IVIValueConfidence() {}
+    IVIValueConfidence(V value,C confidence):
+      m_value(value), m_confidence(confidence) {}
+
+    V getValue() {return m_value;}
+    C getConfidence() {return m_confidence;}
+    void setValue(V value) {m_value=value;}
+    void setConfidence(C confidence) {m_confidence=confidence;}
+  };
+
 
   typedef struct DEN_PosConfidenceEllipse {
     long semiMajorConfidence;

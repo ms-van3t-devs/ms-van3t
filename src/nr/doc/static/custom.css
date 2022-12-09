@@ -1,0 +1,44 @@
+:root {
+  --header-background-color: #ffffff;
+  --header-color: #ffffff;
+  --cover-image-background-color: #ffffff;
+  --header-link-color: #ffffff;
+  --header-link-active-color: #cb4b16;
+  --header-link-current-color: #ea7944;
+  --header-link-active-background-color: #375C93;
+  --header-link-active-background-color: rgba(55, 92, 147, 1);
+
+  --background-color: #cacfd6;
+  --footer-background-color: #edf0f5;
+
+  --nav-brand-case: normal;
+  --nav-menu-case: normal;
+  --nav-heading-case: normal;
+  --nav-categories-case: normal;
+  --landing-header-case: normal;
+}
+
+#m-landing-image
+{
+  color: #000000;
+}
+
+#m-navbar-collapse li
+{
+  background-color: #375C93;
+}
+
+#m-landing-image, #m-cover-image, article#m-jumbo > header #m-jumbo-image
+{
+  margin-top: -1rem;
+  padding-top: 1rem;
+}
+
+body > header > nav #m-navbar-collapse a
+{
+  color: #ffffff;
+}
+.n-navbar, #navigation
+{
+  background-color: #375C93;
+}

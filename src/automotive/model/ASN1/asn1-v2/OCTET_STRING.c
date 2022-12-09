@@ -6,7 +6,7 @@
 #include "asn_internal.h"
 #include "OCTET_STRING.h"
 #include "BIT_STRING.h"	/* for .bits_unused member */
-#include "errno.h"
+#include <errno.h>
 
 /*
  * OCTET STRING basic type description.

@@ -20,8 +20,8 @@
 #define _BSD_SOURCE /* for snprintf() on some linux systems  */
 #endif
 
-#include "stdio.h"	/* For snprintf(3) */
-#include "stdlib.h"	/* For *alloc(3) */
+#include <stdio.h>	/* For snprintf(3) */
+#include <stdlib.h>	/* For *alloc(3) */
 #include "string.h"	/* For memcpy(3) */
 #include "sys/types.h"	/* For size_t */
 #include "limits.h"	/* For LONG_MAX */
@@ -30,7 +30,7 @@
 
 #ifdef	_WIN32
 
-#include "malloc.h"
+#include <malloc.h>
 #define	 snprintf	_snprintf
 #define	 vsnprintf	_vsnprintf
 
@@ -54,18 +54,18 @@ typedef	unsigned char	uint8_t;
 typedef	unsigned short	uint16_t;
 typedef	unsigned int	uint32_t;
 #else /* _MSC_VER >= 1600 */
-#include "stdint.h"
+#include <stdint.h>
 #endif /* _MSC_VER < 1600 */
 #endif	/* ASSUMESTDTYPES */
 #define WIN32_LEAN_AND_MEAN
-#include "windows.h"
-#include "float.h"
+#include <windows.h>
+#include <float.h>
 #define isnan _isnan
 #define finite _finite
 #define copysign _copysign
 #define	ilogb	_logb
 #else	/* !_MSC_VER */
-#include "stdint.h"
+#include <stdint.h>
 #endif	/* _MSC_VER */
 
 #else	/* !_WIN32 */
@@ -97,7 +97,7 @@ typedef	unsigned int	uint32_t;
 #define	ASN_THREAD_SAFE
 #endif	/* Thread safety */
 
-#ifndef	offsetof	/* If not defined by <stddef.h" */
+#ifndef	offsetof	/* If not defined by <stddef.h> */
 #define	offsetof(s, m)	((ptrdiff_t)&(((s *)0)->m) - (ptrdiff_t)((s *)0))
 #endif	/* offsetof */
 

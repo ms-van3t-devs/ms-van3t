@@ -168,7 +168,7 @@ cv2x_NistParabolic3dAntennaModel::GetHorizontalGainDb (Angles a)
   NS_LOG_FUNCTION (this << a);
   
   // azimuth angle w.r.t. the reference system of the antenna
-  double phi = a.phi - m_orientationRadians;
+  double phi = a.GetAzimuth ()- m_orientationRadians;
 
   // make sure phi is in (-pi, pi]
   while (phi <= -M_PI)
@@ -193,7 +193,7 @@ cv2x_NistParabolic3dAntennaModel::GetVerticalGainDb (Angles a)
 {
   NS_LOG_FUNCTION (this << a);
   // azimuth angle w.r.t. the reference system of the antenna
-  double theta = a.theta - M_PI/2 - (m_mTiltRadians + m_eTiltRadians);
+  double theta = a.GetInclination ()- M_PI/2 - (m_mTiltRadians + m_eTiltRadians);
 
   // make sure theta is in [-pi, pi]
   NS_ASSERT (theta <= M_PI && theta >= -M_PI);

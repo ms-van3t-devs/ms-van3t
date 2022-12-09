@@ -81,7 +81,7 @@ cv2x_LteSimpleSpectrumPhy::GetDevice () const
 
 
 Ptr<MobilityModel>
-cv2x_LteSimpleSpectrumPhy::GetMobility ()
+cv2x_LteSimpleSpectrumPhy::GetMobility () const
 {
   NS_LOG_FUNCTION (this);
   return m_mobility;
@@ -118,8 +118,8 @@ cv2x_LteSimpleSpectrumPhy::GetRxSpectrumModel () const
 }
 
 
-Ptr<AntennaModel>
-cv2x_LteSimpleSpectrumPhy::GetRxAntenna ()
+Ptr<Object>
+cv2x_LteSimpleSpectrumPhy::GetAntenna () const
 {
   return m_antenna;
 }

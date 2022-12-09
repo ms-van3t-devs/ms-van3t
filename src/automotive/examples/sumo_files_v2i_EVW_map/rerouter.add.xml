@@ -1,0 +1,18 @@
+<additionals>
+	<route id="01" edges="se_to_ne ne_to_nw nw_to_sw sw_to_se se_to_ne"/>
+	<route id="02" edges="ne_to_se se_to_sw sw_to_nw nw_to_ne ne_to_se"/>
+		
+   
+	<rerouter id="rerouter_0" edges="se_to_ne" probability="100.00">
+  <interval begin="0.00" end="1000000.00">
+      <routeProbReroute id="01" probability="100.00"/>
+  </interval>
+	</rerouter>
+	<rerouter id="rerouter_1" edges="ne_to_se" probability="100.00">
+  <interval begin="0.00" end="1000000.00">
+      <routeProbReroute id="02" probability="100.00"/>
+     
+  </interval>
+	</rerouter>
+
+</additionals>

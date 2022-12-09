@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NS3_VERSION=3.33
+NS3_VERSION=3.35
 
 if [ $# -ne 0 -a $# -ne 1 ]; then
     echo "Too many arguments. You shall specify:"
@@ -78,9 +78,19 @@ fi
 echo "Downloading ns-${NS3_VERSION} from the official repository..."
 sleep 1
 set -v
-git clone https://gitlab.com/nsnam/ns-3-allinone.git
-cd ns-3-allinone
-./download.py -n ns-${NS3_VERSION}
+git clone https://gitlab.com/cttc-lena/ns-3-dev.git
+cd ns-3-dev/src/
+git clone https://gitlab.com/cttc-lena/nr.git
+cd nr
+git checkout nr-v2x-dev
+find . -type d -name .git -exec rm -rfv {} \;
+find . -type f -name .gitignore -exec rm -rfv {} \;
+find . -type f -name .gitlab-ci-clang.yml -exec rm -rfv {} \;
+find . -type f -name .gitlab-ci-gcc.yml -exec rm -rfv {} \;
+find . -type f -name .gitlab-ci.yml -exec rm -rfv {} \;
+find . -type f -name .gitmodules -exec rm -rfv {} \;
+cd ../..
+git checkout v2x-lte-dev
 set +v
 
 echo "Removing git from vanilla ns-${NS3_VERSION}..."
@@ -97,26 +107,23 @@ set -v
 cd ..
 shopt -s extglob
 shopt -s dotglob
-cp -af ./!(ns-3-allinone) ns-3-allinone/ns-${NS3_VERSION}
+cp -af ./!(ns-3-dev) ns-3-dev/
 set +v
 
-echo "Patching wscript to solve the bug reported here: https://groups.google.com/forum/#!topic/ns-3-users/Wlaj57ehruM"
-echo "Original patch and bug report by Manuel Requena"
+echo "Patching CMakeLists.txt to solve compatibility issue with C source files"
 sleep 1
 set -v
-cd ns-3-allinone/ns-${NS3_VERSION}
-sed -i -E 's#^([[:blank:]]*)(program.create_task\("SuidBuild"\))#\1program.create_task("SuidBuild_task")#' wscript
-cd ../..
+cd ns-3-dev
+sed -i -E 's#^([[:blank:]]*)project\(NS3 CXX\)#\1project\(NS3 C CXX\)#' CMakeLists.txt
+cd ..
 set +v
 
 echo "Moving the full installation to the current directory..."
 sleep 1
 set -v
 rm -rfv AUTHORS .git .gitignore img LICENSE license_gplv2.txt README.md src switch_CAM_DENM_version.sh VERSION
-cp -af ns-3-allinone/* .
-rm -rf ns-3-allinone
 set +v
 
-echo "Installation completed. You will find a copy of this script in ./ns-${NS3_VERSION}."
+echo "Installation completed. You will find a copy of this script in ./ns-3-dev."
 
 rm $0

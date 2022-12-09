@@ -97,7 +97,7 @@ cv2x_RemSpectrumPhy::SetDevice (Ptr<NetDevice> d)
 }
 
 Ptr<MobilityModel>
-cv2x_RemSpectrumPhy::GetMobility ()
+cv2x_RemSpectrumPhy::GetMobility () const
 {
   return m_mobility;
 }
@@ -114,8 +114,8 @@ cv2x_RemSpectrumPhy::GetRxSpectrumModel () const
   return m_rxSpectrumModel;
 }
 
-Ptr<AntennaModel>
-cv2x_RemSpectrumPhy::GetRxAntenna ()
+Ptr<Object>
+cv2x_RemSpectrumPhy::GetAntenna () const
 {
   return 0;
 }

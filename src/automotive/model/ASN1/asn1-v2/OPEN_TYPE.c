@@ -6,7 +6,7 @@
 #include "OPEN_TYPE.h"
 #include "constr_CHOICE.h"
 #include "per_opentype.h"
-#include "errno.h"
+#include <errno.h>
 
 asn_TYPE_operation_t asn_OP_OPEN_TYPE = {
 	OPEN_TYPE_free,

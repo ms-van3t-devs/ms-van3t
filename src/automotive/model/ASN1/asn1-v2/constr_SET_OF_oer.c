@@ -8,7 +8,7 @@
 #include "asn_internal.h"
 #include "constr_SET_OF.h"
 #include "asn_SET_OF.h"
-#include "errno.h"
+#include <errno.h>
 
 /*
  * This macro "eats" the part of the buffer which is definitely "consumed",

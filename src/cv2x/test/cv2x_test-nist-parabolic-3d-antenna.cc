@@ -63,7 +63,7 @@ private:
 std::string cv2x_NistParabolic3dAntennaModelTestCase::BuildNameString (Angles a, double hb, double o, double hg, double vb, double e, double m, double vg)
 {
   std::ostringstream oss;
-  oss <<  "theta=" << a.theta << " , phi=" << a.phi 
+  oss <<  "theta=" << a.GetInclination ()<< " , phi=" << a.GetAzimuth ()
       << ", horizontal beamdwidth=" << hb << " deg"
       << ", orientation=" << o 
       << ", horizontal maxAttenuation=" << hg << " dB"

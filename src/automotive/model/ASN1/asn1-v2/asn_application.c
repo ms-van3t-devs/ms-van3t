@@ -4,7 +4,7 @@
  */
 #include "asn_internal.h"
 #include "asn_application.h"
-#include "errno.h"
+#include <errno.h>
 
 static asn_enc_rval_t asn_encode_internal(const asn_codec_ctx_t *opt_codec_ctx,
                                           enum asn_transfer_syntax syntax,

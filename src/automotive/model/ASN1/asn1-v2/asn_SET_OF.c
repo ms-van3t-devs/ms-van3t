@@ -4,7 +4,7 @@
  */
 #include "asn_internal.h"
 #include "asn_SET_OF.h"
-#include "errno.h"
+#include <errno.h>
 
 /*
  * Add another element into the set.

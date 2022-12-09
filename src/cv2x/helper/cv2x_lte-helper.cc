@@ -2001,14 +2001,17 @@ cv2x_LteHelper::DoCalcRsrp (Ptr<PropagationLossModel> propagationLoss, Ptr<Spect
   Ptr<MobilityModel> rxMobility = rxPhy->GetMobility ();
 
   double pathLossDb = 0;
-  if (txPhy->GetRxAntenna() != 0)
+  Ptr<AntennaModel> txAntenna = txPhy->GetAntenna ()->GetObject<AntennaModel>();
+  if (txAntenna != 0)
     {
       Angles txAngles (rxMobility->GetPosition (), txMobility->GetPosition ());
-      double txAntennaGain = txPhy->GetRxAntenna()->GetGainDb (txAngles);
+      //double txAntennaGain = txPhy->GetAntenna()->GetGainDb (txAngles);
+      double txAntennaGain = txAntenna->GetGainDb (txAngles);
       NS_LOG_DEBUG ("txAntennaGain = " << txAntennaGain << " dB");
       pathLossDb -= txAntennaGain;
     }
-  Ptr<AntennaModel> rxAntenna = rxPhy->GetRxAntenna ();
+  //Ptr<AntennaModel> rxAntenna = rxPhy->GetAntenna ();
+  Ptr<AntennaModel> rxAntenna = rxPhy->GetAntenna ()->GetObject<AntennaModel>();
   if (rxAntenna != 0)
     {
       Angles rxAngles (txMobility->GetPosition (), rxMobility->GetPosition ());
@@ -2069,14 +2072,17 @@ cv2x_LteHelper::DoCalcRsrp (Ptr<PropagationLossModel> propagationLoss, double tx
   Ptr<MobilityModel> rxMobility = rxPhy->GetMobility ();
 
   double pathLossDb = 0;
-  if (txPhy->GetRxAntenna() != 0)
+  Ptr<AntennaModel> txAntenna = txPhy->GetAntenna ()->GetObject<AntennaModel>();
+  if (txAntenna != 0)
     {
       Angles txAngles (rxMobility->GetPosition (), txMobility->GetPosition ());
-      double txAntennaGain = txPhy->GetRxAntenna()->GetGainDb (txAngles);
+      //double txAntennaGain = txPhy->GetAntenna()->GetGainDb (txAngles);
+      double txAntennaGain = txAntenna->GetGainDb (txAngles);
       NS_LOG_DEBUG ("txAntennaGain = " << txAntennaGain << " dB");
       pathLossDb -= txAntennaGain;
     }
-  Ptr<AntennaModel> rxAntenna = rxPhy->GetRxAntenna ();
+  //Ptr<AntennaModel> rxAntenna = rxPhy->GetAntenna ();
+  Ptr<AntennaModel> rxAntenna = rxPhy->GetAntenna ()->GetObject<AntennaModel>();
   if (rxAntenna != 0)
     {
       Angles rxAngles (txMobility->GetPosition (), rxMobility->GetPosition ());
