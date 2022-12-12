@@ -27,6 +27,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/packet-socket-helper.h"
 #include "ns3/vehicle-visualizer-module.h"
+#include <unistd.h>
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2v-80211p");
@@ -182,7 +183,7 @@ main (int argc, char *argv[])
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
-  //wifiPhy.EnablePcapAll ("ivimVehicleAlertExample");
+  //wifiPhy.EnablePcapAll ("ivimVehicleWarningExample");
   /*** 4. Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);

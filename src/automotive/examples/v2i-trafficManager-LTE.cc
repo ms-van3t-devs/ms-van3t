@@ -30,6 +30,7 @@
 #include "ns3/packet-socket-helper.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/vehicle-visualizer-module.h"
+#include <unistd.h>
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("v2i-LTE-tm");
