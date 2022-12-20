@@ -4,7 +4,6 @@
 
 struct asn_TYPE_descriptor_s;	/* Forward declaration */
 
-extern struct asn_TYPE_descriptor_s asn_DEF_IVIM;
 extern struct asn_TYPE_descriptor_s asn_DEF_GddStructure;
 extern struct asn_TYPE_descriptor_s asn_DEF_ActualNumberOfPassengers;
 extern struct asn_TYPE_descriptor_s asn_DEF_AddRq;
@@ -56,21 +55,21 @@ extern struct asn_TYPE_descriptor_s asn_DEF_VehicleSpecificCharacteristics;
 extern struct asn_TYPE_descriptor_s asn_DEF_VehicleTotalDistance;
 extern struct asn_TYPE_descriptor_s asn_DEF_VehicleWeightLaden;
 extern struct asn_TYPE_descriptor_s asn_DEF_VehicleCurrentMaxTrainWeight;
+extern struct asn_TYPE_descriptor_s asn_DEF_IVI;
+extern struct asn_TYPE_descriptor_s asn_DEF_CAM;
+extern struct asn_TYPE_descriptor_s asn_DEF_DENM;
 extern struct asn_TYPE_descriptor_s asn_DEF_ConnectionManeuverAssist_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_ConnectionTrajectory_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_IntersectionState_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_LaneAttributes_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_MapData_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_MovementEvent_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_NodeAttributeSet_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_Position3D_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_RestrictionUserType_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_RequestorDescription_addGrpC;
 extern struct asn_TYPE_descriptor_s asn_DEF_SignalStatusPackage_addGrpC;
-extern struct asn_TYPE_descriptor_s asn_DEF_NodeAttributeSet_addGrpC;
-extern struct asn_TYPE_descriptor_s asn_DEF_Offset_B09;
-extern struct asn_TYPE_descriptor_s asn_DEF_IVI;
-extern struct asn_TYPE_descriptor_s asn_DEF_CAM;
-extern struct asn_TYPE_descriptor_s asn_DEF_DENM;
+extern struct asn_TYPE_descriptor_s asn_DEF_RTCMcorrections;
 extern struct asn_TYPE_descriptor_s asn_DEF_TrafficConditionSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_AccidentSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_HumanPresenceOnTheRoadSubCauseCode;
@@ -96,14 +95,17 @@ extern struct asn_TYPE_descriptor_s asn_DEF_VehicleBreakdownSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_PostCrashSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_DigitalMap;
 extern struct asn_TYPE_descriptor_s asn_DEF_OpeningDaysHours;
+extern struct asn_TYPE_descriptor_s asn_DEF_IVIM;
+extern struct asn_TYPE_descriptor_s asn_DEF_MAPEM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SPATEM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SREM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SSEM;
 
 
 struct asn_TYPE_descriptor_s *asn_pdu_collection[] = {
-	/* From module IVIM-PDU-Descriptions in ../IVIM-ASN1-files/asn1_IS_ETSI_TS_103301_IVIM_PDU_Descriptions.asn */
-	&asn_DEF_IVIM,	
-	/* From module GDD in ../IVIM-ASN1-files/asn1_IS_ISO_TS_14823_GDD.asn */
+	/* From module GDD in /home/carlosrisma/IVIM ASN1 files/asn1_IS_ISO_TS_14823_GDD.asn */
 	&asn_DEF_GddStructure,	
-	/* From module EfcDsrcApplication in ../IVIM-ASN1-files/asn1_IS_ISO_TS_14906_EfcDsrcApplication.asn */
+	/* From module EfcDsrcApplication in /home/carlosrisma/IVIM ASN1 files/asn1_IS_ISO_TS_14906_EfcDsrcApplication.asn */
 	&asn_DEF_ActualNumberOfPassengers,	
 	&asn_DEF_AddRq,	
 	&asn_DEF_ChannelRq,	
@@ -154,27 +156,27 @@ struct asn_TYPE_descriptor_s *asn_pdu_collection[] = {
 	&asn_DEF_VehicleTotalDistance,	
 	&asn_DEF_VehicleWeightLaden,	
 	&asn_DEF_VehicleCurrentMaxTrainWeight,	
-	/* From module AddGrpC in ../IVIM-ASN1-files/asn1_IS_ISO_TS_19091_AddGrpC.asn */
+	/* From module IVI in /home/carlosrisma/IVIM ASN1 files/asn1_IS_ISO_TS_19321_IVI.asn */
+	&asn_DEF_IVI,	
+	/* From module CAM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/ETSI CAM v1.4.1.asn */
+	&asn_DEF_CAM,	
+	/* From module DENM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/ETSI DENM v1.3.1.asn */
+	&asn_DEF_DENM,	
+	/* From module AddGrpC in /home/carlosrisma/IVIM ASN1 files/ISO-TS-19091.asn */
 	&asn_DEF_ConnectionManeuverAssist_addGrpC,	
 	&asn_DEF_ConnectionTrajectory_addGrpC,	
 	&asn_DEF_IntersectionState_addGrpC,	
 	&asn_DEF_LaneAttributes_addGrpC,	
 	&asn_DEF_MapData_addGrpC,	
 	&asn_DEF_MovementEvent_addGrpC,	
+	&asn_DEF_NodeAttributeSet_addGrpC,	
 	&asn_DEF_Position3D_addGrpC,	
 	&asn_DEF_RestrictionUserType_addGrpC,	
 	&asn_DEF_RequestorDescription_addGrpC,	
 	&asn_DEF_SignalStatusPackage_addGrpC,	
-	/* From module DSRC-REGION-noCircular in ../IVIM-ASN1-files/asn1_IS_ISO_TS_19091_DSRC_REGION_noCircular.asn */
-	&asn_DEF_NodeAttributeSet_addGrpC,	
-	&asn_DEF_Offset_B09,	
-	/* From module IVI in ../IVIM-ASN1-files/asn1_IS_ISO_TS_19321_IVI.asn */
-	&asn_DEF_IVI,	
-	/* From module CAM-PDU-Descriptions in ../IVIM-ASN1-files/ETSI CAM v1.4.1.asn */
-	&asn_DEF_CAM,	
-	/* From module DENM-PDU-Descriptions in ../IVIM-ASN1-files/ETSI DENM v1.3.1.asn */
-	&asn_DEF_DENM,	
-	/* From module ITS-Container in ../IVIM-ASN1-files/ITS-Container.asn */
+	/* From module DSRC in /home/carlosrisma/IVIM ASN1 files/ISO-TS-19091.asn */
+	&asn_DEF_RTCMcorrections,	
+	/* From module ITS-Container in /home/carlosrisma/IVIM ASN1 files/ITS-Container.asn */
 	&asn_DEF_TrafficConditionSubCauseCode,	
 	&asn_DEF_AccidentSubCauseCode,	
 	&asn_DEF_HumanPresenceOnTheRoadSubCauseCode,	
@@ -200,6 +202,16 @@ struct asn_TYPE_descriptor_s *asn_pdu_collection[] = {
 	&asn_DEF_PostCrashSubCauseCode,	
 	&asn_DEF_DigitalMap,	
 	&asn_DEF_OpeningDaysHours,	
+	/* From module IVIM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/IVIM-PDU-Descriptions.asn */
+	&asn_DEF_IVIM,	
+	/* From module MAPEM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/MAPEM-PDU-Descriptions.asn */
+	&asn_DEF_MAPEM,	
+	/* From module SPATEM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/SPATEM-PDU-Descriptions.asn */
+	&asn_DEF_SPATEM,	
+	/* From module SREM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/SREM-PDU-Descriptions.asn */
+	&asn_DEF_SREM,	
+	/* From module SSEM-PDU-Descriptions in /home/carlosrisma/IVIM ASN1 files/SSEM-PDU-Descriptions.asn */
+	&asn_DEF_SSEM,	
 	0
 };
 

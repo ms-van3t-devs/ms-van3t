@@ -265,7 +265,9 @@ namespace ns3 {
                 if(roadworks_data.innerhardShoulderStatus.isAvailable ())
                   asn1cpp::setField(closedLanes->innerhardShoulderStatus,roadworks_data.innerhardShoulderStatus.getData ());
                 if(roadworks_data.outerhardShoulderStatus.isAvailable ())
-                  asn1cpp::setField(closedLanes->outerhardShoulderStatus,roadworks_data.outerhardShoulderStatus.getData ());
+                  {
+                    asn1cpp::setField(closedLanes->outerhardShoulderStatus,roadworks_data.outerhardShoulderStatus.getData ());
+                  }
                 if(roadworks_data.drivingLaneStatus.isAvailable ())
                   {
                     asn1cpp::bitstring::setBit(closedLanes->drivingLaneStatus,setByteMask(roadworks_data.drivingLaneStatus.getData (),0),0);
@@ -1325,7 +1327,9 @@ namespace ns3 {
               roadworks_data.innerhardShoulderStatus.setData (innerHard);
             auto outerHand = asn1cpp::getField(closedLanes->outerhardShoulderStatus,long,&closedLanes_ok);
             if(closedLanes_ok)
-              roadworks_data.outerhardShoulderStatus.setData (outerHand);
+              {
+                roadworks_data.outerhardShoulderStatus.setData (outerHand);
+              }
             auto drivingLaneStatus_0 = asn1cpp::bitstring::getterByteMask (closedLanes->drivingLaneStatus,0,&closedLanes_ok);
             if(closedLanes_ok)
                 roadworks_data.drivingLaneStatus.setData (getFromMasks(drivingLaneStatus_0, asn1cpp::bitstring::getterByteMask (closedLanes->drivingLaneStatus,1)));

@@ -3,7 +3,7 @@
  * Redistribution and modifications are permitted subject to BSD license.
  */
 #include "asn_internal.h"
-#include <errno.h>
+#include "errno.h"
 
 static ssize_t der_write_TL(ber_tlv_tag_t tag, ber_tlv_len_t len,
 	asn_app_consume_bytes_f *cb, void *app_key, int constructed);

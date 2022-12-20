@@ -20,7 +20,7 @@ extern "C" {
 
 /* Dependencies */
 typedef enum ProtectedZoneType {
-	ProtectedZoneType_cenDsrcTolling	= 0
+	ProtectedZoneType_permanentCenDsrcTolling	= 0
 	/*
 	 * Enumeration is extensible
 	 */

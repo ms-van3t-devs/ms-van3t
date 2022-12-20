@@ -21,18 +21,18 @@ extern "C" {
 #endif
 
 /* Dependencies */
-typedef enum protocolVersion {
+typedef enum ItsPduHeader__protocolVersion {
 	protocolVersion_currentVersion	= 1
-} e_protocolVersion;
-typedef enum messageID {
-	messageID_denm	= 1,
-	messageID_cam	= 2,
-	messageID_poi	= 3,
-	messageID_spat	= 4,
-	messageID_map	= 5,
-	messageID_ivi	= 6,
-	messageID_ev_rsr	= 7
-} e_messageID;
+} e_ItsPduHeader__protocolVersion;
+typedef enum ItsPduHeader__messageID {
+	ItsPduHeader__messageID_denm	= 1,
+	ItsPduHeader__messageID_cam	= 2,
+	ItsPduHeader__messageID_poi	= 3,
+	ItsPduHeader__messageID_spat	= 4,
+	ItsPduHeader__messageID_map	= 5,
+	ItsPduHeader__messageID_ivi	= 6,
+	ItsPduHeader__messageID_ev_rsr	= 7
+} e_ItsPduHeader__messageID;
 
 /* ItsPduHeader */
 typedef struct ItsPduHeader {

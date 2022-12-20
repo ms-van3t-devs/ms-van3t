@@ -4,7 +4,7 @@
  */
 #include "asn_internal.h"
 #include "ber_tlv_tag.h"
-#include <errno.h>
+#include "errno.h"
 
 ssize_t
 ber_fetch_tag(const void *ptr, size_t size, ber_tlv_tag_t *tag_r) {

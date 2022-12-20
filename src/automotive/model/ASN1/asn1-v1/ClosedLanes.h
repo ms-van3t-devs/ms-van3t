@@ -22,7 +22,7 @@ extern "C" {
 
 /* ClosedLanes */
 typedef struct ClosedLanes {
-	HardShoulderStatus_t	*hardShoulderStatus	/* OPTIONAL */;
+	HardShoulderStatus_t	*innerhardShoulderStatus	/* OPTIONAL */;
 	DrivingLaneStatus_t	 drivingLaneStatus;
 	/*
 	 * This type is extensible,

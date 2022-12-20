@@ -6,6 +6,23 @@ struct asn_TYPE_descriptor_s;	/* Forward declaration */
 
 extern struct asn_TYPE_descriptor_s asn_DEF_CAM;
 extern struct asn_TYPE_descriptor_s asn_DEF_DENM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SPATEM;
+extern struct asn_TYPE_descriptor_s asn_DEF_MAPEM;
+extern struct asn_TYPE_descriptor_s asn_DEF_IVIM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SREM;
+extern struct asn_TYPE_descriptor_s asn_DEF_SSEM;
+extern struct asn_TYPE_descriptor_s asn_DEF_CS5;
+extern struct asn_TYPE_descriptor_s asn_DEF_AttributeIdList;
+extern struct asn_TYPE_descriptor_s asn_DEF_ConnectionManeuverAssist_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_ConnectionTrajectory_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_Control_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_IntersectionState_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_MapData_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_Position3D_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_RestrictionUserType_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_SignalStatusPackage_addGrpC;
+extern struct asn_TYPE_descriptor_s asn_DEF_MessageFrame;
+extern struct asn_TYPE_descriptor_s asn_DEF_IVI;
 extern struct asn_TYPE_descriptor_s asn_DEF_TrafficConditionSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_AccidentSubCauseCode;
 extern struct asn_TYPE_descriptor_s asn_DEF_HumanPresenceOnTheRoadSubCauseCode;
@@ -32,10 +49,37 @@ extern struct asn_TYPE_descriptor_s asn_DEF_PostCrashSubCauseCode;
 
 
 struct asn_TYPE_descriptor_s *asn_pdu_collection[] = {
-	/* From module CAM-PDU-Descriptions in ASN1Files/ETSI CAM v1.3.2.asn */
+	/* From module CAM-PDU-Descriptions in ASN1Files/CAM-PDU-Descriptions.asn */
 	&asn_DEF_CAM,	
-	/* From module DENM-PDU-Descriptions in ASN1Files/ETSI DENM v1.2.2.asn */
+	/* From module DENM-PDU-Descriptions in ASN1Files/ETSI_DENM_v1.2.2_no_ITS-Container.asn */
 	&asn_DEF_DENM,	
+	/* From module SPATEM-PDU-Descriptions in ASN1Files/ETSI_TS_103301.asn */
+	&asn_DEF_SPATEM,	
+	/* From module MAPEM-PDU-Descriptions in ASN1Files/ETSI_TS_103301.asn */
+	&asn_DEF_MAPEM,	
+	/* From module IVIM-PDU-Descriptions in ASN1Files/ETSI_TS_103301.asn */
+	&asn_DEF_IVIM,	
+	/* From module SREM-PDU-Descriptions in ASN1Files/ETSI_TS_103301.asn */
+	&asn_DEF_SREM,	
+	/* From module SSEM-PDU-Descriptions in ASN1Files/ETSI_TS_103301.asn */
+	&asn_DEF_SSEM,	
+	/* From module AVIAEINumberingAndDataStructures in ASN1Files/ISO_TS_14816.asn */
+	&asn_DEF_CS5,	
+	/* From module EfcDsrcGeneric in ASN1Files/ISO_TS_14906_Generic.asn */
+	&asn_DEF_AttributeIdList,	
+	/* From module AddGrpC in ASN1Files/ISO_TS_19091.asn */
+	&asn_DEF_ConnectionManeuverAssist_addGrpC,	
+	&asn_DEF_ConnectionTrajectory_addGrpC,	
+	&asn_DEF_Control_addGrpC,	
+	&asn_DEF_IntersectionState_addGrpC,	
+	&asn_DEF_MapData_addGrpC,	
+	&asn_DEF_Position3D_addGrpC,	
+	&asn_DEF_RestrictionUserType_addGrpC,	
+	&asn_DEF_SignalStatusPackage_addGrpC,	
+	/* From module DSRC in ASN1Files/ISO_TS_19091.asn */
+	&asn_DEF_MessageFrame,	
+	/* From module IVI in ASN1Files/ISO_TS_19321.asn */
+	&asn_DEF_IVI,	
 	/* From module ITS-Container in ASN1Files/ITS-Container_v1.asn */
 	&asn_DEF_TrafficConditionSubCauseCode,	
 	&asn_DEF_AccidentSubCauseCode,	

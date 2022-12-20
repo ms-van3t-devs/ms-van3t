@@ -9,10 +9,10 @@
 
 static asn_oer_constraints_t asn_OER_type_PositionOfPillars_constr_1 CC_NOTUSED = {
 	{ 0, 0 },
-	-1	/* (SIZE(0..MAX)) */};
+	-1	/* (SIZE(1..3)) */};
 asn_per_constraints_t asn_PER_type_PositionOfPillars_constr_1 CC_NOTUSED = {
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
-	{ APC_CONSTRAINED | APC_EXTENSIBLE,  2,  2,  1,  3 }	/* (SIZE(1..3,...)) */,
+	{ APC_CONSTRAINED,	 2,  2,  1,  3 }	/* (SIZE(1..3)) */,
 	0, 0	/* No PER value map */
 };
 asn_TYPE_member_t asn_MBR_PositionOfPillars_1[] = {

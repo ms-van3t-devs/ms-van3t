@@ -309,7 +309,7 @@ Set(source_files
     model/ASN1/asn1-v2/NodeAttributeSetXY.c
     model/ASN1/asn1-v2/NodeAttributeXY.c
     model/ASN1/asn1-v2/NodeAttributeXYList.c
-    model/ASN1/asn1-v2/NodeIVI.c
+    model/ASN1/asn1-v2/NodeITS.c
     model/ASN1/asn1-v2/NodeLink.c
     model/ASN1/asn1-v2/Node-LLmD-64b.c
     model/ASN1/asn1-v2/NodeOffsetPointXY.c
@@ -530,7 +530,145 @@ Set(source_files
     model/ASN1/asn1-v2/YawRateConfidence.c
     model/ASN1/asn1-v2/YawRateValue.c
     model/ASN1/asn1-v2/Zid.c
-    model/ASN1/asn1-v2/Zone.c)
+    model/ASN1/asn1-v2/Zone.c
+
+    model/ASN1/asn1-v2/AdvisorySpeed.c
+    model/ASN1/asn1-v2/AdvisorySpeedList.c
+    model/ASN1/asn1-v2/AdvisorySpeedType.c
+    model/ASN1/asn1-v2/AllowedManeuvers.c
+    model/ASN1/asn1-v2/Angle.c
+    model/ASN1/asn1-v2/AntennaOffsetSet.c
+    model/ASN1/asn1-v2/ApproachID.c
+    model/ASN1/asn1-v2/BasicVehicleRole.c
+    model/ASN1/asn1-v2/ComputedLane.c
+    model/ASN1/asn1-v2/ConnectingLane.c
+    model/ASN1/asn1-v2/Connection.c
+    model/ASN1/asn1-v2/ConnectionManeuverAssist.c
+    model/ASN1/asn1-v2/ConnectsToList.c
+    model/ASN1/asn1-v2/DataParameters.c
+    model/ASN1/asn1-v2/DDateTime.c
+    model/ASN1/asn1-v2/DDay.c
+    model/ASN1/asn1-v2/DescriptiveName.c
+    model/ASN1/asn1-v2/DHour.c
+    model/ASN1/asn1-v2/DMinute.c
+    model/ASN1/asn1-v2/DMonth.c
+    model/ASN1/asn1-v2/DOffset.c
+    model/ASN1/asn1-v2/DrivenLineOffsetLg.c
+    model/ASN1/asn1-v2/DrivenLineOffsetSm.c
+    model/ASN1/asn1-v2/DSecond.c
+    model/ASN1/asn1-v2/DSRCmsgID.c
+    model/ASN1/asn1-v2/DYear.c
+    model/ASN1/asn1-v2/Elevation.c
+    model/ASN1/asn1-v2/ElevationConfidence.c
+    model/ASN1/asn1-v2/EnabledLaneList.c
+    model/ASN1/asn1-v2/FullPositionVector.c
+    model/ASN1/asn1-v2/GenericLane.c
+    model/ASN1/asn1-v2/GNSSstatus.c
+    model/ASN1/asn1-v2/IntersectionAccessPoint.c
+    model/ASN1/asn1-v2/IntersectionGeometry.c
+    model/ASN1/asn1-v2/IntersectionGeometryList.c
+    model/ASN1/asn1-v2/IntersectionReferenceID.c
+    model/ASN1/asn1-v2/IntersectionState.c
+    model/ASN1/asn1-v2/IntersectionStateList.c
+    model/ASN1/asn1-v2/IntersectionStatusObject.c
+    model/ASN1/asn1-v2/LaneAttributes-Barrier.c
+    model/ASN1/asn1-v2/LaneAttributes-Bike.c
+    model/ASN1/asn1-v2/LaneAttributes.c
+    model/ASN1/asn1-v2/LaneAttributes-Crosswalk.c
+    model/ASN1/asn1-v2/LaneAttributes-Parking.c
+    model/ASN1/asn1-v2/LaneAttributes-Sidewalk.c
+    model/ASN1/asn1-v2/LaneAttributes-Striping.c
+    model/ASN1/asn1-v2/LaneAttributes-TrackedVehicle.c
+    model/ASN1/asn1-v2/LaneAttributes-Vehicle.c
+    model/ASN1/asn1-v2/LaneDirection.c
+    model/ASN1/asn1-v2/LaneList.c
+    model/ASN1/asn1-v2/LaneSharing.c
+    model/ASN1/asn1-v2/LaneTypeAttributes.c
+    model/ASN1/asn1-v2/LaneWidth.c
+    model/ASN1/asn1-v2/LayerID.c
+    model/ASN1/asn1-v2/LayerType.c
+    model/ASN1/asn1-v2/ManeuverAssistList.c
+    model/ASN1/asn1-v2/MapData.c
+    model/ASN1/asn1-v2/MAPEM.c
+    model/ASN1/asn1-v2/MinuteOfTheYear.c
+    model/ASN1/asn1-v2/MovementEvent.c
+    model/ASN1/asn1-v2/MovementEventList.c
+    model/ASN1/asn1-v2/MovementList.c
+    model/ASN1/asn1-v2/MovementPhaseState.c
+    model/ASN1/asn1-v2/MovementState.c
+    model/ASN1/asn1-v2/MsgCount.c
+    model/ASN1/asn1-v2/NodeListXY.c
+    model/ASN1/asn1-v2/OverlayLaneList.c
+    model/ASN1/asn1-v2/PedestrianBicycleDetect.c
+    model/ASN1/asn1-v2/Position3D.c
+    model/ASN1/asn1-v2/PositionalAccuracy.c
+    model/ASN1/asn1-v2/PositionConfidence.c
+    model/ASN1/asn1-v2/PositionConfidenceSet.c
+    model/ASN1/asn1-v2/PreemptPriorityList.c
+    model/ASN1/asn1-v2/PriorityRequestType.c
+    model/ASN1/asn1-v2/RequestID.c
+    model/ASN1/asn1-v2/RequestImportanceLevel.c
+    model/ASN1/asn1-v2/RequestorDescription.c
+    model/ASN1/asn1-v2/RequestorPositionVector.c
+    model/ASN1/asn1-v2/RequestorType.c
+    model/ASN1/asn1-v2/RequestSubRole.c
+    model/ASN1/asn1-v2/RestrictionAppliesTo.c
+    model/ASN1/asn1-v2/RestrictionClassAssignment.c
+    model/ASN1/asn1-v2/RestrictionClassID.c
+    model/ASN1/asn1-v2/RestrictionClassList.c
+    model/ASN1/asn1-v2/RestrictionUserType.c
+    model/ASN1/asn1-v2/RestrictionUserTypeList.c
+    model/ASN1/asn1-v2/RoadLaneSetList.c
+    model/ASN1/asn1-v2/RoadRegulatorID.c
+    model/ASN1/asn1-v2/RoadSegment.c
+    model/ASN1/asn1-v2/RoadSegmentID.c
+    model/ASN1/asn1-v2/RoadSegmentList.c
+    model/ASN1/asn1-v2/RoadSegmentReferenceID.c
+    model/ASN1/asn1-v2/RTCMcorrections.c
+    model/ASN1/asn1-v2/RTCMheader.c
+    model/ASN1/asn1-v2/RTCMmessage.c
+    model/ASN1/asn1-v2/RTCMmessageList.c
+    model/ASN1/asn1-v2/RTCM-Revision.c
+    model/ASN1/asn1-v2/Scale-B12.c
+    model/ASN1/asn1-v2/SemiMajorAxisAccuracy.c
+    model/ASN1/asn1-v2/SemiMajorAxisOrientation.c
+    model/ASN1/asn1-v2/SemiMinorAxisAccuracy.c
+    model/ASN1/asn1-v2/SignalControlZone.c
+    model/ASN1/asn1-v2/SignalRequest.c
+    model/ASN1/asn1-v2/SignalRequesterInfo.c
+    model/ASN1/asn1-v2/SignalRequestList.c
+    model/ASN1/asn1-v2/SignalRequestMessage.c
+    model/ASN1/asn1-v2/SignalRequestPackage.c
+    model/ASN1/asn1-v2/SignalStatus.c
+    model/ASN1/asn1-v2/SignalStatusList.c
+    model/ASN1/asn1-v2/SignalStatusMessage.c
+    model/ASN1/asn1-v2/SignalStatusPackage.c
+    model/ASN1/asn1-v2/SignalStatusPackageList.c
+    model/ASN1/asn1-v2/SPAT.c
+    model/ASN1/asn1-v2/SPATEM.c
+    model/ASN1/asn1-v2/SpeedAdvice.c
+    model/ASN1/asn1-v2/SpeedandHeadingandThrottleConfidence.c
+    model/ASN1/asn1-v2/SREM.c
+    model/ASN1/asn1-v2/SSEM.c
+    model/ASN1/asn1-v2/TemporaryID.c
+    model/ASN1/asn1-v2/ThrottleConfidence.c
+    model/ASN1/asn1-v2/TimeChangeDetails.c
+    model/ASN1/asn1-v2/TimeConfidence.c
+    model/ASN1/asn1-v2/TimeIntervalConfidence.c
+    model/ASN1/asn1-v2/TimeMark.c
+    model/ASN1/asn1-v2/TransitVehicleOccupancy.c
+    model/ASN1/asn1-v2/TransitVehicleStatus.c
+    model/ASN1/asn1-v2/TransmissionAndSpeed.c
+    model/ASN1/asn1-v2/TransmissionState.c
+    model/ASN1/asn1-v2/VehicleID.c
+    model/ASN1/asn1-v2/VehicleType.c
+    model/ASN1/asn1-v2/WaitOnStopline.c
+    model/ASN1/asn1-v2/ZoneLength.c
+
+    #model/ASN1/asn1-v2/MessageFrame.c
+    #model/ASN1/asn1-v2/Control-addGrpC.c
+    #model/ASN1/asn1-v2/IssuerIdentifier.c
+    )
 
 set(header_files
     helper/areaSpeedAdvisorClientLTE-helper.h
@@ -857,7 +995,7 @@ set(header_files
     model/ASN1/asn1-v2/NodeAttributeSetXY.h
     model/ASN1/asn1-v2/NodeAttributeXY.h
     model/ASN1/asn1-v2/NodeAttributeXYList.h
-    model/ASN1/asn1-v2/NodeIVI.h
+    model/ASN1/asn1-v2/NodeITS.h
     model/ASN1/asn1-v2/NodeLink.h
     model/ASN1/asn1-v2/Node-LLmD-64b.h
     model/ASN1/asn1-v2/NodeOffsetPointXY.h
@@ -1075,7 +1213,145 @@ set(header_files
     model/ASN1/asn1-v2/YawRate.h
     model/ASN1/asn1-v2/YawRateValue.h
     model/ASN1/asn1-v2/Zid.h
-    model/ASN1/asn1-v2/Zone.h)
+    model/ASN1/asn1-v2/Zone.h
+
+    model/ASN1/asn1-v2/AdvisorySpeed.h
+    model/ASN1/asn1-v2/AdvisorySpeedList.h
+    model/ASN1/asn1-v2/AdvisorySpeedType.h
+    model/ASN1/asn1-v2/AllowedManeuvers.h
+    model/ASN1/asn1-v2/Angle.h
+    model/ASN1/asn1-v2/AntennaOffsetSet.h
+    model/ASN1/asn1-v2/ApproachID.h
+    model/ASN1/asn1-v2/BasicVehicleRole.h
+    model/ASN1/asn1-v2/ComputedLane.h
+    model/ASN1/asn1-v2/ConnectingLane.h
+    model/ASN1/asn1-v2/Connection.h
+    model/ASN1/asn1-v2/ConnectionManeuverAssist.h
+    model/ASN1/asn1-v2/ConnectsToList.h
+    model/ASN1/asn1-v2/DataParameters.h
+    model/ASN1/asn1-v2/DDateTime.h
+    model/ASN1/asn1-v2/DDay.h
+    model/ASN1/asn1-v2/DescriptiveName.h
+    model/ASN1/asn1-v2/DHour.h
+    model/ASN1/asn1-v2/DMinute.h
+    model/ASN1/asn1-v2/DMonth.h
+    model/ASN1/asn1-v2/DOffset.h
+    model/ASN1/asn1-v2/DrivenLineOffsetLg.h
+    model/ASN1/asn1-v2/DrivenLineOffsetSm.h
+    model/ASN1/asn1-v2/DSecond.h
+    model/ASN1/asn1-v2/DSRCmsgID.h
+    model/ASN1/asn1-v2/DYear.h
+    model/ASN1/asn1-v2/Elevation.h
+    model/ASN1/asn1-v2/ElevationConfidence.h
+    model/ASN1/asn1-v2/EnabledLaneList.h
+    model/ASN1/asn1-v2/FullPositionVector.h
+    model/ASN1/asn1-v2/GenericLane.h
+    model/ASN1/asn1-v2/GNSSstatus.h
+    model/ASN1/asn1-v2/IntersectionAccessPoint.h
+    model/ASN1/asn1-v2/IntersectionGeometry.h
+    model/ASN1/asn1-v2/IntersectionGeometryList.h
+    model/ASN1/asn1-v2/IntersectionReferenceID.h
+    model/ASN1/asn1-v2/IntersectionState.h
+    model/ASN1/asn1-v2/IntersectionStateList.h
+    model/ASN1/asn1-v2/IntersectionStatusObject.h
+    model/ASN1/asn1-v2/LaneAttributes-Barrier.h
+    model/ASN1/asn1-v2/LaneAttributes-Bike.h
+    model/ASN1/asn1-v2/LaneAttributes.h
+    model/ASN1/asn1-v2/LaneAttributes-Crosswalk.h
+    model/ASN1/asn1-v2/LaneAttributes-Parking.h
+    model/ASN1/asn1-v2/LaneAttributes-Sidewalk.h
+    model/ASN1/asn1-v2/LaneAttributes-Striping.h
+    model/ASN1/asn1-v2/LaneAttributes-TrackedVehicle.h
+    model/ASN1/asn1-v2/LaneAttributes-Vehicle.h
+    model/ASN1/asn1-v2/LaneDirection.h
+    model/ASN1/asn1-v2/LaneList.h
+    model/ASN1/asn1-v2/LaneSharing.h
+    model/ASN1/asn1-v2/LaneTypeAttributes.h
+    model/ASN1/asn1-v2/LaneWidth.h
+    model/ASN1/asn1-v2/LayerID.h
+    model/ASN1/asn1-v2/LayerType.h
+    model/ASN1/asn1-v2/ManeuverAssistList.h
+    model/ASN1/asn1-v2/MapData.h
+    model/ASN1/asn1-v2/MAPEM.h
+    model/ASN1/asn1-v2/MinuteOfTheYear.h
+    model/ASN1/asn1-v2/MovementEvent.h
+    model/ASN1/asn1-v2/MovementEventList.h
+    model/ASN1/asn1-v2/MovementList.h
+    model/ASN1/asn1-v2/MovementPhaseState.h
+    model/ASN1/asn1-v2/MovementState.h
+    model/ASN1/asn1-v2/MsgCount.h
+    model/ASN1/asn1-v2/NodeListXY.h
+    model/ASN1/asn1-v2/OverlayLaneList.h
+    model/ASN1/asn1-v2/PedestrianBicycleDetect.h
+    model/ASN1/asn1-v2/Position3D.h
+    model/ASN1/asn1-v2/PositionalAccuracy.h
+    model/ASN1/asn1-v2/PositionConfidence.h
+    model/ASN1/asn1-v2/PositionConfidenceSet.h
+    model/ASN1/asn1-v2/PreemptPriorityList.h
+    model/ASN1/asn1-v2/PriorityRequestType.h
+    model/ASN1/asn1-v2/RequestID.h
+    model/ASN1/asn1-v2/RequestImportanceLevel.h
+    model/ASN1/asn1-v2/RequestorDescription.h
+    model/ASN1/asn1-v2/RequestorPositionVector.h
+    model/ASN1/asn1-v2/RequestorType.h
+    model/ASN1/asn1-v2/RequestSubRole.h
+    model/ASN1/asn1-v2/RestrictionAppliesTo.h
+    model/ASN1/asn1-v2/RestrictionClassAssignment.h
+    model/ASN1/asn1-v2/RestrictionClassID.h
+    model/ASN1/asn1-v2/RestrictionClassList.h
+    model/ASN1/asn1-v2/RestrictionUserType.h
+    model/ASN1/asn1-v2/RestrictionUserTypeList.h
+    model/ASN1/asn1-v2/RoadLaneSetList.h
+    model/ASN1/asn1-v2/RoadRegulatorID.h
+    model/ASN1/asn1-v2/RoadSegment.h
+    model/ASN1/asn1-v2/RoadSegmentID.h
+    model/ASN1/asn1-v2/RoadSegmentList.h
+    model/ASN1/asn1-v2/RoadSegmentReferenceID.h
+    model/ASN1/asn1-v2/RTCMcorrections.h
+    model/ASN1/asn1-v2/RTCMheader.h
+    model/ASN1/asn1-v2/RTCMmessage.h
+    model/ASN1/asn1-v2/RTCMmessageList.h
+    model/ASN1/asn1-v2/RTCM-Revision.h
+    model/ASN1/asn1-v2/Scale-B12.h
+    model/ASN1/asn1-v2/SemiMajorAxisAccuracy.h
+    model/ASN1/asn1-v2/SemiMajorAxisOrientation.h
+    model/ASN1/asn1-v2/SemiMinorAxisAccuracy.h
+    model/ASN1/asn1-v2/SignalControlZone.h
+    model/ASN1/asn1-v2/SignalRequest.h
+    model/ASN1/asn1-v2/SignalRequesterInfo.h
+    model/ASN1/asn1-v2/SignalRequestList.h
+    model/ASN1/asn1-v2/SignalRequestMessage.h
+    model/ASN1/asn1-v2/SignalRequestPackage.h
+    model/ASN1/asn1-v2/SignalStatus.h
+    model/ASN1/asn1-v2/SignalStatusList.h
+    model/ASN1/asn1-v2/SignalStatusMessage.h
+    model/ASN1/asn1-v2/SignalStatusPackage.h
+    model/ASN1/asn1-v2/SignalStatusPackageList.h
+    model/ASN1/asn1-v2/SPAT.h
+    model/ASN1/asn1-v2/SPATEM.h
+    model/ASN1/asn1-v2/SpeedAdvice.h
+    model/ASN1/asn1-v2/SpeedandHeadingandThrottleConfidence.h
+    model/ASN1/asn1-v2/SREM.h
+    model/ASN1/asn1-v2/SSEM.h
+    model/ASN1/asn1-v2/TemporaryID.h
+    model/ASN1/asn1-v2/ThrottleConfidence.h
+    model/ASN1/asn1-v2/TimeChangeDetails.h
+    model/ASN1/asn1-v2/TimeConfidence.h
+    model/ASN1/asn1-v2/TimeIntervalConfidence.h
+    model/ASN1/asn1-v2/TimeMark.h
+    model/ASN1/asn1-v2/TransitVehicleOccupancy.h
+    model/ASN1/asn1-v2/TransitVehicleStatus.h
+    model/ASN1/asn1-v2/TransmissionAndSpeed.h
+    model/ASN1/asn1-v2/TransmissionState.h
+    model/ASN1/asn1-v2/VehicleID.h
+    model/ASN1/asn1-v2/VehicleType.h
+    model/ASN1/asn1-v2/WaitOnStopline.h
+    model/ASN1/asn1-v2/ZoneLength.h
+
+    #model/ASN1/asn1-v2/MessageFrame.h
+    #model/ASN1/asn1-v2/Control-addGrpC.h
+    #model/ASN1/asn1-v2/IssuerIdentifier.h
+)
 
 set(test_sources
 )

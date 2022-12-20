@@ -8,14 +8,14 @@
 #include "ClosedLanes.h"
 
 asn_TYPE_member_t asn_MBR_ClosedLanes_1[] = {
-	{ ATF_POINTER, 1, offsetof(struct ClosedLanes, hardShoulderStatus),
+	{ ATF_POINTER, 1, offsetof(struct ClosedLanes, innerhardShoulderStatus),
 		(ASN_TAG_CLASS_CONTEXT | (0 << 2)),
 		-1,	/* IMPLICIT tag at current level */
 		&asn_DEF_HardShoulderStatus,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */
-		"hardShoulderStatus"
+		"innerhardShoulderStatus"
 		},
 	{ ATF_NOFLAGS, 0, offsetof(struct ClosedLanes, drivingLaneStatus),
 		(ASN_TAG_CLASS_CONTEXT | (1 << 2)),

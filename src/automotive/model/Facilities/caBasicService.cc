@@ -627,7 +627,7 @@ namespace ns3
                         asn1cpp::setField(closeLanes_seq->innerhardShoulderStatus,roadWorksContainerBasicData.getData ().innerhardShoulderStatus.getData ());
 
                     if(roadWorksContainerBasicData.getData ().outerhardShoulderStatus.isAvailable ())
-                        asn1cpp::setField(closeLanes_seq->outerhardShoulderStatus,roadWorksContainerBasicData.getData ().outerhardShoulderStatus.getData ());
+                        //asn1cpp::setField(closeLanes_seq->outerhardShoulderStatus,roadWorksContainerBasicData.getData ().outerhardShoulderStatus.getData ());
 
                     asn1cpp::setField(specialVehicleCont->choice.roadWorksContainerBasic.closedLanes,closeLanes_seq);
                   }
