@@ -2,9 +2,9 @@
 
 ![](img/MS-VAN3T_logo-V2_small.png)
 
-ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (v-3.33), with the possibility of easily switching stack and communication technology.
+ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, v3.35), with the possibility of easily switching stack and communication technology.
 
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0 and ns-3 v3.33 on Ubuntu 18.04 and 20.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, on Ubuntu 20.04 and 22.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
