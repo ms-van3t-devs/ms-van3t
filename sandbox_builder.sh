@@ -32,14 +32,7 @@ if [ ! -z $1 ]; then
 			exit 1
 		fi
 
-		sudo apt install gcc g++ python python3 python3-setuptools git mercurial qt5-default \
-			openmpi-bin openmpi-common openmpi-doc libopenmpi-dev \
-			autoconf cvs bzr unrar \
-			gdb valgrind uncrustify \
-			python3-sphinx dia gsl-bin libgsl-dev libgslcblas0 \
-			tcpdump sqlite sqlite3 libsqlite3-dev \
-			libxml2 libxml2-dev \
-			libgtk2.0-0 libgtk2.0-dev
+		sudo apt install -y g++ python3 cmake ninja-build git ccache gir1.2-goocanvas-2.0 python3-gi python3-gi-cairo python3-pygraphviz gir1.2-gtk-3.0 python3-dev pkg-config sqlite3 cmake python3-setuptools qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools mercurial unzip gdb valgrind clang clang-format doxygen graphviz imagemagick python3-sphinx gsl-bin libgsl-dev libgslcblas0 tcpdump libsqlite3-dev libxml2 libxml2-dev libc6-dev libc6-dev-i386 libclang-dev llvm-dev automake python3-pip libgtk-3-dev libxml2 libxml2-dev libboost-all-dev 
 			
 		# Detecting the current Ubuntu version to install the correct version of libgsl
 		# This is done only on Ubuntu (i.e. only if the command "lsb_release" returns "Ubuntu" as distro)
@@ -52,9 +45,12 @@ if [ ! -z $1 ]; then
 			version=$(lsb_release -d | cut -d " " -f2 | cut -d "." -f1)
 			subversion=$(lsb_release -d | cut -d " " -f2 | cut -d "." -f2)
 			
-			if [ $version -gt 20 -o \( $version -ge 20 -a $subversion -ge 10 \) ]; then
-				echo "Detected Ubuntu >= 20.10 - installing libgsl25"
+			if [ $version -gt 20 -a $version -lt 22 -o \( $version -ge 20 -a $subversion -ge 10 \) ]; then
+				echo "Detected Ubuntu >= 20.10 and Ubuntu < 22.04 - installing libgsl25"
 				sudo apt install libgsl25
+			elif [ $version -gt 22 -o \( $version -ge 22 -a $subversion -ge 04 \) ]; then
+				echo "Detected Ubuntu >= 22.04 - installing libgsl27"
+				sudo apt install libgsl27
 			else
 				echo "Detected Ubuntu < 20.10 - installing libgsl23"
 				sudo apt install libgsl23

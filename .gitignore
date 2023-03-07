@@ -157,3 +157,7 @@ gitignorer.sh
 /src/automotive/examples/v2v-80211p-student-application-app2.cc
 /src/automotive/examples/v2v-80211p-student-application-app3.cc
 /src/automotive/examples/v2v-80211p-student-application-app4.cc
+
+# Other ns-3-dev files
+/.lock-ns3_*_build
+/cmake-cache/
