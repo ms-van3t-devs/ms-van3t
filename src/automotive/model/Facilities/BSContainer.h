@@ -55,6 +55,11 @@ namespace ns3
     // Then, it may be called as many times as desired to change the DENMs GeoArea
     // It should always be called after setupContainer(), otherwise it will generate an error
     void setDENMCircularGeoArea(double lat, double lon, int radius_meters);
+
+    // Function to be called when this BSContainer is no longer being used (e.g., when a vehicle exits from the SUMO scenario)
+    // This function should be called to automatically perform all the necessary cleanup operations (like stopping the CAM
+    // dissemation, if enabled, and the GeoNetworking egoPV updates)
+    void cleanup();
   private:
     // Message reception callbacks
     std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t)> m_CAReceiveCallbackExtended;
@@ -87,6 +92,7 @@ namespace ns3
 
     bool m_is_configured = false;
     bool m_DENMs_enabled = false;
+    bool m_CAMs_enabled = false;
   };
 }
 

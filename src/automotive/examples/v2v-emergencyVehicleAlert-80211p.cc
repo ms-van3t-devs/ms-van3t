@@ -249,7 +249,7 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
   /* callback function for node creation */
-  std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -267,7 +267,7 @@ main (int argc, char *argv[])
     };
 
   /* Callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
+  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
       Ptr<emergencyVehicleAlert> appSample_ = exNode->GetApplication(0)->GetObject<emergencyVehicleAlert>();

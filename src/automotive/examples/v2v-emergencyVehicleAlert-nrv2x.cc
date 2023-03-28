@@ -675,7 +675,7 @@ main (int argc, char *argv[])
 
   /* callback function for node creation */
   int i=0;
-  std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= allSlUesContainer.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -697,7 +697,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
+  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
       Ptr<emergencyVehicleAlert> appSample_ = exNode->GetApplication(0)->GetObject<emergencyVehicleAlert>();

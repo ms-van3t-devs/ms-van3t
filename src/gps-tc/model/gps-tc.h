@@ -13,6 +13,7 @@
 
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
+#include "ns3/traci-client.h"
 
 #include "ns3/vehicle-visualizer.h"
 
@@ -83,7 +84,7 @@ namespace ns3 {
           void playTrace(Time const &delay);
 
           // Set the functions to create/destroy node
-          void GPSTraceClientSetup(std::function<Ptr<Node>()> create_fcn,std::function<void(Ptr<Node>)> destroy_fcn);
+          void GPSTraceClientSetup(STARTUP_FCN create_fcn,SHUTDOWN_FCN destroy_fcn);
 
           // Stop "playing" the trace
           void StopUpdates();
@@ -119,8 +120,8 @@ namespace ns3 {
           double m_travelled_distance;
 
           // Function pointers to node include/exclude functions
-          std::function<Ptr<Node>()> m_includeNode;
-          std::function<void(Ptr<Node>)> m_excludeNode;
+          STARTUP_FCN m_includeNode;
+          SHUTDOWN_FCN m_excludeNode;
 
           EventId m_event_updatepos;
 

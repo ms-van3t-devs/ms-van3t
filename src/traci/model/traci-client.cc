@@ -239,7 +239,7 @@ namespace ns3
   }
 
   void
-  TraciClient::SumoSetup(std::function<Ptr<Node>()> includeNode, std::function<void (Ptr<Node>)> excludeNode)
+  TraciClient::SumoSetup(std::function<Ptr<Node>(std::string)> includeNode, std::function<void (Ptr<Node>,std::string)> excludeNode)
   {
     NS_LOG_FUNCTION(this);
 
@@ -477,7 +477,7 @@ namespace ns3
                 Ptr<ns3::Node> exNode = m_vehicleNodeMap.at(veh);
 
                 // call exclude function for this node
-                m_excludeNode(exNode);
+                m_excludeNode(exNode,veh);
 
                 // unregister in map
                 m_vehicleNodeMap.erase(veh);
@@ -485,7 +485,7 @@ namespace ns3
             else // if it is not in the map, create a new ns3 node for it
               {
                 // create new node by calling the include function
-                Ptr<ns3::Node> inNode = m_includeNode();
+                Ptr<ns3::Node> inNode = m_includeNode(veh);
 
                 // register in the map (link vehicle to node!)
                 m_vehicleNodeMap.insert(std::pair<std::string, Ptr<Node>>(veh, inNode));

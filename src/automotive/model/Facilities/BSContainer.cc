@@ -120,6 +120,8 @@ namespace ns3
       if(m_CAReceiveCallbackExtended!=nullptr) {
         m_cabs.addCARxCallbackExtended (m_CAReceiveCallbackExtended);
       }
+
+      m_CAMs_enabled = true;
     }
 
     m_vdp_ptr = new VDPTraCI(m_mobility_client,m_sumo_vehid_prefix + std::to_string(m_station_id));
@@ -166,6 +168,22 @@ namespace ns3
       geoArea.shape = CIRCULAR;
 
       m_denbs.setGeoArea (geoArea);
+    }
+  }
+
+  void
+  BSContainer::cleanup()
+  {
+    if(m_CAMs_enabled==true) {
+      m_cabs.terminateDissemination();
+    }
+
+    if(m_DENMs_enabled==true) {
+      m_denbs.cleanup ();
+    }
+
+    if(m_gn!=nullptr) {
+      m_gn->cleanup();
     }
   }
 }

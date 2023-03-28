@@ -239,7 +239,7 @@ namespace ns3
   }
 
   void
-  GPSTraceClient::GPSTraceClientSetup(std::function<Ptr<Node>()> create_fcn,std::function<void(Ptr<Node>)> destroy_fcn)
+  GPSTraceClient::GPSTraceClientSetup(STARTUP_FCN create_fcn,SHUTDOWN_FCN destroy_fcn)
   {
       m_includeNode=create_fcn;
       m_excludeNode=destroy_fcn;
@@ -259,7 +259,7 @@ namespace ns3
   void
   GPSTraceClient::CreateNode()
   {
-      m_vehNode=m_includeNode();
+      m_vehNode=m_includeNode(m_vehID);
 
       // First position update
       m_lastvehicledataidx=0;
@@ -308,7 +308,7 @@ namespace ns3
     }
     if(m_lastvehicledataidx+1==vehiclesdata.size())
       {
-        m_excludeNode(m_vehNode);
+        m_excludeNode(m_vehNode,m_vehID);
         m_vehNode=nullptr;
 
         NS_LOG_INFO("Trace terminated for vehicle: "<<m_vehID);

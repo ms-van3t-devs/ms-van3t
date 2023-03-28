@@ -239,7 +239,7 @@ main (int argc, char *argv[])
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
   /* Callback function for node creation */
-  std::function<Ptr<Node> ()> setupNewEmuNode = [&] () -> Ptr<Node>
+  STARTUP_FCN setupNewEmuNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -286,7 +286,7 @@ main (int argc, char *argv[])
     };
 
   /* Callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownEmuNode = [] (Ptr<Node> exNode)
+  SHUTDOWN_FCN shutdownEmuNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
       Ptr<v2xEmulator> v2xEmulatorApp_ = exNode->GetApplication(0)->GetObject<v2xEmulator>();

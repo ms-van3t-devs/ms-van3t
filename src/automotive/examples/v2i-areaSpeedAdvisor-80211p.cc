@@ -286,7 +286,7 @@ main (int argc, char *argv[])
   AreaSpeedAdvisorClient80211pHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
   /* callback function for node creation */
-  std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -305,7 +305,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode)
+  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* Stop all applications */
       Ptr<areaSpeedAdvisorClient80211p> areaSpeedAdvisorClient80211p_ = exNode->GetApplication(0)->GetObject<areaSpeedAdvisorClient80211p>();

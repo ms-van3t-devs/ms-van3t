@@ -40,6 +40,9 @@
 
 #include "ns3/vehicle-visualizer.h"
 
+#define STARTUP_FCN std::function<Ptr<Node>(std::string)>
+#define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>
+
 namespace ns3 {
 
 class TraciClient : public TraCIAPI, public Object
@@ -53,7 +56,7 @@ public:
   ~TraciClient(void);
 
   // start up sumo; pass function pointers for including and excluding node functions
-  void SumoSetup(std::function<Ptr<Node>()> includeNode, std::function<void(Ptr<Node>)> excludeNode);
+  void SumoSetup(STARTUP_FCN includeNode, SHUTDOWN_FCN excludeNode);
 
   void SumoStop();
 
@@ -85,8 +88,8 @@ private:
   std::vector<std::string> m_untrackedVehicles;
 
   // function pointers to node include/exclude functions 
-  std::function<Ptr<Node>()> m_includeNode;
-  std::function<void(Ptr<Node>)> m_excludeNode;
+  STARTUP_FCN m_includeNode;
+  SHUTDOWN_FCN m_excludeNode;
 
   // port handling functionality for multiple parallel simulations
   static bool PortFreeCheck (uint32_t portNum);
