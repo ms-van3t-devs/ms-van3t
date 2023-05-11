@@ -52,6 +52,26 @@
     </vehicle>
       <vehicle id="veh9" type="Car0" depart="6.09964318063" route="6">
     </vehicle>
-      <vehicle id="veh10" type="Car0" depart="108.14588793954" route="17">
+      <vehicle id="veh10" type="Car0" depart="7.14588793954" route="17">
+    </vehicle><!--
+     <vehicle id="veh11" type="Car0" depart="7.87799595080015" route="6">
     </vehicle>
+     <vehicle id="veh12" type="Car0" depart="7.923968374361712" route="29">
+    </vehicle>
+     <vehicle id="veh13" type="Car0" depart="9.817323523202056" route="23">
+    </vehicle>
+     <vehicle id="veh14" type="Car0" depart="10.043027717370798" route="28">
+    </vehicle>
+     <vehicle id="veh15" type="Car0" depart="11.123553514103612" route="20">
+    </vehicle>
+     <vehicle id="veh16" type="Car0" depart="11.130465040354517" route="10">
+    </vehicle>
+     <vehicle id="veh17" type="Car0" depart="12.645782260792227" route="13">
+    </vehicle>
+     <vehicle id="veh18" type="Car0" depart="13.285333386218529" route="11">
+    </vehicle>
+     <vehicle id="veh19" type="Car0" depart="14.489724437631903" route="27">
+    </vehicle>
+     <vehicle id="veh20" type="Car0" depart="14.648581510872177" route="20">
+    </vehicle>-->
 </routes>
