@@ -171,6 +171,10 @@ main (int argc, char *argv[])
   NS_LOG_INFO("Setting up the 802.11p channel @ " << datarate << " Mbit/s, 10 MHz, and tx power " << (int)txPower << " dBm.");
 
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+  /*Example of using diffrent propagation model (after applying extension with apply-extension.sh in automotive/propagation-extended/)*/
+  //YansWifiChannelHelper wifiChannelHelper;
+  //wifiChannelHelper.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  //wifiChannelHelper.AddPropagationLoss ("ns3::CniUrbanmicrocellPropagationLossModel");
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
   wifiPhy.SetChannel (channel);
   /* To be removed when BPT is implemented */
