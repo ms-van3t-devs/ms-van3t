@@ -172,9 +172,9 @@ main (int argc, char *argv[])
 
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   /*Example of using diffrent propagation model (after applying extension with apply-extension.sh in automotive/propagation-extended/)*/
-  //YansWifiChannelHelper wifiChannelHelper;
-  //wifiChannelHelper.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  //wifiChannelHelper.AddPropagationLoss ("ns3::CniUrbanmicrocellPropagationLossModel");
+  // YansWifiChannelHelper wifiChannel;
+  // wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  // wifiChannel.AddPropagationLoss ("ns3::CniUrbanmicrocellPropagationLossModel");
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
   wifiPhy.SetChannel (channel);
   /* To be removed when BPT is implemented */

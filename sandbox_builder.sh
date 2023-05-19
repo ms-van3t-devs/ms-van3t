@@ -120,6 +120,16 @@ set -v
 rm -rfv AUTHORS .git .gitignore img LICENSE license_gplv2.txt README.md src switch_ETSI_version.sh VERSION enable_v2x_emulator.sh
 set +v
 
+echo "Extending available path loss models..."
+sleep 1
+set -v
+cd ns-3-dev
+cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model.cc src/propagation/model/
+cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model.h src/propagation/model/
+cp src/automotive/propagation-extended/CMakeLists.txt src/propagation/
+cd ..
+set +v
+
 echo "Installation completed. You will find a copy of this script in ./ns-3-dev."
 
 rm $0
