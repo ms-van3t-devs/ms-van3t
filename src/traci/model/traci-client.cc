@@ -191,10 +191,12 @@ namespace ns3
     // sumo gui
     if (m_sumoGUI)
       {
+        // m_sumoCommand = m_sumoBinaryPath + "sumo-gui.exe -c"; // <- to connect to the Windows version of SUMO under WSL2
         m_sumoCommand = m_sumoBinaryPath + "sumo-gui -c";
       }
     else
       {
+        // m_sumoCommand = m_sumoBinaryPath + "sumo.exe -c"; // <- to connect to the Windows version of SUMO under WSL2
         m_sumoCommand = m_sumoBinaryPath + "sumo -c";
       }
 
@@ -273,6 +275,7 @@ namespace ns3
     // connect to sumo via traci
     try
       {
+        // this->TraCIAPI::connect("172.23.208.1", m_sumoPort); // <- to connect to the Windows version of SUMO under WSL2 (Windows "host IP" needs to be customized)
         this->TraCIAPI::connect("localhost", m_sumoPort);
       }
     catch (std::exception& e)

@@ -83,11 +83,43 @@ namespace ns3
 
   CABasicService::CABasicService(unsigned long fixed_stationid,long fixed_stationtype,VDP* vdp, bool real_time, bool is_vehicle)
   {
-    CABasicService();
+    m_socket_tx=NULL;
+    m_btp = NULL;
+
+    // Setting a default value of m_T_CheckCamGen_ms equal to 100 ms (i.e. T_GenCamMin_ms)
+    m_T_CheckCamGen_ms=T_GenCamMin_ms;
+
+    m_prev_heading=-1;
+    m_prev_speed=-1;
+    m_prev_distance=-1;
+
+    m_T_GenCam_ms=T_GenCamMax_ms;
+
+    lastCamGen=-1;
+    lastCamGenLowFrequency=-1;
+    lastCamGenSpecialVehicle=-1;
+
+    // Set to 3 as described by the ETSI EN 302 637-2 V1.3.1 standard
+    m_N_GenCamMax=3;
+    m_N_GenCam=0;
+
+    // CAM generation interval for RSU ITS-Ss (default: 1 s)
+    m_RSU_GenCam_ms=1000;
+
+    m_cam_sent=0;
+
+    // All the optional containers are disabled by default
+    m_lowFreqContainerEnabled = false;
+    m_specialVehContainerEnabled = false;
+
+    m_CAReceiveCallback = nullptr;
+    m_CAReceiveCallbackExtended = nullptr;
+
+    m_refPositions.clear ();
+
     m_station_id = (StationID_t) fixed_stationid;
     m_stationtype = (StationType_t) fixed_stationtype;
 
-    m_T_CheckCamGen_ms=T_GenCamMin_ms;
     m_vdp=vdp;
     m_real_time=real_time;
 

@@ -49,7 +49,17 @@ namespace ns3
 
   BSContainer::BSContainer(unsigned long fixed_stationid, long fixed_stationtype, Ptr<TraciClient> mobility_client, bool real_time, Ptr<Socket> socket_rxtx)
   {
-    BSContainer();
+    m_btp = nullptr;
+    m_gn = nullptr;
+
+    m_prrsup_ptr = nullptr;
+    m_prrsup_beacons = true;
+
+    m_sumo_vehid_prefix = "veh";
+
+    m_is_configured = false;
+    m_DENMs_enabled = false;
+
     m_station_id = (StationID_t) fixed_stationid;
     m_stationtype = (StationType_t) fixed_stationtype;
 
