@@ -76,6 +76,9 @@ You need also to install the `libclang-common-8-dev` package (the command for De
 
 Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlighting several errors and not recognizing some types, when opening any source or header file, even if the code compiles correctly.
 
+**Important**: if `libclang-common-8-dev` is not available, you can try installing a newer version. For example, on Ubuntu 22, we verified that `libclang-common-15-dev` works well too.
+
+
 # Sample V2I example and V2I/V2N applications
 
 *ms-van3t* currently supports two stacks/communication technologies for V2I/V2N:
