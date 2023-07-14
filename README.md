@@ -4,7 +4,7 @@
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
 
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, on Ubuntu 20.04 and 22.04.
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, v1.18.0 on Ubuntu 20.04 and 22.04.
 Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
@@ -14,7 +14,7 @@ To build the project:
     	`sudo add-apt-repository ppa:sumo/stable`  
     	`sudo apt update`  
     	`sudo apt install sumo sumo-tools sumo-doc`  
-    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.16.0** )
+    * Be careful: in the future the previous commands will install updated version of SUMO which are not ensured to work with this scripts (that are tested with any version from **v-1.6.0** to **v-1.18.0** )
     * Test sumo by opening a terminal and running "sumo-gui".
 	
     * **Possible problems**:
@@ -58,7 +58,7 @@ This script will download the proper version of ns-3-dev and install this framew
 
 The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_map` folders to save there the SUMO-related files for his/her own applications.
 
-**The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_CAM_DENM_version.sh` script. This script relies on the `ns-3-dev/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
+**The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_ETSI_version.sh` script. This script relies on the `ns-3-dev/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
 
 # Working with an IDE
 
@@ -77,6 +77,15 @@ You need also to install the `libclang-common-8-dev` package (the command for De
 Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlighting several errors and not recognizing some types, when opening any source or header file, even if the code compiles correctly.
 
 **Important**: if `libclang-common-8-dev` is not available, you can try installing a newer version. For example, on Ubuntu 22, we verified that `libclang-common-15-dev` works well too.
+
+# Supported ETSI C-ITS messages
+
+*ms-van3t* currently supports the following ETSI C-ITS messages:
+- CAM
+- DENM
+- IVIM
+
+For the transmission and reception of IVIMs (from an RSU to vehicles), you can refer to the `v2i-emergencyVehicleWarning-80211p` example.
 
 
 # Sample V2I example and V2I/V2N applications
@@ -139,17 +148,19 @@ If using the LTE version in this very simple toy case, it is possible to connect
 
 # Sample V2V example and V2V applications
 
-*ms-van3t* currently supports two stacks/communication technologies for V2V:
-- 802.11p (sample program name: `v2v-80211p`)
-- C-V2X Mode 4 (sample program name: `v2v-cv2x`)
+*ms-van3t* currently supports three stacks/communication technologies for V2V:
+- 802.11p (sample program name: `v2v-emergencyVehicleAlert-80211p`)
+- LTE-V2X Mode 4 (sample program name: `v2v-emergencyVehicleAlert-cv2x`)
+- NR-V2X Mode 2 (sample program name: `v2v-emergencyVehicleAlert-nrv2x`))
 
 To run the program:
 
 `./ns3 run "v2v-emergencyVehicleAlert-cv2x"` or
-`./ns3 run "v2v-emergencyVehicleAlert-80211p"`
+`./ns3 run "v2v-emergencyVehicleAlert-80211p"` or
+`./ns3 run "v2v-emergencyVehicleAlert-nrv2x"`
 
 *  Nodes are created in the ns3 simulation as vehicle enters the SUMO simulation
-*  A full C-V2X or 802.11p stack is implemented at lower layers
+*  A full NR-V2X, LTE-V2X or 802.11p stack is implemented at lower layers
 
 In this example, every vehicle that enters the scenario will start sending CAMs with a frequency between *1 Hz* and *10 Hz* (according to the ETSI standards). The vehicles are divided into "passenger" vehicles (i.e., normal vehicles) and "emergency" vehicles. 
 
