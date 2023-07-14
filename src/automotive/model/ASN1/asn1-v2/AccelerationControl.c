@@ -6,6 +6,9 @@
  */
 
 #include "AccelerationControl.h"
+#if ASN_EMIT_DEBUG==1
+int asn_debug_indent;
+#endif
 
 int
 AccelerationControl_constraint(const asn_TYPE_descriptor_t *td, const void *sptr,
