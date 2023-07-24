@@ -1,0 +1,65 @@
+PLU-PDU-Descriptions {
+    itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) plu (1) version (1)
+}
+
+DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS ItsPduHeader, Heading, ReferencePosition, Speed, DriveDirection, LongitudinalAcceleration, LateralAcceleration, VerticalAcceleration, StationType, VehicleLength, VehicleWidth, YawRate, SpeedConfidence, LanePosition
+FROM ITS-Container { itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) ts (102894) cdd (2) version (2) }
+OriginatingVehicleContainer
+FROM CPM-PDU-Descriptions { itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) tr (103562) cpm (1) version (1)};
+
+--  The root data frame for collective perception message
+PLU ::= SEQUENCE {
+    header ItsPduHeader,
+    plu PlatoonLeaderUpdate
+}
+
+PlatoonLeaderUpdate ::= SEQUENCE {
+    platoonLeaderContainer               OriginatingVehicleContainer,
+    platoonMembers                       PlatoonMembers,
+    nonPlatoonMembers                    NonPlatoonMembers OPTIONAL,
+    platoonPerceivedObjectsContainer     PlatoonPerceivedObjectsContainer OPTIONAL,
+    ...
+}
+
+
+PlatoonPerceivedObjectsContainer ::= SEQUENCE SIZE(1..128, ...) OF PlatoonPerceivedObject
+
+--  Similar to the BasicVehicleContainerHighFrequency in CAMs mixed with the PerceivedObjects from CPMs 
+PlatoonPerceivedObject ::= SEQUENCE {
+    objectID                Identifier,
+    referencePosition       ReferencePosition,
+    timeOfMeasurement       TimeOfMeasurement,
+    responsiblePM           StationID,
+    associatedPMs           PlatoonMembers,
+    heading                 Heading,
+    speed                   Speed,
+    driveDirection          DriveDirection,
+    vehicleLength           VehicleLength,
+    vehicleWidth            VehicleWidth,
+    lanePosition            LanePosition OPTIONAL,
+    objectConfidence        ObjectConfidence DEFAULT 0,
+    objectRefPoint          ObjectRefPoint DEFAULT 0,
+    lateralAcceleration     LateralAcceleration OPTIONAL,
+    verticalAcceleration    VerticalAcceleration OPTIONAL,
+    ...
+}
+
+PlatoonMembers ::= SEQUENCE SIZE(1..128, ...) OF StationID
+
+NonPlatoonMembers ::= SEQUENCE SIZE(1..128, ...) OF NonPlatoonMember
+
+NonPlatoonMember ::= SEQUENCE {
+    stationID      StationID,
+    responsiblePM  StationID,
+    subscribedPMs  SubscribedPMs OPTIONAL,
+    ...
+}
+
+SubscribedPMs ::= SEQUENCE SIZE(1..128, ...) OF StationID
+
+
+END

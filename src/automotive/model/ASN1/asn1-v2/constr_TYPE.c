@@ -4,7 +4,7 @@
  */
 #include "asn_internal.h"
 #include "constr_TYPE.h"
-#include "errno.h"
+#include <errno.h>
 
 /*
  * Version of the ASN.1 infrastructure shipped with compiler.
@@ -70,7 +70,7 @@ _print2fp(const void *buffer, size_t size, void *app_key) {
  * Some compilers do not support variable args macros.
  * This function is a replacement of ASN_DEBUG() macro.
  */
-void ASN_DEBUG_f(const char *fmt, ...);
+void CC_PRINTFLIKE(1, 2) ASN_DEBUG_f(const char *fmt, ...);
 void ASN_DEBUG_f(const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);

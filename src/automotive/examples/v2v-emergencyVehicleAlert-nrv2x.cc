@@ -17,7 +17,7 @@
  *
  */
 
-
+#include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/config-store.h"
 #include "ns3/network-module.h"
@@ -35,7 +35,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/vehicle-visualizer-module.h"
 #include "ns3/PRRSupervisor.h"
-#include "ns3/automotive-module.h"
+
 
 #include <unistd.h>
 #include "ns3/core-module.h"

@@ -14,6 +14,7 @@
 #define CA_PORT 2001
 #define DEN_PORT 2002
 #define IVIM_PORT 2006
+#define CP_PORT 2009
 
 namespace ns3
 {
@@ -35,6 +36,7 @@ namespace ns3
     void addCAMRxCallback(std::function<void(BTPDataIndication_t,Address)> rx_callback) {m_cam_ReceiveCallback=rx_callback;}
     void addDENMRxCallback(std::function<void(BTPDataIndication_t,Address)> rx_callback) {m_denm_ReceiveCallback=rx_callback;}
     void addIVIMRxCallback(std::function<void(BTPDataIndication_t,Address)> rx_callback) {m_ivim_ReceiveCallback=rx_callback;}
+    void addCPMRxCallback(std::function<void(BTPDataIndication_t,Address)> rx_callback) {m_cpm_ReceiveCallback=rx_callback;}
     void sendBTP(BTPDataRequest_t dataRequest);
     void receiveBTP(GNDataIndication_t, Address address);
     void cleanup();
@@ -46,6 +48,7 @@ namespace ns3
     std::function<void(BTPDataIndication_t,Address)> m_cam_ReceiveCallback;
     std::function<void(BTPDataIndication_t,Address)> m_denm_ReceiveCallback;
     std::function<void(BTPDataIndication_t,Address)> m_ivim_ReceiveCallback;
+    std::function<void(BTPDataIndication_t,Address)> m_cpm_ReceiveCallback;
 
   };
 }

@@ -119,6 +119,7 @@ namespace ns3
 
     m_denm_sent = 0;
     m_cam_received = 0;
+    m_cpm_received = 0;
     m_denm_received = 0;
     m_denm_intertime = 0;
 
@@ -154,6 +155,20 @@ namespace ns3
     m_type = m_client->TraCIAPI::vehicle.getVehicleClass (m_id);
     m_max_speed = m_client->TraCIAPI::vehicle.getMaxSpeed (m_id);
 
+    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
+
+    //Create LDM and sensor object
+    m_LDM = CreateObject<LDM>();
+    m_LDM->setStationID(m_id);
+    m_LDM->setTraCIclient(m_client);
+    m_LDM->setVDP(traci_vdp);
+
+    m_sensor = CreateObject<SUMOSensor>();
+    m_sensor->setStationID(m_id);
+    m_sensor->setTraCIclient(m_client);
+    m_sensor->setVDP(traci_vdp);
+    m_sensor->setLDM (m_LDM);
+
     // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
@@ -166,6 +181,9 @@ namespace ns3
     m_btp->setGeoNet(m_geoNet);
     m_denService.setBTP(m_btp);
     m_caService.setBTP(m_btp);
+    m_cpService.setBTP(m_btp);
+    m_caService.setLDM(m_LDM);
+    m_cpService.setLDM(m_LDM);
 
     /* Create the Sockets for TX and RX */
     TypeId tid;
@@ -207,8 +225,10 @@ namespace ns3
     StationType_t stationtype;
     if (m_type=="passenger")
       stationtype = StationType_passengerCar;
-    else if (m_type=="emergency")
+    else if (m_type=="emergency"){
       stationtype = StationType_specialVehicles;
+      //m_LDM->enablePolygons (); // Uncomment to enable detected object polygon visualization for this specific vehicle
+      }
     else
       stationtype = StationType_unknown;
 
@@ -226,10 +246,18 @@ namespace ns3
     m_caService.addCARxCallback (std::bind(&emergencyVehicleAlert::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
     m_caService.setRealTime (m_real_time);
 
+    /* Set sockets, callback, station properties and TraCI VDP in CPBasicService */
+    m_cpService.setSocketTx (m_socket);
+    m_cpService.setSocketRx (m_socket);
+    m_cpService.setStationProperties (std::stol(m_id.substr (3)), (long)stationtype);
+    m_cpService.addCPRxCallback (std::bind(&emergencyVehicleAlert::receiveCPM,this,std::placeholders::_1,std::placeholders::_2));
+    m_cpService.setRealTime (m_real_time);
+    m_cpService.setTraCIclient (m_client);
+
     /* Set TraCI VDP for GeoNet object */
-    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
     m_caService.setVDP(traci_vdp);
     m_denService.setVDP(traci_vdp);
+    m_cpService.setVDP(traci_vdp);
 
     /* Schedule CAM dissemination */
     if(m_send_cam == true)
@@ -238,6 +266,9 @@ namespace ns3
       double desync = ((double)std::rand()/RAND_MAX);
       m_caService.startCamDissemination(desync);
     }
+
+    /* Schedule CPM dissemination */
+    m_cpService.startCpmDissemination ();
 
     if (!m_csv_name.empty ())
     {
@@ -254,7 +285,7 @@ namespace ns3
     Simulator::Cancel(m_send_cam_ev);
     Simulator::Cancel(m_update_denm_ev);
 
-    uint64_t cam_sent;
+    uint64_t cam_sent, cpm_sent;
 
     if (!m_csv_name.empty ())
     {
@@ -262,6 +293,7 @@ namespace ns3
     }
 
     cam_sent = m_caService.terminateDissemination ();
+    cpm_sent = m_cpService.terminateDissemination ();
     m_denService.cleanup();
 
     if (m_print_summary && !m_already_print)
@@ -269,6 +301,8 @@ namespace ns3
       std::cout << "INFO-" << m_id
                 << ",CAM-SENT:" << cam_sent
                 << ",CAM-RECEIVED:" << m_cam_received
+                << ",CPM-SENT: " << cpm_sent
+                << ",CPM-RECEIVED" << m_cpm_received
                 << std::endl;
       m_already_print=true;
     }
@@ -338,6 +372,95 @@ namespace ns3
        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
      }
+
+  }
+
+  void
+  emergencyVehicleAlert::receiveCPM (asn1cpp::Seq<CPM> cpm, Address from)
+  {
+    /* Implement CPM strategy here */
+    m_cpm_received++;
+    (void) from;
+    //std::cout << "["<< Simulator::Now ().GetSeconds ()<<"] " << m_id <<" received a new CPM from vehicle " << asn1cpp::getField(cpm->header.stationID,long) <<" with "<< asn1cpp::getField(cpm->cpm.cpmParameters.numberOfPerceivedObjects,long)<< " perceived objects." <<std::endl;
+    //For every PO inside the CPM, if any
+    bool POs_ok;
+    auto PObjects = asn1cpp::getSeqOpt(cpm->cpm.cpmParameters.perceivedObjectContainer,PerceivedObjectContainer,&POs_ok);
+    if (POs_ok)
+      {
+        int PObjects_size = asn1cpp::sequenceof::getSize(cpm->cpm.cpmParameters.perceivedObjectContainer);
+        for(int i=0; i<PObjects_size;i++)
+          {
+            LDM::returnedVehicleData_t PO_data;
+            auto PO_seq = asn1cpp::makeSeq(PerceivedObject);
+            PO_seq = asn1cpp::sequenceof::getSeq(cpm->cpm.cpmParameters.perceivedObjectContainer,PerceivedObject,i);
+            //If PO is already in local copy of vLDM
+            if(m_LDM->lookup(asn1cpp::getField(PO_seq->objectID,long),PO_data) == LDM::LDM_OK)
+              {
+                  //Add the new perception to the LDM
+                  std::vector<long> associatedCVs = PO_data.vehData.associatedCVs.getData ();
+                  if(std::find(associatedCVs.begin(), associatedCVs.end (), asn1cpp::getField(cpm->header.stationID,long)) == associatedCVs.end ())
+                    associatedCVs.push_back (asn1cpp::getField(cpm->header.stationID,long));
+                  PO_data.vehData.associatedCVs = OptionalDataItem<std::vector<long>>(associatedCVs);
+                  m_LDM->insert (PO_data.vehData);
+              }
+            else
+              {
+               //Translate CPM data to LDM format
+               m_LDM->insert(translateCPMdata(cpm,i));
+              }
+          }
+      }
+  }
+
+  vehicleData_t
+  emergencyVehicleAlert::translateCPMdata (asn1cpp::Seq<CPM> cpm, int objectIndex)
+  {
+    vehicleData_t retval;
+    auto PO_seq = asn1cpp::makeSeq(PerceivedObject);
+    using namespace boost::geometry::strategy::transform;
+    PO_seq = asn1cpp::sequenceof::getSeq(cpm->cpm.cpmParameters.perceivedObjectContainer,PerceivedObject,objectIndex);
+    retval.detected = true;
+    retval.stationID = asn1cpp::getField(PO_seq->objectID,long);
+    retval.ID = std::to_string(retval.stationID);
+    retval.vehicleLength = asn1cpp::getField(PO_seq->planarObjectDimension1->value,long);
+    retval.vehicleWidth = asn1cpp::getField(PO_seq->planarObjectDimension2->value,long);
+    retval.heading = asn1cpp::getField(cpm->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer.heading.headingValue,double)/10 +
+                        asn1cpp::getField(PO_seq->yawAngle->value,double)/10;
+    if (retval.heading > 360.0)
+      retval.heading -= 360.0;
+
+    retval.speed_ms = (double) (asn1cpp::getField(cpm->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer.speed.speedValue,long) +
+                        asn1cpp::getField(PO_seq->xSpeed.value,long))/CENTI;
+
+    double fromLon = asn1cpp::getField(cpm->cpm.cpmParameters.managementContainer.referencePosition.longitude,double)/DOT_ONE_MICRO;
+    double fromLat = asn1cpp::getField(cpm->cpm.cpmParameters.managementContainer.referencePosition.latitude,double)/DOT_ONE_MICRO;
+
+
+    libsumo::TraCIPosition objectPosition = m_client->TraCIAPI::simulation.convertLonLattoXY (fromLon,fromLat);
+
+    point_type objPoint(asn1cpp::getField(PO_seq->xDistance.value,double)/CENTI,asn1cpp::getField(PO_seq->yDistance.value,double)/CENTI);
+    double fromAngle = asn1cpp::getField(cpm->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer.heading.headingValue,double)/10;
+    rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(fromAngle-90);
+    boost::geometry::transform(objPoint, objPoint, rotate);// Transform points to the reference (x,y) axises
+    objectPosition.x += boost::geometry::get<0>(objPoint);
+    objectPosition.y += boost::geometry::get<1>(objPoint);
+
+    libsumo::TraCIPosition objectPosition2 = objectPosition;
+    objectPosition = m_client->TraCIAPI::simulation.convertXYtoLonLat (objectPosition.x,objectPosition.y);
+
+    retval.lon = objectPosition.x;
+    retval.lat = objectPosition.y;
+
+    point_type speedPoint(asn1cpp::getField(PO_seq->xSpeed.value,double)/CENTI,asn1cpp::getField(PO_seq->ySpeed.value,double)/CENTI);
+    boost::geometry::transform(speedPoint, speedPoint, rotate);// Transform points to the reference (x,y) axises
+    retval.speed_ms = asn1cpp::getField(cpm->cpm.cpmParameters.stationDataContainer->choice.originatingVehicleContainer.speed.speedValue,double)/CENTI + boost::geometry::get<0>(speedPoint);
+
+    retval.camTimestamp = asn1cpp::getField(cpm->cpm.generationDeltaTime,long);
+    retval.timestamp_us = Simulator::Now().GetMicroSeconds () - (asn1cpp::getField(PO_seq->timeOfMeasurement,long)*1000);
+    retval.stationType = StationType_passengerCar;
+    retval.perceivedBy.setData(asn1cpp::getField(cpm->header.stationID,long));
+    retval.confidence = asn1cpp::getField(PO_seq->objectConfidence,long);
+    return retval;
 
   }
 

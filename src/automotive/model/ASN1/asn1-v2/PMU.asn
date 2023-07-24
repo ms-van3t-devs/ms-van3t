@@ -1,0 +1,44 @@
+PMU-PDU-Descriptions {
+    itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) pmu (2) version (1)
+}
+
+DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS ItsPduHeader, Heading, ReferencePosition, Speed, DriveDirection, LongitudinalAcceleration, LateralAcceleration, VerticalAcceleration, StationType, VehicleLength, VehicleWidth, YawRate, SpeedConfidence
+FROM ITS-Container { itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) ts (102894) cdd (2) version (2) }
+NumberOfPerceivedObjects FROM CPM-PDU-Descriptions { itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) tr (103562) cpm (1) version (1)}
+PlatoonPerceivedObjectsContainer 
+FROM PLU-PDU-Descriptions {itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) plu (1) version (1)};
+
+--  The root data frame for collective perception message
+PMU ::= SEQUENCE {
+    header ItsPduHeader,
+    pmu PlatoonMemberUpdate
+}
+
+PlatoonMemberUpdate ::= SEQUENCE {
+    platoonMemberState                  PlatoonMemberState,
+    platoonPerceivedObjectsDelta        PlatoonPerceivedObjectsContainer OPTIONAL,
+    platoonResponsiblePerceivedObjects  PlatoonPerceivedObjectsContainer OPTIONAL,
+    connectedVehiclesDelta              ConnectedVehiclesIDs OPTIONAL,
+    connectedVehiclesSubscriptions      ConnectedVehiclesIDs OPTIONAL,
+    ...
+}
+
+ConnectedVehiclesIDs ::= SEQUENCE SIZE(1..255, ...) OF StationID
+
+PlatoonMemberState ::= SEQUENCE{
+    availableCPUs                         AvailableCPU,
+    numberOfPerceivedObjectsResponsible   NumberOfPerceivedObjects,
+    perceivedPPOIDs                       PerceivedPPOIDs OPTIONAL, 
+    ...       
+}
+
+PerceivedPPOIDs ::= SEQUENCE SIZE(1..255, ...) OF Identifier
+
+-- CPU available in 0.1%
+AvailableCPU ::= INTEGER {unavailable(0), onevCPU(1000), twovCPU(2000), threevCPU(3000)} (0..3000)
+
+END

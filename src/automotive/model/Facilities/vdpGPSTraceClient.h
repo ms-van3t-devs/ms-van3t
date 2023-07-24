@@ -12,6 +12,7 @@ namespace ns3 {
     VDPGPSTraceClient();
 
     CAM_mandatory_data_t getCAMMandatoryData();
+    CPM_mandatory_data_t getCPMMandatoryData();
 
     double getSpeedValue() {return m_gps_trace_client->getSpeedms ();}
     double getTravelledDistance() {return m_gps_trace_client->getTravelledDistance ();}

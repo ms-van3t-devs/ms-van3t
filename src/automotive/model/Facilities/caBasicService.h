@@ -9,6 +9,7 @@
 #include "ns3/btpHeader.h"
 #include "ns3/Seq.hpp"
 #include "ns3/Getter.hpp"
+#include "ns3/LDM.h"
 
 extern "C" {
   #include "ns3/CAM.h"
@@ -43,6 +44,7 @@ namespace ns3
     void setSocketRx(Ptr<Socket> socket_rx);
     void setRSU() {m_vehicle=false;}
     void setVDP(VDP* vdp) {m_vdp=vdp;}
+    void setLDM(Ptr<LDM> LDM){m_LDM = LDM;}
     void setBTP(Ptr<btp> btp){m_btp = btp;}
 
     void receiveCam(BTPDataIndication_t dataIndication, Address from);
@@ -75,6 +77,7 @@ namespace ns3
     void checkCamConditions();
     CABasicService_error_t generateAndEncodeCam();
     int64_t computeTimestampUInt64();
+    void vLDM_handler(asn1cpp::Seq<CAM> decodedCAM);
 
     // std::function<void(CAM_t *, Address)> m_CAReceiveCallback;
     std::function<void(asn1cpp::Seq<CAM>, Address)> m_CAReceiveCallback;
@@ -99,6 +102,8 @@ namespace ns3
     VDP* m_vdp;
 
     Ptr<Socket> m_socket_tx; // Socket TX
+
+     Ptr<LDM> m_LDM;
 
     StationID_t m_station_id;
     StationType_t m_stationtype;

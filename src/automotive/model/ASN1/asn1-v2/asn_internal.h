@@ -10,15 +10,25 @@
 #ifndef __EXTENSIONS__
 #define __EXTENSIONS__          /* for Sun */
 #endif
+
 #include "asn_application.h"	/* Application-visible API */
 
 #ifndef	__NO_ASSERT_H__		/* Include assert.h only for internal use. */
-#include "assert.h"		/* for assert() macro */
+#include <assert.h>		/* for assert() macro */
 #endif
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
+
+#if !defined(ASN_DISABLE_UPER_SUPPORT)
+#include "uper_decoder.h"
+#include "uper_encoder.h"
+#endif  /* !defined(ASN_DISABLE_UPER_SUPPORT) */
+#if !defined(ASN_DISABLE_APER_SUPPORT)
+#include "aper_decoder.h"
+#include "aper_encoder.h"
+#endif  /* !defined(ASN_DISABLE_APER_SUPPORT) */
 
 /* Environment version might be used to avoid running with the old library */
 #define	ASN1C_ENVIRONMENT_VERSION	923	/* Compile-time version */
@@ -32,7 +42,6 @@ int get_asn1c_environment_version(void);	/* Run-time version */
 #define	asn_debug_indent	0
 #define ASN_DEBUG_INDENT_ADD(i) do{}while(0)
 
-#define ASN_EMIT_DEBUG 0
 #ifdef  EMIT_ASN_DEBUG
 #warning "Use ASN_EMIT_DEBUG instead of EMIT_ASN_DEBUG"
 #define ASN_EMIT_DEBUG  EMIT_ASN_DEBUG
@@ -128,6 +137,13 @@ asn__format_to_callback(
  * Check stack against overflow, if limit is set.
  */
 #define	ASN__DEFAULT_STACK_MAX	(30000)
+#ifdef ASN_DISABLE_STACK_OVERFLOW_CHECK
+static int CC_NOTUSED
+ASN__STACK_OVERFLOW_CHECK(const asn_codec_ctx_t *ctx) {
+   (void)ctx;
+   return 0;
+}
+#else
 static int CC_NOTUSED
 ASN__STACK_OVERFLOW_CHECK(const asn_codec_ctx_t *ctx) {
 	if(ctx && ctx->max_stack_size) {
@@ -145,6 +161,7 @@ ASN__STACK_OVERFLOW_CHECK(const asn_codec_ctx_t *ctx) {
 	}
 	return 0;
 }
+#endif
 
 #ifdef	__cplusplus
 }

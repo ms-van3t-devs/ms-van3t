@@ -346,23 +346,23 @@ namespace ns3
     Data.setIvimGlc (glc);
 
 
-    iviData::IVI_tc textContainer;
-    iviData::IVI_tc_part_t tc_part;
-    std::vector<long> appLanesPos;
-    std::vector<iviData::IVI_tc_text_t> textCont;
-    iviData::IVI_tc_text_t text;
-    tc_part.detectionZoneIds.setData (detzoneIDs);
-    tc_part.relevanceZoneIds = relzoneIDs;
-    tc_part.direction.setData (Direction_sameDirection); //Direction_sameDirection;
-    tc_part.data = "Left and central lane only for emergency vehicles";
-    appLanesPos.push_back (LanePosition_secondLaneFromOutside);
-    tc_part.applicableLanesPos.setData (appLanesPos);
-    text.bitLanguage = 00000;
-    text.textCont = "textCon";
-    textCont.push_back (text);
-    tc_part.text.setData (textCont);
-    textContainer.IVItcPart.push_back (tc_part);
-    Data.setIvimtc (textContainer);
+//    iviData::IVI_tc textContainer;
+//    iviData::IVI_tc_part_t tc_part;
+//    std::vector<long> appLanesPos;
+//    std::vector<iviData::IVI_tc_text_t> textCont;
+//    iviData::IVI_tc_text_t text;
+//    tc_part.detectionZoneIds.setData (detzoneIDs);
+//    tc_part.relevanceZoneIds = relzoneIDs;
+//    tc_part.direction.setData (Direction_sameDirection); //Direction_sameDirection;
+//    tc_part.data = "Left and central lane only for emergency vehicles";
+//    appLanesPos.push_back (LanePosition_secondLaneFromOutside);
+//    tc_part.applicableLanesPos.setData (appLanesPos);
+//    text.bitLanguage = 00000;
+//    text.textCont = "textCon";
+//    textCont.push_back (text);
+//    tc_part.text.setData (textCont);
+//    textContainer.IVItcPart.push_back (tc_part);
+//    Data.setIvimtc (textContainer);
 
     m_iviData = Data;
 

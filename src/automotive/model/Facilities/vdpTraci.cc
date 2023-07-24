@@ -176,6 +176,60 @@ namespace ns3
     return CAMdata;
   }
 
+  VDPTraCI::CPM_mandatory_data_t
+  VDPTraCI::getCPMMandatoryData ()
+  {
+    CPM_mandatory_data_t CPMdata;
+
+    /* Speed [0.01 m/s] */
+    CPMdata.speed = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getSpeed (m_id)*CENTI,
+                                       SpeedConfidence_unavailable);
+
+    /* Position */
+    libsumo::TraCIPosition pos=m_traci_client->TraCIAPI::vehicle.getPosition(m_id);
+    pos=m_traci_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+
+    // longitude WGS84 [0,1 microdegree]
+    CPMdata.longitude=(Longitude_t)(pos.x*DOT_ONE_MICRO);
+    // latitude WGS84 [0,1 microdegree]
+    CPMdata.latitude=(Latitude_t)(pos.y*DOT_ONE_MICRO);
+
+    /* Altitude [0,01 m] */
+    CPMdata.altitude = VDPValueConfidence<>(AltitudeValue_unavailable,
+                                          AltitudeConfidence_unavailable);
+
+    /* Position Confidence Ellipse */
+    CPMdata.posConfidenceEllipse.semiMajorConfidence=SemiAxisLength_unavailable;
+    CPMdata.posConfidenceEllipse.semiMinorConfidence=SemiAxisLength_unavailable;
+    CPMdata.posConfidenceEllipse.semiMajorOrientation=HeadingValue_unavailable;
+
+    /* Longitudinal acceleration [0.1 m/s^2] */
+    CPMdata.longAcceleration = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getAcceleration (m_id) * DECI,
+                                                  AccelerationConfidence_unavailable);
+
+    /* Heading WGS84 north [0.1 degree] */
+    CPMdata.heading = VDPValueConfidence<>(m_traci_client->TraCIAPI::vehicle.getAngle (m_id) * DECI,
+                                         HeadingConfidence_unavailable);
+
+    /* Drive direction (backward driving is not fully supported by SUMO, at the moment */
+    CPMdata.driveDirection = DriveDirection_unavailable;
+
+    /* Curvature and CurvatureCalculationMode */
+    CPMdata.curvature = VDPValueConfidence<>(CurvatureValue_unavailable,
+                                             CurvatureConfidence_unavailable);
+    CPMdata.curvature_calculation_mode = CurvatureCalculationMode_unavailable;
+
+    /* Length and Width [0.1 m] */
+    CPMdata.VehicleLength = m_vehicle_length;
+    CPMdata.VehicleWidth = m_vehicle_width;
+
+    /* Yaw Rate */
+    CPMdata.yawRate = VDPValueConfidence<>(YawRateValue_unavailable,
+                                           YawRateConfidence_unavailable);
+
+    return CPMdata;
+  }
+
   VDPDataItem<int>
   VDPTraCI::getLanePosition()
   {

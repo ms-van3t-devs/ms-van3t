@@ -9,9 +9,12 @@
 
 #include "ns3/denBasicService.h"
 #include "ns3/caBasicService.h"
+#include "ns3/cpBasicService.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 #include "ns3/PRRSupervisor.h"
+#include "ns3/sumo-sensor.h"
+#include "ns3/LDM.h"
 
 namespace ns3 {
 
@@ -50,6 +53,15 @@ class emergencyVehicleAlert : public Application
      */
     void receiveDENM (denData denm, Address from);
 
+    /**
+     * \brief Callback to handle a CPM reception.
+     *
+     * This function is called everytime a packet is received by the CPBasicService.
+     *
+     * \param the ASN.1 CPM structure containing the info of the packet that was received.
+     */
+    void receiveCPM (asn1cpp::Seq<CPM> cpm, Address from);
+
   protected:
     virtual void DoDispose (void);
 
@@ -57,8 +69,11 @@ class emergencyVehicleAlert : public Application
 
     DENBasicService m_denService; //!< DEN Basic Service object
     CABasicService m_caService; //!< CA Basic Service object
+    CPBasicService m_cpService; //!< CP Basic Service object
     Ptr<btp> m_btp; //! BTP object
     Ptr<GeoNet> m_geoNet; //! GeoNetworking Object
+    Ptr<SUMOSensor> m_sensor;
+    Ptr<LDM> m_LDM; //! LDM object
     Ipv4Address m_ipAddress; //!< C-V2X self IP address (set by 'v2v-cv2x.cc')
     Ptr<Socket> m_socket; //!< Socket TX/RX for everything
     std::string m_model; //!< Communication Model (possible values: 80211p and cv2x)
@@ -90,6 +105,8 @@ class emergencyVehicleAlert : public Application
      */
     void SetMaxSpeed ();
 
+    vehicleData_t translateCPMdata(asn1cpp::Seq<CPM> cpm, int objectIndex);
+
     virtual void StartApplication (void);
     virtual void StopApplication (void);
 
@@ -109,6 +126,7 @@ class emergencyVehicleAlert : public Application
 
     /* Counters */
     int m_cam_received;
+    int m_cpm_received;
     int m_denm_sent;
     int m_denm_received;
 

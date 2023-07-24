@@ -233,11 +233,60 @@ namespace ns3
         return;
       }
 
+    if(m_LDM != NULL){
+      //Update LDM
+      vLDM_handler(decoded_cam);
+    }
+
     if(m_CAReceiveCallback!=nullptr) {
       m_CAReceiveCallback(decoded_cam,from);
     } else if(m_CAReceiveCallbackExtended!=nullptr) {
       m_CAReceiveCallbackExtended(decoded_cam,from,m_station_id,m_stationtype);
     }
+  }
+
+  void
+  CABasicService::vLDM_handler(asn1cpp::Seq<CAM> decodedCAM)
+  {
+      vehicleData_t vehdata;
+      LDM::LDM_error_t db_retval;
+      bool lowFreq_ok;
+      vehdata.detected = false;
+      vehdata.stationType = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.stationType,long);
+      vehdata.stationID = asn1cpp::getField(decodedCAM->header.stationID,uint64_t);
+      vehdata.lat = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.latitude,double)/(double)DOT_ONE_MICRO;
+      vehdata.lon = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.longitude,double)/(double)DOT_ONE_MICRO;
+      vehdata.elevation = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,double)/(double)CENTI;
+      vehdata.heading = asn1cpp::getField(decodedCAM->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/(double)DECI;
+      vehdata.speed_ms = asn1cpp::getField(decodedCAM->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/(double)CENTI;
+      vehdata.camTimestamp = asn1cpp::getField(decodedCAM->cam.generationDeltaTime,long);
+      vehdata.timestamp_us = Simulator::Now ().GetMicroSeconds ();
+
+      vehdata.vehicleWidth = OptionalDataItem<long>(asn1cpp::getField(decodedCAM->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth,long));
+      vehdata.vehicleLength = OptionalDataItem<long>(asn1cpp::getField(decodedCAM->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue,long));
+
+
+      auto lowFreqContainer = asn1cpp::getSeqOpt(decodedCAM->cam.camParameters.lowFrequencyContainer,LowFrequencyContainer,&lowFreq_ok);
+      if(lowFreq_ok)
+      {
+          vehdata.exteriorLights = OptionalDataItem<uint8_t>(asn1cpp::bitstring::getterByteMask(lowFreqContainer->choice.basicVehicleContainerLowFrequency.exteriorLights,0));
+      }
+      else
+      {
+          LDM::returnedVehicleData_t retveh;
+
+         if(m_LDM->lookup(vehdata.stationID,retveh) == LDM::LDM_OK){
+             vehdata.exteriorLights = retveh.vehData.exteriorLights;
+         }
+         else{
+             vehdata.exteriorLights = OptionalDataItem<uint8_t>(false);
+         }
+      }
+
+      db_retval=m_LDM->insert(vehdata);
+      if(db_retval!=LDM::LDM_OK && db_retval!=LDM::LDM_UPDATED) {
+          std::cerr << "Warning! Insert on the database for vehicle " << asn1cpp::getField(decodedCAM->header.stationID,int) << "failed!" << std::endl;
+      }
   }
 
   void

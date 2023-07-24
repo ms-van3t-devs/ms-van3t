@@ -337,4 +337,6 @@ namespace asn1cpp {
 #define makeSeq(T) \
     makeSeq<T>(&ASN1CPP_ASN1C_DEF(T))
 
+#define makeSeqV1(T) \
+    makeSeq<T##V1>(&ASN1CPP_ASN1C_DEF(T##V1))
 #endif

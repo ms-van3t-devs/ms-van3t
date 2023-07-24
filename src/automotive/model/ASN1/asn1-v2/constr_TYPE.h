@@ -34,23 +34,51 @@ typedef struct asn_struct_ctx_s {
 	ber_tlv_len_t left;	/* Number of bytes left, -1 for indefinite */
 } asn_struct_ctx_t;
 
-#include "ber_decoder.h"	/* Basic Encoding Rules decoder */
-#include "der_encoder.h"	/* Distinguished Encoding Rules encoder */
-#include "xer_decoder.h"	/* Decoder of XER (XML, text) */
-#include "xer_encoder.h"	/* Encoder into XER (XML, text) */
-#include "per_decoder.h"	/* Packet Encoding Rules decoder */
-#include "per_encoder.h"	/* Packet Encoding Rules encoder */
-#include "constraints.h"	/* Subtype constraints support */
-#include "asn_random_fill.h"	/* Random structures support */
+#if !defined(ASN_DISABLE_BER_SUPPORT)
+#include "ber_decoder.h"  /* Basic Encoding Rules decoder */
+#include "der_encoder.h"  /* Distinguished Encoding Rules encoder */
+#else
+typedef void (ber_type_decoder_f)(void);
+typedef void (der_type_encoder_f)(void);
+#endif  /* !defined(ASN_DISABLE_BER_SUPPORT) */
 
-#ifdef  ASN_DISABLE_OER_SUPPORT
+#if !defined(ASN_DISABLE_XER_SUPPORT)
+#include "xer_decoder.h"  /* Decoder of XER (XML, text) */
+#include "xer_encoder.h"  /* Encoder into XER (XML, text) */
+#else
+typedef void (xer_type_decoder_f)(void);
+typedef void (xer_type_encoder_f)(void);
+#endif  /* !defined(ASN_DISABLE_XER_SUPPORT) */
+
+#if !defined(ASN_DISABLE_JER_SUPPORT)
+#include "jer_encoder.h"  /* Encoder into JER (JSON, text) */
+#else
+typedef void (jer_type_encoder_f)(void);
+#endif  /* !defined(ASN_DISABLE_JER_SUPPORT) */
+
+#if !defined(ASN_DISABLE_UPER_SUPPORT) || !defined(ASN_DISABLE_APER_SUPPORT)
+#include "per_decoder.h"  /* Packet Encoding Rules decoder */
+#include "per_encoder.h"  /* Packet Encoding Rules encoder */
+#else
+typedef void (per_type_decoder_f)(void);
+typedef void (per_type_encoder_f)(void);
+#endif  /* !defined(ASN_DISABLE_UPER_SUPPORT) || !defined(ASN_DISABLE_APER_SUPPORT) */
+
+#include "constraints.h"  /* Subtype constraints support */
+
+#if !defined(ASN_DISABLE_RFILL_SUPPORT)
+#include "asn_random_fill.h"  /* Random structures support */
+#else
+typedef void (asn_random_fill_f)(void);
+#endif  /* !defined(ASN_DISABLE_RFILL_SUPPORT) */
+
+#if !defined(ASN_DISABLE_OER_SUPPORT)
+#include "oer_decoder.h"  /* Octet Encoding Rules encoder */
+#include "oer_encoder.h"  /* Octet Encoding Rules encoder */
+#else
 typedef void (oer_type_decoder_f)(void);
 typedef void (oer_type_encoder_f)(void);
-typedef void asn_oer_constraints_t;
-#else
-#include "oer_decoder.h"	/* Octet Encoding Rules encoder */
-#include "oer_encoder.h"	/* Octet Encoding Rules encoder */
-#endif
+#endif  /* !defined(ASN_DISABLE_OER_SUPPORT) */
 
 /*
  * Free the structure according to its specification.
@@ -149,10 +177,13 @@ typedef struct asn_TYPE_operation_s {
     der_type_encoder_f *der_encoder;      /* Canonical DER encoder */
     xer_type_decoder_f *xer_decoder;      /* Generic XER decoder */
     xer_type_encoder_f *xer_encoder;      /* [Canonical] XER encoder */
+    jer_type_encoder_f *jer_encoder;      /* Generic JER encoder */
     oer_type_decoder_f *oer_decoder;      /* Generic OER decoder */
     oer_type_encoder_f *oer_encoder;      /* Canonical OER encoder */
     per_type_decoder_f *uper_decoder;     /* Unaligned PER decoder */
     per_type_encoder_f *uper_encoder;     /* Unaligned PER encoder */
+    per_type_decoder_f *aper_decoder;     /* Aligned PER decoder */
+    per_type_encoder_f *aper_encoder;     /* Aligned PER encoder */
     asn_random_fill_f *random_fill;       /* Initialize with a random value */
     asn_outmost_tag_f *outmost_tag;       /* <optional, internal> */
 } asn_TYPE_operation_t;
@@ -161,8 +192,12 @@ typedef struct asn_TYPE_operation_s {
  * A constraints tuple specifying both the OER and PER constraints.
  */
 typedef struct asn_encoding_constraints_s {
+#if !defined(ASN_DISABLE_OER_SUPPORT)
     const struct asn_oer_constraints_s *oer_constraints;
+#endif  /* !defined(ASN_DISABLE_OER_SUPPORT) */
+#if !defined(ASN_DISABLE_UPER_SUPPORT) || !defined(ASN_DISABLE_APER_SUPPORT)
     const struct asn_per_constraints_s *per_constraints;
+#endif  /* !defined(ASN_DISABLE_UPER_SUPPORT) || !defined(ASN_DISABLE_APER_SUPPORT) */
     asn_constr_check_f *general_constraints;
 } asn_encoding_constraints_t;
 
@@ -237,8 +272,8 @@ typedef struct asn_TYPE_member_s {
 typedef struct asn_TYPE_tag2member_s {
     ber_tlv_tag_t el_tag;   /* Outmost tag of the member */
     unsigned el_no;         /* Index of the associated member, base 0 */
-    int toff_first;         /* First occurence of the el_tag, relative */
-    int toff_last;          /* Last occurence of the el_tag, relative */
+    int toff_first;         /* First occurrence of the el_tag, relative */
+    int toff_last;          /* Last occurrence of the el_tag, relative */
 } asn_TYPE_tag2member_t;
 
 /*

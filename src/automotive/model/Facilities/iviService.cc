@@ -196,7 +196,7 @@ namespace ns3 {
 
     /* Header */
     asn1cpp::setField(ivim->header.messageID,FIX_IVIMID); // description in ITS-Container.asn
-    asn1cpp::setField(ivim->header.protocolVersion,protocolVersion_currentVersion); // description in ITS-Container.asn
+    //asn1cpp::setField(ivim->header.protocolVersion,protocolVersion_currentVersion); // description in ITS-Container.asn
     asn1cpp::setField(ivim->header.stationID,m_station_id); // description in ITS-Container.asn
 
 

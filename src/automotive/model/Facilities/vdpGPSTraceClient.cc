@@ -88,6 +88,67 @@ namespace ns3
     return CAMdata;
   }
 
+  VDPGPSTraceClient::CPM_mandatory_data_t
+  VDPGPSTraceClient::getCPMMandatoryData ()
+  {
+    CPM_mandatory_data_t CPMdata;
+
+    /* Speed [0.01 m/s] */
+    CPMdata.speed = VDPValueConfidence<>(m_gps_trace_client->getSpeedms ()*CENTI,
+                                         SpeedConfidence_unavailable);
+//    CPMdata.speed.speedValue=m_gps_trace_client->getSpeedms ()*CENTI;
+//    CPMdata.speed.speedConfidence=SpeedConfidence_unavailable;
+
+    // longitude WGS84 [0,1 microdegree]
+    CPMdata.longitude=(Longitude_t)(m_gps_trace_client->getLon ()*DOT_ONE_MICRO);
+    // latitude WGS84 [0,1 microdegree]
+    CPMdata.latitude=(Latitude_t)(m_gps_trace_client->getLat ()*DOT_ONE_MICRO);
+
+    /* Altitude [0,01 m] */
+    CPMdata.altitude = VDPValueConfidence<>(AltitudeValue_unavailable,
+                                            AltitudeConfidence_unavailable);
+//    CPMdata.altitude.altitudeValue=AltitudeValue_unavailable;
+//    CPMdata.altitude.altitudeConfidence=AltitudeConfidence_unavailable;
+
+    /* Position Confidence Ellipse */
+    CPMdata.posConfidenceEllipse.semiMajorConfidence=SemiAxisLength_unavailable;
+    CPMdata.posConfidenceEllipse.semiMinorConfidence=SemiAxisLength_unavailable;
+    CPMdata.posConfidenceEllipse.semiMajorOrientation=HeadingValue_unavailable;
+
+    /* Longitudinal acceleration [0.1 m/s^2] */
+    CPMdata.longAcceleration = VDPValueConfidence<>(m_gps_trace_client->getAccelmsq ()* DECI,
+                                                  AccelerationConfidence_unavailable);
+//    CPMdata.longAcceleration.longitudinalAccelerationValue=m_gps_trace_client->getAccelmsq ()* DECI;
+//    CPMdata.longAcceleration.longitudinalAccelerationConfidence=AccelerationConfidence_unavailable;
+
+    /* Heading WGS84 north [0.1 degree] */
+    CPMdata.heading = VDPValueConfidence<>(m_gps_trace_client->getHeadingdeg ()* DECI,
+                                                      HeadingConfidence_unavailable);
+//    CPMdata.heading.headingConfidence = HeadingConfidence_unavailable;
+
+    /* Drive direction */
+    CPMdata.driveDirection = DriveDirection_unavailable;
+
+    /* Curvature and CurvatureCalculationMode */
+    CPMdata.curvature = VDPValueConfidence<>(CurvatureValue_unavailable,
+                                           CurvatureConfidence_unavailable);
+//    CPMdata.curvature.curvatureValue = CurvatureValue_unavailable;
+//    CPMdata.curvature.curvatureConfidence = CurvatureConfidence_unavailable;
+    CPMdata.curvature_calculation_mode = CurvatureCalculationMode_unavailable;
+
+    /* Length and Width [0.1 m] */
+    CPMdata.VehicleLength = m_vehicle_length;
+    CPMdata.VehicleWidth = m_vehicle_width;
+
+    /* Yaw Rate */
+    CPMdata.yawRate = VDPValueConfidence<>(YawRateValue_unavailable,
+                                           YawRateConfidence_unavailable);
+//    CPMdata.yawRate.yawRateValue = YawRateValue_unavailable;
+//    CPMdata.yawRate.yawRateConfidence = YawRateConfidence_unavailable;
+
+    return CPMdata;
+  }
+
   VDP::VDP_position_latlon_t
   VDPGPSTraceClient::getPosition()
   {

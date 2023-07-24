@@ -3,6 +3,7 @@
 
 #include "ns3/simulator.h"
 #include "ns3/DENM.h"
+#include "ns3/DENMV1.h"
 #include "ns3/Seq.hpp"
 #include <stdint.h>
 #include <string>

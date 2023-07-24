@@ -3,8 +3,8 @@
  * Redistribution and modifications are permitted subject to BSD license.
  */
 #include "asn_internal.h"
-#include "stdio.h"
-#include "errno.h"
+#include <stdio.h>
+#include <errno.h>
 
 /*
  * The XER encoder of any type. May be invoked by the application.
@@ -53,7 +53,7 @@ xer__print2fp(const void *buffer, size_t size, void *app_key) {
 
 int
 xer_fprint(FILE *stream, const asn_TYPE_descriptor_t *td, const void *sptr) {
-    asn_enc_rval_t er;
+	asn_enc_rval_t er = {0,0,0};
 
 	if(!stream) stream = stdout;
 	if(!td || !sptr)

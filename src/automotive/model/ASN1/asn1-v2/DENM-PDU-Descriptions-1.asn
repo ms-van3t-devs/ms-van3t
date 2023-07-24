@@ -1,0 +1,108 @@
+DENM-PDU-Descriptions {itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) en (302637) denm (1) version (1)
+}
+
+DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS 
+ItsPduHeaderV1, CauseCodeV1, SpeedV1, InformationQualityV1, ReferencePositionV1, ClosedLanesV1, DangerousGoodsExtendedV1, HeadingV1, LanePositionV1, LightBarSirenInUseV1, RoadTypeV1, HeightLonCarrV1, PosLonCarrV1, PosCentMassV1, PositioningSolutionTypeV1, RequestResponseIndicationV1, StationTypeV1, SpeedLimitV1, StationarySinceV1, TimestampItsV1, WheelBaseVehicleV1, TurningRadiusV1, PosFrontAxV1, PositionOfOccupantsV1, TemperatureV1, VehicleMassV1, VehicleIdentificationV1, EnergyStorageTypeV1, ActionIDV1, ItineraryPathV1, NumberOfOccupantsV1, PositionOfPillarsV1, RelevanceTrafficDirectionV1, RestrictedTypesV1, TracesV1, TransmissionIntervalV1, ValidityDurationV1, RelevanceDistanceV1, EventHistoryV1, TrafficRuleV1, DeltaReferencePositionV1 FROM ITS-Container {
+itu-t (0) identified-organization (4) etsi (0) itsDomain (5) wg1 (1) ts (102894) cdd (2) version (1) 
+};
+
+
+DENMV1 ::= SEQUENCE {
+    header ItsPduHeaderV1,
+    denm DecentralizedEnvironmentalNotificationMessageV1
+}
+
+DecentralizedEnvironmentalNotificationMessageV1 ::= SEQUENCE {
+    management ManagementContainerV1,
+    situation SituationContainerV1 OPTIONAL,
+    location LocationContainerV1 OPTIONAL,
+    alacarte AlacarteContainerV1 OPTIONAL
+}
+
+ManagementContainerV1 ::= SEQUENCE {
+    actionID ActionIDV1,
+    detectionTime TimestampItsV1,
+    referenceTime TimestampItsV1,
+    termination TerminationV1 OPTIONAL,
+    eventPosition ReferencePositionV1,
+    relevanceDistance RelevanceDistanceV1 OPTIONAL,
+    relevanceTrafficDirection RelevanceTrafficDirectionV1 OPTIONAL,
+    validityDuration ValidityDurationV1 DEFAULT defaultValidityV1,
+    transmissionInterval TransmissionIntervalV1 OPTIONAL,
+    stationType StationTypeV1,
+    ...
+}
+
+SituationContainerV1 ::= SEQUENCE {
+    informationQuality InformationQualityV1,
+    eventType CauseCodeV1,
+    linkedCause CauseCodeV1 OPTIONAL,
+    eventHistory EventHistoryV1 OPTIONAL,
+    ...
+}
+
+LocationContainerV1 ::= SEQUENCE {
+    eventSpeed SpeedV1 OPTIONAL,
+    eventPositionHeading HeadingV1 OPTIONAL,
+    traces TracesV1,
+    roadType RoadTypeV1 OPTIONAL,
+    ...
+}
+
+ImpactReductionContainerV1 ::= SEQUENCE {
+    heightLonCarrLeft HeightLonCarrV1,
+    heightLonCarrRight HeightLonCarrV1,
+    posLonCarrLeft PosLonCarrV1,
+    posLonCarrRight PosLonCarrV1,
+    positionOfPillars PositionOfPillarsV1,
+    posCentMass PosCentMassV1,
+    wheelBaseVehicle WheelBaseVehicleV1,
+    turningRadius TurningRadiusV1,
+    posFrontAx PosFrontAxV1,
+    positionOfOccupants PositionOfOccupantsV1,
+    vehicleMass VehicleMassV1,
+    requestResponseIndication RequestResponseIndicationV1
+}
+
+RoadWorksContainerExtendedV1 ::= SEQUENCE {
+    lightBarSirenInUse LightBarSirenInUseV1 OPTIONAL,
+    closedLanes ClosedLanesV1 OPTIONAL,
+    restriction RestrictedTypesV1 OPTIONAL,
+    speedLimit SpeedLimitV1 OPTIONAL,
+    incidentIndication CauseCodeV1 OPTIONAL,
+    recommendedPath ItineraryPathV1 OPTIONAL,
+    startingPointSpeedLimit DeltaReferencePositionV1 OPTIONAL,
+    trafficFlowRule TrafficRuleV1 OPTIONAL,
+    referenceDenms ReferenceDenmsV1 OPTIONAL
+}
+
+StationaryVehicleContainerV1 ::= SEQUENCE {
+    stationarySince StationarySinceV1 OPTIONAL,
+    stationaryCause CauseCodeV1 OPTIONAL,
+    carryingDangerousGoods DangerousGoodsExtendedV1 OPTIONAL,
+    numberOfOccupants NumberOfOccupantsV1 OPTIONAL,
+    vehicleIdentification VehicleIdentificationV1 OPTIONAL,
+    energyStorageType EnergyStorageTypeV1 OPTIONAL
+}
+
+AlacarteContainerV1 ::= SEQUENCE {
+    lanePosition LanePositionV1 OPTIONAL,
+    impactReduction ImpactReductionContainerV1 OPTIONAL,
+    externalTemperature TemperatureV1 OPTIONAL,
+    roadWorks RoadWorksContainerExtendedV1 OPTIONAL,
+    positioningSolution PositioningSolutionTypeV1 OPTIONAL,
+    stationaryVehicle StationaryVehicleContainerV1 OPTIONAL,
+    ...
+}
+
+defaultValidityV1 INTEGER ::= 600
+
+TerminationV1 ::= ENUMERATED {isCancellation(0), isNegation(1)}
+
+ReferenceDenmsV1 ::= SEQUENCE (SIZE(1..8, ...)) OF ActionIDV1
+
+END

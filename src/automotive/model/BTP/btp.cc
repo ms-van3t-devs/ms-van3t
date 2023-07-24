@@ -138,7 +138,13 @@ namespace ns3
       if(m_ivim_ReceiveCallback!=nullptr) {
         m_ivim_ReceiveCallback(btpDataIndication,address);
       }
-    } else {
+    }
+    else if(btpDataIndication.destPort == CP_PORT){
+      if(m_cpm_ReceiveCallback!=nullptr){
+          m_cpm_ReceiveCallback(btpDataIndication,address);
+        }
+      }
+    else {
       NS_LOG_ERROR("BTP : Unknown port");
     }
   }
