@@ -84,6 +84,7 @@ Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlight
 - CAM
 - DENM
 - IVIM
+- CPM
 
 For the transmission and reception of IVIMs (from an RSU to vehicles), you can refer to the `v2i-emergencyVehicleWarning-80211p` example.
 
