@@ -22,6 +22,7 @@
 #include "ns3/core-module.h"
 #include "ns3/gps-tc-helper.h"
 #include "ns3/mobility-module.h"
+#include "ns3/vehicle-visualizer-module.h"
 
 using namespace ns3;
 
@@ -55,6 +56,15 @@ main (int argc, char *argv[])
 
   GPSTCHelper.setVerbose(verbose);
 
+  /* Setup a VehicleVisualizer to show the vehicles moving on a map, following the specified CSV mobility traces */
+  /* The VehicleVisualizer acts as a GUI for gps-tc */
+  vehicleVisualizer vehicleVisObj;
+  Ptr<vehicleVisualizer> vehicleVis = &vehicleVisObj;
+  vehicleVis->startServer();
+  vehicleVis->connectToServer ();
+
+  GPSTCHelper.setVehicleVisualizer(vehicleVis);
+
   GPSTCMap=GPSTCHelper.createTraceClientsFromCSV("src/gps-tc/examples/GPS-Traces-Sample/sampletrace.csv");
 
   int numberOfNodes=GPSTCMap.size ();
@@ -70,7 +80,7 @@ main (int argc, char *argv[])
   uint32_t nodeCounter = 0;
 
   /* callback function for node creation */
-  std::function<Ptr<Node> ()> setupNode = [&] () -> Ptr<Node>
+  STARTUP_FCN setupNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -88,7 +98,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  std::function<void (Ptr<Node>)> shutdownNode = [] (Ptr<Node> exNode)
+  SHUTDOWN_FCN shutdownNode = [&] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
 //      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
