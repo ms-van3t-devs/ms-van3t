@@ -29,7 +29,7 @@ To build the project:
 
 * Clone this repository in your pc:
 
-`git clone https://github.com/marcomali/ms-van3t`
+`git clone https://github.com/ms-van3t-devs/ms-van3t.git`
 
 * Run, from this repository either:
 
