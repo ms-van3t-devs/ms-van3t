@@ -74,7 +74,7 @@ namespace ns3 {
   }
 
   void
-  PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t vehicleID)
+  PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t vehicleID, messageType_e messagetype)
   {
     EventId computePRR_id;
 
@@ -105,6 +105,8 @@ namespace ns3 {
     m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();
 
     m_vehicleid_map[buf] = vehicleID;
+
+    m_messagetype_map[buf] = messagetype;
   }
 
   void
@@ -132,6 +134,7 @@ namespace ns3 {
     if(m_latency_map.count(buf)>0)
     {
         uint64_t senderID = m_vehicleid_map[buf];
+        messageType_e messagetype = m_messagetype_map[buf];
 
         curr_latency_ms = static_cast<double>(Simulator::Now ().GetNanoSeconds () - m_latency_map[buf])/1000000.0;
         m_count_latency++;
@@ -149,6 +152,19 @@ namespace ns3 {
         m_count_latency_per_veh[senderID]++;
         m_avg_latency_ms_per_veh[senderID] += (curr_latency_ms - m_avg_latency_ms_per_veh[senderID])/m_count_latency_per_veh[senderID];
 
+
+        if(m_count_latency_per_messagetype.count(messagetype)<=0) {
+            m_count_latency_per_messagetype[messagetype]=0;
+        }
+
+        if(m_avg_latency_ms_per_messagetype.count(messagetype)<=0) {
+            m_avg_latency_ms_per_messagetype[messagetype]=0;
+        }
+
+        m_count_latency_per_messagetype[messagetype]++;
+        m_avg_latency_ms_per_messagetype[messagetype] += (curr_latency_ms - m_avg_latency_ms_per_messagetype[messagetype])/m_count_latency_per_messagetype[messagetype];
+
+
         if(m_verbose_stdout == true) {
           std::cout << "|Latency| ID: " << vehicleID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
         }
@@ -163,6 +179,7 @@ namespace ns3 {
     if(m_packetbuff_map[buf].vehList.size()>1)
     {
       uint64_t senderID = m_vehicleid_map[buf];
+      messageType_e messagetype = m_messagetype_map[buf];
 
       PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].vehList.size()-1.0);
       m_count++;
@@ -183,8 +200,20 @@ namespace ns3 {
       m_count_per_veh[senderID]++;
       m_avg_PRR_per_veh[senderID] += (PRR-m_avg_PRR_per_veh[senderID])/m_count_per_veh[senderID];
 
+      if(m_count_per_messagetype.count(messagetype)<=0) {
+          m_count_per_messagetype[messagetype]=0;
+      }
+
+      if(m_avg_PRR_per_messagetype.count(messagetype)<=0) {
+          m_avg_PRR_per_messagetype[messagetype]=0;
+      }
+
+      m_count_per_messagetype[messagetype]++;
+      m_avg_PRR_per_messagetype[messagetype] += (PRR-m_avg_PRR_per_messagetype[messagetype])/m_count_per_messagetype[messagetype];
+
       m_packetbuff_map.erase(buf);
       m_vehicleid_map.erase(buf);
+      m_messagetype_map.erase(buf);
     }
 
     // Some time has passed -> remove the packet from the latency map too

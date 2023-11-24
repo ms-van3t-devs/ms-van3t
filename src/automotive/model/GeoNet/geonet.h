@@ -103,6 +103,7 @@ namespace ns3
       void setBeacon();
       void saveRepPacket(GNDataRequest_t dataRequest);
       void maxRepIntTimeout(GNDataRequest_t dataRequest);
+      int get_messageID_from_BTP_port(int16_t port);
 
 
       std::map<GNAddress,GNLocTE> m_GNLocT;//! ETSI EN 302 636-4-1 [8.1]

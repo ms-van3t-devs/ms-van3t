@@ -370,7 +370,9 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
+      int messagetype = get_messageID_from_BTP_port (dataRequest._messagePort);
+
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<PRRSupervisor::messageType_e>(messagetype));
 
       delete[] buffer;
     }
@@ -439,7 +441,9 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
+      int messagetype = get_messageID_from_BTP_port (dataRequest._messagePort);
+
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<PRRSupervisor::messageType_e>(messagetype));
 
       delete[] buffer;
     }
@@ -487,8 +491,7 @@ namespace ns3 {
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id);
-
+      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, PRRSupervisor::messageType_GNbeacon);
       delete[] buffer;
     }
 
@@ -683,7 +686,7 @@ namespace ns3 {
     {
         if(dataIndication.GNType!=BEACON || m_PRRsupervisor_beacons==true)
         {
-            m_PRRSupervisor_ptr->signalReceivedPacket (PRRSupervisor::bufToString (buffer,dataSize),m_station_id);
+            m_PRRSupervisor_ptr->signalReceivedPacket(PRRSupervisor::bufToString (buffer,dataSize),m_station_id);
         }
 
         delete[] buffer;
@@ -950,5 +953,46 @@ namespace ns3 {
       gn_sock->Connect (remote);
 
       return gn_sock;
+  }
+
+  int
+  GeoNet::get_messageID_from_BTP_port(int16_t port) {
+      switch(port) {
+          case 2001:
+                  return 2;
+          case 2002:
+                  return 1;
+          case 2003:
+                  return 5;
+          case 2004:
+                  return 4;
+          case 2005:
+                  return 12;
+          case 2006:
+                  return 6;
+          case 2007:
+                  return 9;
+          case 2008:
+                  return 10;
+          case 2009:
+                  return 14;
+          case 2010:
+                  return 11;
+          case 2012:
+                  return 7;
+          case 2013:
+                  return 13;
+          case 2017:
+                  return 20;
+          case 2018:
+                  return 16;
+          case 2019:
+                  return 15;
+          case 2200:
+                  return 200;
+          default:
+                  return 0;
+      }
+      return 0;
   }
 }
