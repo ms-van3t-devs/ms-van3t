@@ -93,6 +93,8 @@ public:
     /* This function can be used to write all the content of the database in a log file*/
     void writeAllContents();
 
+    void cleanup();
+
     /* This function reads the whole database, and, for each entry, it executes the "oper_fcn" callback
      * This callback should return void (i.e. nothing) and have two arguments:
      * - a vehicleData_t structure, in which the data stored in each entry will be made available to the callback

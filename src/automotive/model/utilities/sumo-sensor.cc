@@ -236,4 +236,10 @@ namespace ns3 {
 
     return points;
   }
+
+  void
+  SUMOSensor::cleanup()
+  {
+    Simulator::Cancel(m_event_updateDetectedObjects);
+  }
 }

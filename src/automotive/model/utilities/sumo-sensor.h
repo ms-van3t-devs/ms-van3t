@@ -35,6 +35,8 @@ namespace ns3 {
     void setLDM(Ptr<LDM> ldm){m_LDM = ldm;}
     libsumo::TraCIPosition boost2TraciPos(point_type point_type);
 
+    void cleanup();
+
   private:
         //Compute defining points of a vehicle with StationID id
         vehiclePoints_t adjust(std::string id);

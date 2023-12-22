@@ -162,3 +162,7 @@ gitignorer.sh
 # Other ns-3-dev files
 /.lock-ns3_*_build
 /cmake-cache/
+
+# CLion files
+.idea/
+cmake-build-debug/

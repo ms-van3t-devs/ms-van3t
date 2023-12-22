@@ -372,8 +372,16 @@ namespace ns3 {
   void
   CPBasicService::startCpmDissemination()
   {
-    std::srand(Simulator::Now().GetNanoSeconds ());
-    double desync = ((double)std::rand()/RAND_MAX);
+    // Old desync code kept just for reference
+    // It may lead to nodes not being desynchronized properly in specific situations in which
+    // Simulator::Now().GetNanoSeconds () returns the same seed for multiple nodes
+    // std::srand(Simulator::Now().GetNanoSeconds ());
+    // double desync = ((double)std::rand()/RAND_MAX);
+
+    Ptr<UniformRandomVariable> desync_rvar = CreateObject<UniformRandomVariable> ();
+    desync_rvar->SetAttribute ("Min", DoubleValue (0.0));
+    desync_rvar->SetAttribute ("Max", DoubleValue (1.0));
+    double desync = desync_rvar->GetValue ();
     m_event_cpmDisseminationStart = Simulator::Schedule (Seconds(desync), &CPBasicService::initDissemination, this);
   }
 

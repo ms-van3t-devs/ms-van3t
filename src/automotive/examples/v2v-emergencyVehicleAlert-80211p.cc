@@ -242,6 +242,8 @@ main (int argc, char *argv[])
     {
       prrSup = &prrSupObj;
       prrSup->setTraCIClient(sumoClient);
+      // Uncomment this to enable verbose output from the PRRsupervisor, printing latency and PRR for each single packet
+      // prrSup->enableVerboseOnStdout();
     }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
