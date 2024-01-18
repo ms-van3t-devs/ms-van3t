@@ -1,7 +1,8 @@
 #ifndef EMERGENCYVEHICLEALERT_H
 #define EMERGENCYVEHICLEALERT_H
 
-#include "ns3/traci-client.h"
+#include "ns3/PRRSupervisor.h"
+
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
 
@@ -12,10 +13,10 @@
 #include "ns3/cpBasicService.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
-#include "ns3/PRRSupervisor.h"
+
 #include "ns3/sumo-sensor.h"
 #include "ns3/LDM.h"
-
+#include "ns3/traci-client.h"
 namespace ns3 {
 
 class emergencyVehicleAlert : public Application

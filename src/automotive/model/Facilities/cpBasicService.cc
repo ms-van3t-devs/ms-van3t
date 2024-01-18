@@ -123,7 +123,7 @@ namespace ns3 {
     /* 1.b The Euclidian absolute distance between the current estimated position of the reference point of the
      * object and the estimated position of the reference point of this object lastly included in a CPM exceeds
      * 4 m. */
-    if(cartesian_dist(previousCPM.lon,previousCPM.lat,PO_data->vehData.lon,PO_data->vehData.lat) > 4.0)
+    if(m_vdp->getCartesianDist (previousCPM.lon,previousCPM.lat,PO_data->vehData.lon,PO_data->vehData.lat) > 4.0)
       return true;
     /* 1.c The difference between the current estimated absolute speed of the reference point of the object and the
      * estimated absolute speed of the reference point of this object lastly included in a CPM exceeds 0,5 m/s. */

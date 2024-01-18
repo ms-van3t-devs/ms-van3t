@@ -2,7 +2,7 @@
 #define trafficManagerServer80211p_H
 
 
-#include "ns3/traci-client.h"
+
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
 #include "ns3/vdp.h"
@@ -12,7 +12,7 @@
 #include "ns3/btpHeader.h"
 #include <mutex>
 #include <unordered_map>
-
+#include "ns3/traci-client.h"
 namespace ns3 {
 
 class trafficManagerServer80211p : public Application

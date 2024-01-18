@@ -1,6 +1,6 @@
 #ifndef trafficManagerCLIENTLTEHELPER_H
 #define trafficManagerCLIENTLTEHELPER_H
-
+#include "ns3/OpenCDAClient.h"
 #include <stdint.h>
 #include "ns3/application-container.h"
 #include "ns3/node-container.h"

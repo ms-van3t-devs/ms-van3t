@@ -166,3 +166,9 @@ gitignorer.sh
 # CLion files
 .idea/
 cmake-build-debug/
+
+# CARLA-OpenCDA files
+CARLA-OpenCDA.conf
+CARLA_0.9.12/
+OpenCDA/
+

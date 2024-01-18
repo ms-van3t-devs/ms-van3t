@@ -1,5 +1,7 @@
 #ifndef GEONET_H
 #define GEONET_H
+
+#include "ns3/PRRSupervisor.h"
 #include <stdint.h>
 #include <string>
 #include <map>
@@ -21,11 +23,13 @@
 #include "ns3/gn-address.h"
 #include "ns3/longpositionvector.h"
 #include "ns3/btpdatarequest.h"
-#include "ns3/PRRSupervisor.h"
+
+
 
 extern "C" {
   #include "ns3/CAM.h"
 }
+
 
 #define TS_MAX 4294967295 //(2^32)-1
 #define TS_MAX1 4294967296 //(2^32)

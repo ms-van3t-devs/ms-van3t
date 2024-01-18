@@ -122,6 +122,15 @@ namespace ns3
     return vdppos;
   }
 
+  double
+  VDPTraCI::getCartesianDist (double lon1, double lat1, double lon2, double lat2)
+  {
+    libsumo::TraCIPosition pos1,pos2;
+    pos1 = m_traci_client->TraCIAPI::simulation.convertLonLattoXY(lon1,lat1);
+    pos2 = m_traci_client->TraCIAPI::simulation.convertLonLattoXY(lon2,lat2);
+    return sqrt((pow((pos1.x-pos2.x),2)+pow((pos1.y-pos2.y),2)));
+  }
+
   VDPTraCI::CAM_mandatory_data_t
   VDPTraCI::getCAMMandatoryData ()
   {

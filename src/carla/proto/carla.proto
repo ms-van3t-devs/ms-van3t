@@ -1,0 +1,133 @@
+//
+// Copyright (C) 2023 Tobias Hardes <tobias.hardes@uni-paderborn.de>
+//
+// Documentation for these modules is at http://veins.car2x.org/
+//
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package carla;
+
+service CarlaAdapter{
+    rpc ExecuteOneTimeStep (google.protobuf.Empty) returns (Boolean);
+
+    rpc Finish (google.protobuf.Empty) returns (google.protobuf.Empty);
+
+    rpc GetManagedActorsIds(google.protobuf.Empty) returns (ActorIds);
+
+    rpc GetManagedCAVsIds(google.protobuf.Empty) returns (ActorIds);
+
+    rpc GetManagedActorById(Number) returns (Vehicle);
+
+    rpc InsertVehicle(Vehicle) returns (Number);
+
+    rpc GetRandomSpawnPoint(google.protobuf.Empty) returns (Transform);
+
+    rpc GetActorLDM(Number) returns (Objects);
+
+    rpc InsertObject(ObjectIn) returns (Number);
+
+    rpc GetCartesian(Vector) returns (Vector);
+
+    rpc GetGeo(Vector) returns (Vector);
+
+    rpc hasLDM (Number) returns (Boolean);
+
+    rpc SetControl(Control) returns (google.protobuf.Empty);
+        
+}
+
+message ActorIds {
+    repeated int32 actorId = 1;
+}
+
+message Number {
+    int32 num = 1;
+}
+
+message Vehicle {
+    int32 id = 1;
+    Vector speed = 2;
+    Vector acceleration = 3;
+    Vector location = 4;
+    double latitude = 5;
+    double longitude = 6;
+    double length = 7;
+    double width = 8;
+    int32 lane = 9;
+    double heading = 10;
+    Transform transform = 11;
+}
+
+message Vector {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message Rotation {
+    double pitch = 1;
+    double yaw = 2;
+    double roll = 3;
+}
+
+message Transform {
+    Vector location = 1;
+    Rotation rotation = 2;
+}
+
+message Object {
+    int32 id = 1;
+    double dx = 2;
+    double dy = 3;
+    Vector speed = 4;
+    Vector acceleration = 5;
+    double length = 6;
+    double width = 7;
+    bool onSight = 8;
+    bool tracked = 9;
+    int32 timestamp = 10;
+    double confidence = 11;
+    double yaw = 12;
+    Transform transform = 13;
+    bool detected = 14;
+    int32 perceivedBy = 15;
+}
+
+message Objects {
+    repeated Object objects = 1;
+}
+
+message Boolean {
+    bool value = 1;
+}
+
+message ObjectIn {
+    Object object = 1;
+    int32 egoId = 2;
+    int32 fromId = 3;
+}
+
+message Control {
+    int32 id = 1;
+    Vector waypoint = 2;
+    double speed = 3;
+    double acceleration = 4;
+}

@@ -1,7 +1,7 @@
 #ifndef emergencyVehicleWarningClient_H
 #define emergencyVehicleWarningClient_H
 
-#include "ns3/traci-client.h"
+
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
 
@@ -12,7 +12,7 @@
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 #include "ns3/iviService.h"
-
+#include "ns3/traci-client.h"
 namespace ns3 {
 
 class emergencyVehicleWarningClient : public Application

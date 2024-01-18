@@ -80,6 +80,9 @@ public:
     // This function returns all Connected Vehicles (CVs) that are currently in the LDM, false if there are not CVs in LDM
     bool getAllCVs(std::vector<returnedVehicleData_t> &selectedVehicles);
 
+    // This function returns all the IDs currently stored in the LDM
+    bool getAllIDs(std::set<int> &IDs);
+
     /* This function deletes from the database all the entries older than time_milliseconds ms
      * The entries are deleted if their age is > time_milliseconds ms if greater_equal == false,
      * or >= time_milliseconds ms if greater_equal == true
@@ -108,8 +111,9 @@ public:
 
     void setStationID(std::string id){m_id=id;m_stationID=std::stol(id.substr (3));}
 
-    void enableOutputFile(std::string id){m_logfile_file.open(id+"-LDM.txt",std::ofstream::trunc);
-                                          m_csv_file.open(id+"-LDM.csv",std::ofstream::trunc);
+    void setStationID(int id){m_stationID=id; m_id = std::to_string(id);}
+
+    void enableOutputFile(std::string id){m_csv_file.open(id+"-LDM.csv",std::ofstream::trunc);
                                           m_csv_file << "Time,Size,POs,AvgConf,AvgAcc,AvgAge,AvgDwell,AvgAssoc,CVs,AvgDist,MaxDist,AvgT2D,UnderPPrange,AvgPPDwell"<<std::endl;}
 
     void setTraCIclient(Ptr<TraciClient> client){m_client=client;}

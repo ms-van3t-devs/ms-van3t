@@ -22,6 +22,7 @@ namespace ns3 {
     VDP_position_latlon_t getPosition();
     VDP_position_cartesian_t getPositionXY();
     VDP_position_cartesian_t getXY(double lon, double lat);
+    double getCartesianDist (double lon1, double lat1, double lon2, double lat2){return 0.0;}
 
     VDPDataItem<uint8_t> getAccelerationControl() {return VDPDataItem<uint8_t>(false);}
     VDPDataItem<int> getLanePosition() {return VDPDataItem<int>(false);}

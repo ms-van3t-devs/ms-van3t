@@ -68,6 +68,7 @@ namespace ns3 {
     m_count = 0;
     m_stationID = 0;
     m_polygons=false;
+    m_client=NULL;
 
     m_LDM = std::unordered_map<uint64_t,returnedVehicleData_t> ();
 
@@ -185,6 +186,21 @@ namespace ns3 {
 
     return retval;
   }
+
+  bool
+  LDM::getAllIDs (std::set<int> &IDs)
+  {
+    bool retval = false;
+
+    for (auto it = m_LDM.begin(); it != m_LDM.end(); ++it) {
+        IDs.insert (it->first);
+        retval = true;
+    }
+
+    return retval;
+
+  }
+
   bool
   LDM::getAllCVs(std::vector<returnedVehicleData_t> &selectedVehicles)
   {
@@ -223,7 +239,7 @@ namespace ns3 {
 
     for (auto it = m_LDM.cbegin(); it != m_LDM.cend();) {
         std::string id = std::to_string(it->second.vehData.stationID);
-        if(m_polygons)
+        if(m_polygons && m_client!=NULL)
           {
             std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
             if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
@@ -240,10 +256,13 @@ namespace ns3 {
                 m_dwell_count ++;
                 m_avg_dwell += (curr_dwell-m_avg_dwell)/m_dwell_count;
 
-                std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
-                if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
-                 m_polygons)
-                  m_client->TraCIAPI::polygon.remove(id,5);
+                if(m_client!=NULL)
+                  {
+                    std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
+                    if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
+                     m_polygons)
+                      m_client->TraCIAPI::polygon.remove(id,5);
+                  }
               }
 
               it = m_LDM.erase(it);
@@ -266,7 +285,7 @@ namespace ns3 {
 
     for (auto it = m_LDM.cbegin(); it != m_LDM.cend();) {
         std::string id = std::to_string(it->second.vehData.stationID);
-        if(m_polygons)
+        if(m_polygons && m_client!=NULL)
           {
             std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
             if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
@@ -283,10 +302,13 @@ namespace ns3 {
                 m_dwell_count ++;
                 m_avg_dwell += (curr_dwell-m_avg_dwell)/m_dwell_count;
 
-                std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
-                if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
-                 m_polygons)
-                  m_client->TraCIAPI::polygon.remove(id,5);
+                if(m_client!=NULL)
+                  {
+                    std::vector<std::string> polygonList = m_client->TraCIAPI::polygon.getIDList ();
+                    if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end () &&
+                     m_polygons)
+                      m_client->TraCIAPI::polygon.remove(id,5);
+                  }
               }
               oper_fcn(it->second.vehData.stationID,additional_args);
               it = m_LDM.erase(it);
@@ -308,6 +330,9 @@ namespace ns3 {
   void
   LDM::writeAllContents()
   {
+    if (m_client == NULL)
+      return;
+
     libsumo::TraCIPosition egoPosXY=m_client->TraCIAPI::vehicle.getPosition(m_id);
 
     std::vector<uint64_t> POs,CVs;
@@ -395,6 +420,8 @@ namespace ns3 {
   void
   LDM::updatePolygons()
   {
+    if(m_client == NULL)
+      return;
     for (auto it = m_LDM.begin(); it != m_LDM.end(); ++it) {
         if (m_polygons)
         {
@@ -409,6 +436,8 @@ namespace ns3 {
   void
   LDM::drawPolygon(vehicleData_t data)
   {
+    if(m_client == NULL)
+      return;
     using namespace boost::geometry::strategy::transform;
     libsumo::TraCIPosition SPos;
     double angle = 0.0;

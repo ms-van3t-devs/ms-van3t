@@ -1,7 +1,8 @@
 #ifndef AREASPEEDADVISORCLIENTLTE_H
 #define AREASPEEDADVISORCLIENTLTE_H
 
-#include "ns3/traci-client.h"
+#include "ns3/PRRSupervisor.h"
+
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
 
@@ -9,7 +10,7 @@
 #include "ns3/caBasicService.h"
 
 #include "ns3/btp.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/traci-client.h"
 
 
 namespace ns3 {

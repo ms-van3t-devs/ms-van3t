@@ -1,8 +1,9 @@
 #ifndef SIMPLECAMSENDER_H
 #define SIMPLECAMSENDER_H
 
-#include "ns3/gps-tc.h"
 #include "ns3/traci-client.h"
+#include "ns3/gps-tc.h"
+
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
 

@@ -173,7 +173,7 @@ namespace ns3
       virtual VDP_position_latlon_t getPosition() = 0;
       virtual VDP_position_cartesian_t getPositionXY() = 0;
       virtual VDP_position_cartesian_t getXY(double lon, double lat) = 0;
-
+      virtual double getCartesianDist (double lon1, double lat1, double lon2, double lat2) = 0;
 
 
       // These methods refer to optional fields in mandatory containers
