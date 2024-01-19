@@ -80,7 +80,7 @@ namespace ns3 {
     /* 3. Set all the containers [to be continued] */
     /* Header */
     asn1cpp::setField(denm->header.messageID,FIX_DENMID);
-    //asn1cpp::setField(denm->header.protocolVersion,protocolVersion_currentVersion);
+    asn1cpp::setField(denm->header.protocolVersion,protocolVersion_currentVersion);
     asn1cpp::setField(denm->header.stationID,m_station_id);
 
 
