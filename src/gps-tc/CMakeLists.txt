@@ -13,6 +13,10 @@ set(header_files
 set(test_sources
 )
 
+set_source_files_properties(model/GeographicLib/utmups.c      
+    model/GeographicLib/utmups_math.c
+	PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+
 build_lib(
   LIBNAME gps-tc
   SOURCE_FILES ${source_files}
