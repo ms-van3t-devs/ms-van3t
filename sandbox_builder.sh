@@ -103,7 +103,7 @@ find . -type f -name .gitlab-ci-gcc.yml -exec rm -rfv {} \;
 find . -type f -name .gitlab-ci.yml -exec rm -rfv {} \;
 find . -type f -name .gitmodules -exec rm -rfv {} \;
 cd ../..
-git checkout v2x-lte-dev
+git checkout ns-3-dev-v2x-v0.2
 set +v
 
 echo "Removing git from vanilla ns-${NS3_VERSION}..."
