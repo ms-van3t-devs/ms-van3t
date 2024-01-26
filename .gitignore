@@ -176,17 +176,20 @@ OpenCDA/
 .clang-tidy
 .codespellrc
 .github/
-build-support/.ns3rc-template
-build-support/3rd-party/FindEigen3.cmake
-build-support/3rd-party/find-program-hints.cmake
-build-support/cmake-format-modules.yaml
-build-support/cmake-format.yaml
-build-support/compiler-workarounds/
-build-support/custom-modules/ns3-compiler-workarounds.cmake
-build-support/custom-modules/ns3-fetch-optional-modules-dependencies.cmake
-build-support/custom-modules/ns3-vcpkg-hunter.cmake
-build-support/pip-wheel/
-build-support/test-files/
+# build-support/.ns3rc-template
+# build-support/3rd-party/FindEigen3.cmake
+# build-support/3rd-party/find-program-hints.cmake
+# build-support/cmake-format-modules.yaml
+# build-support/cmake-format.yaml
+# build-support/compiler-workarounds/
+# build-support/custom-modules/ns3-compiler-workarounds.cmake
+# build-support/custom-modules/ns3-fetch-optional-modules-dependencies.cmake
+# build-support/custom-modules/ns3-vcpkg-hunter.cmake
+# build-support/pip-wheel/
+# build-support/test-files/
+build-support/
+ns3
+CMakeLists.txt
 grpc/
 pyproject.toml
 setup.cfg
