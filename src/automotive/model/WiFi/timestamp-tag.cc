@@ -18,7 +18,7 @@
 */
 
 #include "ns3/double.h"
-#include "timestamp-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3 {
 

@@ -18,7 +18,7 @@
 */
 
 #include "ns3/double.h"
-#include "rssi-tag.h"
+#include "ns3/rssi-tag.h"
 
 namespace ns3 {
 
