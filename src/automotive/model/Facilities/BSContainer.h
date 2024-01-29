@@ -25,8 +25,8 @@ namespace ns3
     void disablePRRSupervisorForGNBeacons() {m_prrsup_beacons=false;}
 
     // This simple wrapper module supports only extended callbacks
-    void addCAMRxCallback(std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
-    void addDENMRxCallback(std::function<void(denData,Address,unsigned long,long)> rx_callback) {m_DENReceiveCallbackExtended=rx_callback;}
+    void addCAMRxCallback(std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
+    void addDENMRxCallback(std::function<void(denData,Address,unsigned long,long,SignalInfo)> rx_callback) {m_DENReceiveCallbackExtended=rx_callback;}
 
     void setRealTime(bool real_time){m_real_time=real_time;}
 
@@ -62,8 +62,8 @@ namespace ns3
     void cleanup();
   private:
     // Message reception callbacks
-    std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t)> m_CAReceiveCallbackExtended;
-    std::function<void(denData,Address,unsigned long,long)> m_DENReceiveCallbackExtended;
+    std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> m_CAReceiveCallbackExtended;
+    std::function<void(denData,Address,unsigned long,long,SignalInfo)> m_DENReceiveCallbackExtended;
 
     // ETSI Transport and Networking layer pointers
     Ptr<btp> m_btp;
@@ -93,6 +93,7 @@ namespace ns3
     bool m_is_configured = false;
     bool m_DENMs_enabled = false;
     bool m_CAMs_enabled = false;
+
   };
 }
 

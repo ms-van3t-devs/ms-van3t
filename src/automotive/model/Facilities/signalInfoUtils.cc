@@ -35,7 +35,7 @@ void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr)
     m_signalInfo.snr = snr;
 };
 
-signalInfo SignalInfoUtils::GetSignalInfo() 
+SignalInfo SignalInfoUtils::GetSignalInfo() 
 {
     return m_signalInfo;
 };

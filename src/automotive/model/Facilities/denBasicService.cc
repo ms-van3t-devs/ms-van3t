@@ -1041,7 +1041,7 @@ namespace ns3 {
     if(m_DENReceiveCallback!=nullptr) {
       m_DENReceiveCallback(den_data,from);
     } else if(m_DENReceiveCallbackExtended!=nullptr) {
-      m_DENReceiveCallbackExtended(den_data,from,m_station_id,m_stationtype);
+      m_DENReceiveCallbackExtended(den_data,from,m_station_id,m_stationtype,GetSignalInfo());
     }
   }
 
