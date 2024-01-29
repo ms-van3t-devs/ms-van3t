@@ -19,8 +19,8 @@
 
 #include "cpBasicService.h"
 #include "ns3/snr-tag.h"
-#include "rssi-tag.h"
-#include "timestamp-tag.h"
+#include "ns3/rssi-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3 {
 

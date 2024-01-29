@@ -31,8 +31,8 @@
 #include "asn_utils.h"
 #include <cmath>
 #include "ns3/snr-tag.h"
-#include "rssi-tag.h"
-#include "timestamp-tag.h"
+#include "ns3/rssi-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3
 {
@@ -44,7 +44,7 @@ namespace ns3
 
   CABasicServiceV1::CABasicServiceV1()
   {
-    m_station_id = ULONG_MAX;rssi.Get(), snr.Get(), t
+    m_station_id = ULONG_MAX;
     m_stationtype = LONG_MAX;
     m_socket_tx=NULL;
     m_btp = NULL;
@@ -62,7 +62,6 @@ namespace ns3
     lastCamGen=-1;
     lastCamGenLowFrequency=-1;
     lastCamGenSpecialVehicle=-1;
-rssi.Get(), snr.Get(), t
     // Set to 3 as described by the ETSI EN 302 637-2 V1.3.1 standard
     m_N_GenCamMax=3;
     m_N_GenCam=0;

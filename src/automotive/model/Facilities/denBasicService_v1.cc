@@ -28,8 +28,8 @@
 #include "ns3/BitString.hpp"
 #include "ns3/asn_application.h"
 #include "ns3/snr-tag.h"
-#include "rssi-tag.h"
-#include "timestamp-tag.h"
+#include "ns3/rssi-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3 {
 
