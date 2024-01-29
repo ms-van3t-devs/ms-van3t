@@ -10,6 +10,7 @@
 #include "ns3/Seq.hpp"
 #include "ns3/Getter.hpp"
 #include "ns3/LDM.h"
+#include "signalInfoUtils.h"
 
 extern "C" {
   #include "ns3/CAM.h"
@@ -28,7 +29,7 @@ namespace ns3
     CAM_CANNOT_SEND=5
   } CABasicService_error_t;
 
-  class CABasicService: public Object
+  class CABasicService: public Object, public SignalInfoUtils
   {
   public:
     CABasicService();

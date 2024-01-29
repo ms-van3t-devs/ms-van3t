@@ -144,6 +144,18 @@ cd ns-3-dev
 cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model.cc src/propagation/model/
 cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model.h src/propagation/model/
 cp src/automotive/propagation-extended/CMakeLists.txt src/propagation/
+
+echo "Extending Signal Info features..."
+sleep 1
+cp src/automotive/model/WiFi/rssi-tag.cc src/wifi/model/
+cp src/automotive/model/WiFi/rssi-tag.h src/wifi/model/
+cp src/automotive/model/WiFi/timestamp-tag.cc src/wifi/model/
+cp src/automotive/model/WiFi/timestamp-tag.h src/wifi/model/
+cp src/automotive/model/WiFi/wifi-mac-queue-item.h src/wifi/model/
+cp src/automotive/model/WiFi/ocb-wifi-mac.cc src/wave/model/
+cp src/automotive/model/WiFi/qos-frame-exchange-manager.cc src/wifi/model/
+cp src/automotive/model/WiFi/CMakeLists.txt src/wifi/
+
 cd ..
 set +v
 

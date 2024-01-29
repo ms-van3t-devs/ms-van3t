@@ -13,6 +13,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include "signalInfoUtils.h"
 
 #define V_O_VALIDITY_INDEX 0
 #define T_REPETITION_INDEX 1
@@ -36,7 +37,7 @@ namespace ns3 {
     DENM_TX_SOCKET_NOT_SET=12
   } DENBasicService_error_t;
 
-  class DENBasicService: public Object
+  class DENBasicService: public Object, public SignalInfoUtils
   {
     public:
     DENBasicService();

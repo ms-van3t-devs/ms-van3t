@@ -13,6 +13,7 @@
 #include "ns3/vdpTraci.h"
 #include "ns3/LDM.h"
 #include "ns3/ldm-utils.h"
+#include "signalInfoUtils.h"
 
 extern "C" {
   #include "ns3/CPM.h"
@@ -21,7 +22,7 @@ extern "C" {
 namespace ns3
 {
 
-class CPBasicService
+class CPBasicService: public SignalInfoUtils
 { 
 public:
   CPBasicService();

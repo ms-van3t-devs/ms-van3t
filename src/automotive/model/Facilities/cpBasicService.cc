@@ -18,6 +18,10 @@
 */
 
 #include "cpBasicService.h"
+#include "ns3/snr-tag.h"
+#include "rssi-tag.h"
+#include "timestamp-tag.h"
+
 namespace ns3 {
 
   NS_LOG_COMPONENT_DEFINE("CPBasicService");
@@ -404,6 +408,17 @@ namespace ns3 {
     buffer=(uint8_t *)malloc((dataIndication.data->GetSize ())*sizeof(uint8_t));
     dataIndication.data->CopyData (buffer, dataIndication.data->GetSize ());
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
+
+    RssiTag rssi;
+    dataIndication.data->PeekPacketTag(rssi);
+
+    SnrTag snr;
+    dataIndication.data->PeekPacketTag(snr);
+
+    TimestampTag timestamp;
+    dataIndication.data->PeekPacketTag(timestamp);
+
+    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get());
 
     /** Decoding **/
     decoded_cpm = asn1cpp::uper::decode(packetContent, CPM);

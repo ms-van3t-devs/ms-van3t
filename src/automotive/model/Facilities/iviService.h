@@ -24,6 +24,7 @@
 #include "ns3/BitString.hpp"
 #include "ns3/View.hpp"
 #include "ns3/Utils.hpp"
+#include "signalInfoUtils.h"
 
 extern "C" {
 #include "ns3/IVIM.h"
@@ -59,7 +60,7 @@ typedef enum {
 
 
 
-  class IVIBasicService
+  class IVIBasicService: public SignalInfoUtils
   {
     public:
     IVIBasicService();

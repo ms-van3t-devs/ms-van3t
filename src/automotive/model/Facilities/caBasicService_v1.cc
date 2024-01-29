@@ -30,6 +30,9 @@
 #include "ns3/vdp.h"
 #include "asn_utils.h"
 #include <cmath>
+#include "ns3/snr-tag.h"
+#include "rssi-tag.h"
+#include "timestamp-tag.h"
 
 namespace ns3
 {
@@ -41,7 +44,7 @@ namespace ns3
 
   CABasicServiceV1::CABasicServiceV1()
   {
-    m_station_id = ULONG_MAX;
+    m_station_id = ULONG_MAX;rssi.Get(), snr.Get(), t
     m_stationtype = LONG_MAX;
     m_socket_tx=NULL;
     m_btp = NULL;
@@ -59,7 +62,7 @@ namespace ns3
     lastCamGen=-1;
     lastCamGenLowFrequency=-1;
     lastCamGenSpecialVehicle=-1;
-
+rssi.Get(), snr.Get(), t
     // Set to 3 as described by the ETSI EN 302 637-2 V1.3.1 standard
     m_N_GenCamMax=3;
     m_N_GenCam=0;
@@ -214,6 +217,17 @@ namespace ns3
     buffer=(uint8_t *)malloc((dataIndication.data->GetSize ())*sizeof(uint8_t));
     dataIndication.data->CopyData (buffer, dataIndication.data->GetSize ());
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
+
+    RssiTag rssi;
+    dataIndication.data->PeekPacketTag(rssi);
+
+    SnrTag snr;
+    dataIndication.data->PeekPacketTag(snr);
+
+    TimestampTag timestamp;
+    dataIndication.data->PeekPacketTag(timestamp);
+
+    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get());
 
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)

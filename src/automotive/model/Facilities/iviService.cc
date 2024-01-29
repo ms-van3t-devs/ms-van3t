@@ -31,8 +31,9 @@
 #include "ns3/BitString.hpp"
 #include "ns3/View.hpp"
 #include "ns3/Utils.hpp"
-
-
+#include "ns3/snr-tag.h"
+#include "rssi-tag.h"
+#include "timestamp-tag.h"
 
 
 namespace ns3 {
@@ -864,6 +865,15 @@ namespace ns3 {
       buffer=(uint8_t *)malloc((packet->GetSize ())*sizeof(uint8_t));
       packet->CopyData (buffer, packet->GetSize ());
       std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
+
+      RssiTag rssi;
+      dataIndication.data->PeekPacketTag(rssi);
+
+      SnrTag snr;
+      dataIndication.data->PeekPacketTag(snr);
+
+      TimestampTag timestamp;
+      dataIndication.data->PeekPacketTag(timestamp);
 
       /* Try to check if the received packet is really a IVIM */
        if (buffer[1]!=FIX_IVIMID) //FIX_IVIMID = 0x06;
