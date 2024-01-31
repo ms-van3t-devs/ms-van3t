@@ -96,8 +96,9 @@ To run the provided examples:
 # Working with an IDE
 
 Although not necessarily required, you can also configure an IDE in order to more comfortably work with ms-van3t.
+The suggested IDEs, which has also been used for the development of ms-van3t, are _QtCreator_ and _CLion_.
 
-The suggested IDE, which has also been used for the development of ms-van3t, is _QtCreator_.
+## QtCreator
 
 You can find all the instructions for setting up QtCreator with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) on the [official ns-3 Wiki](https://www.nsnam.org/wiki/HOWTO_configure_QtCreator_with_ns-3).
 
@@ -110,6 +111,12 @@ You need also to install the `libclang-common-8-dev` package (the command for De
 Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlighting several errors and not recognizing some types, when opening any source or header file, even if the code compiles correctly.
 
 **Important**: if `libclang-common-8-dev` is not available, you can try installing a newer version. For example, on Ubuntu 22, we verified that `libclang-common-15-dev` works well too.
+
+## CLion
+
+CLion can be easily installed with the [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/).
+
+You can find all the instructions for setting up CLion with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) [here](https://carlosrismadoctutorial.readthedocs.io/en/latest/IDE.html#clion).
 
 # Supported ETSI C-ITS messages
 
