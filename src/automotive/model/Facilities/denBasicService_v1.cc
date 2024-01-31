@@ -27,6 +27,9 @@
 #include "ns3/SequenceOf.hpp"
 #include "ns3/BitString.hpp"
 #include "ns3/asn_application.h"
+#include "ns3/snr-tag.h"
+#include "ns3/rssi-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3 {
 
@@ -881,6 +884,15 @@ namespace ns3 {
     packet->CopyData (buffer, packet->GetSize ());
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
 
+    RssiTag rssi;
+    dataIndication.data->PeekPacketTag(rssi);
+
+    SnrTag snr;
+    dataIndication.data->PeekPacketTag(snr);
+
+    TimestampTag timestamp;
+    dataIndication.data->PeekPacketTag(timestamp);
+
     if(!CheckMainAttributes ())
       {
         NS_LOG_ERROR("DENBasicServiceV1 has unset parameters. Cannot receive any data.");
@@ -1022,7 +1034,7 @@ namespace ns3 {
     if(m_DENReceiveCallback!=nullptr) {
       m_DENReceiveCallback(den_data,from);
     } else if(m_DENReceiveCallbackExtended!=nullptr) {
-      m_DENReceiveCallbackExtended(den_data,from,m_station_id,m_stationtype);
+      m_DENReceiveCallbackExtended(den_data,from,m_station_id,m_stationtype,GetSignalInfo());
     }
   }
 

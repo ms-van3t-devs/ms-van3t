@@ -62,7 +62,7 @@ Set(source_files
     model/GeoNet/beacon-header.cc
     model/GeoNet/gn-utils.cc
     
-
+    model/Facilities/signalInfoUtils.cc
 
     model/ASN1/asn1-v2/AbsolutePosition.c
     model/ASN1/asn1-v2/AbsolutePositions.c
@@ -1360,6 +1360,8 @@ set(header_files
     model/utilities/sumo-sensor.h
     model/Applications/v2xEmulator.h
     model/Measurements/PRRSupervisor.h
+
+    model/Facilities/signalInfoUtils.h
     
     helper/emergencyVehicleWarningServer80211p-helper.h
     helper/emergencyVehicleWarningClient80211p-helper.h

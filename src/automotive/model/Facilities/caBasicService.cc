@@ -30,6 +30,9 @@
 #include "ns3/vdp.h"
 #include "asn_utils.h"
 #include <cmath>
+#include "ns3/snr-tag.h"
+#include "ns3/rssi-tag.h"
+#include "ns3/timestamp-tag.h"
 
 namespace ns3
 {
@@ -215,6 +218,17 @@ namespace ns3
     dataIndication.data->CopyData (buffer, dataIndication.data->GetSize ());
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
 
+    RssiTag rssi;
+    dataIndication.data->PeekPacketTag(rssi);
+
+    SnrTag snr;
+    dataIndication.data->PeekPacketTag(snr);
+
+    TimestampTag timestamp;
+    dataIndication.data->PeekPacketTag(timestamp);
+
+    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get());
+
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
       {
@@ -241,7 +255,7 @@ namespace ns3
     if(m_CAReceiveCallback!=nullptr) {
       m_CAReceiveCallback(decoded_cam,from);
     } else if(m_CAReceiveCallbackExtended!=nullptr) {
-      m_CAReceiveCallbackExtended(decoded_cam,from,m_station_id,m_stationtype);
+      m_CAReceiveCallbackExtended(decoded_cam,from,m_station_id,m_stationtype,GetSignalInfo());
     }
   }
 
