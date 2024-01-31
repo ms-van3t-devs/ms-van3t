@@ -83,6 +83,12 @@ namespace ns3 {
       NS_FATAL_ERROR("Fatal error: TraCI client not set in PRR Supervisor.");
     }
 
+    // If the packet is sent by an excluded vehicle due to a problem in the configuration of the simulation, ignore it
+    if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(vehicleID)!=m_excluded_vehID_list.end()))
+    {
+        return;
+    }
+
     std::vector<std::string> ids = m_traci_ptr->TraCIAPI::vehicle.getIDList ();
 
     for(std::vector<std::string>::iterator it=ids.begin();it!=ids.end();++it)
@@ -120,6 +126,14 @@ namespace ns3 {
       NS_FATAL_ERROR("Fatal error: TraCI client not set in PRR Supervisor.");
     }
 
+    // If the packet was received by an excluded vehicle due to a problem in the configuration of the simulation, ignore it
+    if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(vehicleID)!=m_excluded_vehID_list.end()))
+    {
+      return;
+    }
+
+    // If the packet was sent by an excluded vehicle due to a problem in the configuration of the simulation, it will be automatically
+    // ignored as it will not be in the m_packetbuff_map and m_packetbuff_map.count(buf)==0
     if(m_packetbuff_map.count(buf)>0)
     {
       currBaselineData = m_packetbuff_map[buf];
@@ -182,6 +196,12 @@ namespace ns3 {
       messageType_e messagetype = m_messagetype_map[buf];
 
       PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].vehList.size()-1.0);
+
+      if(PRR>1) {
+          std::cerr << "Value of X: " << (double) m_packetbuff_map[buf].x << " - value of Y: " << (double) (m_packetbuff_map[buf].vehList.size()-1.0) << std::endl;
+          NS_FATAL_ERROR ("Error. Computed a PRR greater than 1. This is not possible. Please check how you configured your simulation and the PRRSupervisor.");
+      }
+
       m_count++;
       m_avg_PRR += (PRR-m_avg_PRR)/m_count;
 
