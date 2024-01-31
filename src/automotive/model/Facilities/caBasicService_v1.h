@@ -53,7 +53,7 @@ namespace ns3
     void changeRSUGenInterval(long RSU_GenCam_ms) {m_RSU_GenCam_ms=RSU_GenCam_ms;}
     // Warning: if both the standard and extended callbacks are set, only the standard callback will be called
     void addCARxCallback(std::function<void(asn1cpp::Seq<CAMV1>, Address)> rx_callback) {m_CAReceiveCallback=rx_callback;}
-    void addCARxCallbackExtended(std::function<void(asn1cpp::Seq<CAMV1>, Address, StationID_t, StationType_t)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
+    void addCARxCallbackExtended(std::function<void(asn1cpp::Seq<CAMV1>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
     void setRealTime(bool real_time){m_real_time=real_time;}
 
     void setLowFrequencyContainer(bool enable) {m_lowFreqContainerEnabled = enable;}
@@ -83,7 +83,7 @@ namespace ns3
     // std::function<void(CAM_t *, Address)> m_CAReceiveCallback;
     std::function<void(asn1cpp::Seq<CAMV1>, Address)> m_CAReceiveCallback;
     std::function<void(asn1cpp::Seq<CAMV1>, Address, Ptr<Packet>)> m_CAReceiveCallbackPkt;
-    std::function<void(asn1cpp::Seq<CAMV1>, Address, StationID_t, StationType_t)> m_CAReceiveCallbackExtended;
+    std::function<void(asn1cpp::Seq<CAMV1>, Address, StationID_t, StationType_t, SignalInfo)> m_CAReceiveCallbackExtended;
 
     Ptr<btp> m_btp;
 

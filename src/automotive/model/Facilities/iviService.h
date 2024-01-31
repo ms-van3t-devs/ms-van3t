@@ -74,6 +74,7 @@ typedef enum {
     long timeStamp;
 
     void addIVIRxCallback(std::function<void(iviData,Address)> rx_callback) {m_IVIReceiveCallback=rx_callback;}
+    void addIVIRxCallbackExtended(std::function<void(iviData,Address,StationID_t,StationType_t,SignalInfo)> rx_callback) {m_IVIReceiveCallbackExtended=rx_callback;}
 
     IVIBasicService_error_t appIVIM_trigger(iviData Data);
     IVIBasicService_error_t appIVIM_repetition(iviData Data);
@@ -111,6 +112,7 @@ typedef enum {
     asn1cpp::Seq<PolygonalLine> fillPolyLine(iviData::IVI_glcP_PolygonalLine line);
 
     std::function<void(iviData,Address)> m_IVIReceiveCallback;
+    std::function<void(iviData,Address,StationID_t,StationType_t,SignalInfo)> m_IVIReceiveCallbackExtended;
 
     uint16_t m_port;
     bool m_real_time;

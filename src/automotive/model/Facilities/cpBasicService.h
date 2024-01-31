@@ -39,6 +39,7 @@ public:
   void receiveCpm(BTPDataIndication_t dataIndication, Address from);
   void changeNGenCpmMax(int16_t N_GenCpmMax) {m_N_GenCpmMax=N_GenCpmMax;}
   void addCPRxCallback(std::function<void(asn1cpp::Seq<CPM>, Address)> rx_callback) {m_CPReceiveCallback=rx_callback;}
+  void addCPRxCallbackExtended(std::function<void(asn1cpp::Seq<CPM>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CPReceiveCallbackExtended=rx_callback;}
   void setRealTime(bool real_time){m_real_time=real_time;}
   void startCpmDissemination();
   uint64_t terminateDissemination();
@@ -63,6 +64,8 @@ private:
 
   std::function<void(asn1cpp::Seq<CPM>, Address)> m_CPReceiveCallback;
   std::function<void(asn1cpp::Seq<CPM>, Address, Ptr<Packet>)> m_CPReceiveCallbackPkt;
+  std::function<void(asn1cpp::Seq<CPM>, Address, StationID_t, StationType_t, SignalInfo)> m_CPReceiveCallbackExtended;
+
 
   Ptr<btp> m_btp;
 
