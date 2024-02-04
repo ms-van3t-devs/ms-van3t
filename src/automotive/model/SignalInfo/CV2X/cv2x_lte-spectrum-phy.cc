@@ -2018,7 +2018,7 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
                 (*j)->AddPacketTag (snr);
 
                 TimestampTag timestamp;
-                timestamp.Set(Simulator::Now ().GetMilliSeconds ());
+                timestamp.Set(Simulator::Now ().GetDouble ());
                 (*j)->AddPacketTag (timestamp);
 
                 // retrieve TB info of this packet

@@ -23,16 +23,18 @@
 
 SignalInfoUtils::SignalInfoUtils()
 {
-    m_signalInfo.timestamp = -1;
-    m_signalInfo.rssi = -1;
-    m_signalInfo.snr = -1;
+    m_signalInfo.timestamp = NULL;
+    m_signalInfo.rssi = NULL;
+    m_signalInfo.snr = NULL;
+    m_signalInfo.rsrp = NULL;
 }
 
-void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr) 
+void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr, double rsrp)
 {
     m_signalInfo.timestamp = timestamp; 
     m_signalInfo.rssi = rssi; 
     m_signalInfo.snr = snr;
+    m_signalInfo.rsrp = rsrp;
 };
 
 SignalInfo SignalInfoUtils::GetSignalInfo() 
@@ -53,11 +55,11 @@ void SignalInfoUtils::WriteLastSignalInfo(std::string path, long stationID)
 
     // If the file needs a signature, write the header
     if (needsSignature) {
-        outFile << "#Timestamp, StationID, RSSI, SNR\n";
+        outFile << "#Timestamp, StationID, RSSI, SNR, RSRP(CV2X only)\n";
     }
 
     // Write the signal information with StationID
-    outFile << m_signalInfo.timestamp << "," << stationID << "," << m_signalInfo.rssi << "," << m_signalInfo.snr << "\n";
+    outFile << m_signalInfo.timestamp << "," << stationID << "," << m_signalInfo.rssi << "," << m_signalInfo.snr << "," << m_signalInfo.rsrp << "\n";
 
     // Close the file
     outFile.close();

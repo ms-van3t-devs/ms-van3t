@@ -33,6 +33,7 @@
 #include "ns3/snr-tag.h"
 #include "ns3/rssi-tag.h"
 #include "ns3/timestamp-tag.h"
+#include "ns3/rsrp-tag.h"
 
 namespace ns3
 {
@@ -223,10 +224,17 @@ namespace ns3
     SnrTag snr;
     dataIndication.data->PeekPacketTag(snr);
 
+    RsrpTag rsrp;
+    bool rsrp_result = dataIndication.data->PeekPacketTag(rsrp);
+    if (!rsrp_result) {
+        // No CV2X application
+        rsrp.Set(NULL);
+      }
+
     TimestampTag timestamp;
     dataIndication.data->PeekPacketTag(timestamp);
 
-    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get());
+    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get(), rsrp.Get());
 
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
