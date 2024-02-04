@@ -892,12 +892,7 @@ namespace ns3 {
     dataIndication.data->PeekPacketTag(snr);
 
     RsrpTag rsrp;
-    bool rsrp_result = dataIndication.data->PeekPacketTag(rsrp);
-    if (!rsrp_result) {
-        // No CV2X application
-        rsrp.Set(NULL);
-      }
-
+    dataIndication.data->PeekPacketTag(rsrp);
 
     TimestampTag timestamp;
     dataIndication.data->PeekPacketTag(timestamp);
