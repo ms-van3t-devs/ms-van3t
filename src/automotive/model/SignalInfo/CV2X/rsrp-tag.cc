@@ -45,7 +45,7 @@ RsrpTag::GetInstanceTypeId (void) const
   return GetTypeId ();
 }
 
-RsrpTag::RssiTag ()
+RsrpTag::RsrpTag ()
   : m_rsrp (0)
 {
 }
