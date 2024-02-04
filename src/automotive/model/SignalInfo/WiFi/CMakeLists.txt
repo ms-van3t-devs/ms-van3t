@@ -139,6 +139,7 @@ set(source_files
     model/yans-wifi-phy.cc
     model/rssi-tag.cc
     model/timestamp-tag.cc
+    model/rsrp-tag.cc
 )
 
 set(header_files
@@ -281,6 +282,7 @@ set(header_files
     model/yans-wifi-phy.h
     model/rssi-tag.h
     model/timestamp-tag.h
+    model/rsrp-tag.h
 )
 
 build_lib(
