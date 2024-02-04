@@ -49,7 +49,7 @@ public:
   /**
    * Set the RSSI to the given value.
    *
-   * \param rsrp the value of the RSSI to set in linear scale
+   * \param rsrp the value of the RSRP to set in linear scale
    */
   void Set (double rsrp);
   /**
