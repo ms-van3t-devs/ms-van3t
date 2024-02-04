@@ -147,14 +147,27 @@ cp src/automotive/propagation-extended/CMakeLists.txt src/propagation/
 
 echo "Extending Signal Info features..."
 sleep 1
-cp src/automotive/model/WiFi/rssi-tag.cc src/wifi/model/
-cp src/automotive/model/WiFi/rssi-tag.h src/wifi/model/
-cp src/automotive/model/WiFi/timestamp-tag.cc src/wifi/model/
-cp src/automotive/model/WiFi/timestamp-tag.h src/wifi/model/
-cp src/automotive/model/WiFi/wifi-mac-queue-item.h src/wifi/model/
-cp src/automotive/model/WiFi/ocb-wifi-mac.cc src/wave/model/
-cp src/automotive/model/WiFi/qos-frame-exchange-manager.cc src/wifi/model/
-cp src/automotive/model/WiFi/CMakeLists.txt src/wifi/
+cp src/automotive/model/SignalInfo/rssi-tag.cc src/wifi/model/
+cp src/automotive/model/SignalInfo/rssi-tag.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/rssi-tag.h src/wifi/model/
+cp src/automotive/model/SignalInfo/rssi-tag.h src/cv2x/model/
+cp src/automotive/model/SignalInfo/timestamp-tag.cc src/wifi/model/
+cp src/automotive/model/SignalInfo/timestamp-tag.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/timestamp-tag.h src/wifi/model/
+cp src/automotive/model/SignalInfo/timestamp-tag.h src/cv2x/model/
+
+cp src/automotive/model/SignalInfo/WiFi/wifi-mac-queue-item.h src/wifi/model/
+cp src/automotive/model/SignalInfo/WiFi/ocb-wifi-mac.cc src/wave/model/
+cp src/automotive/model/SignalInfo/WiFi/qos-frame-exchange-manager.cc src/wifi/model/
+cp src/automotive/model/SignalInfo/WiFi/CMakeLists.txt src/wifi/
+
+cp src/automotive/model/SignalInfo/CV2X/rsrp-tag.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/rsrp-tag.h src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.h src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/CMakeLists.txt src/cv2x/
+
 
 cd ..
 set +v
