@@ -223,7 +223,7 @@ namespace ns3
     dataIndication.data->PeekPacketTag(rssi);
 
     SnrTag snr;
-    dataIndication.data->PeekPacketTag(snr);
+    bool result = dataIndication.data->PeekPacketTag(snr);
 
     RsrpTag rsrp;
     dataIndication.data->PeekPacketTag(rsrp);

@@ -2014,11 +2014,11 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
             for (std::list<Ptr<Packet> >::const_iterator j = m_rxPacketInfo[i].m_rxPacketBurst->Begin (); j != m_rxPacketInfo[i].m_rxPacketBurst->End (); ++j)
             {
                 SnrTag snr;
-                snr.Set (itTbV2x->second.sinr);
+                snr.Set (10*log10(itTbV2x->second.sinr));
                 (*j)->AddPacketTag (snr);
 
                 TimestampTag timestamp;
-                timestamp.Set(Simulator::Now ().GetDouble ());
+                timestamp.Set(Simulator::Now ().GetNanoSeconds ());
                 (*j)->AddPacketTag (timestamp);
 
                 // retrieve TB info of this packet

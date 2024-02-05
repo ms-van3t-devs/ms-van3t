@@ -4361,7 +4361,7 @@ cv2x_LteUeMac::DoPassSensingData(uint32_t frameNo, uint32_t subframeNo, uint16_t
         sensingData.m_rxInfo.subframe.frameNo = frameNo;
         sensingData.m_rxInfo.subframe.subframeNo = subframeNo-1;
     }
-    SetSignalInfo(slRssi, slRsrp);
+    SetSignalInfo(10*log10(slRssi), 10*log10(slRsrp));
     m_sensingData.push_back(sensingData);
 }
 
