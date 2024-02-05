@@ -20,6 +20,10 @@
 #ifndef SIGNALINFOUTILS_H
 #define SIGNALINFOUTILS_H
 #include <string>
+#include <cmath>
+#include <fstream>
+
+const double DEFAULT_VALUE = std::numeric_limits<double>::quiet_NaN();
 
 typedef struct {
     double timestamp;

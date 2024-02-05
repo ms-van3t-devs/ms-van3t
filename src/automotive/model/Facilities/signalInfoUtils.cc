@@ -18,8 +18,6 @@
 */
 
 #include "signalInfoUtils.h"
-#include <fstream>
-
 
 SignalInfoUtils::SignalInfoUtils()
 {
@@ -31,10 +29,28 @@ SignalInfoUtils::SignalInfoUtils()
 
 void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr, double rsrp)
 {
-    m_signalInfo.timestamp = timestamp; 
-    m_signalInfo.rssi = rssi; 
-    m_signalInfo.snr = snr;
-    m_signalInfo.rsrp = rsrp;
+    m_signalInfo.timestamp = timestamp;
+
+    if(std::isinf(rssi)) {
+        m_signalInfo.rssi = DEFAULT_VALUE;
+      }
+    else {
+      m_signalInfo.rssi = rssi;
+      }
+
+    if(std::isinf(snr)) {
+        m_signalInfo.snr = DEFAULT_VALUE;
+      }
+    else {
+      m_signalInfo.snr = snr;
+      }
+
+    if(std::isinf(rsrp)) {
+        m_signalInfo.rsrp = DEFAULT_VALUE;
+      }
+    else {
+      m_signalInfo.rsrp = rsrp;
+      }
 };
 
 SignalInfo SignalInfoUtils::GetSignalInfo() 
@@ -59,7 +75,28 @@ void SignalInfoUtils::WriteLastSignalInfo(std::string path, long stationID)
     }
 
     // Write the signal information with StationID
-    outFile << m_signalInfo.timestamp << "," << stationID << "," << m_signalInfo.rssi << "," << m_signalInfo.snr << "," << m_signalInfo.rsrp << "\n";
+    outFile << m_signalInfo.timestamp << "," << stationID << ",";
+
+    if(std::isnan(m_signalInfo.rssi)){
+        outFile << "Inf" << ",";
+      }
+    else {
+        outFile << m_signalInfo.rssi << ",";
+      }
+
+    if(std::isnan(m_signalInfo.snr)){
+        outFile << "Inf" << ",";
+      }
+    else {
+        outFile << m_signalInfo.snr << ",";
+      }
+
+    if(std::isnan(m_signalInfo.rsrp)){
+        outFile << "Inf" << "\n";
+      }
+    else {
+        outFile << m_signalInfo.rsrp << "\n";
+      }
 
     // Close the file
     outFile.close();
