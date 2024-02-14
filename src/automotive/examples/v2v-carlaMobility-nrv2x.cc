@@ -107,7 +107,7 @@ main (int argc, char *argv[])
 
   std::string OpenCDA_HOME, CARLA_HOME, Python_Interpreter;
 
-  int numberOfNodes = 30;
+  int numberOfNodes;
   uint32_t nodeCounter = 0;
 
   double m_baseline_prr = 150.0;

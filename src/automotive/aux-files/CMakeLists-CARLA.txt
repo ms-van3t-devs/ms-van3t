@@ -81,7 +81,7 @@ Set(source_files
     model/GeoNet/beacon-header.cc
     model/GeoNet/gn-utils.cc
     
-
+    model/Facilities/signalInfoUtils.cc
 
     model/ASN1/asn1-v2/AbsolutePosition.c
     model/ASN1/asn1-v2/AbsolutePositions.c
@@ -1404,7 +1404,7 @@ set(header_files
 
 
 
-
+    model/Facilities/signalInfoUtils.h
 
 
 
