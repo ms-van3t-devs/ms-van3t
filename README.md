@@ -2,6 +2,8 @@
 
 ![](img/MS-VAN3T_logo-V2_small.png)
 
+----- _ms-van3t is pronounced "em-es vanet"_
+
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
 
 It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, v1.18.0 on Ubuntu 20.04 and 22.04.

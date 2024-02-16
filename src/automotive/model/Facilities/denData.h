@@ -6,6 +6,10 @@
 #include "ns3/Seq.hpp"
 #include "ns3/Getter.hpp"
 #include "ns3/BitString.hpp"
+#include "ns3/AdverseWeatherCondition-AdhesionSubCauseCode.h"
+#include "ns3/AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.h"
+#include "ns3/AdverseWeatherCondition-PrecipitationSubCauseCode.h"
+#include "ns3/AdverseWeatherCondition-VisibilitySubCauseCode.h"
 #include <cstring>
 
 typedef struct CauseCode sCauseCode_t;

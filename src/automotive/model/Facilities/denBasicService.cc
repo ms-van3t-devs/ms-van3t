@@ -1195,11 +1195,15 @@ namespace ns3 {
     situation.causeCode = asn1cpp::getField(denm_situation_container->eventType.causeCode,long);
     situation.subCauseCode = asn1cpp::getField(denm_situation_container->eventType.subCauseCode,long);
 
-    auto linkedCause = asn1cpp::getField(denm_situation_container->linkedCause->causeCode,long,&ok);
-    if(ok)
+    if(denm_situation_container->linkedCause!=nullptr)
       {
-        situation.linkedCauseCode.setData (linkedCause);
-        situation.linkedSubCauseCode.setData (asn1cpp::getField(denm_situation_container->linkedCause->subCauseCode,long));
+        auto linkedCause = asn1cpp::getField (denm_situation_container->linkedCause->causeCode, long, &ok);
+        if (ok)
+          {
+            situation.linkedCauseCode.setData (linkedCause);
+            situation.linkedSubCauseCode.setData (
+                asn1cpp::getField (denm_situation_container->linkedCause->subCauseCode, long));
+          }
       }
 
     auto eventHist = asn1cpp::getSeqOpt(denm_situation_container->eventHistory,EventHistory,&ok);
