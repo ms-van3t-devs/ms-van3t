@@ -17,35 +17,53 @@
  *  Diego Gasco, Politecnico di Torino (diego.gasco@polito.it, diego.gasco99@gmail.com)
 */
 
-#ifndef SIGNALINFOUTILS_H
-#define SIGNALINFOUTILS_H
-#include <string>
-#include <cmath>
-#include <fstream>
+#ifndef SINR_TAG_H
+#define SINR_TAG_H
 
-const double DEFAULT_VALUE = std::numeric_limits<double>::quiet_NaN();
-const double SENTINEL_VALUE = 42000;
+#include "ns3/tag.h"
 
-typedef struct {
-    double timestamp;
-    double rssi;
-    double snr;
-    double sinr;
-    double rsrp;
-} SignalInfo;
+namespace ns3 {
 
+class Tag;
 
-class SignalInfoUtils
+class SinrTag : public Tag
 {
 public:
-    SignalInfoUtils();
-    void SetSignalInfo(double timestamp, double rssi, double snr, double sinr, double rsrp);
-    SignalInfo GetSignalInfo();
-    void WriteLastSignalInfo(std::string path, long stationID);
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+
+  /**
+   * Create a SinrTag with the default RSRP 0
+   */
+  SinrTag ();
+
+  TypeId GetInstanceTypeId (void) const override;
+  uint32_t GetSerializedSize (void) const override;
+  void Serialize (TagBuffer i) const override;
+  void Deserialize (TagBuffer i) override;
+  void Print (std::ostream &os) const override;
+
+  /**
+   * Set the SINR to the given value.
+   *
+   * \param sinr the value of the SINR to set
+   */
+  void Set (double sinr);
+  /**
+   * Return the SINR value.
+   *
+   * \return the SINR value
+   */
+  double Get (void) const;
+
 
 private:
-    SignalInfo m_signalInfo;
+  double m_sinr;  //!< SINR value
 };
 
+}
 
-#endif // SIGNALINFOUTILS_H
+#endif /* SINR_TAG_H */

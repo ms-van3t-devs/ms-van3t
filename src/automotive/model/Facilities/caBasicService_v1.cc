@@ -31,8 +31,10 @@
 #include "asn_utils.h"
 #include <cmath>
 #include "ns3/snr-tag.h"
+#include "ns3/sinr-tag.h"
 #include "ns3/rssi-tag.h"
 #include "ns3/timestamp-tag.h"
+#include "ns3/rsrp-tag.h"
 
 namespace ns3
 {
@@ -218,15 +220,38 @@ namespace ns3
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
 
     RssiTag rssi;
-    dataIndication.data->PeekPacketTag(rssi);
+    bool rssi_result = dataIndication.data->PeekPacketTag(rssi);
 
     SnrTag snr;
-    dataIndication.data->PeekPacketTag(snr);
+    bool snr_result = dataIndication.data->PeekPacketTag(snr);
+
+    RsrpTag rsrp;
+    bool rsrp_result = dataIndication.data->PeekPacketTag(rsrp);
+
+    SinrTag sinr;
+    bool sinr_result = dataIndication.data->PeekPacketTag(sinr);
 
     TimestampTag timestamp;
     dataIndication.data->PeekPacketTag(timestamp);
 
-    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get());
+    if(!snr_result)
+      {
+        snr.Set(SENTINEL_VALUE);
+      }
+    if (!rssi_result)
+      {
+	rssi.Set(SENTINEL_VALUE);
+      }
+    if (!rsrp_result)
+      {
+        rsrp.Set(SENTINEL_VALUE);
+      }
+    if (!sinr_result)
+      {
+	sinr.Set(SENTINEL_VALUE);
+      }
+	
+    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get(), sinr.Get(), rsrp.Get());
 
     /* Try to check if the received packet is really a CAM */
     if (buffer[1]!=FIX_CAMID)
