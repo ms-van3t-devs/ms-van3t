@@ -191,6 +191,10 @@ OpenCDA/
 build-support/
 ns3
 CMakeLists.txt
+!/src/automotive/model/SignalInfo/CV2X/CMakeLists.txt
+!/src/automotive/model/SignalInfo/LTE/CMakeLists.txt
+!/src/automotive/model/SignalInfo/NR/CMakeLists.txt
+!/src/automotive/model/SignalInfo/WiFi/CMakeLists.txt
 grpc/
 pyproject.toml
 setup.cfg
