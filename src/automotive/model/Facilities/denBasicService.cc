@@ -28,10 +28,8 @@
 #include "ns3/BitString.hpp"
 #include "ns3/asn_application.h"
 #include "ns3/snr-tag.h"
-#include "ns3/sinr-tag.h"
 #include "ns3/rssi-tag.h"
 #include "ns3/timestamp-tag.h"
-#include "ns3/rsrp-tag.h"
 
 namespace ns3 {
 
@@ -894,39 +892,13 @@ namespace ns3 {
     std::string packetContent((char *)buffer,(int) dataIndication.data->GetSize ());
 
     RssiTag rssi;
-    bool rssi_result = dataIndication.data->PeekPacketTag(rssi);
+    dataIndication.data->PeekPacketTag(rssi);
 
     SnrTag snr;
-    bool snr_result = dataIndication.data->PeekPacketTag(snr);
-
-    RsrpTag rsrp;
-    bool rsrp_result = dataIndication.data->PeekPacketTag(rsrp);
-
-    SinrTag sinr;
-    bool sinr_result = dataIndication.data->PeekPacketTag(sinr);
+    dataIndication.data->PeekPacketTag(snr);
 
     TimestampTag timestamp;
     dataIndication.data->PeekPacketTag(timestamp);
-
-    if(!snr_result)
-      {
-        snr.Set(SENTINEL_VALUE);
-      }
-    if (!rssi_result)
-      {
-	rssi.Set(SENTINEL_VALUE);
-      }
-    if (!rsrp_result)
-      {
-        rsrp.Set(SENTINEL_VALUE);
-      }
-    if (!sinr_result)
-      {
-        sinr.Set(SENTINEL_VALUE);
-      }
-	
-    SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get(), sinr.Get(), rsrp.Get());
-
 
     if(!CheckMainAttributes ())
       {
@@ -1223,11 +1195,15 @@ namespace ns3 {
     situation.causeCode = asn1cpp::getField(denm_situation_container->eventType.causeCode,long);
     situation.subCauseCode = asn1cpp::getField(denm_situation_container->eventType.subCauseCode,long);
 
-    auto linkedCause = asn1cpp::getField(denm_situation_container->linkedCause->causeCode,long,&ok);
-    if(ok)
+    if(denm_situation_container->linkedCause!=nullptr)
       {
-        situation.linkedCauseCode.setData (linkedCause);
-        situation.linkedSubCauseCode.setData (asn1cpp::getField(denm_situation_container->linkedCause->subCauseCode,long));
+        auto linkedCause = asn1cpp::getField (denm_situation_container->linkedCause->causeCode, long, &ok);
+        if (ok)
+          {
+            situation.linkedCauseCode.setData (linkedCause);
+            situation.linkedSubCauseCode.setData (
+                asn1cpp::getField (denm_situation_container->linkedCause->subCauseCode, long));
+          }
       }
 
     auto eventHist = asn1cpp::getSeqOpt(denm_situation_container->eventHistory,EventHistory,&ok);

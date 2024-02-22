@@ -105,7 +105,7 @@ namespace ns3 {
       }
     }
 
-    computePRR_id = Simulator::Schedule(Seconds (3), &PRRSupervisor::computePRR, this, buf);
+    computePRR_id = Simulator::Schedule(MilliSeconds (m_pprcomp_timeout*1000.0), &PRRSupervisor::computePRR, this, buf);
     eventList.push_back (computePRR_id);
 
     m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();

@@ -10,8 +10,6 @@
 namespace ns3 {
   class PRRSupervisor : public Object {
 
-
-
     typedef struct baselineVehicleData {
       std::list<uint64_t> vehList;
       int x;
@@ -73,6 +71,16 @@ namespace ns3 {
       void addExcludedID(uint64_t m_vehid) {m_excluded_vehID_list.insert(m_vehid); m_excluded_vehID_enabled=true;}
       void clearExcludedIDs() {m_excluded_vehID_list.clear(); m_excluded_vehID_enabled=false;}
 
+      // This function lets the user customize the timeout value (in seconds) for the PRR computation.
+      // By default, the PRRSupervisor starts a timeout of 3 seconds when a packet is sent. It will
+      // then record all the times the same packet is received by other road users within the baseline and within
+      // the 3 seconds (increasing each time the "X" at the numerator of the formula PRR = X/Y). After 3 seconds,
+      // the PRR for that packet is computed. Therefore, all packets with a latency greater than 3 seconds are
+      // considered as lost (and they likely are lost).
+      // The default value of 3 seconds has been considered as worst case, considering that this is the same
+      // periodicity as the one of GeoNetworking beacons, when no CAMs are being exchanged.
+      // With this function, the timeout can be adjusted depending on the user needs.
+      void modifyPRRComputationTimeout(double prr_comp_timeout_sec) {m_pprcomp_timeout=prr_comp_timeout_sec;}
     private:
       void computePRR(std::string buf);
 
@@ -103,6 +111,8 @@ namespace ns3 {
 
       std::set<uint64_t> m_excluded_vehID_list;
       bool m_excluded_vehID_enabled = false;
+
+      double m_pprcomp_timeout = 3.0;
   };
 }
 

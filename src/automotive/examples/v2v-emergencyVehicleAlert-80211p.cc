@@ -334,6 +334,8 @@ main (int argc, char *argv[])
       std::cout << "Average PRR of DENMSs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_denm) << std::endl;
       std::cout << "Average latency of CPMs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
       std::cout << "Average PRR of CPMs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Average latency of GN Beacons (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Average PRR of GN Beacons (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
     }
 
 
