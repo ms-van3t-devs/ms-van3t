@@ -211,7 +211,6 @@ setup.py
 /src/nr/doc/source/figures/calibrationHex.png.license
 /src/nr/tutorial/source/conf.py
 /src/nr/doc/figures/create-merge-request.png.license
-/src/automotive/model/utilities/csv-utils.h
 /src/nr/examples/3gpp-outdoor-calibration/cttc-nr-3gpp-calibration.cc
 /src/nr/examples/3gpp-outdoor-calibration/cttc-nr-3gpp-calibration.h
 /src/nr/examples/3gpp-outdoor-calibration/cttc-nr-3gpp-calibration-user.cc
