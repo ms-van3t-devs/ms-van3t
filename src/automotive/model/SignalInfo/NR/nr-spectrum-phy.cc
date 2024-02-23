@@ -2144,7 +2144,7 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
       itTb->second.sinrMin = sinrStats.sinrMin;
 
       SinrTag sinr;
-      sinr.Set (10*log10(10*log10(sinrStats.sinrAvg)));
+      sinr.Set (10*log10(sinrStats.sinrAvg));
       (*j)->AddPacketTag (sinr);
 
       TimestampTag timestamp;

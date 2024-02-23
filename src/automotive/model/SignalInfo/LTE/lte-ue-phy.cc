@@ -844,7 +844,7 @@ LteUePhy::ReportRsReceivedPower (const SpectrumValue& power)
           rbNum++;
         }
       double rsrp = 10 * log10 (sum) + 30;
-
+      LteUePhy::s_last_rsrp = rsrp;
       NS_LOG_INFO ("RSRP: " << rsrp);
       m_powerControl->SetRsrp (rsrp);
     }

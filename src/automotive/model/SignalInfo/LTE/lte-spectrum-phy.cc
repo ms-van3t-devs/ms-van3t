@@ -1069,9 +1069,6 @@ LteSpectrumPhy::EndRxData ()
 
   double avrgSinr = (rbNum > 0) ? 10*log10((sum / rbNum)) : 1.79e+308L;
 
-  /*double rsrp = GetRsrp();
-  double rssi = GetRssi();*/
-
   std::map <uint16_t, DlInfoListElement_s> harqDlInfoMap;
   for (std::list<Ptr<PacketBurst> >::const_iterator i = m_rxPacketBurstList.begin ();
        i != m_rxPacketBurstList.end (); ++i)
