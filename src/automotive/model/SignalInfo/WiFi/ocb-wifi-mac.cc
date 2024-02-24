@@ -31,6 +31,7 @@
 #include "ns3/snr-tag.h"
 #include "ns3/rssi-tag.h"
 #include "ns3/timestamp-tag.h"
+#include "ns3/size-tag.h"
 #include "wave-frame-exchange-manager.h"
 #include "ocb-wifi-mac.h"
 #include "vendor-specific-action.h"
@@ -261,13 +262,16 @@ OcbWifiMac::Receive (Ptr<WifiMacQueueItem> mpdu)
   Mac48Address from = hdr->GetAddr2 ();
   Mac48Address to = hdr->GetAddr1 ();
 
-  std::tuple<double, double> signalInfo = mpdu->GetSignalInfo();
+  std::tuple<double, double, double> signalInfo = mpdu->GetSignalInfo();
 
   RssiTag rssi;
   rssi.Set(std::get<0>(signalInfo));
   
   SnrTag snr;
-  snr.Set(std::get<1>(signalInfo));  
+  snr.Set(std::get<1>(signalInfo));
+
+  SizeTag size;
+  size.Set(std::get<2>(signalInfo));
 
   TimestampTag timestamp;
   timestamp.Set(mpdu->GetTimeStamp().GetDouble());
@@ -275,6 +279,7 @@ OcbWifiMac::Receive (Ptr<WifiMacQueueItem> mpdu)
   packet->AddPacketTag(rssi);
   packet->AddPacketTag(snr);
   packet->AddPacketTag(timestamp);
+  packet->AddPacketTag(size);
 
   if (GetWifiRemoteStationManager ()->IsBrandNew (from))
     {

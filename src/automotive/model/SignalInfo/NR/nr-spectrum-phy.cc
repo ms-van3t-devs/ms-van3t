@@ -37,6 +37,7 @@
 #include "ns3/sinr-tag.h"
 #include "ns3/timestamp-tag.h"
 #include "ns3/rsrp-tag.h"
+#include "ns3/size-tag.h"
 
 
 namespace ns3 {
@@ -2152,6 +2153,10 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
       (*j)->AddPacketTag (timestamp);
 
       (*j)->AddPacketTag (rsrp);
+
+      SizeTag size;
+      size.Set((double) (*j)->GetSize());
+      (*j)->AddPacketTag (size);
 
       NS_LOG_INFO ("Finishing RX, sinrAvg = " << itTb->second.sinrAvg <<
                    " sinrMin = " <<  itTb->second.sinrMin <<

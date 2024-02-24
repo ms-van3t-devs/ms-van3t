@@ -47,6 +47,7 @@
 #include <ns3/pointer.h>
 #include "ns3/sinr-tag.h"
 #include "ns3/timestamp-tag.h"
+#include "ns3/size-tag.h"
 
 namespace ns3 {
 
@@ -2025,6 +2026,10 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
                 TimestampTag timestamp;
                 timestamp.Set(Simulator::Now ().GetNanoSeconds ());
                 (*j)->AddPacketTag (timestamp);
+
+                SizeTag size;
+                size.Set((double) (*j)->GetSize());
+                (*j)->AddPacketTag (size);
 
                 // retrieve TB info of this packet
                 cv2x_LteRadioBearerTag tag;

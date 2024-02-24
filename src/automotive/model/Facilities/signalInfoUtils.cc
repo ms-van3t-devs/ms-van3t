@@ -26,9 +26,10 @@ SignalInfoUtils::SignalInfoUtils()
     m_signalInfo.snr = DEFAULT_VALUE;
     m_signalInfo.sinr = DEFAULT_VALUE;
     m_signalInfo.rsrp = DEFAULT_VALUE;
+    m_signalInfo.size = DEFAULT_VALUE;
 }
 
-void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr, double sinr, double rsrp)
+void SignalInfoUtils::SetSignalInfo(double timestamp, double size, double rssi, double snr, double sinr, double rsrp)
 {
     if(timestamp > 0)
       m_signalInfo.timestamp = timestamp;
@@ -44,6 +45,9 @@ void SignalInfoUtils::SetSignalInfo(double timestamp, double rssi, double snr, d
 
     if(!std::isinf(rsrp) && rsrp != SENTINEL_VALUE)
       m_signalInfo.rsrp = rsrp;
+
+    if(!std::isinf(size) && size != SENTINEL_VALUE)
+      m_signalInfo.size = size;
 }
 
 SignalInfo SignalInfoUtils::GetSignalInfo() 
@@ -70,13 +74,18 @@ void SignalInfoUtils::WriteLastSignalInfo(std::string path, long stationID)
         outFile << "\t* SNR available for 802.11p.\n";
         outFile << "\t* SINR available for LTE, CV2X, and NR.\n";
         outFile << "\t* RSRP available for LTE, CV2X, and NR.\n\n";
-        outFile << "#Timestamp, StationID, RSSI, SNR, SINR, RSRP\n";
+        outFile << "#Timestamp, StationID, Size, RSSI, SNR, SINR, RSRP\n";
       }
 
     if(!std::isnan(m_signalInfo.timestamp))
       {
         // Write the signal information with StationID
         outFile << m_signalInfo.timestamp << ", " << stationID << ", ";
+
+        if (std::isnan (m_signalInfo.size) || m_signalInfo.size == SENTINEL_VALUE)
+          outFile << "NaN" << ", ";
+        else
+          outFile << m_signalInfo.size << ", ";
 
         if (std::isnan (m_signalInfo.rssi) || m_signalInfo.rssi == SENTINEL_VALUE)
           outFile << "NaN" << ", ";
