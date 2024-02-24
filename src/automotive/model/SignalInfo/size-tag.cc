@@ -30,7 +30,7 @@ SizeTag::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::SizeTag")
     .SetParent<Tag> ()
     .SetGroupName ("Wifi")
-    .AddConstructor<SinrTag> ()
+    .AddConstructor<SizeTag> ()
     .AddAttribute ("Size", "The SIZE of the last packet received",
                    DoubleValue (0.0),
                    MakeDoubleAccessor (&SizeTag::Get),

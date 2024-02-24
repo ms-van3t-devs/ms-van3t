@@ -42,6 +42,7 @@
 #include "ns3/timestamp-tag.h"
 #include "ns3/rssi-tag.h"
 #include "ns3/rsrp-tag.h"
+#include "ns3/size-tag.h"
 #include "lte-ue-phy.h"
 
 namespace ns3 {
@@ -1083,10 +1084,13 @@ LteSpectrumPhy::EndRxData ()
           timestamp.Set(Simulator::Now().GetNanoSeconds());
           (*j)->AddPacketTag (timestamp);
 
-
           SinrTag sinr;
           sinr.Set(avrgSinr);
           (*j)->AddPacketTag (sinr);
+
+          SizeTag size;
+          size.Set((double) (*j)->GetSize());
+          (*j)->AddPacketTag (size);
 
           if (LteUePhy::s_last_rsrp != LteUePhy::s_sentinel_value)
             {
