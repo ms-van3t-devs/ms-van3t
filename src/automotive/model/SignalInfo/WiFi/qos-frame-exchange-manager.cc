@@ -667,7 +667,7 @@ QosFrameExchangeManager::ReceiveMpdu (Ptr<WifiMacQueueItem> mpdu, RxSignalInfo r
   double rxSnr = rxSignalInfo.snr;
   const WifiMacHeader& hdr = mpdu->GetHeader ();
 
-  mpdu->SetSignalInfo(rxSignalInfo.rssi, 10*log10(rxSignalInfo.snr));
+  mpdu->SetSignalInfo(rxSignalInfo.rssi, 10*log10(rxSignalInfo.snr), mpdu->GetSize());
 
   if (hdr.IsCfEnd ())
     {

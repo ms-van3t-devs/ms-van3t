@@ -32,6 +32,7 @@ typedef struct {
     double snr;
     double sinr;
     double rsrp;
+    double size;
 } SignalInfo;
 
 
@@ -39,7 +40,7 @@ class SignalInfoUtils
 {
 public:
     SignalInfoUtils();
-    void SetSignalInfo(double timestamp, double rssi, double snr, double sinr, double rsrp);
+    void SetSignalInfo(double timestamp, double size, double rssi, double snr, double sinr, double rsrp);
     SignalInfo GetSignalInfo();
     void WriteLastSignalInfo(std::string path, long stationID);
 

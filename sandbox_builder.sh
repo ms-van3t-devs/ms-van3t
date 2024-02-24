@@ -179,6 +179,14 @@ cp src/automotive/model/SignalInfo/sinr-tag.h src/wifi/model/
 cp src/automotive/model/SignalInfo/sinr-tag.h src/cv2x/model/
 cp src/automotive/model/SignalInfo/sinr-tag.h src/nr/model/
 cp src/automotive/model/SignalInfo/sinr-tag.h src/lte/model/
+cp src/automotive/model/SignalInfo/size-tag.cc src/wifi/model/
+cp src/automotive/model/SignalInfo/size-tag.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/size-tag.cc src/nr/model/
+cp src/automotive/model/SignalInfo/size-tag.cc src/lte/model/
+cp src/automotive/model/SignalInfo/size-tag.h src/wifi/model/
+cp src/automotive/model/SignalInfo/size-tag.h src/cv2x/model/
+cp src/automotive/model/SignalInfo/size-tag.h src/nr/model/
+cp src/automotive/model/SignalInfo/size-tag.h src/lte/model/
 
 cp src/automotive/model/SignalInfo/WiFi/wifi-mac-queue-item.h src/wifi/model/
 cp src/automotive/model/SignalInfo/WiFi/ocb-wifi-mac.cc src/wave/model/

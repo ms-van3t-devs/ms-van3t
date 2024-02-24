@@ -149,7 +149,9 @@ set(source_files
 	model/rssi-tag.cc
 	model/timestamp-tag.cc
 	model/rsrp-tag.cc
-	model/sinr-tag.cc)
+	model/sinr-tag.cc
+	model/size-tag.cc
+)
 
 set(header_files
 	model/cv2x_lte-common.h
@@ -302,7 +304,9 @@ set(header_files
 	model/rssi-tag.h
 	model/timestamp-tag.h
 	model/rsrp-tag.h
-	model/sinr-tag.h)
+	model/sinr-tag.h
+	model/size-tag.h
+)
 
 set(test_sources
 	test/cv2x_lte-test-downlink-sinr.cc

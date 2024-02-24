@@ -200,13 +200,13 @@ public:
    * \param rssi RSSI information.
    * \param snr SNR information.
    */
-  void SetSignalInfo (double rssi, double snr) {m_rssi = rssi; m_snr = snr;};
+  void SetSignalInfo (double rssi, double snr, uint32_t size) {m_rssi = rssi; m_snr = snr; m_size = (double) size;};
 
   /**
    * \brief Retrieve the signal info information.
    * \return signal info tuple.
    */
-  std::tuple<double, double> GetSignalInfo () {return std::make_tuple(m_rssi, m_snr);};
+  std::tuple<double, double, double> GetSignalInfo () {return std::make_tuple(m_rssi, m_snr, m_size);};
 
 private:
   /**
@@ -228,6 +228,7 @@ private:
   bool m_inFlight;                              //!< whether the MPDU is in flight
   double m_rssi;                                //!< MPDU RSSI signal info
   double m_snr;                                 //!< MPDU SNR signal info
+  double m_size;                                 //!< MPDU Size signal info
 };
 
 /**

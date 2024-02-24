@@ -17,8 +17,8 @@
  *  Diego Gasco, Politecnico di Torino (diego.gasco@polito.it, diego.gasco99@gmail.com)
 */
 
-#ifndef SINR_TAG_H
-#define SINR_TAG_H
+#ifndef SIZE_TAG_H
+#define SIZE_TAG_H
 
 #include "ns3/tag.h"
 
@@ -26,7 +26,7 @@ namespace ns3 {
 
 class Tag;
 
-class SinrTag : public Tag
+class SizeTag : public Tag
 {
 public:
   /**
@@ -36,9 +36,9 @@ public:
   static TypeId GetTypeId (void);
 
   /**
-   * Create a SinrTag with the default SINR 0
+   * Create a SizeTag with the default SIZE 0
    */
-  SinrTag ();
+  SizeTag ();
 
   TypeId GetInstanceTypeId (void) const override;
   uint32_t GetSerializedSize (void) const override;
@@ -47,23 +47,23 @@ public:
   void Print (std::ostream &os) const override;
 
   /**
-   * Set the SINR to the given value.
+   * Set the SIZE to the given value.
    *
-   * \param sinr the value of the SINR to set
+   * \param size the value of the SIZE to set
    */
-  void Set (double sinr);
+  void Set (double size);
   /**
-   * Return the SINR value.
+   * Return the SIZE value.
    *
-   * \return the SINR value
+   * \return the SIZE value
    */
   double Get (void) const;
 
 
 private:
-  double m_sinr;  //!< SINR value
+  double m_size;  //!< SIZE value
 };
 
 }
 
-#endif /* SINR_TAG_H */
+#endif /* SIZE_TAG_H */

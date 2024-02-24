@@ -141,6 +141,7 @@ set(source_files
     model/timestamp-tag.cc
     model/rsrp-tag.cc
     model/sinr-tag.cc
+    model/size-tag.cc
 )
 
 set(header_files
@@ -285,6 +286,7 @@ set(header_files
     model/timestamp-tag.h
     model/rsrp-tag.h
     model/sinr-tag.h
+    model/size-tag.h
 )
 
 build_lib(
