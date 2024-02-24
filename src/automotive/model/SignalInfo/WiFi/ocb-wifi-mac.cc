@@ -262,7 +262,7 @@ OcbWifiMac::Receive (Ptr<WifiMacQueueItem> mpdu)
   Mac48Address from = hdr->GetAddr2 ();
   Mac48Address to = hdr->GetAddr1 ();
 
-  std::tuple<double, double> signalInfo = mpdu->GetSignalInfo();
+  std::tuple<double, double, double> signalInfo = mpdu->GetSignalInfo();
 
   RssiTag rssi;
   rssi.Set(std::get<0>(signalInfo));
