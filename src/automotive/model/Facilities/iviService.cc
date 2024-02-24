@@ -36,6 +36,7 @@
 #include "ns3/rssi-tag.h"
 #include "ns3/timestamp-tag.h"
 #include "ns3/rsrp-tag.h"
+#include "ns3/size-tag.h"
 
 
 namespace ns3 {
@@ -880,6 +881,9 @@ namespace ns3 {
       SinrTag sinr;
       bool sinr_result = dataIndication.data->PeekPacketTag(sinr);
 
+      SizeTag size;
+      bool size_result = dataIndication.data->PeekPacketTag(size);
+
       TimestampTag timestamp;
       dataIndication.data->PeekPacketTag(timestamp);
 
@@ -899,8 +903,12 @@ namespace ns3 {
         {
           sinr.Set(SENTINEL_VALUE);
         }
+      if (!size_result)
+        {
+          size.Set(SENTINEL_VALUE);
+        }
 
-      SetSignalInfo(timestamp.Get(), rssi.Get(), snr.Get(), sinr.Get(), rsrp.Get());
+      SetSignalInfo(timestamp.Get(), size.Get(), rssi.Get(), snr.Get(), sinr.Get(), rsrp.Get());
 
       /* Try to check if the received packet is really a IVIM */
        if (buffer[1]!=FIX_IVIMID) //FIX_IVIMID = 0x06;
