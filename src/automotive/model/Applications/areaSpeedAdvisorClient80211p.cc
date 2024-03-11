@@ -175,7 +175,7 @@ namespace ns3
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream.open (m_csv_name+"-"+m_id+".csv",std::ofstream::trunc);
-      m_csv_ofstream << "messageID,originatingStationID,sequence,referenceTime,detectionTime,stationID" << std::endl;
+      m_csv_ofstream << "messageID,originatingStationId,sequence,referenceTime,detectionTime,stationID" << std::endl;
     }
 
     /* Schedule CAM dissemination */
@@ -252,7 +252,7 @@ namespace ns3
     if (!m_csv_name.empty ())
     {
       m_csv_ofstream << denm.getDenmHeaderMessageID () << ","
-                     << denm.getDenmActionID ().originatingStationID << ","
+                     << denm.getDenmActionID ().originatingStationId << ","
                      << denm.getDenmActionID ().sequenceNumber << ","
                      << denm.getDenmMgmtReferenceTime () << ","
                      << denm.getDenmMgmtDetectionTime () << ","

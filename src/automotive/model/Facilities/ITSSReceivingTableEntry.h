@@ -4,6 +4,7 @@
 #include "ns3/DENM.h"
 #include "ns3/asn_utils.h"
 #include "ns3/packet.h"
+#include "ns3/Termination.h"
 
 #define ITSS_RX_ENTRY_TERMINATION_UNSET -1
 

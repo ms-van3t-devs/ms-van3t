@@ -85,14 +85,14 @@ namespace ns3 {
 
     /* 3. Set all the containers [to be continued] */
     /* Header */
-    asn1cpp::setField(denm->header.messageID,FIX_DENMID);
-    asn1cpp::setField(denm->header.protocolVersion,protocolVersion_currentVersion);
-    asn1cpp::setField(denm->header.stationID,m_station_id);
+    asn1cpp::setField(denm->header.messageId,FIX_DENMID);
+    asn1cpp::setField(denm->header.protocolVersion,2);
+    asn1cpp::setField(denm->header.stationId,m_station_id);
 
 
 
     /* Management Container */
-    asn1cpp::setField(denm->denm.management.actionID.originatingStationID,actionID.originatingStationID);
+    asn1cpp::setField(denm->denm.management.actionID.originatingStationId,actionID.originatingStationID);
     asn1cpp::setField(denm->denm.management.actionID.sequenceNumber,actionID.sequenceNumber);
     asn1cpp::setField(denm->denm.management.detectionTime,mgmt_data.detectionTime);
     asn1cpp::setField(denm->denm.management.eventPosition.latitude,mgmt_data.latitude);
@@ -169,7 +169,7 @@ namespace ns3 {
         auto traces = asn1cpp::makeSeq(Traces);
         for(size_t i=0;i<location_data.getData ().traces.size ();i++)
           {
-            auto pathHistory = asn1cpp::makeSeq(PathHistory);
+            auto pathHistory = asn1cpp::makeSeq(Path);
             for(size_t j=0;j<location_data.getData ().traces[i].size ();j++)
               {
                 auto pathPoint = asn1cpp::makeSeq(PathPoint);
@@ -338,7 +338,7 @@ namespace ns3 {
                 for(size_t i=0;i<roadworks_data.referenceDenms.getData ().size ();i++)
                   {
                     auto actionId_seq = asn1cpp::makeSeq(ActionID);
-                    asn1cpp::setField(actionId_seq->originatingStationID,roadworks_data.referenceDenms.getData ()[i].originatingStationID);
+                    asn1cpp::setField(actionId_seq->originatingStationId,roadworks_data.referenceDenms.getData ()[i].originatingStationID);
                     asn1cpp::setField(actionId_seq->sequenceNumber,roadworks_data.referenceDenms.getData ()[i].sequenceNumber);
 
                     asn1cpp::sequenceof::pushList(roadworks->referenceDenms,actionId_seq);
@@ -976,7 +976,7 @@ namespace ns3 {
       }
 
     /* Lookup entries in the receiving ITS-S message table with the received actionID */
-    actionID.originatingStationID = asn1cpp::getField(decoded_denm->denm.management.actionID.originatingStationID,unsigned long);
+    actionID.originatingStationID = asn1cpp::getField(decoded_denm->denm.management.actionID.originatingStationId,unsigned long);
     actionID.sequenceNumber = asn1cpp::getField(decoded_denm->denm.management.actionID.sequenceNumber,long);
     map_index = std::make_pair((unsigned long)actionID.originatingStationID ,(long)actionID.sequenceNumber);
 
@@ -1175,9 +1175,9 @@ namespace ns3 {
   void
   DENBasicService::fillDenDataHeader(asn1cpp::Seq<ItsPduHeader>denm_header, denData &denm_data)
   {
-      denm_data.setDenmHeader (asn1cpp::getField(denm_header->messageID,long),
+      denm_data.setDenmHeader (asn1cpp::getField(denm_header->messageId,long),
                                asn1cpp::getField(denm_header->protocolVersion,long),
-                               asn1cpp::getField(denm_header->stationID,long));
+                               asn1cpp::getField(denm_header->stationId,long));
   }
 
   void
@@ -1203,7 +1203,7 @@ namespace ns3 {
     if(ok)
       management.transmissionInterval.setData (transmissionInterval);
 
-    management.stationID = asn1cpp::getField(denm_mgmt_container->actionID.originatingStationID,unsigned long);
+    management.stationID = asn1cpp::getField(denm_mgmt_container->actionID.originatingStationId,unsigned long);
     management.sequenceNumber = asn1cpp::getField(denm_mgmt_container->actionID.sequenceNumber,long);
 
     auto termination = asn1cpp::getField(denm_mgmt_container->termination,long,&ok);
@@ -1276,7 +1276,7 @@ namespace ns3 {
     auto traces = asn1cpp::getSeq(denm_location_container->traces,Traces);
     for(int i=0; i<3;i++)
       {
-        auto pathHistory = asn1cpp::sequenceof::getSeq(*traces,PathHistory,i);
+        auto pathHistory = asn1cpp::sequenceof::getSeq(*traces,Path,i);
         std::vector<DEN_PathPoint_t> pathHistory_data;
         for(int j=0;j<3;j++)
           {
@@ -1449,7 +1449,7 @@ namespace ns3 {
               {
                 DEN_ActionID_t actionId_data;
                 auto actionId = asn1cpp::sequenceof::getSeq(roadworks->referenceDenms,ActionID,i);
-                actionId_data.originatingStationID = asn1cpp::getField(actionId->originatingStationID,long);
+                actionId_data.originatingStationID = asn1cpp::getField(actionId->originatingStationId,long);
                 actionId_data.sequenceNumber = asn1cpp::getField(actionId->sequenceNumber,long);
                 refDenms_data.push_back (actionId_data);
               }

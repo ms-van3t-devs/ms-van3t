@@ -129,7 +129,7 @@ namespace ns3 {
               //Get position with noise
               libsumo::TraCIPosition objectPosition = m_client->TraCIAPI::vehicle.getPosition(objectData.ID);
               objectPosition.x += (dist_distance(m_generator)*dist_factor);
-              objectPosition.y += (dist_distance(m_generator)*dist_factor);
+              objectPosition.y += (dist_distance(m_generator)*dist_factor);            
 
 
               objectData.lon = m_client->TraCIAPI::simulation.convertXYtoLonLat (objectPosition.x
@@ -144,7 +144,8 @@ namespace ns3 {
               objectData.vehicleWidth = OptionalDataItem<long>(long ((m_client->vehicle.getWidth(objectData.ID)+(dist_distance(m_generator)*dist_factor/10))*DECI));
               objectData.vehicleLength = OptionalDataItem<long>(long ((m_client->vehicle.getLength(objectData.ID)+(dist_distance(m_generator)*dist_factor/10))*DECI));
               //Compute relative distance with x axis being defined by the egoVehicle's angle
-              point_type egoReference(m_client->vehicle.getPosition(m_id).x,m_client->vehicle.getPosition(m_id).y);
+              libsumo::TraCIPosition egoPosition = m_client->TraCIAPI::vehicle.getPosition(m_id);
+              point_type egoReference(egoPosition.x,egoPosition.y);
               point_type relReference(objectPosition.x,objectPosition.y);
               rotate_transformer<boost::geometry::degree, double, 2, 2> rotate(90-m_client->vehicle.getAngle (m_id));
 
@@ -155,6 +156,8 @@ namespace ns3 {
               objectData.yDistance = OptionalDataItem<long>(long (boost::geometry::get<1>(relReference)*CENTI -
                                                                   boost::geometry::get<1>(egoReference)*CENTI));//Y Distance in centimeters
 
+              objectData.xDistAbs = OptionalDataItem<long>(long (objectPosition.x - egoPosition.x)*CENTI);
+              objectData.yDistAbs = OptionalDataItem<long>(long (objectPosition.y - egoPosition.y)*CENTI);
               //Compute relative speed with x axis being defined by the egoVehicle's angle
               point_type egoSpeed(m_client->vehicle.getSpeed (m_id),0);
               point_type relSpeed(objectData.speed_ms,0);
@@ -167,7 +170,12 @@ namespace ns3 {
 
               objectData.xSpeed = OptionalDataItem <long>((long) xspeed);
               objectData.ySpeed = OptionalDataItem <long>((long) yspeed);
+              objectData.xSpeedAbs = OptionalDataItem <long>((long) (objectData.speed_ms * cos(DEG_2_RAD(objectData.heading)))*CENTI);
+              objectData.ySpeedAbs = OptionalDataItem <long>((long) (objectData.speed_ms * sin(DEG_2_RAD(objectData.heading)))*CENTI);
+
               objectData.longitudinalAcceleration = OptionalDataItem <long> (long (m_client->vehicle.getAcceleration (objectData.ID)));
+              objectData.xAccAbs = OptionalDataItem <long> (long (m_client->vehicle.getAcceleration (objectData.ID) * cos(DEG_2_RAD(objectData.heading))));
+              objectData.yAccAbs = OptionalDataItem <long> (long (m_client->vehicle.getAcceleration (objectData.ID) * sin(DEG_2_RAD(objectData.heading))));
               objectData.confidence = long (dist_factor*CENTI); //Distance based confidence
               objectData.perceivedBy = OptionalDataItem<long> ((long) m_stationID);
               long relAngle = (long) ((objectData.heading + dist_angle(m_generator) - m_client->vehicle.getAngle(m_id))*DECI);

@@ -282,11 +282,11 @@ namespace ns3
 
    // Ignore messages coming from itself
    // This is needed as broadcasted packets over a promiscuous inteface are also received back on the same socket
-   if(asn1cpp::getField(cam->header.stationID,StationID_t)==std::stoul(m_id.substr (3)))
+   if(asn1cpp::getField(cam->header.stationId,StationID_t)==std::stoul(m_id.substr (3)))
        return;
 
     /* Implement CAM strategy here */
-    std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< asn1cpp::getField(cam->header.stationID,StationID_t) << std::endl;
+    std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< asn1cpp::getField(cam->header.stationId,StationID_t) << std::endl;
   }
 
   void

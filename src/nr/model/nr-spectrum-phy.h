@@ -21,6 +21,7 @@
 #define NR_SPECTRUM_PHY_H
 
 #include <functional>
+#include <numeric>
 #include <ns3/random-variable-stream.h>
 #include <ns3/traced-callback.h>
 #include <ns3/spectrum-channel.h>
@@ -38,7 +39,7 @@
 
 namespace ns3 {
 
-  class UniformPlanarArray;
+class UniformPlanarArray;
 
 /**
  * \ingroup ue-phy
@@ -225,7 +226,7 @@ public:
    * \param ctrlMsgList control message list
    * \param duration the duration of transmission
    */
- void StartTxDataFrames (const Ptr<PacketBurst>& pb, const std::list<Ptr<NrControlMessage> >& ctrlMsgList, Time duration);
+  void StartTxDataFrames (const Ptr<PacketBurst>& pb, const std::list<Ptr<NrControlMessage> >& ctrlMsgList, Time duration);
   /**
    * \brief Starts transmission of DL CTRL
    * \param duration the duration of this transmission
@@ -310,7 +311,7 @@ public:
     * \param srsSinr the resulting SRS SINR spectrum value
     */
   void UpdateSrsSinrPerceived (const SpectrumValue& srsSinr);
-   /**
+  /**
      * \brief SpectrumPhy that will be called when the SNR for the received
      * SRS at gNB is being calculated
      * \param srsSnr the resulting SRS SNR
@@ -497,35 +498,35 @@ private:
    * \brief Function that is called when the spectrum phy finishes the reception of CTRL.
    * It stores CTRL messages and updates spectrum phy state.
    */
-   void EndRxCtrl ();
-   /**
+  void EndRxCtrl ();
+  /**
     * \brief Function that is celled when the spectrum phy finishes the reception of SRS.
     * It stores SRS message, calls the interference calculator to notify the end of the
     * reception which will trigger SRS SINR calculation, and it also updates the spectrum phy state.
     */
-   void EndRxSrs ();
-   /**
+  void EndRxSrs ();
+  /**
     * \brief Check if the channel is busy. If yes, updates the spectrum phy state.
     */
-   void MaybeCcaBusy ();
-   /**
+  void MaybeCcaBusy ();
+  /**
     * \brief Function used to schedule an event to check if state should be switched from CCA_BUSY to IDLE.
     * This function should be used only for this transition of state machine. After finishing
     * reception (RX_DL_CTRL or RX_UL_CTRL or RX_DATA) function MaybeCcaBusy should be called instead to check
     * if to switch to IDLE or CCA_BUSY, and then new event may be created in the case that the
     * channel is BUSY to switch back from busy to idle.
     */
-   void CheckIfStillBusy ();
-   /**
+  void CheckIfStillBusy ();
+  /**
     * \brief Checks whether the CTRL message list contains only SRS control message.
     * Only if the list has only one CTRL message and that message is SRS the function
     * will return true, otherwise it will return false.
     * \ctrlMsgList uplink control message list
     * \returns an indicator whether the ctrlListMessage contains only SRS message
     */
-   bool IsOnlySrs (const std::list<Ptr<NrControlMessage> >& ctrlMsgList);
+  bool IsOnlySrs (const std::list<Ptr<NrControlMessage> >& ctrlMsgList);
 
-   /**
+  /**
     * \brief Information about the expected transport block at a certain point in the slot
     *
     * Information passed by the PHY through a call to AddExpectedTb
@@ -535,16 +536,16 @@ private:
     ExpectedTb (uint8_t ndi, uint32_t tbSize, uint8_t mcs, const std::vector<int> &rbBitmap,
                 uint8_t harqProcessId, uint8_t rv, bool isDownlink, uint8_t symStart,
                 uint8_t numSym, const SfnSf &sfn) :
-      m_ndi (ndi),
-      m_tbSize (tbSize),
-      m_mcs (mcs),
-      m_rbBitmap (rbBitmap),
-      m_harqProcessId (harqProcessId),
-      m_rv (rv),
-      m_isDownlink (isDownlink),
-      m_symStart (symStart),
-      m_numSym (numSym),
-      m_sfn (sfn) { }
+          m_ndi (ndi),
+          m_tbSize (tbSize),
+          m_mcs (mcs),
+          m_rbBitmap (rbBitmap),
+          m_harqProcessId (harqProcessId),
+          m_rv (rv),
+          m_isDownlink (isDownlink),
+          m_symStart (symStart),
+          m_numSym (numSym),
+          m_sfn (sfn) { }
     ExpectedTb () = delete;
     ExpectedTb (const ExpectedTb &o) = default;
 
@@ -563,12 +564,12 @@ private:
   struct TransportBlockInfo
   {
     TransportBlockInfo (const ExpectedTb &expected) :
-      m_expected (expected) { }
+          m_expected (expected) { }
     TransportBlockInfo () = delete;
 
     ExpectedTb m_expected;                //!< Expected data from the PHY. Filled by AddExpectedTb
     bool m_isCorrupted {false};           //!< True if the ErrorModel indicates that the TB is corrupted.
-                                          //    Filled at the end of data rx/tx
+        //    Filled at the end of data rx/tx
     bool m_harqFeedbackSent {false};      //!< Indicate if the feedback has been sent for an entire TB
     Ptr<NrErrorModelOutput> m_outputOfEM; //!< Output of the Error Model (depends on the EM type)
     double m_sinrAvg {0.0};               //!< AVG SINR (only for the RB used to transmit the TB)
@@ -579,9 +580,9 @@ private:
   TypeId m_errorModelType {Object::GetTypeId()}; //!< Error model type by default is NrLteMiErrorModel
   bool m_dataErrorModelEnabled {true}; //!< whether the phy error model for DATA is enabled, by default is enabled
   double m_ccaMode1ThresholdW {0}; //!< Clear channel assessment (CCA) threshold in Watts, attribute that it configures it is
-                                   //   CcaMode1Threshold and is configured in dBm
+      //   CcaMode1Threshold and is configured in dBm
   bool m_unlicensedMode {false}; //!< Whether this spectrum phy is configure to work in an unlicensed mode.
-                                 //   Unlicensed mode additionally to licensed mode allows channel monitoring to discover if is busy before transmission.
+      //   Unlicensed mode additionally to licensed mode allows channel monitoring to discover if is busy before transmission.
 
   Ptr<SpectrumChannel> m_channel {nullptr}; //!< channel is needed to be able to connect listener spectrum phy (AddRx) or to start transmission StartTx
   Ptr<const SpectrumModel> m_rxSpectrumModel {nullptr}; //!< the spectrum model of this spectrum phy
@@ -689,8 +690,8 @@ public:
    *
    * Information passed by the PHY through a call to AddSlExpectedTb
    */
- struct SlExpectedTb
- {
+  struct SlExpectedTb
+  {
     /**
      * \brief constructor
      * \param dstId The Destination id
@@ -701,56 +702,56 @@ public:
      * \param numSym The total number of symbols
      * \param sfn The SfnSf
      */
-   SlExpectedTb (uint32_t dstId, uint32_t tbSize, uint8_t mcs, const std::vector<int> &rbMap,
-               uint8_t symStart, uint8_t numSym, const SfnSf &sfn) :
-     dstId {dstId},
-     tbSize (tbSize),
-     mcs (mcs),
-     rbBitmap (rbMap),
-     symStart (symStart),
-     numSym (numSym),
-     sfn (sfn) { }
-   SlExpectedTb () = delete;
-   /**
+    SlExpectedTb (uint32_t dstId, uint32_t tbSize, uint8_t mcs, const std::vector<int> &rbMap,
+                  uint8_t symStart, uint8_t numSym, const SfnSf &sfn) :
+          dstId {dstId},
+          tbSize (tbSize),
+          mcs (mcs),
+          rbBitmap (rbMap),
+          symStart (symStart),
+          numSym (numSym),
+          sfn (sfn) { }
+    SlExpectedTb () = delete;
+    /**
     * \brief default copy constructor
     * \param o other SlExpectedTb object
     */
-   SlExpectedTb (const SlExpectedTb &o) = default;
+    SlExpectedTb (const SlExpectedTb &o) = default;
 
-   uint32_t dstId            {0}; //!< Destination id
-   uint32_t tbSize           {0}; //!< TBSize
-   uint8_t mcs               {0}; //!< MCS
-   std::vector<int> rbBitmap;     //!< RB Bitmap
-   uint8_t symStart          {0}; //!< Sym start
-   uint8_t numSym            {0}; //!< Num sym
-   SfnSf sfn;                     //!< SFN
- };
+    uint32_t dstId            {0}; //!< Destination id
+    uint32_t tbSize           {0}; //!< TBSize
+    uint8_t mcs               {0}; //!< MCS
+    std::vector<int> rbBitmap;     //!< RB Bitmap
+    uint8_t symStart          {0}; //!< Sym start
+    uint8_t numSym            {0}; //!< Num sym
+    SfnSf sfn;                     //!< SFN
+  };
 
- /**
+  /**
   * \brief Sidelink transport block info
   */
- struct SlTransportBlockInfo
- {
-   /**
+  struct SlTransportBlockInfo
+  {
+    /**
     * \brief constructor
     * \param expectedTb Expected NR SL data from the PHY
     */
-   SlTransportBlockInfo (const SlExpectedTb &expectedTb) :
-     expectedTb (expectedTb) { }
-   SlTransportBlockInfo () = delete;
+    SlTransportBlockInfo (const SlExpectedTb &expectedTb) :
+          expectedTb (expectedTb) { }
+    SlTransportBlockInfo () = delete;
 
-   SlExpectedTb expectedTb;                   //!< Expected NR SL data from the PHY. Filled by AddSlExpectedTb
-   bool isDataCorrupted {false};              //!< True if the ErrorModel indicates that the data TB is corrupted.
-   bool isSci2Corrupted {false};              //!< True if the ErrorModel indicates that the SCI stage 2 is corrupted.
-                                              //    Filled at the end of data rx/tx
-   Ptr<NrErrorModelOutput> outputEmForData;   //!< Output of the Error Model (depends on the EM type) for data
-   Ptr<NrErrorModelOutput> outputEmForSci2;   //!< Output of the Error Model (depends on the EM type) for SCI stage 2
-   SpectrumValue sinrPerceived;               //!< SINR that is being update at the end of the DATA reception and is used for TB decoding
-   bool sinrUpdated {false};                  //!< Flag to indicate the successful update of sinrPerceived
-   double sinrAvg {0.0};                      //!< AVG SINR (only for the RB used to transmit the TB)
-   double sinrMin {0.0};                       //!< MIN SINR (only between the RB used to transmit the TB)
-   uint32_t pktIndex {std::numeric_limits <uint32_t>::max ()}; //!< Index of the TB in the \p m_slRxSigParamInfo buffer
- };
+    SlExpectedTb expectedTb;                   //!< Expected NR SL data from the PHY. Filled by AddSlExpectedTb
+    bool isDataCorrupted {false};              //!< True if the ErrorModel indicates that the data TB is corrupted.
+    bool isSci2Corrupted {false};              //!< True if the ErrorModel indicates that the SCI stage 2 is corrupted.
+        //    Filled at the end of data rx/tx
+    Ptr<NrErrorModelOutput> outputEmForData;   //!< Output of the Error Model (depends on the EM type) for data
+    Ptr<NrErrorModelOutput> outputEmForSci2;   //!< Output of the Error Model (depends on the EM type) for SCI stage 2
+    SpectrumValue sinrPerceived;               //!< SINR that is being update at the end of the DATA reception and is used for TB decoding
+    bool sinrUpdated {false};                  //!< Flag to indicate the successful update of sinrPerceived
+    double sinrAvg {0.0};                      //!< AVG SINR (only for the RB used to transmit the TB)
+    double sinrMin {0.0};                       //!< MIN SINR (only between the RB used to transmit the TB)
+    uint32_t pktIndex {std::numeric_limits <uint32_t>::max ()}; //!< Index of the TB in the \p m_slRxSigParamInfo buffer
+  };
   /**
    * \brief This callback method type is used to notify about a successful PSCCH reception
    */
@@ -881,6 +882,10 @@ public:
    */
   void ClearExpectedSlTb ();
 
+  void EmptyRsrpArray() {m_rsrp_array.clear();};
+  double AvgRsrpArray() {return std::reduce(m_rsrp_array.begin(), m_rsrp_array.end()) / m_rsrp_array.size();};
+  void InsertRsrpArray(double rsrp) {m_rsrp_array.push_back (rsrp);};
+
 private:
   struct SinrStats
   {
@@ -946,6 +951,7 @@ private:
 
   TracedCallback<SlRxCtrlPacketTraceParams> m_rxPscchTraceUe; //!< trace source for PSCCH reception
   TracedCallback<SlRxDataPacketTraceParams> m_rxPsschTraceUe; //!< trace source for PSSCH reception
+  std::vector<double> m_rsrp_array;
 };
 
 }

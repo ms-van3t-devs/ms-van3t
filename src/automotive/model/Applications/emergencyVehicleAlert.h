@@ -11,6 +11,7 @@
 #include "ns3/denBasicService.h"
 #include "ns3/caBasicService.h"
 #include "ns3/cpBasicService.h"
+#include "ns3/cpBasicService_v1.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 
@@ -61,7 +62,16 @@ class emergencyVehicleAlert : public Application
      *
      * \param the ASN.1 CPM structure containing the info of the packet that was received.
      */
-    void receiveCPM (asn1cpp::Seq<CPM> cpm, Address from);
+    void receiveCPM (asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from);
+
+    /**
+     * \brief Callback to handle a CPM reception.
+     *
+     * This function is called everytime a packet is received by the CPBasicService.
+     *
+     * \param the ASN.1 CPM structure containing the info of the packet that was received.
+     */
+    void receiveCPMV1 (asn1cpp::Seq<CPMV1> cpm, Address from);
 
   protected:
     virtual void DoDispose (void);
@@ -71,6 +81,7 @@ class emergencyVehicleAlert : public Application
     DENBasicService m_denService; //!< DEN Basic Service object
     CABasicService m_caService; //!< CA Basic Service object
     CPBasicService m_cpService; //!< CP Basic Service object
+    CPBasicServiceV1 m_cpService_v1; //!< CP Basic Service object version 1 (for CPMv1)
     Ptr<btp> m_btp; //! BTP object
     Ptr<GeoNet> m_geoNet; //! GeoNetworking Object
     Ptr<SUMOSensor> m_sensor;
@@ -106,7 +117,8 @@ class emergencyVehicleAlert : public Application
      */
     void SetMaxSpeed ();
 
-    vehicleData_t translateCPMdata(asn1cpp::Seq<CPM> cpm, int objectIndex);
+    vehicleData_t translateCPMV1data(asn1cpp::Seq<CPMV1> cpm, int objectIndex);
+    vehicleData_t translateCPMdata(asn1cpp::Seq<CollectivePerceptionMessage> cpm,asn1cpp::Seq<PerceivedObject> object, int objectIndex);
 
     virtual void StartApplication (void);
     virtual void StopApplication (void);

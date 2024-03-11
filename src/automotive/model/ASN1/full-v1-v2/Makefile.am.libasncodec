@@ -1,0 +1,871 @@
+ASN_MODULE_SRCS=	\
+	CollectivePerceptionMessage.c	\
+	CpmPayload.c	\
+	ManagementContainerCPM.c	\
+	CpmContainerId.c	\
+	WrappedCpmContainer.c	\
+	WrappedCpmContainers.c	\
+	MessageRateRange.c	\
+	OriginatingVehicleContainer.c	\
+	OriginatingRsuContainer.c	\
+	TrailerDataSet.c	\
+	PerceivedObjectContainer.c	\
+	PerceivedObjects.c	\
+	PerceptionRegionContainer.c	\
+	PerceptionRegion.c	\
+	PerceivedObjectIds.c	\
+	SensorInformationContainer.c	\
+	SensorInformation.c	\
+	AccelerationChange.c	\
+	AccelerationConfidence.c	\
+	AccelerationControl.c	\
+	AccelerationMagnitudeValue.c	\
+	AccelerationValue.c	\
+	AccessTechnologyClass.c	\
+	AccidentSubCauseCode.c	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.c	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.c	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.c	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.c	\
+	AirHumidity.c	\
+	AltitudeConfidence.c	\
+	AltitudeValue.c	\
+	AngleConfidence.c	\
+	AngularSpeedConfidence.c	\
+	AngularAccelerationConfidence.c	\
+	AxlesCount.c	\
+	BarometricPressure.c	\
+	BogiesCount.c	\
+	CardinalNumber1B.c	\
+	CardinalNumber3b.c	\
+	CartesianAngleValue.c	\
+	CartesianAngularAccelerationComponentValue.c	\
+	CartesianAngularVelocityComponentValue.c	\
+	CauseCodeType.c	\
+	CartesianCoordinateSmall.c	\
+	CartesianCoordinate.c	\
+	CartesianCoordinateLarge.c	\
+	CenDsrcTollingZoneID.c	\
+	ClusterBreakupReason.c	\
+	ClusterLeaveReason.c	\
+	CollisionRiskSubCauseCode.c	\
+	ConfidenceLevel.c	\
+	CoordinateConfidence.c	\
+	CorrelationCellValue.c	\
+	CurvatureCalculationMode.c	\
+	CurvatureConfidence.c	\
+	CurvatureValue.c	\
+	DangerousEndOfQueueSubCauseCode.c	\
+	DangerousGoodsBasic.c	\
+	DangerousSituationSubCauseCode.c	\
+	DeltaAltitude.c	\
+	DeltaLatitude.c	\
+	DeltaLongitude.c	\
+	DeltaTimeMilliSecondPositive.c	\
+	DeltaTimeMilliSecondSigned.c	\
+	DeltaTimeQuarterSecond.c	\
+	DeltaTimeTenthOfSecond.c	\
+	DeltaTimeSecond.c	\
+	Direction.c	\
+	DriveDirection.c	\
+	DrivingLaneStatus.c	\
+	EmbarkationStatus.c	\
+	EmergencyPriority.c	\
+	EmergencyVehicleApproachingSubCauseCode.c	\
+	EnergyStorageType.c	\
+	EuVehicleCategoryL.c	\
+	EuVehicleCategoryM.c	\
+	EuVehicleCategoryN.c	\
+	EuVehicleCategoryO.c	\
+	ExteriorLights.c	\
+	GenerationDeltaTime.c	\
+	HardShoulderStatus.c	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.c	\
+	HazardousLocation-DangerousCurveSubCauseCode.c	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.c	\
+	HazardousLocation-SurfaceConditionSubCauseCode.c	\
+	HeadingConfidence.c	\
+	HeadingValue.c	\
+	HeightLonCarr.c	\
+	HumanPresenceOnTheRoadSubCauseCode.c	\
+	HumanProblemSubCauseCode.c	\
+	Identifier1B.c	\
+	Identifier2B.c	\
+	InformationQuality.c	\
+	InterferenceManagementZoneType.c	\
+	Iso3833VehicleType.c	\
+	LanePosition.c	\
+	LaneType.c	\
+	LaneWidth.c	\
+	Latitude.c	\
+	LateralAccelerationValue.c	\
+	LightBarSirenInUse.c	\
+	Longitude.c	\
+	LongitudinalAccelerationValue.c	\
+	LongitudinalLanePositionValue.c	\
+	LongitudinalLanePositionConfidence.c	\
+	MatrixIncludedComponents.c	\
+	MessageId.c	\
+	NumberOfOccupants.c	\
+	ObjectPerceptionQuality.c	\
+	ObjectDimensionValue.c	\
+	ObjectDimensionConfidence.c	\
+	ObjectFace.c	\
+	OpeningDaysHours.c	\
+	OrdinalNumber1B.c	\
+	OrdinalNumber3b.c	\
+	OtherSubClass.c	\
+	PathDeltaTime.c	\
+	PerformanceClass.c	\
+	PhoneNumber.c	\
+	PosCentMass.c	\
+	PositioningSolutionType.c	\
+	PositionOfOccupants.c	\
+	PosFrontAx.c	\
+	PosLonCarr.c	\
+	PosPillar.c	\
+	PostCrashSubCauseCode.c	\
+	PrecipitationIntensity.c	\
+	ProtectedZoneId.c	\
+	ProtectedZoneRadius.c	\
+	ProtectedZoneType.c	\
+	PtActivationData.c	\
+	PtActivationType.c	\
+	RailwayLevelCrossingSubCauseCode.c	\
+	RelevanceDistance.c	\
+	RelevanceTrafficDirection.c	\
+	RequestResponseIndication.c	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.c	\
+	RoadType.c	\
+	RoadworksSubCauseCode.c	\
+	SafeDistanceIndicator.c	\
+	SemiAxisLength.c	\
+	SensorType.c	\
+	SequenceNumber.c	\
+	SignalViolationSubCauseCode.c	\
+	SlowVehicleSubCauseCode.c	\
+	SpecialTransportType.c	\
+	SpeedConfidence.c	\
+	SpeedLimit.c	\
+	SpeedValue.c	\
+	VelocityComponentValue.c	\
+	StabilityLossProbability.c	\
+	StandardLength12b.c	\
+	StandardLength3b.c	\
+	StandardLength9b.c	\
+	StandardLength1B.c	\
+	StandardLength2B.c	\
+	StationarySince.c	\
+	StationaryVehicleSubCauseCode.c	\
+	StationId.c	\
+	StationID.c	\
+	StationType.c	\
+	SteeringWheelAngleConfidence.c	\
+	SteeringWheelAngleValue.c	\
+	SubCauseCodeType.c	\
+	Temperature.c	\
+	TimestampIts.c	\
+	TrafficConditionSubCauseCode.c	\
+	TrafficDirection.c	\
+	TrafficParticipantType.c	\
+	TrafficRule.c	\
+	TrailerPresenceInformation.c	\
+	TrajectoryInterceptionProbability.c	\
+	TrajectoryInterceptionConfidence.c	\
+	TransmissionInterval.c	\
+	TurningDirection.c	\
+	TurningRadius.c	\
+	ValidityDuration.c	\
+	VDS.c	\
+	VehicleBreakdownSubCauseCode.c	\
+	VehicleHeight.c	\
+	VehicleLengthConfidenceIndication.c	\
+	VehicleLengthValue.c	\
+	VehicleMass.c	\
+	VehicleRole.c	\
+	VehicleWidth.c	\
+	VerticalAccelerationValue.c	\
+	VruClusterProfiles.c	\
+	VruDeviceUsage.c	\
+	VruEnvironment.c	\
+	VruMovementControl.c	\
+	VruSubProfilePedestrian.c	\
+	VruSubProfileBicyclist.c	\
+	VruSubProfileMotorcyclist.c	\
+	VruSubProfileAnimal.c	\
+	VruSizeClass.c	\
+	VruSpecificExteriorLights.c	\
+	WheelBaseVehicle.c	\
+	Wgs84AngleConfidence.c	\
+	Wgs84AngleValue.c	\
+	WMInumber.c	\
+	WrongWayDrivingSubCauseCode.c	\
+	YawRateConfidence.c	\
+	YawRateValue.c	\
+	Acceleration3dWithConfidence.c	\
+	AccelerationPolarWithZ.c	\
+	AccelerationCartesian.c	\
+	AccelerationComponent.c	\
+	AccelerationChangeIndication.c	\
+	AccelerationMagnitude.c	\
+	ActionId.c	\
+	ActionID.c	\
+	ActionIdList.c	\
+	Altitude.c	\
+	BasicContainer.c	\
+	CartesianAngle.c	\
+	CartesianAngularVelocityComponent.c	\
+	CartesianAngularAccelerationComponent.c	\
+	CartesianCoordinateWithConfidence.c	\
+	CartesianPosition3d.c	\
+	CartesianPosition3dWithConfidence.c	\
+	CauseCode.c	\
+	CauseCodeChoice.c	\
+	CauseCodeV2.c	\
+	CenDsrcTollingZone.c	\
+	CircularShape.c	\
+	ClosedLanes.c	\
+	ClusterBreakupInfo.c	\
+	ClusterJoinInfo.c	\
+	ClusterLeaveInfo.c	\
+	CorrelationColumn.c	\
+	Curvature.c	\
+	DangerousGoodsExtended.c	\
+	DeltaReferencePosition.c	\
+	DigitalMap.c	\
+	EllipticalShape.c	\
+	EulerAnglesWithConfidence.c	\
+	EuVehicleCategoryCode.c	\
+	EventHistory.c	\
+	EventPoint.c	\
+	EventZone.c	\
+	GeneralizedLanePosition.c	\
+	Heading.c	\
+	HeadingChangeIndication.c	\
+	InterferenceManagementChannel.c	\
+	InterferenceManagementZone.c	\
+	InterferenceManagementZoneDefinition.c	\
+	InterferenceManagementInfo.c	\
+	InterferenceManagementInfoPerChannel.c	\
+	InterferenceManagementZones.c	\
+	IntersectionReferenceId.c	\
+	ItineraryPath.c	\
+	ItsPduHeader.c	\
+	LanePositionAndType.c	\
+	LateralAcceleration.c	\
+	LongitudinalAcceleration.c	\
+	LongitudinalLanePosition.c	\
+	LowerTriangularPositiveSemidefiniteMatrices.c	\
+	LowerTriangularPositiveSemidefiniteMatrix.c	\
+	LowerTriangularPositiveSemidefiniteMatrixColumns.c	\
+	MapPosition.c	\
+	MapReference.c	\
+	MessageRateHz.c	\
+	MessageSegmentationInfo.c	\
+	MitigationForTechnologies.c	\
+	MitigationPerTechnologyClass.c	\
+	ObjectClass.c	\
+	ObjectClassDescription.c	\
+	ObjectClassWithConfidence.c	\
+	ObjectDimension.c	\
+	Path.c	\
+	PathHistory.c	\
+	PathPredicted.c	\
+	PathPoint.c	\
+	PathPointPredicted.c	\
+	PerceivedObject.c	\
+	PolygonalShape.c	\
+	PosConfidenceEllipse.c	\
+	PositionConfidenceEllipse.c	\
+	PositionOfPillars.c	\
+	ProtectedCommunicationZone.c	\
+	ProtectedCommunicationZonesRSU.c	\
+	PtActivation.c	\
+	RadialShape.c	\
+	RadialShapes.c	\
+	RadialShapesList.c	\
+	RadialShapeDetails.c	\
+	RectangularShape.c	\
+	ReferencePosition.c	\
+	ReferencePositionWithConfidence.c	\
+	RestrictedTypes.c	\
+	RoadSegmentReferenceId.c	\
+	SafeDistanceIndication.c	\
+	SequenceOfCartesianPosition3d.c	\
+	SequenceOfIdentifier1B.c	\
+	SequenceOfSafeDistanceIndication.c	\
+	SequenceOfTrajectoryInterceptionIndication.c	\
+	Shape.c	\
+	Speed.c	\
+	StabilityChangeIndication.c	\
+	SteeringWheelAngle.c	\
+	Traces.c	\
+	TrafficIslandPosition.c	\
+	TrailerData.c	\
+	TrajectoryInterceptionIndication.c	\
+	VarLengthNumber.c	\
+	Ext1.c	\
+	Ext2.c	\
+	Ext3.c	\
+	VerticalAcceleration.c	\
+	VehicleIdentification.c	\
+	VehicleLength.c	\
+	VehicleLengthV2.c	\
+	Velocity3dWithConfidence.c	\
+	VelocityCartesian.c	\
+	VelocityComponent.c	\
+	VelocityPolarWithZ.c	\
+	VruClusterInformation.c	\
+	VruExteriorLights.c	\
+	VruProfileAndSubprofile.c	\
+	Wgs84Angle.c	\
+	YawRate.c	\
+	EXTERNAL.c
+
+ASN_MODULE_HDRS=	\
+	CollectivePerceptionMessage.h	\
+	CpmPayload.h	\
+	ManagementContainerCPM.h	\
+	CpmContainerId.h	\
+	WrappedCpmContainer.h	\
+	WrappedCpmContainers.h	\
+	MessageRateRange.h	\
+	OriginatingVehicleContainer.h	\
+	OriginatingRsuContainer.h	\
+	TrailerDataSet.h	\
+	PerceivedObjectContainer.h	\
+	PerceivedObjects.h	\
+	PerceptionRegionContainer.h	\
+	PerceptionRegion.h	\
+	PerceivedObjectIds.h	\
+	SensorInformationContainer.h	\
+	SensorInformation.h	\
+	AccelerationChange.h	\
+	AccelerationConfidence.h	\
+	AccelerationControl.h	\
+	AccelerationMagnitudeValue.h	\
+	AccelerationValue.h	\
+	AccessTechnologyClass.h	\
+	AccidentSubCauseCode.h	\
+	AdverseWeatherCondition-AdhesionSubCauseCode.h	\
+	AdverseWeatherCondition-ExtremeWeatherConditionSubCauseCode.h	\
+	AdverseWeatherCondition-PrecipitationSubCauseCode.h	\
+	AdverseWeatherCondition-VisibilitySubCauseCode.h	\
+	AirHumidity.h	\
+	AltitudeConfidence.h	\
+	AltitudeValue.h	\
+	AngleConfidence.h	\
+	AngularSpeedConfidence.h	\
+	AngularAccelerationConfidence.h	\
+	AxlesCount.h	\
+	BarometricPressure.h	\
+	BogiesCount.h	\
+	CardinalNumber1B.h	\
+	CardinalNumber3b.h	\
+	CartesianAngleValue.h	\
+	CartesianAngularAccelerationComponentValue.h	\
+	CartesianAngularVelocityComponentValue.h	\
+	CauseCodeType.h	\
+	CartesianCoordinateSmall.h	\
+	CartesianCoordinate.h	\
+	CartesianCoordinateLarge.h	\
+	CenDsrcTollingZoneID.h	\
+	ClusterBreakupReason.h	\
+	ClusterLeaveReason.h	\
+	CollisionRiskSubCauseCode.h	\
+	ConfidenceLevel.h	\
+	CoordinateConfidence.h	\
+	CorrelationCellValue.h	\
+	CurvatureCalculationMode.h	\
+	CurvatureConfidence.h	\
+	CurvatureValue.h	\
+	DangerousEndOfQueueSubCauseCode.h	\
+	DangerousGoodsBasic.h	\
+	DangerousSituationSubCauseCode.h	\
+	DeltaAltitude.h	\
+	DeltaLatitude.h	\
+	DeltaLongitude.h	\
+	DeltaTimeMilliSecondPositive.h	\
+	DeltaTimeMilliSecondSigned.h	\
+	DeltaTimeQuarterSecond.h	\
+	DeltaTimeTenthOfSecond.h	\
+	DeltaTimeSecond.h	\
+	Direction.h	\
+	DriveDirection.h	\
+	DrivingLaneStatus.h	\
+	EmbarkationStatus.h	\
+	EmergencyPriority.h	\
+	EmergencyVehicleApproachingSubCauseCode.h	\
+	EnergyStorageType.h	\
+	EuVehicleCategoryL.h	\
+	EuVehicleCategoryM.h	\
+	EuVehicleCategoryN.h	\
+	EuVehicleCategoryO.h	\
+	ExteriorLights.h	\
+	GenerationDeltaTime.h	\
+	HardShoulderStatus.h	\
+	HazardousLocation-AnimalOnTheRoadSubCauseCode.h	\
+	HazardousLocation-DangerousCurveSubCauseCode.h	\
+	HazardousLocation-ObstacleOnTheRoadSubCauseCode.h	\
+	HazardousLocation-SurfaceConditionSubCauseCode.h	\
+	HeadingConfidence.h	\
+	HeadingValue.h	\
+	HeightLonCarr.h	\
+	HumanPresenceOnTheRoadSubCauseCode.h	\
+	HumanProblemSubCauseCode.h	\
+	Identifier1B.h	\
+	Identifier2B.h	\
+	InformationQuality.h	\
+	InterferenceManagementZoneType.h	\
+	Iso3833VehicleType.h	\
+	LanePosition.h	\
+	LaneType.h	\
+	LaneWidth.h	\
+	Latitude.h	\
+	LateralAccelerationValue.h	\
+	LightBarSirenInUse.h	\
+	Longitude.h	\
+	LongitudinalAccelerationValue.h	\
+	LongitudinalLanePositionValue.h	\
+	LongitudinalLanePositionConfidence.h	\
+	MatrixIncludedComponents.h	\
+	MessageId.h	\
+	NumberOfOccupants.h	\
+	ObjectPerceptionQuality.h	\
+	ObjectDimensionValue.h	\
+	ObjectDimensionConfidence.h	\
+	ObjectFace.h	\
+	OpeningDaysHours.h	\
+	OrdinalNumber1B.h	\
+	OrdinalNumber3b.h	\
+	OtherSubClass.h	\
+	PathDeltaTime.h	\
+	PerformanceClass.h	\
+	PhoneNumber.h	\
+	PosCentMass.h	\
+	PositioningSolutionType.h	\
+	PositionOfOccupants.h	\
+	PosFrontAx.h	\
+	PosLonCarr.h	\
+	PosPillar.h	\
+	PostCrashSubCauseCode.h	\
+	PrecipitationIntensity.h	\
+	ProtectedZoneId.h	\
+	ProtectedZoneRadius.h	\
+	ProtectedZoneType.h	\
+	PtActivationData.h	\
+	PtActivationType.h	\
+	RailwayLevelCrossingSubCauseCode.h	\
+	RelevanceDistance.h	\
+	RelevanceTrafficDirection.h	\
+	RequestResponseIndication.h	\
+	RescueAndRecoveryWorkInProgressSubCauseCode.h	\
+	RoadType.h	\
+	RoadworksSubCauseCode.h	\
+	SafeDistanceIndicator.h	\
+	SemiAxisLength.h	\
+	SensorType.h	\
+	SequenceNumber.h	\
+	SignalViolationSubCauseCode.h	\
+	SlowVehicleSubCauseCode.h	\
+	SpecialTransportType.h	\
+	SpeedConfidence.h	\
+	SpeedLimit.h	\
+	SpeedValue.h	\
+	VelocityComponentValue.h	\
+	StabilityLossProbability.h	\
+	StandardLength12b.h	\
+	StandardLength3b.h	\
+	StandardLength9b.h	\
+	StandardLength1B.h	\
+	StandardLength2B.h	\
+	StationarySince.h	\
+	StationaryVehicleSubCauseCode.h	\
+	StationId.h	\
+	StationID.h	\
+	StationType.h	\
+	SteeringWheelAngleConfidence.h	\
+	SteeringWheelAngleValue.h	\
+	SubCauseCodeType.h	\
+	Temperature.h	\
+	TimestampIts.h	\
+	TrafficConditionSubCauseCode.h	\
+	TrafficDirection.h	\
+	TrafficParticipantType.h	\
+	TrafficRule.h	\
+	TrailerPresenceInformation.h	\
+	TrajectoryInterceptionProbability.h	\
+	TrajectoryInterceptionConfidence.h	\
+	TransmissionInterval.h	\
+	TurningDirection.h	\
+	TurningRadius.h	\
+	ValidityDuration.h	\
+	VDS.h	\
+	VehicleBreakdownSubCauseCode.h	\
+	VehicleHeight.h	\
+	VehicleLengthConfidenceIndication.h	\
+	VehicleLengthValue.h	\
+	VehicleMass.h	\
+	VehicleRole.h	\
+	VehicleWidth.h	\
+	VerticalAccelerationValue.h	\
+	VruClusterProfiles.h	\
+	VruDeviceUsage.h	\
+	VruEnvironment.h	\
+	VruMovementControl.h	\
+	VruSubProfilePedestrian.h	\
+	VruSubProfileBicyclist.h	\
+	VruSubProfileMotorcyclist.h	\
+	VruSubProfileAnimal.h	\
+	VruSizeClass.h	\
+	VruSpecificExteriorLights.h	\
+	WheelBaseVehicle.h	\
+	Wgs84AngleConfidence.h	\
+	Wgs84AngleValue.h	\
+	WMInumber.h	\
+	WrongWayDrivingSubCauseCode.h	\
+	YawRateConfidence.h	\
+	YawRateValue.h	\
+	Acceleration3dWithConfidence.h	\
+	AccelerationPolarWithZ.h	\
+	AccelerationCartesian.h	\
+	AccelerationComponent.h	\
+	AccelerationChangeIndication.h	\
+	AccelerationMagnitude.h	\
+	ActionId.h	\
+	ActionID.h	\
+	ActionIdList.h	\
+	Altitude.h	\
+	BasicContainer.h	\
+	CartesianAngle.h	\
+	CartesianAngularVelocityComponent.h	\
+	CartesianAngularAccelerationComponent.h	\
+	CartesianCoordinateWithConfidence.h	\
+	CartesianPosition3d.h	\
+	CartesianPosition3dWithConfidence.h	\
+	CauseCode.h	\
+	CauseCodeChoice.h	\
+	CauseCodeV2.h	\
+	CenDsrcTollingZone.h	\
+	CircularShape.h	\
+	ClosedLanes.h	\
+	ClusterBreakupInfo.h	\
+	ClusterJoinInfo.h	\
+	ClusterLeaveInfo.h	\
+	CorrelationColumn.h	\
+	Curvature.h	\
+	DangerousGoodsExtended.h	\
+	DeltaReferencePosition.h	\
+	DigitalMap.h	\
+	EllipticalShape.h	\
+	EulerAnglesWithConfidence.h	\
+	EuVehicleCategoryCode.h	\
+	EventHistory.h	\
+	EventPoint.h	\
+	EventZone.h	\
+	GeneralizedLanePosition.h	\
+	Heading.h	\
+	HeadingChangeIndication.h	\
+	InterferenceManagementChannel.h	\
+	InterferenceManagementZone.h	\
+	InterferenceManagementZoneDefinition.h	\
+	InterferenceManagementInfo.h	\
+	InterferenceManagementInfoPerChannel.h	\
+	InterferenceManagementZones.h	\
+	IntersectionReferenceId.h	\
+	ItineraryPath.h	\
+	ItsPduHeader.h	\
+	LanePositionAndType.h	\
+	LateralAcceleration.h	\
+	LongitudinalAcceleration.h	\
+	LongitudinalLanePosition.h	\
+	LowerTriangularPositiveSemidefiniteMatrices.h	\
+	LowerTriangularPositiveSemidefiniteMatrix.h	\
+	LowerTriangularPositiveSemidefiniteMatrixColumns.h	\
+	MapPosition.h	\
+	MapReference.h	\
+	MessageRateHz.h	\
+	MessageSegmentationInfo.h	\
+	MitigationForTechnologies.h	\
+	MitigationPerTechnologyClass.h	\
+	ObjectClass.h	\
+	ObjectClassDescription.h	\
+	ObjectClassWithConfidence.h	\
+	ObjectDimension.h	\
+	Path.h	\
+	PathHistory.h	\
+	PathPredicted.h	\
+	PathPoint.h	\
+	PathPointPredicted.h	\
+	PerceivedObject.h	\
+	PolygonalShape.h	\
+	PosConfidenceEllipse.h	\
+	PositionConfidenceEllipse.h	\
+	PositionOfPillars.h	\
+	ProtectedCommunicationZone.h	\
+	ProtectedCommunicationZonesRSU.h	\
+	PtActivation.h	\
+	RadialShape.h	\
+	RadialShapes.h	\
+	RadialShapesList.h	\
+	RadialShapeDetails.h	\
+	RectangularShape.h	\
+	ReferencePosition.h	\
+	ReferencePositionWithConfidence.h	\
+	RestrictedTypes.h	\
+	RoadSegmentReferenceId.h	\
+	SafeDistanceIndication.h	\
+	SequenceOfCartesianPosition3d.h	\
+	SequenceOfIdentifier1B.h	\
+	SequenceOfSafeDistanceIndication.h	\
+	SequenceOfTrajectoryInterceptionIndication.h	\
+	Shape.h	\
+	Speed.h	\
+	StabilityChangeIndication.h	\
+	SteeringWheelAngle.h	\
+	Traces.h	\
+	TrafficIslandPosition.h	\
+	TrailerData.h	\
+	TrajectoryInterceptionIndication.h	\
+	VarLengthNumber.h	\
+	Ext1.h	\
+	Ext2.h	\
+	Ext3.h	\
+	VerticalAcceleration.h	\
+	VehicleIdentification.h	\
+	VehicleLength.h	\
+	VehicleLengthV2.h	\
+	Velocity3dWithConfidence.h	\
+	VelocityCartesian.h	\
+	VelocityComponent.h	\
+	VelocityPolarWithZ.h	\
+	VruClusterInformation.h	\
+	VruExteriorLights.h	\
+	VruProfileAndSubprofile.h	\
+	Wgs84Angle.h	\
+	YawRate.h	\
+	EXTERNAL.h
+
+ASN_MODULE_HDRS+=ANY.h
+ASN_MODULE_SRCS+=ANY.c
+ASN_MODULE_HDRS+=OCTET_STRING.h
+ASN_MODULE_HDRS+=OPEN_TYPE.h
+ASN_MODULE_SRCS+=OPEN_TYPE.c
+ASN_MODULE_HDRS+=constr_CHOICE.h
+ASN_MODULE_HDRS+=BOOLEAN.h
+ASN_MODULE_SRCS+=BOOLEAN.c
+ASN_MODULE_HDRS+=ENUMERATED.h
+ASN_MODULE_SRCS+=ENUMERATED.c
+ASN_MODULE_HDRS+=INTEGER.h
+ASN_MODULE_HDRS+=NativeEnumerated.h
+ASN_MODULE_HDRS+=GraphicString.h
+ASN_MODULE_SRCS+=GraphicString.c
+ASN_MODULE_HDRS+=IA5String.h
+ASN_MODULE_SRCS+=IA5String.c
+ASN_MODULE_SRCS+=INTEGER.c
+ASN_MODULE_HDRS+=NULL.h
+ASN_MODULE_SRCS+=NULL.c
+ASN_MODULE_SRCS+=NativeEnumerated.c
+ASN_MODULE_HDRS+=NativeInteger.h
+ASN_MODULE_SRCS+=NativeInteger.c
+ASN_MODULE_HDRS+=NumericString.h
+ASN_MODULE_SRCS+=NumericString.c
+ASN_MODULE_HDRS+=OBJECT_IDENTIFIER.h
+ASN_MODULE_SRCS+=OBJECT_IDENTIFIER.c
+ASN_MODULE_HDRS+=asn_codecs_prim.h
+ASN_MODULE_HDRS+=ObjectDescriptor.h
+ASN_MODULE_SRCS+=ObjectDescriptor.c
+ASN_MODULE_HDRS+=UTF8String.h
+ASN_MODULE_SRCS+=UTF8String.c
+ASN_MODULE_HDRS+=asn_SEQUENCE_OF.h
+ASN_MODULE_SRCS+=asn_SEQUENCE_OF.c
+ASN_MODULE_HDRS+=asn_SET_OF.h
+ASN_MODULE_SRCS+=asn_SET_OF.c
+ASN_MODULE_SRCS+=constr_CHOICE.c
+ASN_MODULE_HDRS+=constr_SEQUENCE.h
+ASN_MODULE_SRCS+=constr_SEQUENCE.c
+ASN_MODULE_HDRS+=constr_SEQUENCE_OF.h
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF.c
+ASN_MODULE_HDRS+=constr_SET_OF.h
+ASN_MODULE_SRCS+=constr_SET_OF.c
+ASN_MODULE_HDRS+=asn_application.h
+ASN_MODULE_SRCS+=asn_application.c
+ASN_MODULE_HDRS+=asn_ioc.h
+ASN_MODULE_HDRS+=asn_system.h
+ASN_MODULE_HDRS+=asn_codecs.h
+ASN_MODULE_HDRS+=asn_internal.h
+ASN_MODULE_SRCS+=asn_internal.c
+ASN_MODULE_HDRS+=asn_bit_data.h
+ASN_MODULE_SRCS+=asn_bit_data.c
+ASN_MODULE_SRCS+=OCTET_STRING.c
+ASN_MODULE_HDRS+=BIT_STRING.h
+ASN_MODULE_SRCS+=BIT_STRING.c
+ASN_MODULE_SRCS+=asn_codecs_prim.c
+ASN_MODULE_HDRS+=ber_tlv_length.h
+ASN_MODULE_SRCS+=ber_tlv_length.c
+ASN_MODULE_HDRS+=ber_tlv_tag.h
+ASN_MODULE_SRCS+=ber_tlv_tag.c
+ASN_MODULE_HDRS+=constr_TYPE.h
+ASN_MODULE_SRCS+=constr_TYPE.c
+ASN_MODULE_HDRS+=constraints.h
+ASN_MODULE_SRCS+=constraints.c
+ASN_MODULE_HDRS+=ber_decoder.h
+ASN_MODULE_HDRS+=der_encoder.h
+ASN_MODULE_SRCS+=ber_decoder.c
+ASN_MODULE_SRCS+=der_encoder.c
+ASN_MODULE_SRCS+=ANY_ber.c
+ASN_MODULE_SRCS+=BOOLEAN_ber.c
+ASN_MODULE_SRCS+=INTEGER_ber.c
+ASN_MODULE_SRCS+=NULL_ber.c
+ASN_MODULE_SRCS+=NativeInteger_ber.c
+ASN_MODULE_SRCS+=OCTET_STRING_ber.c
+ASN_MODULE_SRCS+=OPEN_TYPE_ber.c
+ASN_MODULE_SRCS+=asn_codecs_prim_ber.c
+ASN_MODULE_SRCS+=constr_CHOICE_ber.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF_ber.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_ber.c
+ASN_MODULE_SRCS+=constr_SET_OF_ber.c
+ASN_MODULE_HDRS+=xer_support.h
+ASN_MODULE_HDRS+=xer_decoder.h
+ASN_MODULE_HDRS+=xer_encoder.h
+ASN_MODULE_SRCS+=xer_support.c
+ASN_MODULE_SRCS+=xer_decoder.c
+ASN_MODULE_SRCS+=xer_encoder.c
+ASN_MODULE_SRCS+=ANY_xer.c
+ASN_MODULE_SRCS+=BIT_STRING_xer.c
+ASN_MODULE_SRCS+=BOOLEAN_xer.c
+ASN_MODULE_SRCS+=INTEGER_xer.c
+ASN_MODULE_SRCS+=NULL_xer.c
+ASN_MODULE_SRCS+=NativeEnumerated_xer.c
+ASN_MODULE_SRCS+=NativeInteger_xer.c
+ASN_MODULE_SRCS+=OBJECT_IDENTIFIER_xer.c
+ASN_MODULE_SRCS+=OCTET_STRING_xer.c
+ASN_MODULE_SRCS+=OPEN_TYPE_xer.c
+ASN_MODULE_SRCS+=asn_codecs_prim_xer.c
+ASN_MODULE_SRCS+=constr_CHOICE_xer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF_xer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_xer.c
+ASN_MODULE_SRCS+=constr_SET_OF_xer.c
+ASN_MODULE_HDRS+=oer_decoder.h
+ASN_MODULE_HDRS+=oer_encoder.h
+ASN_MODULE_HDRS+=oer_support.h
+ASN_MODULE_SRCS+=oer_decoder.c
+ASN_MODULE_SRCS+=oer_encoder.c
+ASN_MODULE_SRCS+=oer_support.c
+ASN_MODULE_SRCS+=OPEN_TYPE_oer.c
+ASN_MODULE_SRCS+=INTEGER_oer.c
+ASN_MODULE_SRCS+=BIT_STRING_oer.c
+ASN_MODULE_SRCS+=OCTET_STRING_oer.c
+ASN_MODULE_SRCS+=NativeInteger_oer.c
+ASN_MODULE_SRCS+=NativeEnumerated_oer.c
+ASN_MODULE_SRCS+=constr_CHOICE_oer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_oer.c
+ASN_MODULE_SRCS+=constr_SET_OF_oer.c
+ASN_MODULE_SRCS+=BOOLEAN_oer.c
+ASN_MODULE_SRCS+=ENUMERATED_oer.c
+ASN_MODULE_SRCS+=NULL_oer.c
+ASN_MODULE_HDRS+=per_decoder.h
+ASN_MODULE_HDRS+=per_encoder.h
+ASN_MODULE_HDRS+=per_support.h
+ASN_MODULE_HDRS+=per_opentype.h
+ASN_MODULE_SRCS+=per_decoder.c
+ASN_MODULE_SRCS+=per_encoder.c
+ASN_MODULE_SRCS+=per_support.c
+ASN_MODULE_SRCS+=per_opentype.c
+ASN_MODULE_HDRS+=uper_decoder.h
+ASN_MODULE_HDRS+=uper_encoder.h
+ASN_MODULE_HDRS+=uper_support.h
+ASN_MODULE_HDRS+=uper_opentype.h
+ASN_MODULE_SRCS+=uper_decoder.c
+ASN_MODULE_SRCS+=uper_encoder.c
+ASN_MODULE_SRCS+=uper_support.c
+ASN_MODULE_SRCS+=uper_opentype.c
+ASN_MODULE_SRCS+=ANY_uper.c
+ASN_MODULE_SRCS+=BIT_STRING_uper.c
+ASN_MODULE_SRCS+=BOOLEAN_uper.c
+ASN_MODULE_SRCS+=ENUMERATED_uper.c
+ASN_MODULE_SRCS+=INTEGER_uper.c
+ASN_MODULE_SRCS+=NULL_uper.c
+ASN_MODULE_SRCS+=NativeEnumerated_uper.c
+ASN_MODULE_SRCS+=NativeInteger_uper.c
+ASN_MODULE_SRCS+=OCTET_STRING_uper.c
+ASN_MODULE_SRCS+=OPEN_TYPE_uper.c
+ASN_MODULE_SRCS+=constr_CHOICE_uper.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF_uper.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_uper.c
+ASN_MODULE_SRCS+=constr_SET_OF_uper.c
+ASN_MODULE_HDRS+=aper_decoder.h
+ASN_MODULE_HDRS+=aper_encoder.h
+ASN_MODULE_HDRS+=aper_support.h
+ASN_MODULE_HDRS+=aper_opentype.h
+ASN_MODULE_SRCS+=aper_decoder.c
+ASN_MODULE_SRCS+=aper_encoder.c
+ASN_MODULE_SRCS+=aper_support.c
+ASN_MODULE_SRCS+=aper_opentype.c
+ASN_MODULE_SRCS+=ANY_aper.c
+ASN_MODULE_SRCS+=BOOLEAN_aper.c
+ASN_MODULE_SRCS+=ENUMERATED_aper.c
+ASN_MODULE_SRCS+=INTEGER_aper.c
+ASN_MODULE_SRCS+=NULL_aper.c
+ASN_MODULE_SRCS+=NativeEnumerated_aper.c
+ASN_MODULE_SRCS+=NativeInteger_aper.c
+ASN_MODULE_SRCS+=OCTET_STRING_aper.c
+ASN_MODULE_SRCS+=OPEN_TYPE_aper.c
+ASN_MODULE_SRCS+=constr_CHOICE_aper.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF_aper.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_aper.c
+ASN_MODULE_SRCS+=constr_SET_OF_aper.c
+ASN_MODULE_SRCS+=BIT_STRING_print.c
+ASN_MODULE_SRCS+=BOOLEAN_print.c
+ASN_MODULE_SRCS+=INTEGER_print.c
+ASN_MODULE_SRCS+=NULL_print.c
+ASN_MODULE_SRCS+=NativeInteger_print.c
+ASN_MODULE_SRCS+=OBJECT_IDENTIFIER_print.c
+ASN_MODULE_SRCS+=OCTET_STRING_print.c
+ASN_MODULE_SRCS+=UTF8String_print.c
+ASN_MODULE_SRCS+=constr_CHOICE_print.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_print.c
+ASN_MODULE_SRCS+=constr_SET_OF_print.c
+ASN_MODULE_HDRS+=asn_random_fill.h
+ASN_MODULE_SRCS+=asn_random_fill.c
+ASN_MODULE_SRCS+=BIT_STRING_rfill.c
+ASN_MODULE_SRCS+=BOOLEAN_rfill.c
+ASN_MODULE_SRCS+=INTEGER_rfill.c
+ASN_MODULE_SRCS+=NULL_rfill.c
+ASN_MODULE_SRCS+=NativeInteger_rfill.c
+ASN_MODULE_SRCS+=OBJECT_IDENTIFIER_rfill.c
+ASN_MODULE_SRCS+=OCTET_STRING_rfill.c
+ASN_MODULE_SRCS+=UTF8String_rfill.c
+ASN_MODULE_SRCS+=constr_CHOICE_rfill.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_rfill.c
+ASN_MODULE_SRCS+=constr_SET_OF_rfill.c
+ASN_MODULE_HDRS+=jer_support.h
+ASN_MODULE_HDRS+=jer_decoder.h
+ASN_MODULE_HDRS+=jer_encoder.h
+ASN_MODULE_SRCS+=jer_support.c
+ASN_MODULE_SRCS+=jer_decoder.c
+ASN_MODULE_SRCS+=jer_encoder.c
+ASN_MODULE_SRCS+=ANY_jer.c
+ASN_MODULE_SRCS+=BIT_STRING_jer.c
+ASN_MODULE_SRCS+=BOOLEAN_jer.c
+ASN_MODULE_SRCS+=ENUMERATED_jer.c
+ASN_MODULE_SRCS+=INTEGER_jer.c
+ASN_MODULE_SRCS+=NULL_jer.c
+ASN_MODULE_SRCS+=NativeEnumerated_jer.c
+ASN_MODULE_SRCS+=NativeInteger_jer.c
+ASN_MODULE_SRCS+=OBJECT_IDENTIFIER_jer.c
+ASN_MODULE_SRCS+=OCTET_STRING_jer.c
+ASN_MODULE_SRCS+=OPEN_TYPE_jer.c
+ASN_MODULE_SRCS+=asn_codecs_prim_jer.c
+ASN_MODULE_SRCS+=constr_CHOICE_jer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_OF_jer.c
+ASN_MODULE_SRCS+=constr_SEQUENCE_jer.c
+ASN_MODULE_SRCS+=constr_SET_OF_jer.c
+
+ASN_MODULE_CFLAGS=
+
+lib_LTLIBRARIES+=libasncodec.la
+libasncodec_la_SOURCES=$(ASN_MODULE_SRCS) $(ASN_MODULE_HDRS)
+libasncodec_la_CPPFLAGS=-I$(top_srcdir)/
+libasncodec_la_CFLAGS=$(ASN_MODULE_CFLAGS)
+libasncodec_la_LDFLAGS=-lm

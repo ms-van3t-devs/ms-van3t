@@ -145,7 +145,13 @@ set(source_files
 	model/cv2x_nist-scm-urbanmacrocell-propagation-loss-model.cc
 	model/cv2x_nist-indoor-propagation-loss-model.cc
 	model/cv2x_nist-outdoor-propagation-loss-model.cc
-	model/cv2x_nist-hybrid-propagation-loss-model.cc)
+	model/cv2x_nist-hybrid-propagation-loss-model.cc
+	model/rssi-tag.cc
+	model/timestamp-tag.cc
+	model/rsrp-tag.cc
+	model/sinr-tag.cc
+	model/size-tag.cc
+)
 
 set(header_files
 	model/cv2x_lte-common.h
@@ -294,7 +300,13 @@ set(header_files
 	model/cv2x_nist-scm-urbanmacrocell-propagation-loss-model.h
 	model/cv2x_nist-indoor-propagation-loss-model.h
 	model/cv2x_nist-outdoor-propagation-loss-model.h
-	model/cv2x_nist-hybrid-propagation-loss-model.h)
+	model/cv2x_nist-hybrid-propagation-loss-model.h
+	model/rssi-tag.h
+	model/timestamp-tag.h
+	model/rsrp-tag.h
+	model/sinr-tag.h
+	model/size-tag.h
+)
 
 set(test_sources
 	test/cv2x_lte-test-downlink-sinr.cc

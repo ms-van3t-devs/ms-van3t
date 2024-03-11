@@ -174,7 +174,7 @@ namespace ns3
   {
     /* Implement CAM strategy here */
     std::cout <<"VehicleID: " << m_id
-            <<" | Rx CAM from "<<cam->header.stationID
+            <<" | Rx CAM from "<<cam->header.stationId
             <<" | Remote vehicle position: ("<<asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO<<","
             <<asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO<<")"<<std::endl;
 

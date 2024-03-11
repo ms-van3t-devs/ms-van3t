@@ -132,7 +132,7 @@ namespace ns3
 
 
       VDP* m_vdp;
-      StationID_t m_station_id;
+      StationId_t m_station_id;
       StationType_t m_stationtype;
 
       EventId m_event_EPVupdate;

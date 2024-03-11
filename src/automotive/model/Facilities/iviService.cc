@@ -124,7 +124,7 @@ namespace ns3 {
   {
     ActionID actionID;
     actionID.sequenceNumber = m_seq_number;
-    actionID.originatingStationID = m_station_id;
+    actionID.originatingStationId = m_station_id;
 
     return actionID;
   }
@@ -199,9 +199,9 @@ namespace ns3 {
   {
 
     /* Header */
-    asn1cpp::setField(ivim->header.messageID,FIX_IVIMID); // description in ITS-Container.asn
+    asn1cpp::setField(ivim->header.messageId,FIX_IVIMID); // description in ITS-Container.asn
     //asn1cpp::setField(ivim->header.protocolVersion,protocolVersion_currentVersion); // description in ITS-Container.asn
-    asn1cpp::setField(ivim->header.stationID,m_station_id); // description in ITS-Container.asn
+    asn1cpp::setField(ivim->header.stationId,m_station_id); // description in ITS-Container.asn
 
 
     /* Mandatory */
@@ -392,9 +392,9 @@ namespace ns3 {
 
                 asn1cpp::setField(at->present, ISO14823Attribute_PR_spe);
                 if(rsCode_it->RS_spm.isAvailable ())
-                  asn1cpp::setField(at->choice.spe.spm,rsCode_it->RS_spm.getData ());
+                  asn1cpp::setField(at->choice.spe.speedLimitMax,rsCode_it->RS_spm.getData ());
                 if(rsCode_it->RS_mns.isAvailable ())
-                  asn1cpp::setField(at->choice.spe.mns,rsCode_it->RS_mns.getData ());
+                  asn1cpp::setField(at->choice.spe.speedLimitMin,rsCode_it->RS_mns.getData ());
 
                 asn1cpp::setField(at->choice.spe.unit,
                                   rsCode_it->RS_unit.getData());
@@ -426,7 +426,7 @@ namespace ns3 {
         auto rccPart = asn1cpp::makeSeq(RccPart);
 
         for(auto zIDs_it = rccPart_it->zoneID.begin ();zIDs_it != rccPart_it->zoneID.end ();zIDs_it++)
-          asn1cpp::sequenceof::pushList(rccPart->zoneIds,*zIDs_it);
+          asn1cpp::sequenceof::pushList(rccPart->relevanceZoneIds,*zIDs_it);
 
         asn1cpp::setField(rccPart->roadType,rccPart_it->roadType);
 
@@ -567,7 +567,7 @@ namespace ns3 {
 
     /* Assign unused actionID value */
     ActionID actionid;
-    actionid.originatingStationID = m_station_id;
+    actionid.originatingStationId = m_station_id;
     actionid.sequenceNumber = m_seq_number-1;
 
     //std::pair <unsigned long, long> map_index = std::make_pair((unsigned long)m_station_id,(long)m_seq_number);
@@ -632,7 +632,7 @@ namespace ns3 {
 
       /* Assign unused actionID value */
       ActionID actionid;
-      actionid.originatingStationID = m_station_id;
+      actionid.originatingStationId = m_station_id;
       actionid.sequenceNumber = m_seq_number;
 
       //std::cout << "New Ivim triggered with ID number :" << actionid.sequenceNumber << std::endl;
@@ -924,7 +924,7 @@ namespace ns3 {
 
        iviData decodedData;
 
-       decodedData.setIvimHeader (decoded_ivim->header.messageID,decoded_ivim->header.protocolVersion,decoded_ivim->header.stationID);
+       decodedData.setIvimHeader (decoded_ivim->header.messageId,decoded_ivim->header.protocolVersion,decoded_ivim->header.stationId);
        iviData::iviDataMandatory mandatory;
        mandatory.timeStamp = (long) decoded_ivim->ivi.mandatory.timeStamp;
        mandatory.providerIdentifier = (long) decoded_ivim->ivi.mandatory.serviceProviderId.providerIdentifier;
@@ -1112,7 +1112,7 @@ namespace ns3 {
                                        auto att = asn1cpp::sequenceof::getSeq(RSs->code.choice.iso14823.attributes,ISO14823Attribute,i);
                                        if(asn1cpp::getField(att->present,ISO14823Attribute_PR) == ISO14823Attribute_PR_spe)
                                          {
-                                           RSdata.RS_spm.setData (asn1cpp::getField(att->choice.spe.spm,long));
+                                           RSdata.RS_spm.setData (asn1cpp::getField(att->choice.spe.speedLimitMax,long));
                                            RSdata.RS_unit.setData (asn1cpp::getField(att->choice.spe.unit,long));
                                          }
                                     }
@@ -1158,9 +1158,9 @@ namespace ns3 {
                    for (int j=0;j<rccPartSize;j++) {
                        iviData::IVI_rcc_part_t rccPartData;
                        auto rccPart = asn1cpp::sequenceof::getSeq(*rcc,RccPart,j);
-                       int zoneIDsize = asn1cpp::sequenceof::getSize(rccPart->zoneIds);
+                       int zoneIDsize = asn1cpp::sequenceof::getSize(rccPart->relevanceZoneIds);
                        for (int i=0;i<zoneIDsize;i++)
-                          rccPartData.zoneID.push_back (asn1cpp::sequenceof::getField(rccPart->zoneIds,long,i));
+                          rccPartData.zoneID.push_back (asn1cpp::sequenceof::getField(rccPart->relevanceZoneIds,long,i));
 
                        rccPartData.roadType = asn1cpp::getField(rccPart->roadType,long);
                        int laneCsize = asn1cpp::sequenceof::getSize(rccPart->laneConfiguration);

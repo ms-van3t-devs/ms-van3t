@@ -186,6 +186,11 @@ namespace ns3
     m_caService.setSocketRx (m_socket);
     m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
+    if(m_PRR_supervisor!=nullptr)
+    {
+      m_PRR_supervisor->addExcludedID (777888999);
+    }
+
     // Set the RSU position in the CA and DEN basic service (mandatory for any RSU object)
     // As the position must be specified in (lat, lon), we must take it from the mobility model and then convert it to Latitude and Longitude
     // As SUMO is used here, we can rely on the TraCIAPI for this conversion
@@ -336,11 +341,11 @@ namespace ns3
     if (!m_csv_name.empty ())
       {
         // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
-        m_csv_ofstream_cam << cam->header.messageID << "," << cam->header.stationID << ",";
+        m_csv_ofstream_cam << cam->header.messageId << "," << cam->header.stationId << ",";
         m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO << ",";
         m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO << "," ;
         m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
-        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
+        m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value,double)/DECI << std::endl;
       }
 
 //    ASN_STRUCT_FREE(asn_DEF_CAM,cam);

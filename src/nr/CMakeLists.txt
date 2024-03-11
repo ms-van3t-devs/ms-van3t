@@ -113,6 +113,11 @@ set(source_files
     utils/file-transfer-application.cc
     utils/three-gpp-channel-model-param.cc
     utils/distance-based-three-gpp-spectrum-propagation-loss-model.cc
+    model/rssi-tag.cc
+    model/timestamp-tag.cc
+    model/rsrp-tag.cc
+    model/sinr-tag.cc
+    model/size-tag.cc
 )
 
 set(header_files
@@ -237,6 +242,11 @@ set(header_files
     utils/file-transfer-application.h
     utils/three-gpp-channel-model-param.h
     utils/distance-based-three-gpp-spectrum-propagation-loss-model.h
+    model/rssi-tag.h
+    model/timestamp-tag.h
+    model/rsrp-tag.h
+    model/sinr-tag.h
+    model/size-tag.h
 )
 
 

@@ -300,7 +300,7 @@ namespace ns3
       bool lowFreq_ok;
       vehdata.detected = false;
       vehdata.stationType = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.stationType,long);
-      vehdata.stationID = asn1cpp::getField(decodedCAM->header.stationID,uint64_t);
+      vehdata.stationID = asn1cpp::getField(decodedCAM->header.stationId,uint64_t);
       vehdata.lat = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.latitude,double)/(double)DOT_ONE_MICRO;
       vehdata.lon = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.longitude,double)/(double)DOT_ONE_MICRO;
       vehdata.elevation = asn1cpp::getField(decodedCAM->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,double)/(double)CENTI;
@@ -332,7 +332,7 @@ namespace ns3
 
       db_retval=m_LDM->insert(vehdata);
       if(db_retval!=LDM::LDM_OK && db_retval!=LDM::LDM_UPDATED) {
-          std::cerr << "Warning! Insert on the database for vehicle " << asn1cpp::getField(decodedCAM->header.stationID,int) << "failed!" << std::endl;
+          std::cerr << "Warning! Insert on the database for vehicle " << asn1cpp::getField(decodedCAM->header.stationId,int) << "failed!" << std::endl;
       }
   }
 
@@ -474,9 +474,9 @@ namespace ns3
       }
 
     /* Fill the header */
-    asn1cpp::setField(cam->header.messageID, FIX_CAMID);
-    asn1cpp::setField(cam->header.protocolVersion , protocolVersion_currentVersion);
-    asn1cpp::setField(cam->header.stationID, m_station_id);
+    asn1cpp::setField(cam->header.messageId, FIX_CAMID);
+    asn1cpp::setField(cam->header.protocolVersion , 2);
+    asn1cpp::setField(cam->header.stationId, m_station_id);
 
     /*
      * Compute the generationDeltaTime, "computed as the time corresponding to the
@@ -499,9 +499,9 @@ namespace ns3
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence, cam_mandatory_data.altitude.getConfidence ());
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude, cam_mandatory_data.latitude);
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude, cam_mandatory_data.longitude);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence, cam_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence, cam_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation, cam_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisLength, cam_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorAxisLength, cam_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisOrientation, cam_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
 
         /* Fill the highFrequencyContainer */
 
@@ -514,8 +514,8 @@ namespace ns3
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue, cam_mandatory_data.VehicleLength.getValue());
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthConfidenceIndication, cam_mandatory_data.VehicleLength.getConfidence());
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth, cam_mandatory_data.VehicleWidth);
-        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue, cam_mandatory_data.longAcceleration.getValue ());
-        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationConfidence, cam_mandatory_data.longAcceleration.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value, cam_mandatory_data.longAcceleration.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.confidence, cam_mandatory_data.longAcceleration.getConfidence ());
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvature.curvatureValue, cam_mandatory_data.curvature.getValue ());
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvature.curvatureConfidence, cam_mandatory_data.curvature.getConfidence ());
         asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.curvatureCalculationMode, cam_mandatory_data.curvature_calculation_mode);
@@ -543,18 +543,18 @@ namespace ns3
 
         auto latacc = m_vdp->getLateralAcceleration();
         if(latacc.isAvailable()) {
-            auto latacc_seq = asn1cpp::makeSeq(LateralAcceleration);
-            asn1cpp::setField(latacc_seq->lateralAccelerationValue,latacc.getData ().getValue ());
-            asn1cpp::setField(latacc_seq->lateralAccelerationConfidence,latacc.getData ().getConfidence ());
+            auto latacc_seq = asn1cpp::makeSeq(AccelerationComponent);
+            asn1cpp::setField(latacc_seq->value,latacc.getData ().getValue ());
+            asn1cpp::setField(latacc_seq->confidence,latacc.getData ().getConfidence ());
             asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.lateralAcceleration,latacc_seq);
         }
 
 
         auto vertacc = m_vdp->getVerticalAcceleration();
         if(vertacc.isAvailable()) {
-            auto vertacc_seq = asn1cpp::makeSeq(VerticalAcceleration);
-            asn1cpp::setField(vertacc_seq->verticalAccelerationValue,vertacc.getData ().getValue ());
-            asn1cpp::setField(vertacc_seq->verticalAccelerationConfidence,vertacc.getData ().getConfidence ());
+            auto vertacc_seq = asn1cpp::makeSeq(AccelerationComponent);
+            asn1cpp::setField(vertacc_seq->value,vertacc.getData ().getValue ());
+            asn1cpp::setField(vertacc_seq->confidence,vertacc.getData ().getConfidence ());
             asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.verticalAcceleration,vertacc_seq);
         }
 
@@ -566,7 +566,7 @@ namespace ns3
         auto tollZone = m_vdp->getCenDsrcTollingZone ();
         if(tollZone.isAvailable ()) {
             auto tollZone_seq = asn1cpp::makeSeq(CenDsrcTollingZone);
-            asn1cpp::setField(tollZone_seq->cenDsrcTollingZoneID,tollZone.getData ().cenDsrcTollingZoneID);
+            asn1cpp::setField(tollZone_seq->cenDsrcTollingZoneId,tollZone.getData ().cenDsrcTollingZoneID);
             asn1cpp::setField(tollZone_seq->protectedZoneLatitude,tollZone.getData ().latitude);
             asn1cpp::setField(tollZone_seq->protectedZoneLongitude,tollZone.getData ().longitude);
             asn1cpp::setField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.cenDsrcTollingZone,tollZone_seq);
@@ -586,9 +586,9 @@ namespace ns3
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,AltitudeValue_unavailable);
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude,Latitude_unavailable);
         asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude,Longitude_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence,SemiAxisLength_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence,SemiAxisLength_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation,HeadingValue_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisLength,SemiAxisLength_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorAxisLength,SemiAxisLength_unavailable);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisOrientation,HeadingValue_unavailable);
         /* Fill the highFrequencyContainer */
         //auto RSUContainerHighFreq = asn1cpp::makeSeq(RSUContainerHighFrequency);
 
@@ -787,13 +787,13 @@ namespace ns3
               asn1cpp::setField(specialVehicleCont->present,SpecialVehicleContainer_PR_emergencyContainer);
               asn1cpp::bitstring::setBit(specialVehicleCont->choice.emergencyContainer.lightBarSirenInUse,setByteMask(emergencyContainerData.getData().lightBarSirenInUse),0);
 
-              if(emergencyContainerData.getData().causeCode.isAvailable ())
-                {
-                  auto cause_seq = asn1cpp::makeSeq(CauseCode);
-                  asn1cpp::setField(cause_seq->causeCode,emergencyContainerData.getData ().causeCode.getData ());
-                  asn1cpp::setField(cause_seq->subCauseCode,emergencyContainerData.getData ().subCauseCode.getData ());
-                  asn1cpp::setField(specialVehicleCont->choice.emergencyContainer.incidentIndication,cause_seq);
-                }
+//              if(emergencyContainerData.getData().causeCode.isAvailable ())
+//                {
+//                  auto cause_seq = asn1cpp::makeSeq(CauseCode);
+//                  asn1cpp::setField(cause_seq->causeCode,emergencyContainerData.getData ().causeCode.getData ());
+//                  asn1cpp::setField(cause_seq->subCauseCode,emergencyContainerData.getData ().subCauseCode.getData ());
+//                  asn1cpp::setField(specialVehicleCont->choice.emergencyContainer.incidentIndication,cause_seq);
+//                }
 
               if(emergencyContainerData.getData ().emergencyPriority.isAvailable ())
                 {
@@ -821,13 +821,13 @@ namespace ns3
                   {
                     asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.speedLimit,safetyCarContainerData.getData ().speedLimit.getData ());
                   }
-                if(safetyCarContainerData.getData ().incidentIndicationCauseCode.isAvailable ())
-                  {
-                    auto causeCode_seq = asn1cpp::makeSeq(CauseCode);
-                    asn1cpp::setField(causeCode_seq->causeCode,safetyCarContainerData.getData ().incidentIndicationCauseCode.getData ());
-                    asn1cpp::setField(causeCode_seq->subCauseCode,safetyCarContainerData.getData ().incidentIndicationSubCauseCode.getData ());
-                    asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.incidentIndication,causeCode_seq);
-                  }
+//                if(safetyCarContainerData.getData ().incidentIndicationCauseCode.isAvailable ())
+//                  {
+//                    auto causeCode_seq = asn1cpp::makeSeq(CauseCode);
+//                    asn1cpp::setField(causeCode_seq->causeCode,safetyCarContainerData.getData ().incidentIndicationCauseCode.getData ());
+//                    asn1cpp::setField(causeCode_seq->subCauseCode,safetyCarContainerData.getData ().incidentIndicationSubCauseCode.getData ());
+//                    asn1cpp::setField(specialVehicleCont->choice.safetyCarContainer.incidentIndication,causeCode_seq);
+//                  }
 
               }
             break;
@@ -912,7 +912,8 @@ namespace ns3
       // Reference postiion as specified in ETSI TS 102 894-2
       pathDeltas.timestamp = now_centi;
       pathDeltas.heading =  asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,long);
-      m_refPositions.insert(m_refPositions.begin (),std::make_pair(cam->cam.camParameters.basicContainer.referencePosition,pathDeltas));
+      m_refPositions.insert(m_refPositions.begin(), std::make_pair(cam->cam.camParameters.basicContainer.referencePosition, pathDeltas));
+
     }
 
     return errval;

@@ -43,6 +43,7 @@
 #include "nr-ch-access-manager.h"
 #include "nr-ue-power-control.h"
 #include <ns3/object-vector.h>
+#include "ns3/rsrp-tag.h"
 
 namespace ns3 {
 
@@ -80,130 +81,130 @@ TypeId
 NrUePhy::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::NrUePhy")
-    .SetParent<NrPhy> ()
-    .AddConstructor<NrUePhy> ()
-    .AddAttribute ("TxPower",
-                   "Transmission power in dBm",
-                   DoubleValue (2.0),
-                   MakeDoubleAccessor (&NrUePhy::m_txPower),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("NoiseFigure",
-                   "Loss (dB) in the Signal-to-Noise-Ratio due to non-idealities in the receiver."
-                   " According to Wikipedia (http://en.wikipedia.org/wiki/Noise_figure), this is "
-                   "\"the difference in decibels (dB) between"
-                   " the noise output of the actual receiver to the noise output of an "
-                   " ideal receiver with the same overall gain and bandwidth when the receivers "
-                   " are connected to sources at the standard noise temperature T0.\" "
-                  "In this model, we consider T0 = 290K.",
-                   DoubleValue (5.0), // nr code from NYU and UniPd assumed in the code the value of 5dB, thats why we configure the default value to that
-                   MakeDoubleAccessor (&NrPhy::SetNoiseFigure,
-                                       &NrPhy::GetNoiseFigure),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("PowerAllocationType",
-                    "Defines the type of the power allocation. Currently are supported "
-                    "two types: \"UniformPowerAllocBw\", which is a uniform power allocation over all "
-                    "bandwidth (over all RBs), and \"UniformPowerAllocBw\", which is a uniform "
-                    "power allocation over used (active) RBs. By default is set a uniform power "
-                    "allocation over used RBs .",
-                    EnumValue (NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_USED),
-                    MakeEnumAccessor (&NrPhy::SetPowerAllocationType,
-                                      &NrPhy::GetPowerAllocationType),
-                    MakeEnumChecker ( NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_BW, "UniformPowerAllocBw",
-                                      NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_USED, "UniformPowerAllocUsed"
-                                    ))
-    .AddAttribute ("LBTThresholdForCtrl",
-                   "After a DL/UL transmission, if we have less than this value to send the UL CTRL, we consider the channel as granted",
-                   TimeValue (MicroSeconds (25)),
-                   MakeTimeAccessor (&NrUePhy::m_lbtThresholdForCtrl),
-                   MakeTimeChecker ())
-    .AddAttribute ("TbDecodeLatency",
-                   "Transport block decode latency",
-                   TimeValue (MicroSeconds (100)),
-                   MakeTimeAccessor (&NrPhy::SetTbDecodeLatency,
-                   &NrPhy::GetTbDecodeLatency),
-                   MakeTimeChecker ())
-    .AddAttribute ("EnableUplinkPowerControl",
-                   "If true, Uplink Power Control will be enabled.",
-                    BooleanValue (false),
-                    MakeBooleanAccessor (&NrUePhy::SetEnableUplinkPowerControl),
-                    MakeBooleanChecker ())
-    .AddAttribute ("FixedRankIndicator",
-                   "The rank indicator",
-                   UintegerValue (1),
-                   MakeUintegerAccessor (&NrUePhy::SetFixedRankIndicator,
-                                         &NrUePhy::GetFixedRankIndicator),
-                   MakeUintegerChecker<uint8_t> (1, 2))
-    .AddAttribute ("UseFixedRi",
-                   "If true, UE will use a fixed configured RI value; otherwise,"
-                   "it will use an adaptive RI value based on the SINR of the"
-                   "streams",
-                   BooleanValue (true),
-                   MakeBooleanAccessor (&NrUePhy::UseFixedRankIndicator),
-                   MakeBooleanChecker ())
-    .AddAttribute ("RiSinrThreshold1",
-                   "The SINR threshold 1 in dB. It is used to adaptively choose"
-                   "the rank indicator value when a UE is trying to switch from"
-                   "one stream to two. The UE will report RI = 2 if the average"
-                   "SINR of the measured stream is above this threshold; otherwise,"
-                   "it will report RI = 1. The initial threshold value of 10 dB"
-                   "is selected according to: https://ieeexplore.ieee.org/abstract/document/6364098 Figure 2",
-                   DoubleValue (10.0),
-                   MakeDoubleAccessor (&NrUePhy::SetRiSinrThreshold1,
-                                       &NrUePhy::GetRiSinrThreshold1),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("RiSinrThreshold2",
-                   "The SINR threshold 2 in dB. It is used to adaptively choose"
-                   "the rank indicator value once a UE has already switched to"
-                   "two streams, i.e., it has already received the data on the"
-                   "second stream and has measured its average SINR. The UE will"
-                   "report RI = 2 if the average SINR of both the stream is"
-                   "above this threshold; otherwise, it will report RI = 1."
-                   "The initial threshold value of 10 dB is selected according to: "
-                   "https://ieeexplore.ieee.org/abstract/document/6364098 Figure 2",
-                   DoubleValue (10.0),
-                   MakeDoubleAccessor (&NrUePhy::SetRiSinrThreshold2,
-                                       &NrUePhy::GetRiSinrThreshold2),
-                   MakeDoubleChecker<double> ())
-    .AddTraceSource ("DlDataSinr",
-                     "DL DATA SINR statistics.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_dlDataSinrTrace),
-                     "ns3::NrUePhy::DlDataSinrTracedCallback")
-    .AddTraceSource ("DlCtrlSinr",
-                     "Report the SINR computed for DL CTRL",
-                     MakeTraceSourceAccessor (&NrUePhy::m_dlCtrlSinrTrace),
-                     "ns3::NrUePhy::DlCtrlSinrTracedCallback")
-    .AddAttribute ("NrSpectrumPhyList", "List of all SpectrumPhy instances of this NrUePhy.",
-                    ObjectVectorValue (),
-                    MakeObjectVectorAccessor (&NrUePhy::m_spectrumPhys),
-                    MakeObjectVectorChecker<NrSpectrumPhy> ())
-    .AddTraceSource ("ReportUplinkTbSize",
-                     "Report allocated uplink TB size for trace.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_reportUlTbSize),
-                     "ns3::UlTbSize::TracedCallback")
-    .AddTraceSource ("ReportDownlinkTbSize",
-                     "Report allocated downlink TB size for trace.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_reportDlTbSize),
-                     "ns3::DlTbSize::TracedCallback")
-    .AddTraceSource ("UePhyRxedCtrlMsgsTrace",
-                     "Ue PHY Control Messages Traces.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_phyRxedCtrlMsgsTrace),
-                     "ns3::NrPhyRxTrace::RxedUePhyCtrlMsgsTracedCallback")
-    .AddTraceSource ("UePhyTxedCtrlMsgsTrace",
-                     "Ue PHY Control Messages Traces.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_phyTxedCtrlMsgsTrace),
-                     "ns3::NrPhyRxTrace::TxedUePhyCtrlMsgsTracedCallback")
-    .AddTraceSource ("UePhyRxedDlDciTrace",
-                     "Ue PHY DL DCI Traces.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_phyUeRxedDlDciTrace),
-                     "ns3::NrPhyRxTrace::RxedUePhyDlDciTracedCallback")
-    .AddTraceSource ("UePhyTxedHarqFeedbackTrace",
-                     "Ue PHY DL HARQ Feedback Traces.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_phyUeTxedHarqFeedbackTrace),
-                     "ns3::NrPhyRxTrace::TxedUePhyHarqFeedbackTracedCallback")
-    .AddTraceSource ("ReportPowerSpectralDensity",
-                     "Power Spectral Density data.",
-                     MakeTraceSourceAccessor (&NrUePhy::m_reportPowerSpectralDensity),
-                     "ns3::NrUePhy::PowerSpectralDensityTracedCallback")
+                          .SetParent<NrPhy> ()
+                          .AddConstructor<NrUePhy> ()
+                          .AddAttribute ("TxPower",
+                                         "Transmission power in dBm",
+                                         DoubleValue (2.0),
+                                         MakeDoubleAccessor (&NrUePhy::m_txPower),
+                                         MakeDoubleChecker<double> ())
+                          .AddAttribute ("NoiseFigure",
+                                         "Loss (dB) in the Signal-to-Noise-Ratio due to non-idealities in the receiver."
+                                         " According to Wikipedia (http://en.wikipedia.org/wiki/Noise_figure), this is "
+                                         "\"the difference in decibels (dB) between"
+                                         " the noise output of the actual receiver to the noise output of an "
+                                         " ideal receiver with the same overall gain and bandwidth when the receivers "
+                                         " are connected to sources at the standard noise temperature T0.\" "
+                                         "In this model, we consider T0 = 290K.",
+                                         DoubleValue (5.0), // nr code from NYU and UniPd assumed in the code the value of 5dB, thats why we configure the default value to that
+                                         MakeDoubleAccessor (&NrPhy::SetNoiseFigure,
+                                                             &NrPhy::GetNoiseFigure),
+                                         MakeDoubleChecker<double> ())
+                          .AddAttribute ("PowerAllocationType",
+                                         "Defines the type of the power allocation. Currently are supported "
+                                         "two types: \"UniformPowerAllocBw\", which is a uniform power allocation over all "
+                                         "bandwidth (over all RBs), and \"UniformPowerAllocBw\", which is a uniform "
+                                         "power allocation over used (active) RBs. By default is set a uniform power "
+                                         "allocation over used RBs .",
+                                         EnumValue (NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_USED),
+                                         MakeEnumAccessor (&NrPhy::SetPowerAllocationType,
+                                                           &NrPhy::GetPowerAllocationType),
+                                         MakeEnumChecker ( NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_BW, "UniformPowerAllocBw",
+                                                          NrSpectrumValueHelper::UNIFORM_POWER_ALLOCATION_USED, "UniformPowerAllocUsed"
+                                                          ))
+                          .AddAttribute ("LBTThresholdForCtrl",
+                                         "After a DL/UL transmission, if we have less than this value to send the UL CTRL, we consider the channel as granted",
+                                         TimeValue (MicroSeconds (25)),
+                                         MakeTimeAccessor (&NrUePhy::m_lbtThresholdForCtrl),
+                                         MakeTimeChecker ())
+                          .AddAttribute ("TbDecodeLatency",
+                                         "Transport block decode latency",
+                                         TimeValue (MicroSeconds (100)),
+                                         MakeTimeAccessor (&NrPhy::SetTbDecodeLatency,
+                                                           &NrPhy::GetTbDecodeLatency),
+                                         MakeTimeChecker ())
+                          .AddAttribute ("EnableUplinkPowerControl",
+                                         "If true, Uplink Power Control will be enabled.",
+                                         BooleanValue (false),
+                                         MakeBooleanAccessor (&NrUePhy::SetEnableUplinkPowerControl),
+                                         MakeBooleanChecker ())
+                          .AddAttribute ("FixedRankIndicator",
+                                         "The rank indicator",
+                                         UintegerValue (1),
+                                         MakeUintegerAccessor (&NrUePhy::SetFixedRankIndicator,
+                                                               &NrUePhy::GetFixedRankIndicator),
+                                         MakeUintegerChecker<uint8_t> (1, 2))
+                          .AddAttribute ("UseFixedRi",
+                                         "If true, UE will use a fixed configured RI value; otherwise,"
+                                         "it will use an adaptive RI value based on the SINR of the"
+                                         "streams",
+                                         BooleanValue (true),
+                                         MakeBooleanAccessor (&NrUePhy::UseFixedRankIndicator),
+                                         MakeBooleanChecker ())
+                          .AddAttribute ("RiSinrThreshold1",
+                                         "The SINR threshold 1 in dB. It is used to adaptively choose"
+                                         "the rank indicator value when a UE is trying to switch from"
+                                         "one stream to two. The UE will report RI = 2 if the average"
+                                         "SINR of the measured stream is above this threshold; otherwise,"
+                                         "it will report RI = 1. The initial threshold value of 10 dB"
+                                         "is selected according to: https://ieeexplore.ieee.org/abstract/document/6364098 Figure 2",
+                                         DoubleValue (10.0),
+                                         MakeDoubleAccessor (&NrUePhy::SetRiSinrThreshold1,
+                                                             &NrUePhy::GetRiSinrThreshold1),
+                                         MakeDoubleChecker<double> ())
+                          .AddAttribute ("RiSinrThreshold2",
+                                         "The SINR threshold 2 in dB. It is used to adaptively choose"
+                                         "the rank indicator value once a UE has already switched to"
+                                         "two streams, i.e., it has already received the data on the"
+                                         "second stream and has measured its average SINR. The UE will"
+                                         "report RI = 2 if the average SINR of both the stream is"
+                                         "above this threshold; otherwise, it will report RI = 1."
+                                         "The initial threshold value of 10 dB is selected according to: "
+                                         "https://ieeexplore.ieee.org/abstract/document/6364098 Figure 2",
+                                         DoubleValue (10.0),
+                                         MakeDoubleAccessor (&NrUePhy::SetRiSinrThreshold2,
+                                                             &NrUePhy::GetRiSinrThreshold2),
+                                         MakeDoubleChecker<double> ())
+                          .AddTraceSource ("DlDataSinr",
+                                           "DL DATA SINR statistics.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_dlDataSinrTrace),
+                                           "ns3::NrUePhy::DlDataSinrTracedCallback")
+                          .AddTraceSource ("DlCtrlSinr",
+                                           "Report the SINR computed for DL CTRL",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_dlCtrlSinrTrace),
+                                           "ns3::NrUePhy::DlCtrlSinrTracedCallback")
+                          .AddAttribute ("NrSpectrumPhyList", "List of all SpectrumPhy instances of this NrUePhy.",
+                                         ObjectVectorValue (),
+                                         MakeObjectVectorAccessor (&NrUePhy::m_spectrumPhys),
+                                         MakeObjectVectorChecker<NrSpectrumPhy> ())
+                          .AddTraceSource ("ReportUplinkTbSize",
+                                           "Report allocated uplink TB size for trace.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_reportUlTbSize),
+                                           "ns3::UlTbSize::TracedCallback")
+                          .AddTraceSource ("ReportDownlinkTbSize",
+                                           "Report allocated downlink TB size for trace.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_reportDlTbSize),
+                                           "ns3::DlTbSize::TracedCallback")
+                          .AddTraceSource ("UePhyRxedCtrlMsgsTrace",
+                                           "Ue PHY Control Messages Traces.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_phyRxedCtrlMsgsTrace),
+                                           "ns3::NrPhyRxTrace::RxedUePhyCtrlMsgsTracedCallback")
+                          .AddTraceSource ("UePhyTxedCtrlMsgsTrace",
+                                           "Ue PHY Control Messages Traces.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_phyTxedCtrlMsgsTrace),
+                                           "ns3::NrPhyRxTrace::TxedUePhyCtrlMsgsTracedCallback")
+                          .AddTraceSource ("UePhyRxedDlDciTrace",
+                                           "Ue PHY DL DCI Traces.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_phyUeRxedDlDciTrace),
+                                           "ns3::NrPhyRxTrace::RxedUePhyDlDciTracedCallback")
+                          .AddTraceSource ("UePhyTxedHarqFeedbackTrace",
+                                           "Ue PHY DL HARQ Feedback Traces.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_phyUeTxedHarqFeedbackTrace),
+                                           "ns3::NrPhyRxTrace::TxedUePhyHarqFeedbackTracedCallback")
+                          .AddTraceSource ("ReportPowerSpectralDensity",
+                                           "Power Spectral Density data.",
+                                           MakeTraceSourceAccessor (&NrUePhy::m_reportPowerSpectralDensity),
+                                           "ns3::NrUePhy::PowerSpectralDensityTracedCallback")
       ;
   return tid;
 }
@@ -379,29 +380,29 @@ NrUePhy::SetPattern (const std::string &pattern)
   NS_LOG_FUNCTION (this);
 
   static std::unordered_map<std::string, LteNrTddSlotType> lookupTable =
-  {
-    { "DL", LteNrTddSlotType::DL },
-    { "UL", LteNrTddSlotType::UL },
-    { "S",  LteNrTddSlotType::S },
-    { "F",  LteNrTddSlotType::F },
-  };
+      {
+          { "DL", LteNrTddSlotType::DL },
+          { "UL", LteNrTddSlotType::UL },
+          { "S",  LteNrTddSlotType::S },
+          { "F",  LteNrTddSlotType::F },
+      };
 
   std::vector<LteNrTddSlotType> vector;
   std::stringstream ss (pattern);
   std::string token;
   std::vector<std::string> extracted;
 
-   while (std::getline(ss, token, '|'))
-     {
-       extracted.push_back(token);
-     }
+  while (std::getline(ss, token, '|'))
+    {
+      extracted.push_back(token);
+    }
 
-   for (const auto & v : extracted)
-     {
-       vector.push_back (lookupTable[v]);
-     }
+  for (const auto & v : extracted)
+    {
+      vector.push_back (lookupTable[v]);
+    }
 
-   m_tddPattern = vector;
+  m_tddPattern = vector;
 }
 
 uint32_t
@@ -442,7 +443,7 @@ NrUePhy::InsertAllocation (const std::shared_ptr<DciInfoElementTdma> &dci)
 
 void
 NrUePhy::InsertFutureAllocation (const SfnSf &sfnSf,
-                                     const std::shared_ptr<DciInfoElementTdma> &dci)
+                                 const std::shared_ptr<DciInfoElementTdma> &dci)
 {
   NS_LOG_FUNCTION (this);
 
@@ -592,14 +593,14 @@ NrUePhy::TryToPerformLbt ()
       // or we have to schedule an LBT event.
 
       Time limit = m_lastSlotStart + GetSlotPeriod () -
-          ((GetSymbolsPerSlot () - ulCtrlSymStart) * GetSymbolPeriod ()) -
-          m_lbtThresholdForCtrl;
+                   ((GetSymbolsPerSlot () - ulCtrlSymStart) * GetSymbolPeriod ()) -
+                   m_lbtThresholdForCtrl;
 
       for (const auto & alloc : m_currSlotAllocInfo.m_varTtiAllocInfo)
         {
           int64_t symbolPeriod = GetSymbolPeriod ().GetMicroSeconds ();
           int64_t dciEndsAt = m_lastSlotStart.GetMicroSeconds () +
-              ((alloc.m_dci->m_numSym + alloc.m_dci->m_symStart) * symbolPeriod);
+                              ((alloc.m_dci->m_numSym + alloc.m_dci->m_symStart) * symbolPeriod);
 
           if (alloc.m_dci->m_type != DciInfoElementTdma::DATA)
             {
@@ -612,7 +613,7 @@ NrUePhy::TryToPerformLbt ()
                            " which is inside the LBT shared COT (the limit is " <<
                            limit << "). No need for LBT");
               m_lbtEvent.Cancel (); // Forget any LBT we previously set, because of the new
-                                    // DCI information
+                  // DCI information
               m_channelStatus = GRANTED;
             }
           else
@@ -626,7 +627,7 @@ NrUePhy::TryToPerformLbt ()
       if (m_channelStatus != GRANTED)
         {
           Time sched = m_lastSlotStart - Simulator::Now () +
-              (GetSymbolPeriod () * ulCtrlSymStart) - MicroSeconds (25);
+                       (GetSymbolPeriod () * ulCtrlSymStart) - MicroSeconds (25);
           NS_LOG_INFO ("Scheduling an LBT for sending the UL CTRL at " <<
                        Simulator::Now () + sched);
           m_lbtEvent.Cancel ();
@@ -649,7 +650,7 @@ NrUePhy::RequestAccess ()
   NS_LOG_FUNCTION (this);
   NS_LOG_INFO ("Request access at " << Simulator::Now () << " because we have to transmit UL CTRL");
   m_cam->RequestAccess (); // This will put the m_channelStatus to granted when
-                           // the channel will be granted.
+      // the channel will be granted.
 }
 
 void
@@ -874,10 +875,10 @@ NrUePhy::UlSrs (const std::shared_ptr<DciInfoElementTdma> &dci)
     }
 
   NS_LOG_DEBUG ("UE" << m_rnti << " TXing UL SRS frame for symbols " <<
-                  +dci->m_symStart << "-" <<
-                  +(dci->m_symStart + dci->m_numSym - 1) <<
-                  "\t start " << Simulator::Now () << " end " <<
-                  (Simulator::Now () + varTtiPeriod - NanoSeconds (1.0)));
+                +dci->m_symStart << "-" <<
+                +(dci->m_symStart + dci->m_numSym - 1) <<
+                "\t start " << Simulator::Now () << " end " <<
+                (Simulator::Now () + varTtiPeriod - NanoSeconds (1.0)));
 
   ChannelAccessDenied (); // Reset the channel status
   return varTtiPeriod;
@@ -893,11 +894,11 @@ NrUePhy::UlCtrl (const std::shared_ptr<DciInfoElementTdma> &dci)
   if (m_ctrlMsgs.size () == 0)
     {
       NS_LOG_INFO   ("UE" << m_rnti << " reserved space for UL CTRL frame for symbols " <<
-                    +dci->m_symStart << "-" <<
-                    +(dci->m_symStart + dci->m_numSym - 1) <<
-                    "\t start " << Simulator::Now () << " end " <<
-                    (Simulator::Now () + varTtiPeriod - NanoSeconds (1.0)) <<
-                    " but no data to transmit");
+                   +dci->m_symStart << "-" <<
+                   +(dci->m_symStart + dci->m_numSym - 1) <<
+                   "\t start " << Simulator::Now () << " end " <<
+                   (Simulator::Now () + varTtiPeriod - NanoSeconds (1.0)) <<
+                   " but no data to transmit");
       m_cam->Cancel ();
       return varTtiPeriod;
     }
@@ -970,11 +971,11 @@ NrUePhy::DlData (const std::shared_ptr<DciInfoElementTdma> &dci)
           //responsible to receive the expected TB of the stream we
           //are iterating over
           m_spectrumPhys.at (streamIndex)->AddExpectedTb (dci->m_rnti, dci->m_ndi.at (streamIndex),
-                                                         dci->m_tbSize.at (streamIndex),
-                                                         dci->m_mcs.at (streamIndex),
-                                                         FromRBGBitmaskToRBAssignment (dci->m_rbgBitmask),
-                                                         dci->m_harqProcess, dci->m_rv.at (streamIndex), true,
-                                                         dci->m_symStart, dci->m_numSym, m_currentSlot);
+                                                          dci->m_tbSize.at (streamIndex),
+                                                          dci->m_mcs.at (streamIndex),
+                                                          FromRBGBitmaskToRBAssignment (dci->m_rbgBitmask),
+                                                          dci->m_harqProcess, dci->m_rv.at (streamIndex), true,
+                                                          dci->m_symStart, dci->m_numSym, m_currentSlot);
                                                          
           m_reportDlTbSize (m_netDevice->GetObject <NrUeNetDevice> ()->GetImsi (), dci->m_tbSize.at (streamIndex));
           NS_LOG_DEBUG ("UE" << m_rnti << " stream " << +streamIndex <<
@@ -1479,10 +1480,10 @@ NrUePhy::DoSetInitialBandwidth ()
   uint16_t initialBandwidthWithOverhead = initialBandwidthIn100KHz / (1 - GetRbOverhead ());
 
   NS_ABORT_MSG_IF (initialBandwidthWithOverhead == 0, " Initial bandwidth could not be set. Parameters provided are: "
-                   "\n dlBandwidthInRBNum = " << 6 <<
-                   "\n m_subcarrierSpacing = " << GetSubcarrierSpacing() <<
-                   "\n NrSpectrumValueHelper::SUBCARRIERS_PER_RB  = " << (unsigned) NrSpectrumValueHelper::SUBCARRIERS_PER_RB <<
-                   "\n m_rbOh = " << GetRbOverhead() );
+                                                      "\n dlBandwidthInRBNum = " << 6 <<
+                                                          "\n m_subcarrierSpacing = " << GetSubcarrierSpacing() <<
+                                                          "\n NrSpectrumValueHelper::SUBCARRIERS_PER_RB  = " << (unsigned) NrSpectrumValueHelper::SUBCARRIERS_PER_RB <<
+                                                          "\n m_rbOh = " << GetRbOverhead() );
 
   DoSetDlBandwidth (initialBandwidthWithOverhead);
 }
@@ -1603,7 +1604,7 @@ NrUePhy::SetFixedRankIndicator (uint8_t ri)
 uint8_t
 NrUePhy::GetFixedRankIndicator () const
 {
- return m_fixedRi;
+  return m_fixedRi;
 }
 
 void
@@ -1822,23 +1823,23 @@ NrUePhy::EndNrSlVarTti (const NrSlVarTtiAllocInfo &varTtiInfo)
                " which lasted for " << varTtiInfo.symLength << " symbols");
 
   if (m_nrSlCurrentAlloc.slvarTtiInfoList.size () == 0)
-      {
-        // end of slot
-        m_currentSlot.Add (1);
-        //we need trigger the NR Slot start
-        Simulator::Schedule (m_lastSlotStart + GetSlotPeriod () - Simulator::Now (),
-                             &NrUePhy::StartSlot, this, m_currentSlot);
-      }
-    else
-      {
-        NrSlVarTtiAllocInfo nextVarTtiInfo = *(m_nrSlCurrentAlloc.slvarTtiInfoList.begin());
-        //erase the retrieved var TTI info
-        m_nrSlCurrentAlloc.slvarTtiInfoList.erase (m_nrSlCurrentAlloc.slvarTtiInfoList.begin());
-        auto nextVarTtiStart = GetSymbolPeriod () * nextVarTtiInfo.symStart;
+    {
+      // end of slot
+      m_currentSlot.Add (1);
+      //we need trigger the NR Slot start
+      Simulator::Schedule (m_lastSlotStart + GetSlotPeriod () - Simulator::Now (),
+                           &NrUePhy::StartSlot, this, m_currentSlot);
+    }
+  else
+    {
+      NrSlVarTtiAllocInfo nextVarTtiInfo = *(m_nrSlCurrentAlloc.slvarTtiInfoList.begin());
+      //erase the retrieved var TTI info
+      m_nrSlCurrentAlloc.slvarTtiInfoList.erase (m_nrSlCurrentAlloc.slvarTtiInfoList.begin());
+      auto nextVarTtiStart = GetSymbolPeriod () * nextVarTtiInfo.symStart;
 
-        Simulator::Schedule (nextVarTtiStart + m_lastSlotStart - Simulator::Now (),
-                             &NrUePhy::StartNrSlVarTti, this, nextVarTtiInfo);
-      }
+      Simulator::Schedule (nextVarTtiStart + m_lastSlotStart - Simulator::Now (),
+                           &NrUePhy::StartNrSlVarTti, this, nextVarTtiInfo);
+    }
 }
 
 Time
@@ -1855,7 +1856,7 @@ NrUePhy::SlCtrl (const NrSlVarTtiAllocInfo &varTtiInfo)
   // -1 ns ensures control ends before data period
   SendNrSlCtrlChannels (pktBurst, varTtiPeriod - NanoSeconds (1.0), varTtiInfo);
 
- return varTtiPeriod;
+  return varTtiPeriod;
 }
 
 void
@@ -1954,17 +1955,21 @@ NrUePhy::PhyPscchPduReceived (const Ptr<Packet> &p, const SpectrumValue &psd)
 
   double rsrpDbm = GetSidelinkRsrp (psd);
 
-  NS_LOG_DEBUG ("Sending sensing data to UE MAC. RSRP " << rsrpDbm << " dBm "
-                << " Frame " << m_currentSlot.GetFrame ()
-                << " SubFrame " << +m_currentSlot.GetSubframe ()
-                << " Slot " << m_currentSlot.GetSlot ());
+  RsrpTag rsrp;
+  rsrp.Set (rsrpDbm);
+  p->AddPacketTag (rsrp);
 
- SensingData sensingData (m_currentSlot, sciF1a.GetSlResourceReservePeriod (),
-                          sciF1a.GetLengthSubChannel (),
-                          sciF1a.GetIndexStartSubChannel (),
-                          sciF1a.GetPriority (), rsrpDbm,
-                          sciF1a.GetGapReTx1 (), sciF1a.GetIndexStartSbChReTx1(),
-                          sciF1a.GetGapReTx2 (), sciF1a.GetIndexStartSbChReTx2());
+  NS_LOG_DEBUG ("Sending sensing data to UE MAC. RSRP " << rsrpDbm << " dBm "
+                                                        << " Frame " << m_currentSlot.GetFrame ()
+                                                        << " SubFrame " << +m_currentSlot.GetSubframe ()
+                                                        << " Slot " << m_currentSlot.GetSlot ());
+
+  SensingData sensingData (m_currentSlot, sciF1a.GetSlResourceReservePeriod (),
+                           sciF1a.GetLengthSubChannel (),
+                           sciF1a.GetIndexStartSubChannel (),
+                           sciF1a.GetPriority (), rsrpDbm,
+                           sciF1a.GetGapReTx1 (), sciF1a.GetIndexStartSbChReTx1(),
+                           sciF1a.GetGapReTx2 (), sciF1a.GetIndexStartSbChReTx2());
 
   m_nrSlUePhySapUser->ReceiveSensingData (sensingData);
 
@@ -1974,9 +1979,9 @@ NrUePhy::PhyPscchPduReceived (const Ptr<Packet> &p, const SpectrumValue &psd)
       NS_LOG_INFO ("Received first stage SCI for destination " << *it << " from RNTI " << tag.GetRnti ());
       // Assume first stream
       m_spectrumPhys.at (0)->AddSlExpectedTb (tag.GetRnti (), tag.GetDstL2Id (),
-                                      tag.GetTbSize (), sciF1a.GetMcs (),
-                                      rbBitMap, tag.GetSymStart (),
-                                      tag.GetNumSym (), tag.GetSfn ());
+                                              tag.GetTbSize (), sciF1a.GetMcs (),
+                                              rbBitMap, tag.GetSymStart (),
+                                              tag.GetNumSym (), tag.GetSfn ());
       SaveFutureSlRxGrants (sciF1a, tag, sbChSize);
     }
   else
@@ -2043,13 +2048,13 @@ NrUePhy::SendSlExpectedTbInfo (const SfnSf &s)
         {
           m_slRxGrants.pop_front ();
           m_spectrumPhys.at (0)->AddSlExpectedTb (expectedTbInfo.rnti,
-                                          expectedTbInfo.dstId,
-                                          expectedTbInfo.tbSize,
-                                          expectedTbInfo.mcs,
-                                          expectedTbInfo.rbBitmap,
-                                          expectedTbInfo.symStart,
-                                          expectedTbInfo.numSym,
-                                          expectedTbInfo.sfn);
+                                                  expectedTbInfo.dstId,
+                                                  expectedTbInfo.tbSize,
+                                                  expectedTbInfo.mcs,
+                                                  expectedTbInfo.rbBitmap,
+                                                  expectedTbInfo.symStart,
+                                                  expectedTbInfo.numSym,
+                                                  expectedTbInfo.sfn);
         }
     }
 }
@@ -2071,19 +2076,19 @@ NrUePhy::GetSidelinkRsrp (SpectrumValue psd)
   double sum = 0.0;
   uint16_t numRB = 0;
 
-      for (Values::const_iterator itPi = psd.ConstValuesBegin(); itPi != psd.ConstValuesEnd(); itPi++)
+  for (Values::const_iterator itPi = psd.ConstValuesBegin(); itPi != psd.ConstValuesEnd(); itPi++)
+    {
+      if((*itPi))
         {
-          if((*itPi))
-            {
-              uint32_t scSpacing = 15000 * static_cast<uint32_t> (std::pow (2, GetNumerology ()));
-              uint32_t RbWidthInHz = static_cast<uint32_t> (scSpacing * NrSpectrumValueHelper::SUBCARRIERS_PER_RB);
-              double powerTxWattPerRb = ((*itPi) * RbWidthInHz); //convert PSD [W/Hz] to linear power [W]
-              double powerTxWattPerRe = (powerTxWattPerRb / NrSpectrumValueHelper::SUBCARRIERS_PER_RB); // power of one RE per RB
-              double PowerTxWattDmrsPerRb = powerTxWattPerRe * 3.0; // TS 38.211 sec 8.4.1.3, 3 RE per RB carries PSCCH DMRS, i.e. Comb 4
-              sum += PowerTxWattDmrsPerRb;
-              numRB++;
-            }
+          uint32_t scSpacing = 15000 * static_cast<uint32_t> (std::pow (2, GetNumerology ()));
+          uint32_t RbWidthInHz = static_cast<uint32_t> (scSpacing * NrSpectrumValueHelper::SUBCARRIERS_PER_RB);
+          double powerTxWattPerRb = ((*itPi) * RbWidthInHz); //convert PSD [W/Hz] to linear power [W]
+          double powerTxWattPerRe = (powerTxWattPerRb / NrSpectrumValueHelper::SUBCARRIERS_PER_RB); // power of one RE per RB
+          double PowerTxWattDmrsPerRb = powerTxWattPerRe * 3.0; // TS 38.211 sec 8.4.1.3, 3 RE per RB carries PSCCH DMRS, i.e. Comb 4
+          sum += PowerTxWattDmrsPerRb;
+          numRB++;
         }
+    }
 
   double avrgRsrpWatt = (sum / ((double) numRB * 3.0));
   double rsrpDbm = 10 * log10 (1000 * (avrgRsrpWatt));

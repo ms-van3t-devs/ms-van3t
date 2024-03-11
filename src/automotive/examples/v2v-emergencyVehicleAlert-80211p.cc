@@ -63,7 +63,7 @@ main (int argc, char *argv[])
   std::string csv_name_cumulative;
   std::string sumo_netstate_file_name;
   int txPower=23;
-  double penetrationRate = 1.0;
+  double penetrationRate = 0.7;
 
   float datarate=12;  
   bool vehicle_vis = false;

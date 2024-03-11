@@ -276,10 +276,10 @@ namespace ns3
     if (!m_csv_name.empty ())
     {
       // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
-      m_csv_ofstream_cam << asn1cpp::getField(cam->header.messageID,long) << "," << asn1cpp::getField(cam->header.stationID,long) << ",";
+      m_csv_ofstream_cam << asn1cpp::getField(cam->header.messageId,long) << "," << asn1cpp::getField(cam->header.stationId,long) << ",";
       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.generationDeltaTime,long) << "," << lat << "," << lon << ",";
       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
-      m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue,double)/DECI << std::endl;
+      m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value,double)/DECI << std::endl;
     }
 
     /* If is the first time the this veh sends a CAM, just check if it is inside or outside, then return */

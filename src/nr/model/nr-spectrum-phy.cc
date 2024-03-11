@@ -26,7 +26,7 @@
 #include "nr-gnb-phy.h"
 #include "nr-ue-phy.h"
 #include "nr-ue-net-device.h"
-#include "nr-ue-phy.h"
+#include "ns3/nr-ue-phy.h"
 #include "nr-lte-mi-error-model.h"
 #include "ns3/uniform-planar-array.h"
 #include <ns3/node.h>
@@ -34,6 +34,10 @@
 #include <unordered_set>
 #include "nr-sl-sci-f1a-header.h"
 #include "nr-sl-sci-f2a-header.h"
+#include "ns3/sinr-tag.h"
+#include "ns3/timestamp-tag.h"
+#include "ns3/rsrp-tag.h"
+#include "ns3/size-tag.h"
 
 
 namespace ns3 {
@@ -45,7 +49,7 @@ std::ostream&
 operator<<(std::ostream &os, const enum NrSpectrumPhy::State state)
 {
   switch (state)
-  {
+    {
     case NrSpectrumPhy::TX:
       os << "TX";
       break;
@@ -69,12 +73,12 @@ operator<<(std::ostream &os, const enum NrSpectrumPhy::State state)
       break;
     default:
       NS_ABORT_MSG ("Unknown state.");
-  }
+    }
   return os;
 }
 
 NrSpectrumPhy::NrSpectrumPhy ()
-  : SpectrumPhy ()
+    : SpectrumPhy ()
 {
   m_interferenceData = CreateObject<NrInterference> ();
   m_interferenceCtrl = CreateObject<NrInterference> ();
@@ -138,98 +142,98 @@ TypeId
 NrSpectrumPhy::GetTypeId (void)
 {
   static TypeId
-    tid =
-    TypeId ("ns3::NrSpectrumPhy")
-    .SetParent<SpectrumPhy> ()
-    .AddConstructor<NrSpectrumPhy> ()
-    .AddAttribute ("DataErrorModelEnabled",
-                   "Activate/Deactivate the error model of data (TBs of PDSCH and PUSCH) [by default is active].",
-                    BooleanValue (true),
-                    MakeBooleanAccessor (&NrSpectrumPhy::SetDataErrorModelEnabled),
-                    MakeBooleanChecker ())
-    .AddAttribute ("ErrorModelType",
-                   "Type of the Error Model to apply to TBs of PDSCH and PUSCH",
-                    TypeIdValue (NrLteMiErrorModel::GetTypeId ()),
-                    MakeTypeIdAccessor (&NrSpectrumPhy::SetErrorModelType),
-                    MakeTypeIdChecker ())
-    .AddAttribute ("UnlicensedMode",
-                   "Activate/Deactivate unlicensed mode in which energy detection is performed" 
-                   " and PHY state machine has an additional state CCA_BUSY.",
-                    BooleanValue (false),
-                    MakeBooleanAccessor (&NrSpectrumPhy::SetUnlicensedMode),
-                    MakeBooleanChecker ())
-    .AddAttribute ("CcaMode1Threshold",
-                   "The energy of a received signal should be higher than "
-                   "this threshold (dbm) to allow the PHY layer to declare CCA BUSY state.",
-                    DoubleValue (-62.0),
-                    MakeDoubleAccessor (&NrSpectrumPhy::SetCcaMode1Threshold,
-                                       &NrSpectrumPhy::GetCcaMode1Threshold),
-                    MakeDoubleChecker<double> ())
-    .AddAttribute ("InterStreamInterferenceRatio",
-                   "Inter-stream interference ratio in the range of 0 to 1, e.g.,"
-                   "0 means no interference and 1 means full interference",
-                   DoubleValue (0.0),
-                   MakeDoubleAccessor (&NrSpectrumPhy::SetInterStreamInterferenceRatio),
-                   MakeDoubleChecker <double> (0.0, 1.0))
-    .AddAttribute ("SlErrorModelType",
-                   "Type of the Error Model to be used for NR sidelink",
-                   TypeIdValue (NrLteMiErrorModel::GetTypeId ()),
-                   MakeTypeIdAccessor (&NrSpectrumPhy::SetSlErrorModelType),
-                   MakeTypeIdChecker ())
-    .AddAttribute ("SlDataErrorModelEnabled",
-                   "Activate/Deactivate the error model for the Sidelink PSSCH decodification [by default is active].",
-                   BooleanValue (true),
-                   MakeBooleanAccessor (&NrSpectrumPhy::SetSlDataErrorModelEnabled),
-                   MakeBooleanChecker ())
-    .AddAttribute ("SlCtrlErrorModelEnabled",
-                   "Activate/Deactivate the error model for the Sidelink PSCCH decodification [by default is active].",
-                   BooleanValue (true),
-                   MakeBooleanAccessor (&NrSpectrumPhy::SetSlCtrlErrorModelEnabled),
-                   MakeBooleanChecker ())
-     .AddAttribute ("DropTbOnRbOnCollision",
-                    "Activate/Deactivate the dropping colliding RBs regardless of SINR value.",
-                    BooleanValue (false),
-                    MakeBooleanAccessor (&NrSpectrumPhy::DropTbOnRbOnCollision),
-                    MakeBooleanChecker ())
+      tid =
+          TypeId ("ns3::NrSpectrumPhy")
+              .SetParent<SpectrumPhy> ()
+              .AddConstructor<NrSpectrumPhy> ()
+              .AddAttribute ("DataErrorModelEnabled",
+                             "Activate/Deactivate the error model of data (TBs of PDSCH and PUSCH) [by default is active].",
+                             BooleanValue (true),
+                             MakeBooleanAccessor (&NrSpectrumPhy::SetDataErrorModelEnabled),
+                             MakeBooleanChecker ())
+              .AddAttribute ("ErrorModelType",
+                             "Type of the Error Model to apply to TBs of PDSCH and PUSCH",
+                             TypeIdValue (NrLteMiErrorModel::GetTypeId ()),
+                             MakeTypeIdAccessor (&NrSpectrumPhy::SetErrorModelType),
+                             MakeTypeIdChecker ())
+              .AddAttribute ("UnlicensedMode",
+                             "Activate/Deactivate unlicensed mode in which energy detection is performed"
+                             " and PHY state machine has an additional state CCA_BUSY.",
+                             BooleanValue (false),
+                             MakeBooleanAccessor (&NrSpectrumPhy::SetUnlicensedMode),
+                             MakeBooleanChecker ())
+              .AddAttribute ("CcaMode1Threshold",
+                             "The energy of a received signal should be higher than "
+                             "this threshold (dbm) to allow the PHY layer to declare CCA BUSY state.",
+                             DoubleValue (-62.0),
+                             MakeDoubleAccessor (&NrSpectrumPhy::SetCcaMode1Threshold,
+                                                 &NrSpectrumPhy::GetCcaMode1Threshold),
+                             MakeDoubleChecker<double> ())
+              .AddAttribute ("InterStreamInterferenceRatio",
+                             "Inter-stream interference ratio in the range of 0 to 1, e.g.,"
+                             "0 means no interference and 1 means full interference",
+                             DoubleValue (0.0),
+                             MakeDoubleAccessor (&NrSpectrumPhy::SetInterStreamInterferenceRatio),
+                             MakeDoubleChecker <double> (0.0, 1.0))
+              .AddAttribute ("SlErrorModelType",
+                             "Type of the Error Model to be used for NR sidelink",
+                             TypeIdValue (NrLteMiErrorModel::GetTypeId ()),
+                             MakeTypeIdAccessor (&NrSpectrumPhy::SetSlErrorModelType),
+                             MakeTypeIdChecker ())
+              .AddAttribute ("SlDataErrorModelEnabled",
+                             "Activate/Deactivate the error model for the Sidelink PSSCH decodification [by default is active].",
+                             BooleanValue (true),
+                             MakeBooleanAccessor (&NrSpectrumPhy::SetSlDataErrorModelEnabled),
+                             MakeBooleanChecker ())
+              .AddAttribute ("SlCtrlErrorModelEnabled",
+                             "Activate/Deactivate the error model for the Sidelink PSCCH decodification [by default is active].",
+                             BooleanValue (true),
+                             MakeBooleanAccessor (&NrSpectrumPhy::SetSlCtrlErrorModelEnabled),
+                             MakeBooleanChecker ())
+              .AddAttribute ("DropTbOnRbOnCollision",
+                             "Activate/Deactivate the dropping colliding RBs regardless of SINR value.",
+                             BooleanValue (false),
+                             MakeBooleanAccessor (&NrSpectrumPhy::DropTbOnRbOnCollision),
+                             MakeBooleanChecker ())
 
-    .AddTraceSource ("RxPacketTraceEnb",
-                     "The no. of packets received and transmitted by the Base Station",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPacketTraceEnb),
-                     "ns3::RxPacketTraceParams::TracedCallback")
-    .AddTraceSource ("TxPacketTraceEnb",
-                     "Traces when the packet is being transmitted by the Base Station",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_txPacketTraceEnb),
-                     "ns3::GnbPhyPacketCountParameter::TracedCallback")
-    .AddTraceSource ("RxPacketTraceUe",
-                     "The no. of packets received and transmitted by the User Device",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPacketTraceUe),
-                     "ns3::RxPacketTraceParams::TracedCallback")
-    .AddTraceSource ("ChannelOccupied",
-                     "This traced callback is triggered every time that the channel is occupied",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_channelOccupied),
-                     "ns3::Time::TracedCallback")
-    .AddTraceSource ("TxDataTrace",
-                     "Indicates when the channel is being occupied by a data transmission",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_txDataTrace),
-                     "ns3::Time::TracedCallback")
-    .AddTraceSource ("TxCtrlTrace",
-                     "Indicates when the channel is being occupied by a ctrl transmission",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_txCtrlTrace),
-                     "ns3::Time::TracedCallback")
-    .AddTraceSource ("RxDataTrace",
-                     "Indicates the reception of data from this cell (reporting the rxPsd without interferences)",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxDataTrace),
-                     "ns3::RxDataTracedCallback::TracedCallback")
-    .AddTraceSource ("RxPscchTraceUe",
-                     "The PSCCH transmission received by the User Device",
-                     MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPscchTraceUe),
-                     "ns3::SlRxCtrlPacketTraceParams::TracedCallback")
-   .AddTraceSource ("RxPsschTraceUe",
-                    "The PSSCH transmission received by the User Device",
-                    MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPsschTraceUe),
-                    "ns3::SlRxDataPacketTraceParams::TracedCallback")
+              .AddTraceSource ("RxPacketTraceEnb",
+                               "The no. of packets received and transmitted by the Base Station",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPacketTraceEnb),
+                               "ns3::RxPacketTraceParams::TracedCallback")
+              .AddTraceSource ("TxPacketTraceEnb",
+                               "Traces when the packet is being transmitted by the Base Station",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_txPacketTraceEnb),
+                               "ns3::GnbPhyPacketCountParameter::TracedCallback")
+              .AddTraceSource ("RxPacketTraceUe",
+                               "The no. of packets received and transmitted by the User Device",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPacketTraceUe),
+                               "ns3::RxPacketTraceParams::TracedCallback")
+              .AddTraceSource ("ChannelOccupied",
+                               "This traced callback is triggered every time that the channel is occupied",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_channelOccupied),
+                               "ns3::Time::TracedCallback")
+              .AddTraceSource ("TxDataTrace",
+                               "Indicates when the channel is being occupied by a data transmission",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_txDataTrace),
+                               "ns3::Time::TracedCallback")
+              .AddTraceSource ("TxCtrlTrace",
+                               "Indicates when the channel is being occupied by a ctrl transmission",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_txCtrlTrace),
+                               "ns3::Time::TracedCallback")
+              .AddTraceSource ("RxDataTrace",
+                               "Indicates the reception of data from this cell (reporting the rxPsd without interferences)",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxDataTrace),
+                               "ns3::RxDataTracedCallback::TracedCallback")
+              .AddTraceSource ("RxPscchTraceUe",
+                               "The PSCCH transmission received by the User Device",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPscchTraceUe),
+                               "ns3::SlRxCtrlPacketTraceParams::TracedCallback")
+              .AddTraceSource ("RxPsschTraceUe",
+                               "The PSSCH transmission received by the User Device",
+                               MakeTraceSourceAccessor (&NrSpectrumPhy::m_rxPsschTraceUe),
+                               "ns3::SlRxDataPacketTraceParams::TracedCallback")
 
-  ;
+      ;
 
   return tid;
 }
@@ -376,9 +380,9 @@ NrSpectrumPhy::SetNoisePowerSpectralDensity (const Ptr<const SpectrumValue>& noi
     {
       m_interferenceSrs->SetNoisePowerSpectralDensity (noisePsd);
     }
-    
+
   m_slInterference->SetNoisePowerSpectralDensity (noisePsd);
-  
+
 }
 
 void
@@ -396,18 +400,18 @@ NrSpectrumPhy::StartRx (Ptr<SpectrumSignalParameters> params)
   NS_LOG_INFO ("Start receiving signal: " << rxPsd <<" duration= " << duration);
 
   Ptr<NrSpectrumSignalParametersDataFrame> nrDataRxParams =
-    DynamicCast<NrSpectrumSignalParametersDataFrame> (params);
+      DynamicCast<NrSpectrumSignalParametersDataFrame> (params);
 
   Ptr<NrSpectrumSignalParametersDlCtrlFrame> dlCtrlRxParams =
-    DynamicCast<NrSpectrumSignalParametersDlCtrlFrame> (params);
+      DynamicCast<NrSpectrumSignalParametersDlCtrlFrame> (params);
 
   Ptr<NrSpectrumSignalParametersUlCtrlFrame> ulCtrlRxParams =
-    DynamicCast<NrSpectrumSignalParametersUlCtrlFrame> (params);
+      DynamicCast<NrSpectrumSignalParametersUlCtrlFrame> (params);
 
   // pass it to Sidelink interference calculations regardless of the type (SL or non-Sl)
   m_slInterference->AddSignal (params->psd, params->duration);
   Ptr<NrSpectrumSignalParametersSlFrame> nrSlRxParams =
-    DynamicCast<NrSpectrumSignalParametersSlFrame> (params);
+      DynamicCast<NrSpectrumSignalParametersSlFrame> (params);
   if (nrDataRxParams)
     {
       if (nrDataRxParams->cellId == GetCellId ()
@@ -469,7 +473,7 @@ NrSpectrumPhy::StartRx (Ptr<SpectrumSignalParameters> params)
           else
             {
               NS_LOG_INFO ("Received DL CTRL, but not in sync with this signal (cellId=" <<
-                       dlCtrlRxParams->cellId  << ", m_cellId=" << GetCellId () << ")");
+                           dlCtrlRxParams->cellId  << ", m_cellId=" << GetCellId () << ")");
             }
         }
       else
@@ -500,7 +504,7 @@ NrSpectrumPhy::StartRx (Ptr<SpectrumSignalParameters> params)
         }
       else
         {
-           NS_LOG_DEBUG ("UL CTRL ignored at UE device");
+          NS_LOG_DEBUG ("UL CTRL ignored at UE device");
         }
     }
   else if (nrSlRxParams != nullptr)
@@ -531,7 +535,7 @@ NrSpectrumPhy::StartRx (Ptr<SpectrumSignalParameters> params)
 
 void
 NrSpectrumPhy::StartTxDataFrames (const Ptr<PacketBurst>& pb, const std::list<Ptr<NrControlMessage> >& ctrlMsgList,
-                                      Time duration)
+                                  Time duration)
 {
   NS_LOG_FUNCTION (this);
   switch (m_state)
@@ -551,7 +555,7 @@ NrSpectrumPhy::StartTxDataFrames (const Ptr<PacketBurst>& pb, const std::list<Pt
     case CCA_BUSY:
       NS_LOG_WARN ("Start transmitting DATA while in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_txPsd);
 
@@ -599,7 +603,7 @@ NrSpectrumPhy::StartTxDataFrames (const Ptr<PacketBurst>& pb, const std::list<Pt
 
 void
 NrSpectrumPhy::StartTxDlControlFrames (const std::list<Ptr<NrControlMessage> > &ctrlMsgList,
-                                           const Time &duration)
+                                       const Time &duration)
 {
   NS_LOG_LOGIC (this << " state: " << m_state);
 
@@ -620,7 +624,7 @@ NrSpectrumPhy::StartTxDlControlFrames (const std::list<Ptr<NrControlMessage> > &
     case CCA_BUSY:
       NS_LOG_WARN ("Start transmitting DL CTRL while in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_txPsd);
         ChangeState (TX, duration);
@@ -649,7 +653,7 @@ NrSpectrumPhy::StartTxDlControlFrames (const std::list<Ptr<NrControlMessage> > &
 
 void
 NrSpectrumPhy::StartTxUlControlFrames (const std::list<Ptr<NrControlMessage> > &ctrlMsgList,
-                                           const Time &duration)
+                                       const Time &duration)
 {
   NS_LOG_LOGIC (this << " state: " << m_state);
 
@@ -658,7 +662,7 @@ NrSpectrumPhy::StartTxUlControlFrames (const std::list<Ptr<NrControlMessage> > &
     case RX_DATA:
       /* no break */
     case RX_DL_CTRL:
-      /* no break */ 
+      /* no break */
     case RX_UL_CTRL:
       /* no break */
     case RX_UL_SRS:
@@ -670,7 +674,7 @@ NrSpectrumPhy::StartTxUlControlFrames (const std::list<Ptr<NrControlMessage> > &
     case CCA_BUSY:
       NS_LOG_WARN ("Start transmitting UL CTRL while in CCA_BUSY state");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_txPsd);
         ChangeState (TX, duration);
@@ -840,8 +844,8 @@ NrSpectrumPhy::GetNrInterference (void) const
 
 void
 NrSpectrumPhy::AddExpectedTb (uint16_t rnti, uint8_t ndi, uint32_t size, uint8_t mcs,
-                                  const std::vector<int> &rbMap, uint8_t harqId, uint8_t rv, bool downlink,
-                                  uint8_t symStart, uint8_t numSym, const SfnSf &sfn)
+                              const std::vector<int> &rbMap, uint8_t harqId, uint8_t rv, bool downlink,
+                              uint8_t symStart, uint8_t numSym, const SfnSf &sfn)
 {
   NS_LOG_FUNCTION (this);
   auto it = m_transportBlocks.find (rnti);
@@ -852,9 +856,9 @@ NrSpectrumPhy::AddExpectedTb (uint16_t rnti, uint8_t ndi, uint32_t size, uint8_t
     }
 
   m_transportBlocks.emplace (std::make_pair(rnti, TransportBlockInfo(ExpectedTb (ndi, size, mcs,
-                                                                                rbMap, harqId, rv,
-                                                                                downlink, symStart,
-                                                                                numSym, sfn))));
+                                                                                   rbMap, harqId, rv,
+                                                                                   downlink, symStart,
+                                                                                   numSym, sfn))));
   NS_LOG_INFO ("Add expected TB for rnti " << rnti << " size=" << size <<
                " mcs=" << static_cast<uint32_t> (mcs) << " symstart=" <<
                static_cast<uint32_t> (symStart) << " numSym=" <<
@@ -929,7 +933,7 @@ NrSpectrumPhy::StartRxData (const Ptr<NrSpectrumSignalParametersDataFrame>& para
       /* no break */
     case RX_DATA: // RX_DATA while RX_DATA is possible with OFDMA, i.e. gNB receives from multiple UEs at the same time
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         m_interferenceData->StartRx (params->psd);
 
@@ -999,7 +1003,7 @@ NrSpectrumPhy::StartRxDlCtrl (const Ptr<NrSpectrumSignalParametersDlCtrlFrame>& 
     case CCA_BUSY:
       NS_LOG_INFO ("Start receiving CTRL while channel in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_rxControlMessageList.empty ());
         NS_LOG_LOGIC (this << "receiving DL CTRL from cellId:"<<params->cellId<< "and scheduling EndRx with delay " << params->duration);
@@ -1009,7 +1013,7 @@ NrSpectrumPhy::StartRxDlCtrl (const Ptr<NrSpectrumSignalParametersDlCtrlFrame>& 
         ChangeState (RX_DL_CTRL, params->duration);
         break;
       }
-    default:
+      default:
       {
         NS_FATAL_ERROR ("Unknown state.");
         break;
@@ -1046,7 +1050,7 @@ NrSpectrumPhy::StartRxUlCtrl (const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& 
       /* no break */
     case RX_UL_CTRL:
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         // at the gNB we can receive more UL CTRL signals simultaneously
         if (m_state == IDLE || m_state == CCA_BUSY)
@@ -1068,7 +1072,7 @@ NrSpectrumPhy::StartRxUlCtrl (const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& 
           }
         break;
       }
-    default:
+      default:
       {
         NS_FATAL_ERROR ("unknown state");
         break;
@@ -1108,7 +1112,7 @@ NrSpectrumPhy::StartRxSrs (const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& par
     case CCA_BUSY:
       NS_LOG_INFO ("Start receiving UL SRS while channel in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         // at the gNB we can receive only one SRS at a time, and the only allowed states before starting it are IDLE or BUSY
         m_interferenceSrs->StartRx (params->psd);
@@ -1123,7 +1127,7 @@ NrSpectrumPhy::StartRxSrs (const Ptr<NrSpectrumSignalParametersUlCtrlFrame>& par
         ChangeState (RX_UL_SRS, params->duration);
       }
       break;
-    default:
+      default:
       {
         // not allowed state for starting the SRS reception
         NS_FATAL_ERROR ("Not allowed state for starting SRS reception.");
@@ -1231,7 +1235,7 @@ NrSpectrumPhy::EndRxData ()
         }
 
       const NrErrorModel::NrErrorModelHistory & harqInfoList = RetrieveHistory (GetRnti (tbIt),
-                                                                                GetTBInfo (tbIt).m_expected.m_harqProcessId);
+                                                                               GetTBInfo (tbIt).m_expected.m_harqProcessId);
 
       NS_ABORT_MSG_IF (!m_errorModelType.IsChildOf(NrErrorModel::GetTypeId()),
                        "The error model must be a child of NrErrorModel");
@@ -1245,10 +1249,10 @@ NrSpectrumPhy::EndRxData ()
       // if the entire TB is corrupted or not
 
       GetTBInfo(tbIt).m_outputOfEM = em->GetTbDecodificationStats (m_sinrPerceived,
-                                                                   GetTBInfo(tbIt).m_expected.m_rbBitmap,
-                                                                   GetTBInfo(tbIt).m_expected.m_tbSize,
-                                                                   GetTBInfo(tbIt).m_expected.m_mcs,
-                                                                   harqInfoList);
+                                                                    GetTBInfo(tbIt).m_expected.m_rbBitmap,
+                                                                    GetTBInfo(tbIt).m_expected.m_tbSize,
+                                                                    GetTBInfo(tbIt).m_expected.m_mcs,
+                                                                    harqInfoList);
       GetTBInfo (tbIt).m_isCorrupted = m_random->GetValue () > GetTBInfo(tbIt).m_outputOfEM->m_tbler ? false : true;
 
       if (GetTBInfo (tbIt).m_isCorrupted)
@@ -1517,7 +1521,7 @@ NrSpectrumPhy::MaybeCcaBusy ()
             }
 
           NS_LOG_DEBUG ("Check if still BUSY in:" << delayUntilCcaEnd << " us, and that is at "
-              " time:"<<Simulator::Now() + delayUntilCcaEnd<<" and current time is:"<<Simulator::Now());
+                                                                         " time:"<<Simulator::Now() + delayUntilCcaEnd<<" and current time is:"<<Simulator::Now());
 
           m_checkIfIsIdleEvent = Simulator::Schedule (delayUntilCcaEnd, &NrSpectrumPhy::CheckIfStillBusy, this);
         }
@@ -1525,7 +1529,7 @@ NrSpectrumPhy::MaybeCcaBusy ()
   else
     {
       NS_ABORT_MSG_IF (m_checkIfIsIdleEvent.IsRunning(), "Unexpected state: returning to IDLE while there is an event "
-                       "running that should switch from CCA_BUSY to IDLE ?!");
+                                                          "running that should switch from CCA_BUSY to IDLE ?!");
       NS_LOG_DEBUG ("Channel detected IDLE after being in: " << m_state << " state.");
       ChangeState (IDLE, Seconds (0));
     }
@@ -1562,14 +1566,14 @@ NrSpectrumPhy::IsOnlySrs (const std::list<Ptr<NrControlMessage> >& ctrlMsgList)
 {
   NS_ASSERT_MSG(ctrlMsgList.size(), "Passed an empty uplink control list");
 
-   if (ctrlMsgList.size() == 1 && (*ctrlMsgList.begin())->GetMessageType() == NrControlMessage::SRS )
-     {
-       return true;
-     }
-   else
-     {
-       return false;
-     }
+  if (ctrlMsgList.size() == 1 && (*ctrlMsgList.begin())->GetMessageType() == NrControlMessage::SRS )
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
 }
 
 int64_t
@@ -1645,7 +1649,7 @@ NrSpectrumPhy::StartTxSlCtrlFrames (const Ptr<PacketBurst>& pb, Time duration)
   NS_LOG_FUNCTION (this << " state: " << m_state);
 
   switch (m_state)
-  {
+    {
     case RX_DATA:
       /* no break */
     case RX_DL_CTRL:
@@ -1659,7 +1663,7 @@ NrSpectrumPhy::StartTxSlCtrlFrames (const Ptr<PacketBurst>& pb, Time duration)
     case CCA_BUSY:
       NS_LOG_WARN ("Start transmitting NR SL CTRL while in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_txPsd);
 
@@ -1688,7 +1692,7 @@ NrSpectrumPhy::StartTxSlCtrlFrames (const Ptr<PacketBurst>& pb, Time duration)
       break;
     default:
       NS_FATAL_ERROR ("Unknown state " << m_state << " Code should not reach this point");
-  }
+    }
 }
 
 void
@@ -1697,7 +1701,7 @@ NrSpectrumPhy::StartTxSlDataFrames (const Ptr<PacketBurst>& pb, Time duration)
   NS_LOG_FUNCTION (this << " state: " << m_state);
 
   switch (m_state)
-  {
+    {
     case RX_DATA:
       /* no break */
     case RX_DL_CTRL:
@@ -1711,7 +1715,7 @@ NrSpectrumPhy::StartTxSlDataFrames (const Ptr<PacketBurst>& pb, Time duration)
     case CCA_BUSY:
       NS_LOG_WARN ("Start transmitting NR SL DATA while in CCA_BUSY state.");
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         NS_ASSERT (m_txPsd);
 
@@ -1740,7 +1744,7 @@ NrSpectrumPhy::StartTxSlDataFrames (const Ptr<PacketBurst>& pb, Time duration)
       break;
     default:
       NS_FATAL_ERROR ("Unknown state " << m_state << " Code should not reach this point");
-  }
+    }
 }
 
 void
@@ -1764,7 +1768,7 @@ NrSpectrumPhy::StartRxSlFrame (Ptr<NrSpectrumSignalParametersSlFrame> params)
       /* no break */
     case RX_DATA:
       /* no break */
-    case IDLE:
+      case IDLE:
       {
         // the behavior is similar when we're IDLE or in RX because we can
         // receive more signals simultaneously (e.g., at the gNB).
@@ -1808,7 +1812,7 @@ NrSpectrumPhy::StartRxSlFrame (Ptr<NrSpectrumSignalParametersSlFrame> params)
         m_slRxSigParamInfo.push_back (signalInfo);
         break;
       }
-    default:
+      default:
       {
         NS_FATAL_ERROR ("unknown state");
         break;
@@ -2035,6 +2039,7 @@ NrSpectrumPhy::RxSlPscch (std::vector<uint32_t> paramIndexes)
       traceParams.m_mcs = pscchMcs;
       traceParams.m_sinr = ctrlMsgIt.sinrAvg;
       traceParams.m_sinrMin = ctrlMsgIt.sinrMin;
+
       if (m_slCtrlErrorModelEnabled)
         {
           traceParams.m_tbler = outputEmForCtrl->m_tbler;
@@ -2065,9 +2070,13 @@ NrSpectrumPhy::RxSlPscch (std::vector<uint32_t> paramIndexes)
         {
           NS_LOG_DEBUG (this << " PSCCH OK");
           std::list<PscchPduInfo>::iterator it;
+          int count = 0;
           for (it = rxControlMessageOkList.begin (); it != rxControlMessageOkList.end (); it++)
             {
               m_nrPhyRxPscchEndOkCallback (it->packet, it->psd);
+              RsrpTag rsrp;
+              it->packet->PeekPacketTag (rsrp);
+              InsertRsrpArray(rsrp.Get());
             }
         }
     }
@@ -2086,6 +2095,12 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
 
   //Compute error on PSSCH
   //Create a mapping between the packet tag and the index of the packet bursts.
+
+  RsrpTag rsrp;
+  double avg_rsrpDbm = AvgRsrpArray();
+  rsrp.Set (avg_rsrpDbm);
+  EmptyRsrpArray();
+
   for (uint32_t i = 0; i < m_slRxSigParamInfo.size (); i++)
     {
       uint32_t pktIndex = paramIndexes [i];
@@ -2128,6 +2143,20 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
       auto sinrStats = GetSinrStats (itTb->second.sinrPerceived, itTb->second.expectedTb.rbBitmap);
       itTb->second.sinrAvg = sinrStats.sinrAvg;
       itTb->second.sinrMin = sinrStats.sinrMin;
+
+      SinrTag sinr;
+      sinr.Set (10*log10(sinrStats.sinrAvg));
+      (*j)->AddPacketTag (sinr);
+
+      TimestampTag timestamp;
+      timestamp.Set (Simulator::Now().GetNanoSeconds());
+      (*j)->AddPacketTag (timestamp);
+
+      (*j)->AddPacketTag (rsrp);
+
+      SizeTag size;
+      size.Set((double) (*j)->GetSize());
+      (*j)->AddPacketTag (size);
 
       NS_LOG_INFO ("Finishing RX, sinrAvg = " << itTb->second.sinrAvg <<
                    " sinrMin = " <<  itTb->second.sinrMin <<
@@ -2357,7 +2386,6 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
       traceParams.m_dstL2Id = sciF2a.GetDstId ();
       traceParams.m_srcL2Id = sciF2a.GetSrcId ();
       m_rxPsschTraceUe (traceParams);
-
       // Now dispatch the non corrupted TBs to UE PHY
       if (!tbIt.second.isDataCorrupted)
         {
@@ -2467,10 +2495,10 @@ NrSpectrumPhy::AddSlExpectedTb (uint16_t rnti, uint32_t dstId, uint32_t tbSize, 
   Ptr<NrUeNetDevice> ueRx = DynamicCast<NrUeNetDevice> (GetDevice ());
 
   NS_LOG_DEBUG ("RNTI " << ueRx->GetPhy (GetBwpId ())->GetRnti ()
-                << " added NR SL expected TB from rnti " << rnti << " with Dest id " << dstId
-                << " TB size = " << tbSize << " mcs = " << static_cast<uint32_t> (mcs)
-                << " sfn: " << sfn << " symstart = " << static_cast<uint32_t> (symStart)
-                << " numSym = " << static_cast<uint32_t> (numSym));
+                        << " added NR SL expected TB from rnti " << rnti << " with Dest id " << dstId
+                        << " TB size = " << tbSize << " mcs = " << static_cast<uint32_t> (mcs)
+                        << " sfn: " << sfn << " symstart = " << static_cast<uint32_t> (symStart)
+                        << " numSym = " << static_cast<uint32_t> (numSym));
 }
 
 void

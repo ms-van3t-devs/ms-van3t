@@ -210,17 +210,17 @@ namespace ns3
     }
 
     /* If is the first time the this veh sends a CAM, just check if it is inside and edge of interest(1-8) or outside(0), then return */
-    if (m_veh_position.find (cam->header.stationID) == m_veh_position.end ())
+    if (m_veh_position.find (cam->header.stationId) == m_veh_position.end ())
     {
         if(isInside)
         {
-          m_veh_position[cam->header.stationID] = roadMap.edgeID;
+          m_veh_position[cam->header.stationId] = roadMap.edgeID;
           m_veh_number[roadMap.edgeID]++;
         }
         else
         {
           // Empty string -> we are not interested in an edge which is outside the ones we are interested in
-          m_veh_position[cam->header.stationID] = "";
+          m_veh_position[cam->header.stationId] = "";
           m_veh_number[""]++;
         }
         return;
@@ -231,22 +231,22 @@ namespace ns3
     {
       /* The vehice is now in an edge of interest
        * If it was registered in other edge, update traffic lights state */
-      if (m_veh_position[cam->header.stationID] != roadMap.edgeID)
+      if (m_veh_position[cam->header.stationId] != roadMap.edgeID)
       {
-          m_veh_number[m_veh_position[cam->header.stationID]]--;
+          m_veh_number[m_veh_position[cam->header.stationId]]--;
           m_veh_number[roadMap.edgeID]++;
-          m_veh_position[cam->header.stationID] = roadMap.edgeID;
+          m_veh_position[cam->header.stationId] = roadMap.edgeID;
       }
     }
     else
     {
       /* The vehicle is now outside of any edge of interest
        * If it was registered inside one, then update traffic lights state */
-      if (!m_veh_position[cam->header.stationID].empty ())
+      if (!m_veh_position[cam->header.stationId].empty ())
       {
-          m_veh_number[m_veh_position[cam->header.stationID]]--;
+          m_veh_number[m_veh_position[cam->header.stationId]]--;
           m_veh_number[""]++;
-          m_veh_position[cam->header.stationID] = "";
+          m_veh_position[cam->header.stationId] = "";
       }
     }
 

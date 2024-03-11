@@ -194,7 +194,7 @@ namespace ns3
     red.r=255;red.g=0;red.b=0;red.a=255;
     m_client->TraCIAPI::vehicle.setColor (m_id,red);
       }else if (m_type=="emergency"){
-      stationtype = StationType_specialVehicles;
+      stationtype = StationType_specialVehicle;
       libsumo::TraCIColor pink;
       pink.r=255;pink.g=0;pink.b=239;pink.a=255;
       //orange.r=232;orange.g=126;orange.b=4;orange.a=255;
@@ -283,7 +283,7 @@ namespace ns3
 
 
    /* If the CAM is received from an emergency vehicle, and the host vehicle is a "passenger" car, then process the CAM */
-   if (cam->cam.camParameters.basicContainer.stationType==StationType_specialVehicles && m_type!="emergency")
+   if (cam->cam.camParameters.basicContainer.stationType==StationType_specialVehicle && m_type!="emergency")
    {
      libsumo::TraCIPosition pos=m_client->TraCIAPI::vehicle.getPosition(m_id);
      pos=m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
@@ -296,11 +296,11 @@ namespace ns3
        pos=m_client->TraCIAPI::vehicle.getPosition(m_id);
 
        // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
-       m_csv_ofstream_cam << cam->header.messageID << "," << cam->header.stationID << ",";
+       m_csv_ofstream_cam << cam->header.messageId << "," << cam->header.stationId << ",";
        m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << (double)cam->cam.camParameters.basicContainer.referencePosition.latitude/DOT_ONE_MICRO << ",";
        m_csv_ofstream_cam << (double)cam->cam.camParameters.basicContainer.referencePosition.longitude/DOT_ONE_MICRO << "," ;
        m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue/DECI << "," << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue/CENTI << ",";
-       m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.longitudinalAccelerationValue/DECI << ",";
+       m_csv_ofstream_cam << (double)cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value/DECI << ",";
        m_csv_ofstream_cam << pos.x << "," << pos.y << std::endl;
 
 

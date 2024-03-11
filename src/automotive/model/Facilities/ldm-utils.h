@@ -63,6 +63,15 @@ namespace ns3 {
           OptionalDataItem<long> angle;
           OptionalDataItem<uint64_t> lastCPMincluded;
 
+          //patch for v2
+          OptionalDataItem<long> xDistAbs;
+          OptionalDataItem<long> yDistAbs;
+          OptionalDataItem<long> xSpeedAbs;
+          OptionalDataItem<long> ySpeedAbs;
+          OptionalDataItem<long> xAccAbs;
+          OptionalDataItem<long> yAccAbs;
+
+
           OptionalDataItem<std::vector<long>> associatedCVs;
           OptionalDataItem<long> perceivedBy;
   } vehicleData_t;

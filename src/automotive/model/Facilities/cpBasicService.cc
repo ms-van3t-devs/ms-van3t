@@ -110,7 +110,7 @@ namespace ns3 {
   bool
   CPBasicService::checkCPMconditions(std::vector<LDM::returnedVehicleData_t>::iterator PO_data)
   {
-    /*Perceived Object Container Inclusion Management as mandated by TR 103 562 Section 4.3.4.2*/
+    /*Perceived Object Container Inclusion Management as mandated by TS 103 324 Section 6.1.2.3*/
     std::map<uint64_t, PHData_t> phPoints = PO_data->phData.getPHpoints ();
     PHData_t previousCPM;
     /* 1.a The object has first been detected by the perception system after the last CPM generation event.*/
@@ -158,140 +158,144 @@ namespace ns3 {
 
     BTPDataRequest_t dataRequest = {};
 
-    int64_t now = computeTimestampUInt64 ()/NANO_TO_MILLI;
+    int64_t now = computeTimestampUInt64 () / NANO_TO_MILLI;
 
-
+    std::string encode_result;
 
     long numberOfPOs = 0;
+    long container_counter = 1;
 
     /* Collect data for mandatory containers */
-    auto cpm = asn1cpp::makeSeq(CPM);
+    auto cpm = asn1cpp::makeSeq (CollectivePerceptionMessage);
 
-    if(bool(cpm)==false)
+    if (bool (cpm) == false)
       {
-        NS_LOG_ERROR("Warning: unable to encode CPM.");
+        NS_LOG_ERROR ("Warning: unable to encode CPM.");
         return;
       }
 
     //Schedule new CPM
-    m_event_cpmSend = Simulator::Schedule (MilliSeconds (m_N_GenCpm), &CPBasicService::generateAndEncodeCPM, this);
+    m_event_cpmSend = Simulator::Schedule (MilliSeconds (m_N_GenCpm),
+                                           &CPBasicService::generateAndEncodeCPM, this);
 
+    auto CPMcontainers = asn1cpp::makeSeq (WrappedCpmContainers);
+    auto POsContainer = asn1cpp::makeSeq (PerceivedObjectContainer);
+    auto CPM_POs = asn1cpp::makeSeq (PerceivedObjects);
+    //std::cout << "[CPM] Vehicle " << m_station_id << " position: " << m_vdp->getPositionXY().x << " " << m_vdp->getPositionXY().y << std::endl;
 
-    /* Process select Perceived Object Container Candidates as detailed in ETSI TR 103 562, ANNEX D (D.2) */
-    if(m_LDM != NULL)
+    if (m_LDM != NULL)
       {
         std::vector<LDM::returnedVehicleData_t> LDM_POs;
-        if(m_LDM->getAllPOs (LDM_POs)) // If there are any POs in the LDM
+        if (m_LDM->getAllPOs (LDM_POs)) // If there are any POs in the LDM
           {
-            auto POsContainer = asn1cpp::makeSeq(PerceivedObjectContainer);
+            /* Fill Perceived Object Container as detailed in ETSI TS 103 324, Section 7.1.8 */
             std::vector<LDM::returnedVehicleData_t>::iterator it;
-            for(it = LDM_POs.begin (); it != LDM_POs.end ();it++)
-              {               
+            for (it = LDM_POs.begin (); it != LDM_POs.end (); it++)
+              {
 
-                if(it->vehData.perceivedBy.getData () != (long) m_station_id)
-                  break;
-                if(!checkCPMconditions (it) && m_redundancy_mitigation)
-                  break;
+                if (it->vehData.perceivedBy.getData () != (long) m_station_id)
+                  continue;
+                if (!checkCPMconditions (it) && m_redundancy_mitigation)
+                  continue;
                 else
                   {
-                    auto PO = asn1cpp::makeSeq(PerceivedObject);
-                    asn1cpp::setField(PO->objectID,it->vehData.stationID);
-                    long timeOfMeasurement = (Simulator::Now ().GetMicroSeconds () - it->vehData.timestamp_us)/1000;// time of measuremente in ms
-                    if(timeOfMeasurement > 1500)
-                        timeOfMeasurement = 1500;
-                    asn1cpp::setField(PO->timeOfMeasurement,timeOfMeasurement);
-                    if(it->vehData.confidence.getData () < ObjectConfidence_unavailable && it->vehData.confidence.getData () > 0)
-                      asn1cpp::setField(PO->objectConfidence,it->vehData.confidence.getData ());
-                    else
-                      asn1cpp::setField(PO->objectConfidence,ObjectConfidence_unavailable);
+                    auto PO = asn1cpp::makeSeq (PerceivedObject);
+                    asn1cpp::setField (PO->objectId, it->vehData.stationID);
+                    long timeOfMeasurement =
+                        (Simulator::Now ().GetMicroSeconds () - it->vehData.timestamp_us) /
+                        1000; // time of measuremente in ms
+                    if (timeOfMeasurement > 1500)
+                      timeOfMeasurement = 1500;
+                    asn1cpp::setField (PO->measurementDeltaTime, timeOfMeasurement);
+                    asn1cpp::setField (PO->position.xCoordinate.value,
+                                       it->vehData.xDistAbs.getData ());
+                    asn1cpp::setField (PO->position.xCoordinate.confidence,
+                                       CoordinateConfidence_unavailable);
+                    asn1cpp::setField (PO->position.yCoordinate.value,
+                                       it->vehData.yDistAbs.getData ());
+                    asn1cpp::setField (PO->position.yCoordinate.confidence,
+                                       CoordinateConfidence_unavailable);
 
-                    asn1cpp::setField(PO->xDistance.value,it->vehData.xDistance.getData ());
-                    asn1cpp::setField(PO->xDistance.confidence,DistanceConfidence_unavailable);
-                    asn1cpp::setField(PO->yDistance.value,it->vehData.yDistance.getData ());
-                    asn1cpp::setField(PO->yDistance.confidence,DistanceConfidence_unavailable);
-                    asn1cpp::setField(PO->xSpeed.value,it->vehData.xSpeed.getData ());
-                    asn1cpp::setField(PO->xSpeed.confidence,SpeedConfidence_unavailable);
-                    asn1cpp::setField(PO->ySpeed.value,it->vehData.ySpeed.getData ());
-                    asn1cpp::setField(PO->ySpeed.confidence,SpeedConfidence_unavailable);
-                    auto angle = asn1cpp::makeSeq(CartesianAngle);
-                    if(it->vehData.angle.getData() < CartesianAngleValue_unavailable && it->vehData.angle.getData() > 0)
-                      asn1cpp::setField(angle->value,it->vehData.angle.getData());
+                    auto velocity = asn1cpp::makeSeq (Velocity3dWithConfidence);
+                    asn1cpp::setField (velocity->present,
+                                       Velocity3dWithConfidence_PR_cartesianVelocity);
+                    auto cartesianVelocity = asn1cpp::makeSeq (VelocityCartesian);
+                    asn1cpp::setField (cartesianVelocity->xVelocity.value,
+                                       it->vehData.xSpeedAbs.getData ());
+                    asn1cpp::setField (cartesianVelocity->xVelocity.confidence,
+                                       SpeedConfidence_unavailable);
+                    asn1cpp::setField (cartesianVelocity->yVelocity.value,
+                                       it->vehData.ySpeedAbs.getData ());
+                    asn1cpp::setField (cartesianVelocity->yVelocity.confidence,
+                                       SpeedConfidence_unavailable);
+                    asn1cpp::setField (velocity->choice.cartesianVelocity, cartesianVelocity);
+                    asn1cpp::setField (PO->velocity, velocity);
+
+                    auto acceleration = asn1cpp::makeSeq (Acceleration3dWithConfidence);
+                    asn1cpp::setField (acceleration->present,
+                                       Acceleration3dWithConfidence_PR_cartesianAcceleration);
+                    auto cartesianAcceleration = asn1cpp::makeSeq (AccelerationCartesian);
+                    asn1cpp::setField (cartesianAcceleration->xAcceleration.value,
+                                       it->vehData.xAccAbs.getData ());
+                    asn1cpp::setField (cartesianAcceleration->xAcceleration.confidence,
+                                       AccelerationConfidence_unavailable);
+                    asn1cpp::setField (cartesianAcceleration->yAcceleration.value,
+                                       it->vehData.yAccAbs.getData ());
+                    asn1cpp::setField (cartesianAcceleration->yAcceleration.confidence,
+                                       AccelerationConfidence_unavailable);
+                    asn1cpp::setField (acceleration->choice.cartesianAcceleration,
+                                       cartesianAcceleration);
+                    asn1cpp::setField (PO->acceleration, acceleration);
+
+                    //Only z angle
+                    auto angle = asn1cpp::makeSeq (EulerAnglesWithConfidence);
+                    if ((it->vehData.heading*DECI) < CartesianAngleValue_unavailable &&
+                        (it->vehData.heading*DECI) > 0)
+                      asn1cpp::setField (angle->zAngle.value, (it->vehData.heading*DECI));
                     else
-                      asn1cpp::setField(angle->value,CartesianAngleValue_unavailable);
-                    asn1cpp::setField(angle->confidence,AngleConfidence_unavailable);
-                    asn1cpp::setField(PO->yawAngle,angle);
-                    auto OD1 = asn1cpp::makeSeq(ObjectDimension);
-                    if(it->vehData.vehicleLength.getData() < 1023 && it->vehData.vehicleLength.getData() > 0)
-                      asn1cpp::setField(OD1->value,it->vehData.vehicleLength.getData());
+                      asn1cpp::setField (angle->zAngle.value, CartesianAngleValue_unavailable);
+                    asn1cpp::setField (angle->zAngle.confidence, AngleConfidence_unavailable);
+                    asn1cpp::setField (PO->angles, angle);
+                    auto OD1 = asn1cpp::makeSeq (ObjectDimension);
+                    if (it->vehData.vehicleLength.getData () < 1023 &&
+                        it->vehData.vehicleLength.getData () > 0)
+                      asn1cpp::setField (OD1->value, it->vehData.vehicleLength.getData ());
                     else
-                      asn1cpp::setField(OD1->value,50);//usual value for SUMO vehicles
-                    asn1cpp::setField(OD1->confidence,ObjectDimensionConfidence_unavailable);
-                    asn1cpp::setField(PO->planarObjectDimension1,OD1);
-                    auto OD2 = asn1cpp::makeSeq(ObjectDimension);
-                    if(it->vehData.vehicleWidth.getData() < 1023 && it->vehData.vehicleWidth.getData() > 0)
-                      asn1cpp::setField(OD2->value,it->vehData.vehicleWidth.getData());
+                      asn1cpp::setField (OD1->value, 50); //usual value for SUMO vehicles
+                    asn1cpp::setField (OD1->confidence, ObjectDimensionConfidence_unavailable);
+                    asn1cpp::setField (PO->objectDimensionX, OD1);
+                    auto OD2 = asn1cpp::makeSeq (ObjectDimension);
+                    if (it->vehData.vehicleWidth.getData () < 1023 &&
+                        it->vehData.vehicleWidth.getData () > 0)
+                      asn1cpp::setField (OD2->value, it->vehData.vehicleWidth.getData ());
                     else
-                      asn1cpp::setField(OD2->value,18);//usual value for SUMO vehicles
-                    asn1cpp::setField(OD2->confidence,ObjectDimensionConfidence_unavailable);
-                    asn1cpp::setField(PO->planarObjectDimension2,OD2);
-                    asn1cpp::setField(PO->objectRefPoint,ObjectRefPoint_topMid);
+                      asn1cpp::setField (OD2->value, 18); //usual value for SUMO vehicles
+                    asn1cpp::setField (OD2->confidence, ObjectDimensionConfidence_unavailable);
+                    asn1cpp::setField (PO->objectDimensionY, OD2);
 
                     /*Rest of optional fields handling left as future work*/
 
                     //Push Perceived Object to the container
-                    asn1cpp::sequenceof::pushList(*POsContainer,PO);
+                    asn1cpp::sequenceof::pushList (*CPM_POs, PO);
                     //Update the timestamp of the last time this PO was included in a CPM
-                    m_LDM->updateCPMincluded (it->vehData.stationID,computeTimestampUInt64 ()/NANO_TO_MILLI);
+                    m_LDM->updateCPMincluded (it->vehData.stationID,
+                                              computeTimestampUInt64 () / NANO_TO_MILLI);
                     //Increase number of POs for the numberOfPerceivedObjects field in cpmParameters container
                     numberOfPOs++;
                   }
               }
-            if(numberOfPOs != 0)
-              asn1cpp::setField(cpm->cpm.cpmParameters.perceivedObjectContainer,POsContainer);
+            if (numberOfPOs != 0)
+              {
+                asn1cpp::setField (POsContainer->perceivedObjects, CPM_POs);
+                asn1cpp::setField (POsContainer->numberOfPerceivedObjects, numberOfPOs);
+              }
           }
       }
 
-    // Fill numberOfPerceivedObjects
-    asn1cpp::setField(cpm->cpm.cpmParameters.numberOfPerceivedObjects,numberOfPOs);
-
-    /* Process generate Sensor Information Container as detailed in ETSI TR 103 562, ANNEX D (D.3) */
-    if(now-m_T_LastSensorInfoContainer >= m_T_AddSensorInformation)
-      {
-        auto sensorInfoContainer = asn1cpp::makeSeq(SensorInformationContainer);
-        //For now we only consider one sensor
-        //We assume a Lidar sensor of 50m sensing range from the vehicle front bumper
-        auto sensorInfo = asn1cpp::makeSeq(SensorInformation);
-        asn1cpp::setField(sensorInfo->sensorID,2);
-        asn1cpp::setField(sensorInfo->type,SensorType_radar);
-        auto detectionArea = asn1cpp::makeSeq(DetectionArea);
-        asn1cpp::setField(detectionArea->present,DetectionArea_PR_vehicleSensor);
-        asn1cpp::setField(detectionArea->choice.vehicleSensor.refPointId,0);
-        asn1cpp::setField(detectionArea->choice.vehicleSensor.xSensorOffset,0);
-        asn1cpp::setField(detectionArea->choice.vehicleSensor.ySensorOffset,0);
-        auto property = asn1cpp::makeSeq(VehicleSensorProperties);
-        asn1cpp::setField(property->range,50);
-        asn1cpp::setField(property->horizontalOpeningAngleStart,0);
-        asn1cpp::setField(property->horizontalOpeningAngleEnd,3600);//360 degrees
-        asn1cpp::sequenceof::pushList(detectionArea->choice.vehicleSensor.vehicleSensorPropertyList,property);
-        asn1cpp::setField(sensorInfo->detectionArea,detectionArea);
-        //We ommit free space confidence
-        asn1cpp::sequenceof::pushList(*sensorInfoContainer,sensorInfo);
-        asn1cpp::setField(cpm->cpm.cpmParameters.sensorInformationContainer,sensorInfoContainer);
-
-        m_T_LastSensorInfoContainer = now;
-      }
-    else
-      {
-        //If no sensorInformationContainer and no perceivedObjectsContainer
-        if(numberOfPOs==0)
-          return; //No CPM is generated in the current cycle
-      }
-
-
     /* Fill the header */
-    asn1cpp::setField(cpm->header.messageID, ItsPduHeader__messageID_cpm);
-    asn1cpp::setField(cpm->header.protocolVersion, 1);
-    asn1cpp::setField(cpm->header.stationID, m_station_id);
+    asn1cpp::setField (cpm->header.messageId, MessageId_cpm);
+    asn1cpp::setField (cpm->header.protocolVersion, 2);
+    asn1cpp::setField (cpm->header.stationId, m_station_id);
 
     /*
      * Compute the generationDeltaTime, "computed as the time corresponding to the
@@ -300,54 +304,101 @@ namespace ns3 {
      * remainder of the corresponding value of TimestampIts divided by 65 536 as below:
      * generationDeltaTime = TimestampIts mod 65 536"
     */
-    asn1cpp::setField(cpm->cpm.generationDeltaTime, compute_timestampIts (m_real_time) % 65536);
+    asn1cpp::setField (cpm->payload.managementContainer.referenceTime,
+                       compute_timestampIts (m_real_time) % 65536);
 
-    /* Fill the managementContainer's station type */
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.stationType, m_stationtype);
-
-    cpm_mandatory_data=m_vdp->getCPMMandatoryData();
+    cpm_mandatory_data = m_vdp->getCPMMandatoryData ();
 
     /* Fill the managementContainer */
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.altitude.altitudeValue, cpm_mandatory_data.altitude.getValue ());
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.altitude.altitudeConfidence, cpm_mandatory_data.altitude.getConfidence ());
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.latitude, cpm_mandatory_data.latitude);
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.longitude, cpm_mandatory_data.longitude);
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.positionConfidenceEllipse.semiMajorConfidence, cpm_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.positionConfidenceEllipse.semiMinorConfidence, cpm_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
-    asn1cpp::setField(cpm->cpm.cpmParameters.managementContainer.referencePosition.positionConfidenceEllipse.semiMajorOrientation, cpm_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.altitude.altitudeValue,
+                       cpm_mandatory_data.altitude.getValue ());
+    asn1cpp::setField (
+        cpm->payload.managementContainer.referencePosition.altitude.altitudeConfidence,
+        cpm_mandatory_data.altitude.getConfidence ());
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.latitude,
+                       cpm_mandatory_data.latitude);
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.longitude,
+                       cpm_mandatory_data.longitude);
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.positionConfidenceEllipse
+                           .semiMajorConfidence,
+                       cpm_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.positionConfidenceEllipse
+                           .semiMinorConfidence,
+                       cpm_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
+    asn1cpp::setField (cpm->payload.managementContainer.referencePosition.positionConfidenceEllipse
+                           .semiMajorOrientation,
+                       cpm_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
     //TODO:  compute segmentInfo, get MTU and deal with needed segmentation
 
-    /* Fill the stationDataContainer */
-    auto stationDataContainer = asn1cpp::makeSeq(StationDataContainer);
-    asn1cpp::setField(stationDataContainer->present, StationDataContainer_PR_originatingVehicleContainer);
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.heading.headingValue, cpm_mandatory_data.heading.getValue ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.heading.headingConfidence, cpm_mandatory_data.heading.getConfidence ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.speed.speedValue, cpm_mandatory_data.speed.getValue ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.speed.speedConfidence, cpm_mandatory_data.speed.getConfidence ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.driveDirection, cpm_mandatory_data.driveDirection);
+    /* Fill the originatingVehicleContainer */
+    auto wrappedCpmContainer = asn1cpp::makeSeq (WrappedCpmContainer);
+    asn1cpp::setField (wrappedCpmContainer->containerId, 1);
+    auto originatingVehicleContainer = asn1cpp::makeSeq (OriginatingVehicleContainer);
+    asn1cpp::setField (originatingVehicleContainer->orientationAngle.value,
+                       cpm_mandatory_data.heading.getValue ());
+    asn1cpp::setField (originatingVehicleContainer->orientationAngle.confidence,
+                       cpm_mandatory_data.heading.getConfidence ());
+    asn1cpp::setField (wrappedCpmContainer->containerData.present,
+                       WrappedCpmContainer__containerData_PR_OriginatingVehicleContainer);
+    asn1cpp::setField (wrappedCpmContainer->containerData.choice.OriginatingVehicleContainer,
+                       originatingVehicleContainer);
+    asn1cpp::sequenceof::pushList (cpm->payload.cpmContainers, wrappedCpmContainer);
 
-    auto vehicleLength = asn1cpp::makeSeq(VehicleLength);
-    asn1cpp::setField(vehicleLength->vehicleLengthValue, cpm_mandatory_data.VehicleLength.getValue());
-    asn1cpp::setField(vehicleLength->vehicleLengthConfidenceIndication, cpm_mandatory_data.VehicleLength.getConfidence());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.vehicleLength,vehicleLength);
+    /* Generate Sensor Information Container as detailed in ETSI TS 103 324, Section 6.1.2.2 */
+    if (now - m_T_LastSensorInfoContainer >= m_T_AddSensorInformation)
+      {
+        auto CPMcontainer = asn1cpp::makeSeq (WrappedCpmContainer);
+        asn1cpp::setField (CPMcontainer->containerId, 3);
+        auto sensorInfoContainer = asn1cpp::makeSeq (SensorInformationContainer);
 
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.vehicleWidth, cpm_mandatory_data.VehicleWidth);
+        //For now we only consider one sensor
+        //We assume sensor fusion or aggregation of 50m sensing range from the vehicle front bumper
+        auto sensorInfo = asn1cpp::makeSeq (SensorInformation);
+        asn1cpp::setField (sensorInfo->sensorId, 2);
+        asn1cpp::setField (sensorInfo->sensorType, SensorType_localAggregation);
+        asn1cpp::setField (sensorInfo->shadowingApplies, true);
+        auto detectionArea = asn1cpp::makeSeq (Shape);
+        asn1cpp::setField (detectionArea->present, Shape_PR_circular);
+        auto circularArea = asn1cpp::makeSeq (CircularShape);
+        auto egoPos = m_vdp->getPositionXY ();
+        auto refPos = asn1cpp::makeSeq (CartesianPosition3d);
+        asn1cpp::setField (refPos->xCoordinate, egoPos.x);
+        asn1cpp::setField (refPos->yCoordinate, egoPos.y);
+        asn1cpp::setField (circularArea->shapeReferencePoint, refPos);
+        asn1cpp::setField (circularArea->radius, 50);
+        asn1cpp::setField (detectionArea->choice.circular, circularArea);
+        asn1cpp::setField (sensorInfo->perceptionRegionShape, detectionArea);
 
-    auto longAcc = asn1cpp::makeSeq(LongitudinalAcceleration);
-    asn1cpp::setField(longAcc->longitudinalAccelerationValue, cpm_mandatory_data.longAcceleration.getValue ());
-    asn1cpp::setField(longAcc->longitudinalAccelerationConfidence, cpm_mandatory_data.longAcceleration.getConfidence ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.longitudinalAcceleration,longAcc);
+        asn1cpp::sequenceof::pushList (*sensorInfoContainer, sensorInfo);
 
-    auto yawRate = asn1cpp::makeSeq(YawRate);
-    asn1cpp::setField(yawRate->yawRateValue, cpm_mandatory_data.yawRate.getValue ());
-    asn1cpp::setField(yawRate->yawRateConfidence, cpm_mandatory_data.yawRate.getConfidence ());
-    asn1cpp::setField(stationDataContainer->choice.originatingVehicleContainer.yawRate,yawRate);
+        asn1cpp::setField (CPMcontainer->containerData.present,
+                           WrappedCpmContainer__containerData_PR_SensorInformationContainer);
+        asn1cpp::setField (CPMcontainer->containerData.choice.SensorInformationContainer,
+                           sensorInfoContainer);
+        asn1cpp::sequenceof::pushList (cpm->payload.cpmContainers, CPMcontainer);
+        m_T_LastSensorInfoContainer = now;
+      }
+    else
+      {
+        //If no sensorInformationContainer and no perceivedObjectsContainer
+        if (numberOfPOs == 0)
+          return; //No CPM is generated in the current cycle
+      }
 
-    asn1cpp::setField(cpm->cpm.cpmParameters.stationDataContainer, stationDataContainer);
+    if (numberOfPOs != 0)
+      {
+        auto CPMcontainer = asn1cpp::makeSeq (WrappedCpmContainer);
+        asn1cpp::setField (CPMcontainer->containerId, 5);
+        asn1cpp::setField (CPMcontainer->containerData.present,
+                           WrappedCpmContainer__containerData_PR_PerceivedObjectContainer);
+        asn1cpp::setField (CPMcontainer->containerData.choice.PerceivedObjectContainer,
+                           POsContainer);
+        asn1cpp::sequenceof::pushList(cpm->payload.cpmContainers,CPMcontainer);
+      }
 
+    // TODO: Support for Perception Region information from LDM (to be implemented in both SUMOensor and CARLAsensor)
 
-    std::string encode_result = asn1cpp::uper::encode(cpm);
-
+    encode_result = asn1cpp::uper::encode(cpm);
     if(encode_result.size()<1)
     {
         NS_LOG_ERROR("Warning: unable to encode CPM.");
@@ -355,6 +406,7 @@ namespace ns3 {
     }
 
     packet = Create<Packet> ((uint8_t*) encode_result.c_str(), encode_result.size());
+    //packet = Create<Packet> ((uint8_t*) bytes, length);
 
     dataRequest.BTPType = BTP_B; //!< BTP-B
     dataRequest.destPort = CP_PORT;
@@ -405,7 +457,7 @@ namespace ns3 {
   CPBasicService::receiveCpm (BTPDataIndication_t dataIndication, Address from)
   {
     Ptr<Packet> packet;
-    asn1cpp::Seq<CPM> decoded_cpm,cpm_test;
+    asn1cpp::Seq<CollectivePerceptionMessage> decoded_cpm,cpm_test;
 
     uint8_t *buffer; //= new uint8_t[packet->GetSize ()];
     buffer=(uint8_t *)malloc((dataIndication.data->GetSize ())*sizeof(uint8_t));
@@ -455,7 +507,7 @@ namespace ns3 {
 
 
     /** Decoding **/
-    decoded_cpm = asn1cpp::uper::decode(packetContent, CPM);
+    decoded_cpm = asn1cpp::uper::decode(packetContent, CollectivePerceptionMessage);
 
     if(bool(decoded_cpm)==false) {
         NS_LOG_ERROR("Warning: unable to decode a received CPM.");

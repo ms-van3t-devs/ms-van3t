@@ -16,7 +16,7 @@
 #include "signalInfoUtils.h"
 
 extern "C" {
-  #include "ns3/CPM.h"
+  #include "ns3/CollectivePerceptionMessage.h"
 }
 
 namespace ns3
@@ -38,8 +38,8 @@ public:
 
   void receiveCpm(BTPDataIndication_t dataIndication, Address from);
   void changeNGenCpmMax(int16_t N_GenCpmMax) {m_N_GenCpmMax=N_GenCpmMax;}
-  void addCPRxCallback(std::function<void(asn1cpp::Seq<CPM>, Address)> rx_callback) {m_CPReceiveCallback=rx_callback;}
-  void addCPRxCallbackExtended(std::function<void(asn1cpp::Seq<CPM>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CPReceiveCallbackExtended=rx_callback;}
+  void addCPRxCallback(std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address)> rx_callback) {m_CPReceiveCallback=rx_callback;}
+  void addCPRxCallbackExtended(std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CPReceiveCallbackExtended=rx_callback;}
   void setRealTime(bool real_time){m_real_time=real_time;}
   void startCpmDissemination();
   uint64_t terminateDissemination();
@@ -62,9 +62,9 @@ private:
   bool checkCPMconditions(std::vector<LDM::returnedVehicleData_t>::iterator it);
   double cartesian_dist(double lon1, double lat1, double lon2, double lat2);
 
-  std::function<void(asn1cpp::Seq<CPM>, Address)> m_CPReceiveCallback;
-  std::function<void(asn1cpp::Seq<CPM>, Address, Ptr<Packet>)> m_CPReceiveCallbackPkt;
-  std::function<void(asn1cpp::Seq<CPM>, Address, StationID_t, StationType_t, SignalInfo)> m_CPReceiveCallbackExtended;
+  std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address)> m_CPReceiveCallback;
+  std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, Ptr<Packet>)> m_CPReceiveCallbackPkt;
+  std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> m_CPReceiveCallbackExtended;
 
 
   Ptr<btp> m_btp;

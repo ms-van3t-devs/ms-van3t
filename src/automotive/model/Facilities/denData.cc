@@ -60,7 +60,7 @@ ActionID_t
 denData::getDenmActionID()
 {
   ActionID retval;
-  retval.originatingStationID = m_management.stationID;
+  retval.originatingStationId = m_management.stationID;
   retval.sequenceNumber = m_management.sequenceNumber;
   return retval;
 }
@@ -123,7 +123,7 @@ void
 denData::setDenmMandatoryFields_asn_types (ActionID_t actionID, TimestampIts_t detectionTime, ReferencePosition_t eventPosition)
 {
   setDenmMandatoryFields_asn_types(detectionTime,eventPosition);
-  m_management.stationID = (long) actionID.originatingStationID;
+  m_management.stationID = (long) actionID.originatingStationId;
   m_management.sequenceNumber = (long) actionID.sequenceNumber;
 }
 
