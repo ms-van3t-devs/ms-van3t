@@ -48,8 +48,8 @@ namespace ns3 {
 
     /* Longitudinal acceleration [0.1 m/s^2] */
     double acc = sqrt(pow(egoVehicle.acceleration ().x (),2)+pow(egoVehicle.acceleration ().y (),2));
-    if ((acc*DECI) > LongitudinalAccelerationValue_unavailable)
-      CAMdata.longAcceleration = VDPValueConfidence<>(LongitudinalAccelerationValue_unavailable,
+    if ((acc*DECI) > AccelerationValue_unavailable)
+      CAMdata.longAcceleration = VDPValueConfidence<>(AccelerationValue_unavailable,
                                                     AccelerationConfidence_unavailable);
     else
       CAMdata.longAcceleration = VDPValueConfidence<>(acc * DECI,
@@ -119,8 +119,8 @@ namespace ns3 {
     /* Longitudinal acceleration [0.1 m/s^2] */
     double acc = sqrt(pow(egoVehicle.acceleration ().x (),2)+pow(egoVehicle.acceleration ().y (),2));
     // CARLA sometimes gives very high acceleration values https://github.com/carla-simulator/carla/issues/3168
-    if ((acc*DECI) > LongitudinalAccelerationValue_unavailable)
-      CPMdata.longAcceleration = VDPValueConfidence<>(LongitudinalAccelerationValue_unavailable,
+    if ((acc*DECI) > AccelerationValue_unavailable)
+      CPMdata.longAcceleration = VDPValueConfidence<>(AccelerationValue_unavailable,
                                                     AccelerationConfidence_unavailable);
     else
       CPMdata.longAcceleration = VDPValueConfidence<>(acc * DECI,

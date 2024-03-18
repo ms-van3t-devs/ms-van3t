@@ -14,6 +14,7 @@
 #include "ns3/denBasicService.h"
 #include "ns3/caBasicService.h"
 #include "ns3/cpBasicService.h"
+#include "ns3/cpBasicService_v1.h"
 #include "ns3/vdpTraci.h"
 #include "ns3/socket.h"
 
@@ -54,7 +55,16 @@ class cooperativePerception : public Application
      *
      * \param the ASN.1 CPM structure containing the info of the packet that was received.
      */
-    void receiveCPM (asn1cpp::Seq<CPM> cpm, Address from);
+    void receiveCPM (asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from);
+
+    /**
+     * \brief Callback to handle a CPM reception.
+     *
+     * This function is called everytime a packet is received by the CPBasicService.
+     *
+     * \param the ASN.1 CPM structure containing the info of the packet that was received.
+     */
+    void receiveCPMV1 (asn1cpp::Seq<CPMV1> cpm, Address from);
 
   protected:
     virtual void DoDispose (void);
@@ -64,6 +74,7 @@ class cooperativePerception : public Application
     DENBasicService m_denService; //!< DEN Basic Service object
     CABasicService m_caService; //!< CA Basic Service object
     CPBasicService m_cpService; //!< CP Basic Service object
+    CPBasicServiceV1 m_cpService_v1; //!< CP Basic Service object version 1 (for CPMv1)
     Ptr<btp> m_btp; //! BTP object
     Ptr<GeoNet> m_geoNet; //! GeoNetworking Object
     Ptr<SUMOSensor> m_sumo_sensor;
@@ -73,7 +84,8 @@ class cooperativePerception : public Application
     Ptr<Socket> m_socket; //!< Socket TX/RX for everything
     std::string m_model; //!< Communication Model (possible values: 80211p and cv2x)
 
-    vehicleData_t translateCPMdata(asn1cpp::Seq<CPM> cpm, int objectIndex, int newID);
+    vehicleData_t translateCPMdata(asn1cpp::Seq<CollectivePerceptionMessage> cpm, asn1cpp::Seq<PerceivedObject>, int objectIndex, int newID);
+    vehicleData_t translateCPMV1data (asn1cpp::Seq<CPMV1> cpm, int objectIndex, int newID);
 
     virtual void StartApplication (void);
     virtual void StopApplication (void);
@@ -92,15 +104,14 @@ class cooperativePerception : public Application
     bool m_real_time; //!< To decide wheter to use realtime scheduler
     std::string m_csv_name; //!< CSV log file name
     std::ofstream m_csv_ofstream_cam; //!< CSV log stream (CAM), created using m_csv_name
+    std::map<int, std::map<int,int>> m_recvCPMmap;  //! Structure mapping, for each CV that we have received a CPM from, the CPM's PO ids with the ego LDM's PO ids
+
 
     /* Counters */
     int m_cam_received;
     int m_cpm_received;
 
     EventId m_send_cam_ev; //!< Event to send the CAM
-
-    std::map<int, std::map<int,int>> m_recvCPMmap;  //! Structure mapping, for each CV that we have received a CPM from, the CPM's PO ids with the ego LDM's PO ids
-
 
 
     bool m_send_cam;
