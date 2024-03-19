@@ -198,7 +198,8 @@ public:
   /**
    * \brief Store the signal info information.
    * \param rssi RSSI information.
-   * \param snr SNR information.
+   * \param rssi RSSI information.
+   * \param size SNR information.
    */
   void SetSignalInfo (double rssi, double snr, uint32_t size) {m_rssi = rssi; m_snr = snr; m_size = (double) size;};
 
