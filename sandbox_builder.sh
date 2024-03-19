@@ -190,7 +190,7 @@ cp src/automotive/model/SignalInfo/size-tag.h src/lte/model/
 
 cp src/automotive/model/SignalInfo/WiFi/wifi-mac-queue-item.h src/wifi/model/
 cp src/automotive/model/SignalInfo/WiFi/ocb-wifi-mac.cc src/wave/model/
-cp src/automotive/model/SignalInfo/WiFi/qos-frame-exchange-manager.cc src/wifi/model/
+cp src/automotive/model/SignalInfo/WiFi/frame-exchange-manager.cc src/wifi/model/
 cp src/automotive/model/SignalInfo/WiFi/CMakeLists.txt src/wifi/
 
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.cc src/cv2x/model/
