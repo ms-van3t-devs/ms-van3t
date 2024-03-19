@@ -46,7 +46,7 @@ if [ ! -z $1 ]; then
 		mkdir -p cmake/build
 		cd cmake/build
 		cmake ../..
-		make
+		make -j$(nproc)
 		sudo make install
 		cd ../../..
 
