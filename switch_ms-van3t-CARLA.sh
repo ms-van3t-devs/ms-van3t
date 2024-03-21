@@ -138,6 +138,8 @@ if [ "$mode" = "base" ]; then
 					pip install cycler
 					pip install pandas
 					pip install open3d
+					pip install filterpy
+					pip install psutil
 
 					cd ..
 
