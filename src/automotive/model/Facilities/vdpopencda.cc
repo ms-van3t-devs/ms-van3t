@@ -208,9 +208,8 @@ namespace ns3 {
   VDPDataItem<int>
   VDPOpenCDA::getLanePosition()
   {
-    VDPDataItem <int> lanePos;
     carla::Vehicle vehicle = m_opencda_client->GetManagedActorById (m_id);
-    lanePos.setData ((int) vehicle.lane ());
+    VDPDataItem<int> lanePos(vehicle.lane ());
     return lanePos;
   }
 }
