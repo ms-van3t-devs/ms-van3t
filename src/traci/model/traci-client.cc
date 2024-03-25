@@ -560,5 +560,16 @@ TraciClient::GetFreePort (uint32_t portNum)
 return port;
 }
 
+std::vector<std::string>
+TraciClient::getVehicleNodeMapIds()
+{
+    std::vector<std::string> ids;
+    for (auto & it : m_vehicleNodeMap)
+    {
+      ids.push_back(it.first);
+    }
+    return ids;
+}
+
 } // namespace ns3
 

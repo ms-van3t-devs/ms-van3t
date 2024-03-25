@@ -89,7 +89,8 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
       return;
     }
 
-  std::vector<std::string> ids = m_traci_ptr->TraCIAPI::vehicle.getIDList ();
+  //std::vector<std::string> ids = m_traci_ptr->TraCIAPI::vehicle.getIDList ();
+  std::vector<std::string> ids = m_traci_ptr->getVehicleNodeMapIds();
 
   for(std::vector<std::string>::iterator it=ids.begin();it!=ids.end();++it)
     {

@@ -65,6 +65,8 @@ public:
 
   uint32_t GetVehicleMapSize(); // size of vehicle map
 
+  std::vector<std::string> getVehicleNodeMapIds(); // get all vehicle node ids
+
 private:
   // perform sumo simulation for a certain time step
   void SumoSimulationStep(void);
