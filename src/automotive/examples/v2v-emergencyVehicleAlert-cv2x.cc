@@ -60,6 +60,7 @@ main (int argc, char *argv[])
   std::string csv_name_cumulative;
   std::string sumo_netstate_file_name;
   bool vehicle_vis = false;
+  double penetrationRate = 0.7;
 
   /*** 0.b LENA + V2X Options ***/
   double ueTxPower = 23.0;                // Transmission power in dBm
@@ -98,7 +99,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
   cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
-
+  cmd.AddValue ("penetrationRate", "Rate of vehicles equipped with wireless communication devices", penetrationRate);
 
   /* Cmd Line option for C-V2X */
   cmd.AddValue ("tx-power", "UEs transmission power [dBm]", ueTxPower);
@@ -363,7 +364,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
   sumoClient->SetAttribute ("SumoGUI", BooleanValue (sumo_gui));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
-  sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
+  sumoClient->SetAttribute ("PenetrationRate", DoubleValue (penetrationRate));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
   sumoClient->SetAttribute ("SumoStepLog", BooleanValue (false));
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));

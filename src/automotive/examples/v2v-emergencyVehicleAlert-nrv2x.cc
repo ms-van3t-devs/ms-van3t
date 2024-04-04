@@ -100,6 +100,8 @@ main (int argc, char *argv[])
   int numberOfNodes;
   uint32_t nodeCounter = 0;
 
+  double penetrationRate = 0.7;
+
   xmlDocPtr rou_xml_file;
   double m_baseline_prr = 150.0;
   bool m_prr_sup = false;
@@ -154,7 +156,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
   cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
-
+  cmd.AddValue ("penetrationRate", "Rate of vehicles equipped with wireless communication devices", penetrationRate);
 
   cmd.AddValue ("simTime",
                 "Simulation time in seconds",
@@ -621,6 +623,9 @@ main (int argc, char *argv[])
   //Set Sidelink bearers
   nrSlHelper->ActivateNrSlBearer (slBearersActivationTime, allSlUesNetDeviceContainer, tft);
 
+  // enable log component
+  //LogComponentEnable("NrUeMac", LOG_LEVEL_INFO);
+
   /*** 6. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
   sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
@@ -629,7 +634,7 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
   sumoClient->SetAttribute ("SumoGUI", BooleanValue (sumo_gui));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
-  sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
+  sumoClient->SetAttribute ("PenetrationRate", DoubleValue (penetrationRate));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
   sumoClient->SetAttribute ("SumoStepLog", BooleanValue (false));
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
