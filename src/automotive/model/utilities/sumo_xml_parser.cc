@@ -49,4 +49,31 @@ namespace ns3
 
       return num_vehicles;
   }
+  int XML_rou_count_pedestrians(xmlDocPtr doc)
+  {
+      xmlXPathContextPtr xpathCtx;
+      xmlXPathObjectPtr xpathObj;
+
+      int num_pedestrians=-1;
+
+      // Create xPath to select all the 'person' nodes in the rou.xml file
+      xpathCtx = xmlXPathNewContext(doc);
+      if(xpathCtx == NULL) {
+          return -1;
+      }
+
+      // Evaluate the xPath expression "//person" to look for all the "<person>" elements
+      xpathObj = xmlXPathEvalExpression((xmlChar *)"//person",xpathCtx);
+      if(xpathObj == NULL || xpathObj->nodesetval==NULL) {
+          xmlXPathFreeContext(xpathCtx);
+          return -1;
+      }
+
+      num_pedestrians = xpathObj->nodesetval->nodeNr;
+
+      xmlXPathFreeObject(xpathObj);
+      xmlXPathFreeContext(xpathCtx);
+
+      return num_pedestrians;
+  }
 }

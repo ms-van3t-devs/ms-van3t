@@ -11,7 +11,7 @@ namespace ns3 {
 class PRRSupervisor : public Object {
 
   typedef struct baselineVehicleData {
-    std::list<uint64_t> vehList;
+    std::list<uint64_t> nodeList;
     int x;
   } baselineVehicleData_t;
 
@@ -61,6 +61,8 @@ public:
 
   double getAveragePRR_vehicle(uint64_t vehicleID) {return m_avg_PRR_per_veh[vehicleID];}
   double getAverageLatency_vehicle(uint64_t vehicleID) {return m_avg_latency_ms_per_veh[vehicleID];}
+  double getAveragePRR_pedestrian(uint64_t pedestrianID) {return m_avg_PRR_per_ped[pedestrianID];}
+  double getAverageLatency_pedestrian(uint64_t pedestrianID) {return m_avg_latency_ms_per_ped[pedestrianID];}
 
   double getAveragePRR_messagetype(messageType_e messagetype) {return m_avg_PRR_per_messagetype[messagetype];}
   double getAverageLatency_messagetype(messageType_e messagetype) {return m_avg_latency_ms_per_messagetype[messagetype];}
@@ -88,14 +90,20 @@ private:
   std::unordered_map<std::string,int64_t> m_latency_map;
   std::unordered_map<std::string,uint64_t> m_vehicleid_map;
   std::unordered_map<std::string,messageType_e> m_messagetype_map;
+  std::unordered_map<std::string,StationType_t> m_stationtype_map;
+
   int m_count = 0;
   uint64_t m_count_latency = 0;
   double m_avg_PRR = 0.0;
   double m_avg_latency_ms = 0.0;
   std::unordered_map<uint64_t,double> m_avg_PRR_per_veh;
+  std::unordered_map<uint64_t,double> m_avg_PRR_per_ped;
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_veh;
+  std::unordered_map<uint64_t,double> m_avg_latency_ms_per_ped;
   std::unordered_map<uint64_t,int> m_count_per_veh;
+  std::unordered_map<uint64_t,int> m_count_per_ped;
   std::unordered_map<uint64_t,uint64_t> m_count_latency_per_veh;
+  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_ped;
 
   std::unordered_map<messageType_e,double> m_avg_PRR_per_messagetype;
   std::unordered_map<messageType_e,double> m_avg_latency_ms_per_messagetype;

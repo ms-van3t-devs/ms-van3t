@@ -67,6 +67,7 @@ namespace ns3 {
   {
     Simulator::Cancel(m_event_EPVupdate);
     Simulator::Cancel(m_event_Beacon);
+    m_EPVupdate_running=false;
     m_socket_tx->ShutdownRecv ();
   }
 
@@ -122,6 +123,13 @@ namespace ns3 {
   }
 
   void
+  GeoNet::setVRUdp (VRUdp* vrudp)
+  {
+    m_vrudp = vrudp;
+    EPVupdate ();// Update EPV at startup
+  }
+
+  void
   GeoNet::setSocketTx(Ptr<Socket> socket_tx)
   {
     m_socket_tx = socket_tx;
@@ -152,11 +160,19 @@ namespace ns3 {
     
     m_egoPV.TST_EPV = (compute_timestampIts (true) + 37000) % TS_MAX1;
     
-    if(!(m_stationtype==StationType_roadSideUnit))
+    if(!(m_stationtype==StationType_roadSideUnit) && m_EPVupdate_running==true)
     {
-      m_egoPV.S_EPV = m_vdp->getSpeedValue ();
-      m_egoPV.H_EPV = m_vdp->getHeadingValue ();
-      m_egoPV.POS_EPV = m_vdp->getPosition();
+      if(m_stationtype == StationType_pedestrian){
+          m_egoPV.S_EPV = m_vrudp->getPedSpeedValue ();
+          m_egoPV.H_EPV = m_vrudp->getPedHeadingValue ();
+          m_egoPV.POS_EPV.lat = m_vrudp->getPedPosition().lat;
+          m_egoPV.POS_EPV.lon = m_vrudp->getPedPosition().lon;
+          m_egoPV.POS_EPV.alt = m_vrudp->getPedPosition().alt;
+        } else{
+          m_egoPV.S_EPV = m_vdp->getSpeedValue ();
+          m_egoPV.H_EPV = m_vdp->getHeadingValue ();
+          m_egoPV.POS_EPV = m_vdp->getPosition();
+        }
     }
     // ETSI EN 302 636-4-1 [10.2.2]
     //Schedule the next egoPV update with GNMinUpdateFrequencyEPV protocol constant (1000ms)

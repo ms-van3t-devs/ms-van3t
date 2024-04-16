@@ -1552,6 +1552,11 @@ TraCIAPI::SimulationScope::getDepartedIDList() const {
     return myParent.getStringVector(CMD_GET_SIM_VARIABLE, VAR_DEPARTED_VEHICLES_IDS, "");
 }
 
+std::vector<std::string>
+TraCIAPI::SimulationScope::getPedList() const {
+    return myParent.getStringVector(CMD_GET_PERSON_VARIABLE, 0x00, "");
+}
+
 int
 TraCIAPI::SimulationScope::getArrivedNumber() const {
     return (int) myParent.getInt(CMD_GET_SIM_VARIABLE, VAR_ARRIVED_VEHICLES_NUMBER, "");

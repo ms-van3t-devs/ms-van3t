@@ -17,9 +17,15 @@
 
 
 namespace ns3 {
-  // Class to store optional data
-  // If the data is not available, m_available is 'false' and no actual data is stored (getData() does not return any meaningful data)
-  // If the data is available (isAvailable() returns 'true'), then the actual data can be retrieved with getData()
+/**
+ * \ingroup automotive
+ *
+ * @brief Class to store optional data
+ *
+ * If the data is not available, m_available is 'false' and no actual data is stored (getData() does not return any meaningful data)
+ * If the data is available (isAvailable() returns 'true'), then the actual data can be retrieved with getData()
+ *
+ */
   template <class T> class OptionalDataItem
   {
           private:
@@ -34,7 +40,13 @@ namespace ns3 {
 		  bool isAvailable() {return m_available;}
 		  T setData(T data) {m_dataitem=data; m_available=true;return m_dataitem;}
   };
-  // This structure contains all the data stored in the database for each vehicle (except for the PHPoints)
+  /**
+   * \ingroup automotive
+   *
+   * @brief Structure to store the data of a vehicle in the LDM
+   *
+   * This structure contains all the data stored in the database for each vehicle (except for the PHPoints)
+   */
   typedef struct _vehicleData {
           bool detected;
           uint64_t stationID;
@@ -45,6 +57,7 @@ namespace ns3 {
           double heading; // Heading between 0 and 360 degrees
           double speed_ms;
           long camTimestamp; // This is the CAM message GenerationDeltaTime
+          long vamTimestamp; // This is the VAM message GenerationDeltaTime
           uint64_t timestamp_us;// Entry last update
           uint64_t age_us; //Entry lifetime
           long stationType;
@@ -76,7 +89,12 @@ namespace ns3 {
           OptionalDataItem<long> perceivedBy;
   } vehicleData_t;
 
-  // Information stored for each PH point
+  /**
+   * \ingroup automotive
+   *
+   * @brief Information stored for each PH point
+   *
+   */
   typedef struct PHData {
           double lat;
           double lon;

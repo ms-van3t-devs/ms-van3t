@@ -332,6 +332,8 @@ namespace ns3 {
   {
     if (m_client == NULL)
       return;
+    if (m_station_type == StationType_pedestrian)
+      return;
 
     libsumo::TraCIPosition egoPosXY=m_client->TraCIAPI::vehicle.getPosition(m_id);
 
@@ -426,7 +428,8 @@ namespace ns3 {
         if (m_polygons)
         {
             std::string veh = std::to_string(it->second.vehData.stationID);
-            if(it->second.vehData.detected)
+            //if(it->second.vehData.detected)
+            if(it->second.vehData.stationID != m_stationID)
               drawPolygon(it->second.vehData);
         }
     }
@@ -475,6 +478,10 @@ namespace ns3 {
     libsumo::TraCIPositionVector SUMOPolygon;
     libsumo::TraCIColor magenta;
     magenta.r=255;magenta.g=0;magenta.b=255;magenta.a=255;
+    libsumo::TraCIColor magenta_cpm;
+    magenta_cpm.r=0;magenta_cpm.g=214;magenta_cpm.b=0;magenta_cpm.a=225;
+    libsumo::TraCIColor cian_connected;
+    cian_connected.r=189;cian_connected.g=238;cian_connected.b=245;cian_connected.a=255;
     SUMOPolygon.push_back(boost2TraciPos (Spoints.front_left));
     SUMOPolygon.push_back(boost2TraciPos (Spoints.back_left));
     SUMOPolygon.push_back(boost2TraciPos (Spoints.back_right));
@@ -487,10 +494,25 @@ namespace ns3 {
     if(std::find(polygonList.begin(), polygonList.end (), id) != polygonList.end ())
       {
         m_client->TraCIAPI::polygon.setShape (id,SUMOPolygon);
+        if (data.detected)
+          {
+            long who = data.perceivedBy.getData();
+            if (who == m_stationID)
+              m_client->TraCIAPI::polygon.setColor (id,magenta);
+            else
+              m_client->TraCIAPI::polygon.setColor (id,magenta_cpm);
+          }
       }
     else
       {
-        m_client->TraCIAPI::polygon.add(id,SUMOPolygon,magenta,1,"building.yes",5);
+        if(data.detected)
+          {
+            long who = data.perceivedBy.getData();
+            if (who == m_stationID)
+              m_client->TraCIAPI::polygon.add(id,SUMOPolygon,magenta,1,"building.yes",5);
+            else
+              m_client->TraCIAPI::polygon.add(id,SUMOPolygon,magenta_cpm,1,"building.yes",5);
+          }
       }
   }
 

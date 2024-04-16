@@ -207,6 +207,8 @@ if [ "$mode" = "base" ]; then
 	# Switch CMakeLists.txt and PRRsup
 	ns_3_dir=$(pwd)
 	cd src/automotive/
+	cp CMakeLists.txt aux-files/CMakeLists-base.txt
+	cp model/Measurements/* aux-files/Measurements-base/
 	cp aux-files/CMakeLists-CARLA.txt CMakeLists.txt
 	cp aux-files/CMakeLists-examples-CARLA.txt examples/CMakeLists.txt
 	cp aux-files/Measurements-CARLA/* model/Measurements/

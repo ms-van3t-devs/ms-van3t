@@ -89,3 +89,11 @@ build_lib_example(
     ${libgps-tc}
     ${libtraci}
 )
+build_lib_example(
+        NAME v2p-vam-80211p
+        SOURCE_FILES v2p-vam-80211p.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+        ${libwave}
+        ${libtraci}
+)

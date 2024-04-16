@@ -19,6 +19,7 @@
 
 #include "ns3/BSContainer.h"
 #include "ns3/vdp.h"
+#include "ns3/VRUdp.h"
 
 namespace ns3
 {
@@ -37,11 +38,16 @@ namespace ns3
     m_gn = nullptr;
     m_real_time = false;
     m_mobility_client = nullptr;
+    m_LDM = nullptr;
 
     m_prrsup_ptr = nullptr;
     m_prrsup_beacons = true;
 
     m_sumo_vehid_prefix = "veh";
+    m_sumo_pedid_prefix = "ped";
+
+    m_csv_file_name = "";
+    m_VAM_metrics = false;
 
     m_is_configured = false;
     m_DENMs_enabled = false;
@@ -49,13 +55,23 @@ namespace ns3
 
   BSContainer::BSContainer(unsigned long fixed_stationid, long fixed_stationtype, Ptr<TraciClient> mobility_client, bool real_time, Ptr<Socket> socket_rxtx)
   {
+    m_station_id = ULONG_MAX;
+    m_stationtype = LONG_MAX;
+    m_socket = nullptr;
     m_btp = nullptr;
     m_gn = nullptr;
+    m_real_time = false;
+    m_mobility_client = nullptr;
+    m_LDM = nullptr;
 
     m_prrsup_ptr = nullptr;
     m_prrsup_beacons = true;
 
     m_sumo_vehid_prefix = "veh";
+    m_sumo_pedid_prefix = "ped";
+
+    m_csv_file_name = "";
+    m_VAM_metrics = false;
 
     m_is_configured = false;
     m_DENMs_enabled = false;
@@ -94,15 +110,33 @@ namespace ns3
     m_socket=socket_rxtx;
   }
 
+  void BSContainer::setVAMmetricsfile(std::string file_name, bool collect_metrics){
+    m_csv_file_name = file_name;
+    m_VAM_metrics = collect_metrics;
+  }
+
   void
-  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled) {
-    if(CABasicService_enabled==false && DENBasicService_enabled==false) {
+  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled) {
+    if(CABasicService_enabled==false && DENBasicService_enabled==false && VRUBasicService_enabled==false) {
       NS_FATAL_ERROR("Error. Called setupContainer() asking for enabling zero Basic Services. Aborting simulation.");
     }
 
     if(m_socket==nullptr || m_mobility_client==nullptr || m_station_id==ULONG_MAX || m_stationtype==LONG_MAX) {
       NS_FATAL_ERROR("Error. Attempted to call setupContainer() on an uninitialized BSContainer. Aborting simulation.");
     }
+
+    // If dealing with a pedestrian create the local dynamic map
+    m_LDM = CreateObject<LDM> ();
+    m_LDM->setTraCIclient (m_mobility_client);
+    m_LDM->setStationType (m_stationtype);
+
+    if(m_stationtype == StationType_pedestrian){
+        m_LDM->setStationID (m_sumo_pedid_prefix + std::to_string (m_station_id));
+    }
+    else{
+        m_LDM->setStationID (m_sumo_vehid_prefix + std::to_string (m_station_id));
+    }
+
 
     // Setup the required services
     // ETSI Transport and Networking layers
@@ -123,6 +157,7 @@ namespace ns3
       m_cabs.setBTP (m_btp);
       m_cabs.setSocketTx (m_socket);
       m_cabs.setSocketRx (m_socket);
+      m_cabs.setLDM (m_LDM);
 
       // Remember that setStationProperties() must always be called *after* setBTP()
       m_cabs.setStationProperties (m_station_id, m_stationtype);
@@ -134,12 +169,14 @@ namespace ns3
       m_CAMs_enabled = true;
     }
 
-    m_vdp_ptr = new VDPTraCI(m_mobility_client,m_sumo_vehid_prefix + std::to_string(m_station_id));
-    m_btp->setVDP(m_vdp_ptr);
+    if(m_stationtype != StationType_pedestrian){
+        m_vdp_ptr = new VDPTraCI(m_mobility_client,m_sumo_vehid_prefix + std::to_string(m_station_id));
+        m_btp->setVDP(m_vdp_ptr);
 
-    if(CABasicService_enabled==true) {
-      m_cabs.setVDP(m_vdp_ptr);
-    }
+        if(CABasicService_enabled==true) {
+          m_cabs.setVDP(m_vdp_ptr);
+        }
+      }
 
     if(DENBasicService_enabled==true) {
       m_denbs.setBTP (m_btp);
@@ -153,6 +190,32 @@ namespace ns3
 
       m_DENMs_enabled = true;
     }
+
+    if(VRUBasicService_enabled==true) {
+      m_vrubs.setBTP (m_btp);
+      m_vrubs.setSocketTx (m_socket);
+      m_vrubs.setSocketRx (m_socket);
+      //m_vrubs.setVAMmetricsfile (m_csv_file_name, m_VAM_metrics);
+      m_vrubs.setLDM (m_LDM);
+
+      // Remember that setStationProperties() must always be called *after* setBTP()
+      m_vrubs.setStationProperties (m_station_id, m_stationtype);
+
+      if(m_VAMReceiveCallback!=nullptr) {
+        m_vrubs.addVAMRxCallback (m_VAMReceiveCallback);
+      }
+
+      m_VAMs_enabled = true;
+    }
+
+    if(m_stationtype == StationType_pedestrian){
+        m_vrudp_ptr = new VRUdp(m_mobility_client,m_sumo_pedid_prefix + std::to_string(m_station_id));
+        m_btp->setVRUdp(m_vrudp_ptr);
+
+        if(VRUBasicService_enabled==true) {
+          m_vrubs.setVRUdp (m_vrudp_ptr);
+        }
+      }
 
     m_is_configured = true;
   }
@@ -192,8 +255,15 @@ namespace ns3
       m_denbs.cleanup ();
     }
 
+    if(m_VAMs_enabled==true) {
+      m_vrubs.terminateDissemination();
+    }
+
     if(m_gn!=nullptr) {
       m_gn->cleanup();
+    }
+    if(m_LDM!=nullptr) {
+      m_LDM->cleanup();
     }
   }
 }

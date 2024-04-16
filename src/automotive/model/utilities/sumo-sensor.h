@@ -20,18 +20,55 @@ namespace ns3 {
   using polygon_type = boost::geometry::model::polygon<point_type>;
   using linestring_type = boost::geometry::model::linestring<point_type>;
 
+  /**
+   * \ingroup automotive
+   * \brief This class implements a sensor that detects vehicles in its vicinity for a given SUMO vehicle.
+   *
+   * This class provides capabilities for detecting vehicles in the vicinity of a SUMO vehicle.
+   */
   class SUMOSensor : public Object
   {
   public:
+    /**
+     * @brief Construct a new SUMOSensor object.
+     */
     SUMOSensor();
     ~SUMOSensor();
 
+    /**
+     * @brief Set the station ID.
+     *
+     * @param id The station ID.
+     */
     void setStationID(std::string id){m_id=id;m_stationID=std::stol(id.substr (3));}
+    /**
+     * @brief Set the TraCI client.
+     *
+     * @param client The TraCI client.
+     */
     void setTraCIclient(Ptr<TraciClient> client){m_client=client;m_event_updateDetectedObjects = Simulator::Schedule(MilliSeconds (100),&SUMOSensor::updateDetectedObjects,this);}
+    /**
+     * @brief Set the VDP object.
+     *
+     * @param vdp The VDP object.
+     */
     void setVDP(VDP* vdp) {m_vdp=vdp;}
+    /**
+     * @brief Set the sensor perception range. (Default = 50 meters)
+     *
+     * @param sensorRange The sensor range.
+     */
     void setSensorRange(double sensorRange){m_sensorRange = sensorRange;}
+    /**
+     * @brief Get the detected objects and update the LDM.
+     *
+     */
     void updateDetectedObjects();
 
+    /**
+     * @brief Set the LDM object.
+     * @param ldm
+     */
     void setLDM(Ptr<LDM> ldm){m_LDM = ldm;}
     libsumo::TraCIPosition boost2TraciPos(point_type point_type);
 
@@ -54,12 +91,12 @@ namespace ns3 {
 
         EventId m_event_updateDetectedObjects;
 
-        double m_sensorRange;
+        double m_sensorRange; ///! Sensor range in meters
 
-        const double m_mean = 0.0;
-        const double m_stddev_distance = 1.0; // meters
-        const double m_stddev_angle = 0.57; //degrees
-        const double m_stddev_speed = 0.45; // m/s
+        const double m_mean = 0.0; ///! Mean of the perception's noise
+        const double m_stddev_distance = 0.5; ///! Standard deviation of the perception's distance noise
+        const double m_stddev_angle = 0.2; ///! Standard deviation of the perception's angle noise
+        const double m_stddev_speed = 0.2; ///! Standard deviation of the perception's speed noise
         double m_avg_dwell = 0.0;
         int m_dwell_count = 0;
 

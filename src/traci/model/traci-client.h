@@ -40,6 +40,8 @@
 
 #include "ns3/vehicle-visualizer.h"
 
+#include "ns3/StationType.h"
+
 #define STARTUP_FCN std::function<Ptr<Node>(std::string)>
 #define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>
 
@@ -67,6 +69,9 @@ public:
 
   std::vector<std::string> getVehicleNodeMapIds(); // get all vehicle node ids
 
+  std::map< std::string, std::pair< StationType_t, Ptr<Node> > > get_NodeMap() {return m_NodeMap;};
+
+
 private:
   // perform sumo simulation for a certain time step
   void SumoSimulationStep(void);
@@ -78,13 +83,13 @@ private:
   void GetSumoVehicles(std::vector<std::string>& sumoVehicles);
 
   // synchronise ns3 nodes with sumo vehicles
-  void SynchroniseVehicleNodeMap(void);
+  void SynchroniseNodeMap(void);
 
   // build command line string for sumo start up
   std::string GetSumoCmdString (void);
 
-  // map every sumo vehicle to a ns3 node
-  std::map< std::string, Ptr<Node> > m_vehicleNodeMap;
+  // map every sumo vehicle/pedestrian to a ns3 node
+  std::map< std::string, std::pair< StationType_t, Ptr<Node> > > m_NodeMap;
 
   // a vehicle is untracked if it is simulated in sumo but not linked to a ns3 node because of an penetration rate < 1.0
   std::vector<std::string> m_untrackedVehicles;
@@ -114,6 +119,9 @@ private:
   double m_altitude;
   int m_sumoSeed;
   ns3::Time m_sumoWaitForSocket;
+
+  // Flag pedestrians list empty
+  bool m_pedlist_empty = true;
 
   Ptr<vehicleVisualizer> m_vehicle_visualizer;
   std::string m_netns_name;

@@ -49,15 +49,41 @@ namespace ns3
         void setConfidence(C confidence) {m_confidence=confidence;}
   };
 
+  /**
+   * \ingroup automotive
+   *
+   * \brief This class provides the interface for the Vehicle Data Provider (VDP).
+   *
+   * This class encapsulates various data structures representing different aspects of vehicle data and its processing.
+   */
   class VDP
   {
     public:
+    /**
+     * @struct VDP_PosConfidenceEllipse
+     * @brief Represents the positional confidence ellipse for vehicle data processing.
+     *
+     * @var long VDP_PosConfidenceEllipse::semiMajorConfidence
+     * Semi-major axis confidence.
+     *
+     * @var long VDP_PosConfidenceEllipse::semiMinorConfidence
+     * Semi-minor axis confidence.
+     *
+     * @var long VDP_PosConfidenceEllipse::semiMajorOrientation
+     * Orientation of the semi-major axis.
+     */
       typedef struct VDP_PosConfidenceEllipse {
         long semiMajorConfidence;
         long semiMinorConfidence;
         long semiMajorOrientation;
       } VDP_PosConfidenceEllipse_t;
 
+    /**
+     * @struct CAM_mandatory_data
+     * @brief Struct representing the mandatory data in a CAM message.
+     *
+     * This includes various parameters like speed, position, acceleration, heading, etc.
+     */
       typedef struct CAM_mandatory_data {
         VDPValueConfidence<> speed;
         long longitude;
@@ -74,6 +100,12 @@ namespace ns3
         VDPValueConfidence<> yawRate;
       } CAM_mandatory_data_t;
 
+    /**
+     * @struct CPM_mandatory_data
+     * @brief Mandatory data for Collective Perception Messages.
+     *
+     * Similar to CAM_mandatory_data, but used for collective perception.
+     */
       typedef struct CPM_mandatory_data {
         VDPValueConfidence<> speed;
         long longitude;
@@ -90,14 +122,32 @@ namespace ns3
         VDPValueConfidence<> yawRate;
       } CPM_mandatory_data_t;
 
+    /**
+     * @struct VDP_position_cartesian
+     * @brief Represents a position in Cartesian coordinates.
+     *
+     * Describes a vehicle's position in a 3D Cartesian coordinate system.
+     */
       typedef struct VDP_position_cartesian {
         double x,y,z;
       } VDP_position_cartesian_t;
 
+    /**
+     * @struct VDP_position_latlon
+     * @brief Represents a geographic position.
+     *
+     * Describes a vehicle's position in terms of latitude, longitude, and altitude.
+     */
       typedef struct VDP_position_latlon {
         double lat,lon,alt;
       } VDP_position_latlon_t;
 
+    /**
+     * @struct VDP_CEN_DSRC_tolling_zone
+     * @brief Represents a CEN DSRC tolling zone.
+     *
+     * Contains data about a tolling zone as defined in the CEN DSRC standards.
+     */
       typedef struct VDP_CEN_DSRC_tolling_zone {
         long latitude;
         long longitude;

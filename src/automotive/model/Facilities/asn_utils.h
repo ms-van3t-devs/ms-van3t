@@ -11,6 +11,7 @@
 #define FIX_DENMID          0x01
 #define FIX_CAMID           0x02
 #define FIX_IVIMID          0x06
+#define FIX_VAMID           0x10
 #define DECI                10
 #define CENTI               100
 #define MILLI               1000

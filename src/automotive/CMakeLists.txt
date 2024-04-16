@@ -50,6 +50,8 @@ Set(source_files
     model/Facilities/caBasicService_v1.cc
     model/Facilities/denBasicService_v1.cc
     model/Facilities/cpBasicService_v1.cc
+    model/Facilities/VRUdp.cc
+    model/Facilities/VRUBasicService.cc
 
     model/BTP/btp.cc
     model/BTP/btpHeader.cc
@@ -1318,6 +1320,8 @@ set(header_files
     model/Facilities/caBasicService_v1.h
     model/Facilities/denBasicService_v1.h
     model/Facilities/cpBasicService_v1.h
+    model/Facilities/VRUdp.h
+    model/Facilities/VRUBasicService.h
 
     # BTP
     model/BTP/btp.h

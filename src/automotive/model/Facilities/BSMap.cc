@@ -36,7 +36,7 @@ namespace ns3
       NS_FATAL_ERROR("Fatal error. Called BSMap::add() with a null pointer.");
     }
 
-    StationID_t station_id=bscontainer->getVehicleID();
+    StationID_t station_id=bscontainer->getStationID();
 
     m_internal_bsvector[station_id] = bscontainer;
   }

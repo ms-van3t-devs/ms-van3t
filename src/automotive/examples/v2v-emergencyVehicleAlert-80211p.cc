@@ -62,7 +62,7 @@ main (int argc, char *argv[])
   std::string csv_name;
   std::string csv_name_cumulative;
   std::string sumo_netstate_file_name;
-  int txPower=23;
+  int txPower=30;
   double penetrationRate = 0.7;
 
   float datarate=12;  
@@ -193,7 +193,7 @@ main (int argc, char *argv[])
                                       "NonUnicastMode",StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
-  //wifiPhy.EnablePcap ("v2v-EVA",netDevices);
+  wifiPhy.EnablePcap ("v2v-EVA",netDevices);
 
   /*** 4. Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
   PacketSocketHelper packetSocket;

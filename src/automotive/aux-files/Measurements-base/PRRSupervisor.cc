@@ -74,7 +74,7 @@ PRRSupervisor::bufToString(uint8_t *buf, uint32_t bufsize)
 }
 
 void
-PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t vehicleID, messageType_e messagetype)
+PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t nodeID, messageType_e messagetype)
 {
   EventId computePRR_id;
 
@@ -84,23 +84,33 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
     }
 
   // If the packet is sent by an excluded vehicle due to a problem in the configuration of the simulation, ignore it
-  if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(vehicleID)!=m_excluded_vehID_list.end()))
+  if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(nodeID)!=m_excluded_vehID_list.end()))
     {
       return;
     }
 
-  std::vector<std::string> ids = m_traci_ptr->TraCIAPI::vehicle.getIDList ();
+  //std::vector<std::string> ids = m_traci_ptr->TraCIAPI::vehicle.getIDList ();
+  std::map< std::string, std::pair< StationType_t, Ptr<Node> > > node_map = m_traci_ptr->get_NodeMap ();
 
-  for(std::vector<std::string>::iterator it=ids.begin();it!=ids.end();++it)
+  for(std::map< std::string, std::pair< StationType_t, Ptr<Node> > >::iterator it=node_map.begin();it!=node_map.end();++it)
     {
-      uint64_t stationID = std::stol(it->substr (3));
-      libsumo::TraCIPosition pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (*it);
+      uint64_t stationID = std::stol(it->first.substr (3));
+      StationType_t station_type = it->second.first;
+
+      libsumo::TraCIPosition pos;
+      if(station_type == StationType_pedestrian)
+        pos = m_traci_ptr->TraCIAPI::person.getPosition (it->first);
+      else
+        pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (it->first);
       pos=m_traci_ptr->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+
+      if(stationID == nodeID)
+        m_stationtype_map[buf] = station_type;
 
       if(m_excluded_vehID_enabled==false || (m_excluded_vehID_list.find(stationID)==m_excluded_vehID_list.end())) {
           if(PRRSupervisor_haversineDist(lat,lon,pos.y,pos.x)<=m_baseline_m)
             {
-              m_packetbuff_map[buf].vehList.push_back(stationID);
+              m_packetbuff_map[buf].nodeList.push_back(stationID);
             }
         }
     }
@@ -110,13 +120,13 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
 
   m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();
 
-  m_vehicleid_map[buf] = vehicleID;
+  m_vehicleid_map[buf] = nodeID;
 
   m_messagetype_map[buf] = messagetype;
 }
 
 void
-PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t vehicleID)
+PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
 {
   baselineVehicleData_t currBaselineData;
   double curr_latency_ms = DBL_MAX;
@@ -127,7 +137,7 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t vehicleID)
     }
 
   // If the packet was received by an excluded vehicle due to a problem in the configuration of the simulation, ignore it
-  if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(vehicleID)!=m_excluded_vehID_list.end()))
+  if(m_excluded_vehID_enabled==true && (m_excluded_vehID_list.find(nodeID)!=m_excluded_vehID_list.end()))
     {
       return;
     }
@@ -138,7 +148,7 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t vehicleID)
     {
       currBaselineData = m_packetbuff_map[buf];
 
-      if(std::find(currBaselineData.vehList.begin(), currBaselineData.vehList.end(), vehicleID) != currBaselineData.vehList.end())
+      if(std::find(currBaselineData.nodeList.begin(), currBaselineData.nodeList.end(), nodeID) != currBaselineData.nodeList.end())
         {
           (m_packetbuff_map[buf].x)++;
         }
@@ -155,17 +165,33 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t vehicleID)
 
       m_avg_latency_ms += (curr_latency_ms-m_avg_latency_ms)/m_count_latency;
 
-      if(m_count_latency_per_veh.count(senderID)<=0) {
-          m_count_latency_per_veh[senderID]=0;
+      StationType_t station_type = m_stationtype_map[buf];
+      if(station_type == StationType_pedestrian){
+
+          if(m_count_latency_per_ped.count(senderID)<=0) {
+              m_count_latency_per_ped[senderID]=0;
+            }
+
+          if(m_avg_latency_ms_per_ped.count(senderID)<=0) {
+              m_avg_latency_ms_per_ped[senderID]=0;
+            }
+
+          m_count_latency_per_ped[senderID]++;
+          m_avg_latency_ms_per_ped[senderID] += (curr_latency_ms - m_avg_latency_ms_per_ped[senderID])/m_count_latency_per_ped[senderID];
+
         }
+      else{
+          if(m_count_latency_per_veh.count(senderID)<=0) {
+              m_count_latency_per_veh[senderID]=0;
+            }
 
-      if(m_avg_latency_ms_per_veh.count(senderID)<=0) {
-          m_avg_latency_ms_per_veh[senderID]=0;
+          if(m_avg_latency_ms_per_veh.count(senderID)<=0) {
+              m_avg_latency_ms_per_veh[senderID]=0;
+            }
+
+          m_count_latency_per_veh[senderID]++;
+          m_avg_latency_ms_per_veh[senderID] += (curr_latency_ms - m_avg_latency_ms_per_veh[senderID])/m_count_latency_per_veh[senderID];
         }
-
-      m_count_latency_per_veh[senderID]++;
-      m_avg_latency_ms_per_veh[senderID] += (curr_latency_ms - m_avg_latency_ms_per_veh[senderID])/m_count_latency_per_veh[senderID];
-
 
       if(m_count_latency_per_messagetype.count(messagetype)<=0) {
           m_count_latency_per_messagetype[messagetype]=0;
@@ -178,9 +204,8 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t vehicleID)
       m_count_latency_per_messagetype[messagetype]++;
       m_avg_latency_ms_per_messagetype[messagetype] += (curr_latency_ms - m_avg_latency_ms_per_messagetype[messagetype])/m_count_latency_per_messagetype[messagetype];
 
-
       if(m_verbose_stdout == true) {
-          std::cout << "|Latency| ID: " << vehicleID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
+          std::cout << "|Latency| ID: " << nodeID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
         }
     }
 }
@@ -190,15 +215,16 @@ PRRSupervisor::computePRR(std::string buf)
 {
   double PRR = 0.0;
 
-  if(m_packetbuff_map[buf].vehList.size()>1)
+  if(m_packetbuff_map[buf].nodeList.size()>1)
     {
       uint64_t senderID = m_vehicleid_map[buf];
       messageType_e messagetype = m_messagetype_map[buf];
+      StationType_t station_type = m_stationtype_map[buf];
 
-      PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].vehList.size()-1.0);
+      PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].nodeList.size()-1.0);
 
       if(PRR>1) {
-          std::cerr << "Value of X: " << (double) m_packetbuff_map[buf].x << " - value of Y: " << (double) (m_packetbuff_map[buf].vehList.size()-1.0) << std::endl;
+          std::cerr << "Value of X: " << (double) m_packetbuff_map[buf].x << " - value of Y: " << (double) (m_packetbuff_map[buf].nodeList.size()-1.0) << std::endl;
           NS_FATAL_ERROR ("Error. Computed a PRR greater than 1. This is not possible. Please check how you configured your simulation and the PRRSupervisor.");
         }
 
@@ -209,16 +235,31 @@ PRRSupervisor::computePRR(std::string buf)
           std::cout << "|PRR| Current: " << PRR << " - Average: " << m_avg_PRR << std::endl;
         }
 
-      if(m_count_per_veh.count(senderID)<=0) {
-          m_count_per_veh[senderID]=0;
-        }
+      if (station_type == StationType_pedestrian){
+          if(m_count_per_ped.count(senderID)<=0) {
+              m_count_per_ped[senderID]=0;
+            }
 
-      if(m_avg_PRR_per_veh.count(senderID)<=0) {
-          m_avg_PRR_per_veh[senderID]=0;
-        }
+          if(m_avg_PRR_per_ped.count(senderID)<=0) {
+              m_avg_PRR_per_ped[senderID]=0;
+            }
 
-      m_count_per_veh[senderID]++;
-      m_avg_PRR_per_veh[senderID] += (PRR-m_avg_PRR_per_veh[senderID])/m_count_per_veh[senderID];
+          m_count_per_ped[senderID]++;
+          m_avg_PRR_per_ped[senderID] += (PRR-m_avg_PRR_per_ped[senderID])/m_count_per_ped[senderID];
+        }
+      else
+        {
+          if(m_count_per_veh.count(senderID)<=0) {
+              m_count_per_veh[senderID]=0;
+            }
+
+          if(m_avg_PRR_per_veh.count(senderID)<=0) {
+              m_avg_PRR_per_veh[senderID]=0;
+            }
+
+          m_count_per_veh[senderID]++;
+          m_avg_PRR_per_veh[senderID] += (PRR-m_avg_PRR_per_veh[senderID])/m_count_per_veh[senderID];
+        }
 
       if(m_count_per_messagetype.count(messagetype)<=0) {
           m_count_per_messagetype[messagetype]=0;

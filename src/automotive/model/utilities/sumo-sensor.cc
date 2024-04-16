@@ -117,12 +117,16 @@ namespace ns3 {
          std::normal_distribution<double> dist_speed(m_mean,m_stddev_speed);
 
 
-         if (retval==LDM::LDM_ITEM_NOT_FOUND || (retval==LDM::LDM_OK && retveh.vehData.detected))
+         //if (retval==LDM::LDM_ITEM_NOT_FOUND || (retval==LDM::LDM_OK && retveh.vehData.detected))
+         if (retval==LDM::LDM_ITEM_NOT_FOUND || retval==LDM::LDM_OK)
            {
              vehicleData_t objectData = {0};
               long id = m_stationID;
               double dist_factor = 1-(sensedIDs[i].second/m_sensorRange);
-              objectData.detected = true;
+              if (retval==LDM::LDM_OK && !retveh.vehData.detected)
+                 objectData.detected = false;
+              else
+                objectData.detected = true;
               objectData.ID = sensedIDs[i].first;
               objectData.stationID = std::stol(objectData.ID.substr(3));
 

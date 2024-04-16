@@ -44,6 +44,7 @@ namespace ns3
     m_cam_ReceiveCallback = nullptr;
     m_denm_ReceiveCallback = nullptr;
     m_ivim_ReceiveCallback = nullptr;
+    m_vam_ReceiveCallback = nullptr;
   }
 
   void
@@ -144,8 +145,11 @@ namespace ns3
       if(m_cpm_ReceiveCallback!=nullptr){
           m_cpm_ReceiveCallback(btpDataIndication,address);
         }
-      }
-    else {
+      } else if(btpDataIndication.destPort == VA_PORT) {
+        if(m_vam_ReceiveCallback!=nullptr) {
+          m_vam_ReceiveCallback(btpDataIndication,address);
+        }
+    } else {
       NS_LOG_ERROR("BTP : Unknown port");
     }
   }

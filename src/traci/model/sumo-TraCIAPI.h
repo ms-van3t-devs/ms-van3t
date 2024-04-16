@@ -508,6 +508,7 @@ public:
         std::vector<std::string> getDepartedIDList() const;
         int getArrivedNumber() const;
         std::vector<std::string> getArrivedIDList() const;
+        std::vector<std::string> getPedList() const;
         int getStartingTeleportNumber() const;
         std::vector<std::string> getStartingTeleportIDList() const;
         int getEndingTeleportNumber() const;

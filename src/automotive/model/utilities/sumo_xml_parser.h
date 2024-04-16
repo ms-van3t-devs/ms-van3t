@@ -10,6 +10,7 @@
 namespace ns3 {
 
   int XML_rou_count_vehicles(xmlDocPtr doc);
+  int XML_rou_count_pedestrians(xmlDocPtr doc);
 }
 
 #endif

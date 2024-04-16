@@ -5,6 +5,13 @@
 #include "ns3/traci-client.h"
 
 namespace ns3 {
+
+/**
+ * \ingroup automotive
+ *
+ * \brief This class is used to represent a VDP object that gathers information from TraCI.
+ *
+ */
   class VDPTraCI : public VDP
   {
   public:
@@ -27,25 +34,85 @@ namespace ns3 {
     VEH_SIGNAL_EMERGENCY_YELLOW =0b10000000000000,
     }TraciVehicleSignals_e;
 
+    /**
+     * @brief Constructor
+     *
+     * This constructor initializes the VDPTraCI object.
+     * @param traci_client The TraCI client object.
+     * @param node_id The node ID of the SUMO vehicle.
+     */
     VDPTraCI(Ptr<TraciClient> traci_client, std::string node_id);
     VDPTraCI();
 
     void setProperties(Ptr<TraciClient> traci_client,std::string node_id) {m_traci_client=traci_client; m_id=node_id;}
 
+    /**
+     * @brief This function returns the mandatory data of the CAM message.
+     *
+     * This method returns the mandatory data of the CAM message in the units used for the ASN.1 encoding.
+     *
+     * @return  The mandatory data of the CAM message.
+     */
     CAM_mandatory_data_t getCAMMandatoryData();
+
+    /**
+     * @brief This function returns the mandatory data of the CPM message.
+     *
+     * This method returns the mandatory data of the CPM message in the units used for the ASN.1 encoding.
+     *
+     * @return  The mandatory data of the CPM message.
+     */
     CPM_mandatory_data_t getCPMMandatoryData();
 
+    /**
+     * @brief This functio returns the vehicle's speed.
+     * @return
+     */
     double getSpeedValue() {return m_traci_client->TraCIAPI::vehicle.getSpeed (m_id);}
+    /**
+     * @brief This function returns the vehicle's travelled distance.
+     * @return
+     */
     double getTravelledDistance() {return m_traci_client->TraCIAPI::vehicle.getDistance (m_id);}
+    /**
+     * @brief This function returns the vehicle's heading.
+     * @return
+     */
     double getHeadingValue() {return m_traci_client->TraCIAPI::vehicle.getAngle (m_id);}
 
     // Added for GeoNet functionalities
+    /**
+     * @brief This function returns the vehicle's position in lat/lon coordinates.
+     * @return
+     */
     VDP_position_latlon_t getPosition();
+    /**
+     * @brief This function returns the vehicle's position in cartesian coordinates.
+     * @return
+     */
     VDP_position_cartesian_t getPositionXY();
+    /**
+     * @brief This function converts the vehicle's position in lat/lon coordinates to cartesian coordinates.
+     * @param lon The vehicle's longitude.
+     * @param lat The vehicle's latitude.
+     * @return
+     */
     VDP_position_cartesian_t getXY(double lon, double lat);
+    /**
+     * @brief This function returns the distance between two points in lat/lon coordinates.
+     * @param lon1
+     * @param lat1
+     * @param lon2
+     * @param lat2
+     * @return
+     */
     double getCartesianDist (double lon1, double lat1, double lon2, double lat2);
 
     VDPDataItem<uint8_t> getAccelerationControl() {return VDPDataItem<uint8_t>(false);}
+    /**
+     * @brief This function returns the vehicle's lane position in the road.
+     * @return lane id
+     */
     VDPDataItem<int> getLanePosition();
     VDPDataItem<VDPValueConfidence<int,int>> getSteeringWheelAngle() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
     VDPDataItem<VDPValueConfidence<int,int>> getLateralAcceleration() {return VDPDataItem<VDPValueConfidence<int,int>>(false);}
@@ -54,6 +121,10 @@ namespace ns3 {
     VDPDataItem<VDP_CEN_DSRC_tolling_zone_t> getCenDsrcTollingZone() {return VDPDataItem<VDP_CEN_DSRC_tolling_zone_t>(false);}
 
     VDPDataItem<unsigned int> getVehicleRole() {return m_vehicleRole;}
+    /**
+     * @brief This function returns the vehicle's exterior lights state in the format used in CAM ASN.1 structure.
+     * @return bit map of the exterior lights state
+     */
     VDPDataItem<uint8_t> getExteriorLights();
 
     VDPDataItem<VDP_PublicTransportContainerData_t> getPublicTransportContainerData() {return m_publicTransportContainerData;}

@@ -162,19 +162,19 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
 
-    std::string foundVeh("");
+    std::string foundNode("");
 
     // search map for corresponding node
-    for (std::map<std::string, Ptr<Node> >::iterator it = m_vehicleNodeMap.begin(); it != m_vehicleNodeMap.end(); ++it)
+    for (std::map<std::string, std::pair< StationType_t, Ptr<Node> > >::iterator it = m_NodeMap.begin(); it != m_NodeMap.end(); ++it)
       {
-        if (it->second == node)
+        if (it->second.second == node)
           {
-            foundVeh = it->first;
+            foundNode = it->first;
             break;
           }
       }
 
-    return foundVeh;
+    return foundNode;
   }
 
   std::string
@@ -310,7 +310,7 @@ namespace ns3
     this->TraCIAPI::simulationStep(m_startTime.GetSeconds());
 
     // synchronise sumo vehicles with ns3 nodes
-    SynchroniseVehicleNodeMap();
+    SynchroniseNodeMap();
 
     // get current positions from sumo and uptdate positions
     UpdatePositions();
@@ -332,10 +332,10 @@ namespace ns3
         // command sumo to simulate next time step
         this->TraCIAPI::simulationStep(nextTime);
 
-        // include a ns3 node for every new sumo vehicle and exclude arrived vehicles
-        SynchroniseVehicleNodeMap();
+        // include a ns3 node for every new sumo vehicle/pedestrian and exclude arrived vehicles/pedestrians
+        SynchroniseNodeMap();
 
-        // ask sumo for new vehicle positions and update node positions
+        // ask sumo for new vehicle/pedestrian positions and update node positions
         UpdatePositions();
 
         // schedule next event to simulate next time step in sumo
@@ -355,27 +355,31 @@ namespace ns3
 
     try
       {
-        // iterate over all sumo vehicles in map
-        for (std::map<std::string, Ptr<Node> >::iterator it = m_vehicleNodeMap.begin(); it != m_vehicleNodeMap.end(); ++it)
+        // iterate over all nodes in the map
+        for (std::map<std::string, std::pair< StationType_t, Ptr<Node> > >::iterator it = m_NodeMap.begin(); it != m_NodeMap.end(); ++it)
           {
-            // get current sumo vehicle from map
-            std::string veh(it->first);
+            // get current vehicle/pedestrian from the map
+            std::string node_ID(it->first);
 
-            // get vehicle position from sumo
-            libsumo::TraCIPosition pos(this->TraCIAPI::vehicle.getPosition(veh));
+            // get vehicle/pedestrian position from sumo
+            libsumo::TraCIPosition pos;
+            if(it->second.first == StationType_pedestrian)
+               pos = this->TraCIAPI::person.getPosition(node_ID);
+            else
+               pos = this->TraCIAPI::vehicle.getPosition(node_ID);
 
             // get corresponding ns3 node from map
-            Ptr<MobilityModel> mob = m_vehicleNodeMap.at(veh)->GetObject<MobilityModel>();
+            Ptr<MobilityModel> mob = m_NodeMap.at(node_ID).second->GetObject<MobilityModel>();
             // set ns3 node position with user defined altitude
             mob->SetPosition(Vector(pos.x, pos.y, m_altitude));
 
-            if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected())
+            if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected() && it->second.first != StationType_pedestrian)
             {
                 libsumo::TraCIPosition lonlat = this->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
-                int rval = m_vehicle_visualizer->sendObjectUpdate (veh,lonlat.y,lonlat.x,this->TraCIAPI::vehicle.getAngle (veh));
+                int rval = m_vehicle_visualizer->sendObjectUpdate (node_ID,lonlat.y,lonlat.x,this->TraCIAPI::vehicle.getAngle (node_ID));
                 if (rval<0)
                 {
-                    NS_FATAL_ERROR("Error: cannot send the object update to the vehicle visualizer for vehicle: "<<veh);
+                    NS_FATAL_ERROR("Error: cannot send the object update to the vehicle visualizer for vehicle: "<<node_ID);
                 }
             }
           }
@@ -437,12 +441,12 @@ namespace ns3
             std::string veh(*it);
 
             // search for arrived vehicle in vehicleNodeMap
-            std::map<std::string, Ptr<Node> >::iterator pos = m_vehicleNodeMap.find(veh);
+            std::map<std::string, std::pair< StationType_t, Ptr<Node> > >::iterator pos = m_NodeMap.find(veh);
 
             // if node is in map, exclude it, otherwise is was not simulated in ns3 because of the penetration rate
-            if (pos != m_vehicleNodeMap.end())
+            if (pos != m_NodeMap.end())
               {
-                sumoVehicles.push_back(veh);
+                sumoVehicles.push_back (veh);
               }
           }
       }
@@ -454,7 +458,7 @@ namespace ns3
   }
 
   void
-  TraciClient::SynchroniseVehicleNodeMap()
+  TraciClient::SynchroniseNodeMap()
   {
     NS_LOG_FUNCTION(this);
 
@@ -471,41 +475,98 @@ namespace ns3
             std::string veh(*it);
 
             // search for vehicle in vehicleNodeMap
-            std::map<std::string, Ptr<Node> >::iterator pos = m_vehicleNodeMap.find(veh);
+            std::map<std::string,std::pair< StationType_t, Ptr<Node> >>::iterator pos = m_NodeMap.find(veh);
 
             // if it is already in the map, remove it and exclude node
-            if (pos != m_vehicleNodeMap.end())
+            if (pos != m_NodeMap.end())
               {
                 // get corresponding ns3 node
-                Ptr<ns3::Node> exNode = m_vehicleNodeMap.at(veh);
+                Ptr<ns3::Node> exNode = m_NodeMap.at(veh).second;
 
                 // call exclude function for this node
                 m_excludeNode(exNode,veh);
 
                 // unregister in map
-                m_vehicleNodeMap.erase(veh);
+                m_NodeMap.erase(veh);
               }
             else // if it is not in the map, create a new ns3 node for it
               {
                 // create new node by calling the include function
-                Ptr<ns3::Node> inNode = m_includeNode(veh);
+                std::pair<StationType_t, Ptr<ns3::Node>> inNode;
+                inNode.first = StationType_passengerCar;
+                inNode.second = m_includeNode(veh);
 
                 // register in the map (link vehicle to node!)
-                m_vehicleNodeMap.insert(std::pair<std::string, Ptr<Node>>(veh, inNode));
+                m_NodeMap.insert(std::pair<std::string, std::pair<StationType_t, Ptr<ns3::Node>>>(veh, inNode));
+              }
+          }
+
+        // Get all pedestrians present in the simulation
+        std::vector<std::string> sumoPed = this->TraCIAPI::simulation.getPedList ();
+        if(!sumoPed.empty()){
+            m_pedlist_empty = false;
+          }
+
+        if(!m_pedlist_empty){
+            // Iterate over all pedestrians present in the simulation
+            for (std::vector<std::string>::iterator it = sumoPed.begin(); it != sumoPed.end(); ++it){
+                // Get current pedestrian
+                std::string ped(*it);
+
+                // Search for pedestrian in the node map
+                std::map<std::string, std::pair< StationType_t, Ptr<Node> > >::iterator pos = m_NodeMap.find(ped);
+
+                // If the pedestrian is not present in the node map yet, include it
+                if (pos == m_NodeMap.end()){
+                    // Create the new node by calling the include function
+                    std::pair<StationType_t, Ptr<ns3::Node>> inNode_ped;
+                    inNode_ped.first = StationType_pedestrian;
+                    inNode_ped.second = m_includeNode(ped);
+
+                    // Register the new node in the map
+                    m_NodeMap.insert(std::pair<std::string, std::pair<StationType_t, Ptr<ns3::Node>>>(ped, inNode_ped));
+                  }
+              }
+
+            // Iterate over all nodes present in the node map
+            for (auto it = m_NodeMap.begin(); it != m_NodeMap.end(); /* no increment here */){
+                std::string node_ID = it->first;
+
+                // Check if the extracted node corresponds to a pedestrian
+                if(it->second.first == StationType_pedestrian){
+                    // Search for the given node among the pedestrians present in the simulation
+                    auto iter = std::find(sumoPed.begin(), sumoPed.end(), node_ID);
+
+                    // If the node is not currently present in the simulation, remove it
+                    if(iter == sumoPed.end()){
+                        // get corresponding ns3 node
+                        Ptr<ns3::Node> exNode_ped = it->second.second;
+
+                        // Call exclude function for this node
+                        m_excludeNode(exNode_ped,node_ID);
+
+                        // Unregister in map and update iterator
+                        it = m_NodeMap.erase(it);
+                      } else {
+                        ++it;
+                      }
+                  } else {
+                    ++it;
+                  }
               }
           }
       }
     catch (std::exception& e)
       {
         terminateVehicleVisualizer();
-        NS_FATAL_ERROR("SUMO was closed unexpectedly while updating the vehicle node map: " << e.what());
+        NS_FATAL_ERROR("SUMO was closed unexpectedly while updating the node map: " << e.what());
       }
   }
 
 uint32_t
 TraciClient::GetVehicleMapSize()
 {
-return m_vehicleNodeMap.size();
+return m_NodeMap.size();
 }
 
 void
@@ -564,7 +625,7 @@ std::vector<std::string>
 TraciClient::getVehicleNodeMapIds()
 {
     std::vector<std::string> ids;
-    for (auto & it : m_vehicleNodeMap)
+    for (auto & it : m_NodeMap)
     {
       ids.push_back(it.first);
     }

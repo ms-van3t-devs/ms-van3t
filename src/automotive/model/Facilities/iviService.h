@@ -59,11 +59,33 @@ typedef enum {
 } ivimTerminationType;
 
 
+/**
+ * \ingroup automotive
+ * \brief This class implements the basic service for the  Infrastructure to Vehicle Information (IVI) service defined in ETSI TS 103 301 V1.3.1 (2020-02).
+ *
+ * IVI service is one instantiation of the infrastructure services to manage the generation, transmission and reception of the IVIM messages.
+ * An IVIM supports mandatory and advisory road signage such as contextual speeds and road works warnings.
+ * IVIM either provides information of physical road signs such as static or variable road signs, virtual signs or road works.
+ *
+ */
 
   class IVIBasicService: public SignalInfoUtils
   {
     public:
+    /**
+     * @brief Constructor
+     *
+     * This constructor initializes the IVIBasicService object.
+     */
     IVIBasicService();
+    /**
+     * @brief Constructor
+     *
+     * This constructor initializes the IVIBasicService object.
+     * @param fixed_stationid The station ID of the ITS-S.
+     * @param fixed_stationtype The station type of the ITS-S.
+     * @param socket_tx The socket used for transmitting IVIM messages.
+     */
     IVIBasicService(unsigned long fixed_stationid,long fixed_stationtype,Ptr<Socket> socket_tx);
     int n_update;
     int receivedIVIM ;
@@ -73,21 +95,73 @@ typedef enum {
     bool b_neg;
     long timeStamp;
 
+    /**
+     * @brief Set Reception callback for IVI messages.
+     * @param rx_callback
+     */
     void addIVIRxCallback(std::function<void(iviData,Address)> rx_callback) {m_IVIReceiveCallback=rx_callback;}
     void addIVIRxCallbackExtended(std::function<void(iviData,Address,StationID_t,StationType_t,SignalInfo)> rx_callback) {m_IVIReceiveCallbackExtended=rx_callback;}
 
+    /**
+     * @brief Trigger an IVIM message.
+     * @param Data  The IVI data to be transmitted.
+     * @return  error code.
+     */
     IVIBasicService_error_t appIVIM_trigger(iviData Data);
+    /**
+     * @brief Repetition of an IVIM message.
+     * @param Data  The IVI data to be transmitted.
+     * @return  error code.
+     */
     IVIBasicService_error_t appIVIM_repetition(iviData Data);
+    /**
+     * @brief Update an IVIM message.
+     * @param Data  The IVI data to be transmitted.
+     * @param actionID  The action ID of the IVIM message.
+     * @return  error code.
+     */
     IVIBasicService_error_t appIVIM_update(iviData Data, ActionID_t actionID);
+    /**
+     * @brief Termination of an IVIM message.
+     * @param Data  The IVI data to stop being transmitted.
+     * @param term  The termination type.
+     * @param actionID  The action ID of the IVIM message.
+     * @return  error code.
+     */
     IVIBasicService_error_t appIVIM_termination(iviData Data, ivimTerminationType term,ActionID_t actionID);
     IVIBasicService_error_t fillIVIM(asn1cpp::Seq<IVIM> &ivim, iviData Data, const ActionID_t actionID);
 
 
+    /**
+     * @brief Process a received IVIM message.
+     * @param dataIndication  The received data indication from BTP/GeoNet.
+     * @param address  The address of the sender of the IVIM message.
+     */
     void receiveIVIM(BTPDataIndication_t dataIndication, Address address);
 
+    /**
+     * @brief Set the station ID and station type of the ITS-S.
+     *
+     * @param fixed_stationid
+     * @param fixed_stationtype
+     */
     void setStationProperties(unsigned long fixed_stationid,long fixed_stationtype);
+    /**
+     * @brief Set the fixed position of the ITS-S.
+     *
+     * @param latitude_deg
+     * @param longitude_deg
+     */
     void setFixedPositionRSU(double latitude_deg, double longitude_deg);
+    /**
+     * @brief Set the station ID of the ITS-S.
+     * @param fixed_stationid
+     */
     void setStationID(unsigned long fixed_stationid);
+    /**
+     * @brief Set the station type of the ITS-S.
+     * @param fixed_stationtype
+     */
     void setStationType(long fixed_stationtype);
     ActionID getActionId();
 
