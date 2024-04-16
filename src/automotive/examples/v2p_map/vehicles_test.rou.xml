@@ -1,0 +1,7 @@
+<routes>
+
+	<vehicle id="veh0" depart="0">
+        	<route edges="sx_s_0 sx_s_1 sx_s_2 sx_s_3 sx_s_4 sx_s_5 sx_s_6 sx_s_7 sx_s_8 sx_s_9 sx_s_10 sx_s_11 sx_s_12"/>
+        </vehicle>
+
+</routes>

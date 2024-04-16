@@ -1,0 +1,12 @@
+<routes>
+	
+	<route id="pedroute_0" edges="cross_n_5 cross_n_4 cross_n_3 cross_n_2 cross_n_1 cross_n_0"/>
+	
+        <person id="ped1000" depart="0">
+        	<walk route="pedroute_0"/>
+        </person>
+        <person id="ped1001" depart="0.2">
+        	<walk route="pedroute_0"/>
+        </person>
+
+</routes>
