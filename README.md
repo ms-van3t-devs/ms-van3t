@@ -2,7 +2,7 @@
 
 ![](img/MS-VAN3T_logo-V2_small.png)
 
-[<img src="img/docs.png" height="40">](https://ms-van3t-documentation.readthedocs.io/en/latest/)
+[<img src="img/docs.png" height="40">](https://ms-van3ts-documentation.readthedocs.io/en/master/)
 
 ----- _ms-van3t is pronounced "em-es vanet"_
 
