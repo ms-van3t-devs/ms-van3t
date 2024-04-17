@@ -2,6 +2,8 @@
 
 ![](img/MS-VAN3T_logo-V2_small.png)
 
+[<img src="img/docs.png" height="40">](https://ms-van3t-documentation.readthedocs.io/en/latest/)
+
 ----- _ms-van3t is pronounced "em-es vanet"_
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
@@ -118,7 +120,7 @@ Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlight
 
 CLion can be easily installed with the [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/).
 
-You can find all the instructions for setting up CLion with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) [here](https://carlosrismadoctutorial.readthedocs.io/en/latest/IDE.html#clion).
+You can find all the instructions for setting up CLion with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) on our [documentation](https://ms-van3ts-documentation.readthedocs.io/en/master/IDE.html#clion).
 
 # Supported ETSI C-ITS messages
 
@@ -127,6 +129,7 @@ You can find all the instructions for setting up CLion with ns-3 (and the same a
 - DENM
 - IVIM
 - CPM
+- VAM
 
 For the transmission and reception of IVIMs (from an RSU to vehicles), you can refer to the `v2i-emergencyVehicleWarning-80211p` example.
 
