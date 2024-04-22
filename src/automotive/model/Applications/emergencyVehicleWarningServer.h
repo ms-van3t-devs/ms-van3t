@@ -93,10 +93,13 @@ class emergencyVehicleWarningServer : public Application
 
     Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
 
+    bool m_send_cam;
 
     EventId m_aggegateOutputEvent; //!< Event to create aggregate output
     EventId m_update_denm_ev; //!< Event to update the DENM
     EventId m_terminate_denm_ev; //!< Event to terminate the DENM
+
+    uint64_t m_stationId_baseline = 1000000;
   };
 
 

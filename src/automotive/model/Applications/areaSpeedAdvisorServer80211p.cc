@@ -152,7 +152,7 @@ namespace ns3
     uint64_t id = std::stoi(m_id.substr (m_id.find("_") + 1));
     m_denService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
 
-    /* Set callback and station properties in CABasicService (which will only be used to receive CAMs) */
+    /* Set callback and station properties in CABasicService */
     m_caService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
     m_caService.setSocketRx (m_socket);
     m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
@@ -174,8 +174,8 @@ namespace ns3
 
     m_denService.setGeoArea (geoArea);
 
-    m_denService.setFixedPositionRSU (rsuPosLonLat.x,rsuPosLonLat.y);
-    m_caService.setFixedPositionRSU (rsuPosLonLat.x,rsuPosLonLat.y);
+    m_denService.setFixedPositionRSU (rsuPosLonLat.y,rsuPosLonLat.x);
+    m_caService.setFixedPositionRSU (rsuPosLonLat.y,rsuPosLonLat.x);
 
     VDP* traci_vdp = new VDPTraCI(m_client, m_id, true);
 

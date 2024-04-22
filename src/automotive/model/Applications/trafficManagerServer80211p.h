@@ -77,6 +77,10 @@ class trafficManagerServer80211p : public Application
     /* Counters */
     u_int m_cam_received;
 
+    bool m_send_cam;
+
+    std::string m_id;
+
     uint16_t m_phase_time;
     double m_threshold;
     std::map <unsigned long, std::string> m_veh_position;
@@ -87,6 +91,8 @@ class trafficManagerServer80211p : public Application
     std::mutex m_load_Mutex;
 
     Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+
+    uint64_t m_stationId_baseline = 1000000;
   };
 
 } // namespace ns3
