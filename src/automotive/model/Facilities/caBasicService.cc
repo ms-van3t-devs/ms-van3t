@@ -581,14 +581,14 @@ namespace ns3
    else
       {
         /* Fill the basicContainer */
-        /* There is still no full RSU support in this release */
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence,AltitudeConfidence_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,AltitudeValue_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude,Latitude_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude,Longitude_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisLength,SemiAxisLength_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorAxisLength,SemiAxisLength_unavailable);
-        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisOrientation,HeadingValue_unavailable);
+        cam_mandatory_data = m_vdp->getCAMMandatoryData();
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeConfidence,cam_mandatory_data.altitude.getConfidence ());
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.altitude.altitudeValue,cam_mandatory_data.altitude.getValue ());
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.latitude,cam_mandatory_data.latitude);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.longitude,cam_mandatory_data.longitude);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisLength,cam_mandatory_data.posConfidenceEllipse.semiMajorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMinorAxisLength,cam_mandatory_data.posConfidenceEllipse.semiMinorConfidence);
+        asn1cpp::setField(cam->cam.camParameters.basicContainer.referencePosition.positionConfidenceEllipse.semiMajorAxisOrientation,cam_mandatory_data.posConfidenceEllipse.semiMajorOrientation);
         /* Fill the highFrequencyContainer */
         //auto RSUContainerHighFreq = asn1cpp::makeSeq(RSUContainerHighFrequency);
 
