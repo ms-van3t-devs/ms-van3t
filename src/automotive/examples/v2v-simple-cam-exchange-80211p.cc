@@ -299,7 +299,8 @@ int main (int argc, char *argv[])
           // Setup the new ETSI Basic Services container
           // The first parameter is true is you want to setup a CA Basic Service (for sending/receiving CAMs)
           // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
-          bs_container->setupContainer(true,false);
+          // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
+          bs_container->setupContainer(true,false,false);
 
           // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
           // retrieve the right BSContainer given a vehicle ID
