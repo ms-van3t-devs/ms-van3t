@@ -140,6 +140,7 @@ if [ "$mode" = "base" ]; then
 					pip install open3d
 					pip install filterpy
 					pip install psutil
+     					pip install grpcio grpcio-tools conan==1.54.0
 
 					cd ..
 
