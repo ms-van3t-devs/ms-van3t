@@ -365,6 +365,8 @@ namespace ns3
             libsumo::TraCIPosition pos;
             if(it->second.first == StationType_pedestrian)
                pos = this->TraCIAPI::person.getPosition(node_ID);
+            else if (it->second.first == StationType_roadSideUnit)
+              return;
             else
                pos = this->TraCIAPI::vehicle.getPosition(node_ID);
 
@@ -632,5 +634,38 @@ TraciClient::getVehicleNodeMapIds()
     return ids;
 }
 
-} // namespace ns3
+void TraciClient::AddStation(std::string id, float x, float y, float z, Ptr<Node> node)
+{
+  // Add RSU to the map
+  std::pair<StationType_t, Ptr<ns3::Node>> inNode;
+  inNode.first = StationType_roadSideUnit;
+  inNode.second = node;
 
+  // register in the map (link vehicle to node!)
+  m_NodeMap.insert(std::pair<std::string, std::pair<StationType_t, Ptr<ns3::Node>>>(id, inNode));
+
+  // Set the position of the Station
+  Ptr<MobilityModel> mob = node->GetObject<MobilityModel>();
+  mob->SetPosition(Vector(x, y, z));
+}
+
+std::string TraciClient::GetStationId(Ptr<Node> node)
+{
+  NS_LOG_FUNCTION (this);
+
+  std::string foundNode ("");
+
+  // search map for corresponding node
+  for (auto it = m_NodeMap.begin (); it != m_NodeMap.end (); ++it)
+    {
+      if (it->second.second == node)
+        {
+          foundNode = it->first;
+          break;
+        }
+    }
+
+  return foundNode;
+}
+
+} // namespace ns3

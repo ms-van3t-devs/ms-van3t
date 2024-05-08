@@ -94,12 +94,21 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
 
   for(std::map< std::string, std::pair< StationType_t, Ptr<Node> > >::iterator it=node_map.begin();it!=node_map.end();++it)
     {
-      uint64_t stationID = std::stol(it->first.substr (3));
       StationType_t station_type = it->second.first;
+      uint64_t stationID;
+      if (station_type == StationType_roadSideUnit)
+        {
+          uint64_t id = std::stoi(it->first.substr (it->first.find("_") + 1));
+          stationID = m_stationId_baseline + id;
+        }
+      else
+        stationID = std::stol(it->first.substr (3));
 
       libsumo::TraCIPosition pos;
       if(station_type == StationType_pedestrian)
         pos = m_traci_ptr->TraCIAPI::person.getPosition (it->first);
+      else if(station_type == StationType_roadSideUnit)
+        pos = m_traci_ptr->TraCIAPI::poi.getPosition (it->first);
       else
         pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (it->first);
       pos=m_traci_ptr->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
@@ -120,7 +129,7 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
 
   m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();
 
-  m_vehicleid_map[buf] = nodeID;
+  m_id_map[buf] = nodeID;
 
   m_messagetype_map[buf] = messagetype;
 }
@@ -157,7 +166,7 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
   // Compute latency in ms
   if(m_latency_map.count(buf)>0)
     {
-      uint64_t senderID = m_vehicleid_map[buf];
+      uint64_t senderID = m_id_map[buf];
       messageType_e messagetype = m_messagetype_map[buf];
 
       curr_latency_ms = static_cast<double>(Simulator::Now ().GetNanoSeconds () - m_latency_map[buf])/1000000.0;
@@ -179,6 +188,24 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
           m_count_latency_per_ped[senderID]++;
           m_avg_latency_ms_per_ped[senderID] += (curr_latency_ms - m_avg_latency_ms_per_ped[senderID])/m_count_latency_per_ped[senderID];
 
+        }
+      else if(station_type == StationType_roadSideUnit)
+        {
+
+          if (m_count_latency_per_rsu.count (senderID) <= 0)
+            {
+              m_count_latency_per_rsu[senderID] = 0;
+            }
+
+          if (m_avg_latency_ms_per_rsu.count (senderID) <= 0)
+            {
+              m_avg_latency_ms_per_rsu[senderID] = 0;
+            }
+
+          m_count_latency_per_rsu[senderID]++;
+          m_avg_latency_ms_per_rsu[senderID] +=
+              (curr_latency_ms - m_avg_latency_ms_per_rsu[senderID]) /
+              m_count_latency_per_rsu[senderID];
         }
       else{
           if(m_count_latency_per_veh.count(senderID)<=0) {
@@ -217,7 +244,7 @@ PRRSupervisor::computePRR(std::string buf)
 
   if(m_packetbuff_map[buf].nodeList.size()>1)
     {
-      uint64_t senderID = m_vehicleid_map[buf];
+      uint64_t senderID = m_id_map[buf];
       messageType_e messagetype = m_messagetype_map[buf];
       StationType_t station_type = m_stationtype_map[buf];
 
@@ -231,7 +258,7 @@ PRRSupervisor::computePRR(std::string buf)
       m_count++;
       m_avg_PRR += (PRR-m_avg_PRR)/m_count;
 
-      if(m_verbose_stdout == true) {
+      if(m_verbose_stdout) {
           std::cout << "|PRR| Current: " << PRR << " - Average: " << m_avg_PRR << std::endl;
         }
 
@@ -246,6 +273,22 @@ PRRSupervisor::computePRR(std::string buf)
 
           m_count_per_ped[senderID]++;
           m_avg_PRR_per_ped[senderID] += (PRR-m_avg_PRR_per_ped[senderID])/m_count_per_ped[senderID];
+        }
+      else if(station_type == StationType_roadSideUnit)
+        {
+          if (m_count_per_rsu.count (senderID) <= 0)
+            {
+              m_count_per_rsu[senderID] = 0;
+            }
+
+          if (m_avg_PRR_per_rsu.count (senderID) <= 0)
+            {
+              m_avg_PRR_per_rsu[senderID] = 0;
+            }
+
+          m_count_per_rsu[senderID]++;
+          m_avg_PRR_per_rsu[senderID] +=
+              (PRR - m_avg_PRR_per_rsu[senderID]) / m_count_per_rsu[senderID];
         }
       else
         {
@@ -273,7 +316,7 @@ PRRSupervisor::computePRR(std::string buf)
       m_avg_PRR_per_messagetype[messagetype] += (PRR-m_avg_PRR_per_messagetype[messagetype])/m_count_per_messagetype[messagetype];
 
       m_packetbuff_map.erase(buf);
-      m_vehicleid_map.erase(buf);
+      m_id_map.erase(buf);
       m_messagetype_map.erase(buf);
     }
 

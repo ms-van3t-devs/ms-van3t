@@ -21,7 +21,7 @@
 
 #include "emergencyVehicleWarningClient80211p-helper.h"
 
-#include "ns3/emergencyVehicleWarningClient.h"
+#include "ns3/emergencyVehicleWarningClient80211p.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
 
@@ -29,7 +29,7 @@ namespace ns3 {
 
 emergencyVehicleWarningClient80211pHelper::emergencyVehicleWarningClient80211pHelper ()
 {
-  m_factory.SetTypeId (emergencyVehicleWarningClient::GetTypeId ());
+  m_factory.SetTypeId (emergencyVehicleWarningClient80211p::GetTypeId ());
 }
 
 
@@ -69,7 +69,7 @@ emergencyVehicleWarningClient80211pHelper::Install (NodeContainer c) const
 Ptr<Application>
 emergencyVehicleWarningClient80211pHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<emergencyVehicleWarningClient> ();
+  Ptr<Application> app = m_factory.Create<emergencyVehicleWarningClient80211p> ();
   node->AddApplication (app);
 
   return app;

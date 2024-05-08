@@ -57,6 +57,7 @@ main (int argc, char *argv[])
   /*** 0.a App Options ***/
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_map/";
   std::string mob_trace = "cars.rou.xml";
+  std::string rsu_file = "stations.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2i_map/map.sumo.cfg";
 
   bool verbose = true;
@@ -75,13 +76,15 @@ main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_prr_sup = true;
 
 
   double simTime = 100;
 
   int numberOfNodes;
   uint32_t nodeCounter = 0;
+  int numberOfRSUs;
+  uint32_t rsuCounter = 0;
 
   CommandLine cmd;
 
@@ -157,6 +160,11 @@ main (int argc, char *argv[])
     }
   numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
 
+  std::string rsu_path = sumo_folder + rsu_file;
+  std::ifstream rsu_file_stream (rsu_path.c_str());
+  std::vector<std::tuple<std::string, float, float>> rsuData = XML_poli_count_stations(rsu_file_stream);
+  numberOfRSUs = rsuData.size();
+
   xmlFreeDoc(rou_xml_file);
   xmlCleanupParser();
 
@@ -172,14 +180,12 @@ main (int argc, char *argv[])
 
   /*** 1. Create containers for OBUs ***/
   NodeContainer obuNodes;
-  obuNodes.Create(numberOfNodes+1); //+1 for the server
+  obuNodes.Create(numberOfNodes);
 
-  /*** 2. Create and setup channel objects
-       the network topology created is the following:
+  /*** 1.1 Create containers for RSUs ***/
+  NodeContainer rsuNodes;
+  rsuNodes.Create(numberOfRSUs);
 
-       OBUs->(WIFI CHANNEL)->RSU->RemoteHost
-
-   ***/
   /*** 2. Create and setup channel   ***/
   YansWifiPhyHelper wifiPhy;
   wifiPhy.Set ("TxPowerStart", DoubleValue (txPower));
@@ -199,21 +205,20 @@ main (int argc, char *argv[])
                                       "ControlMode", StringValue (datarate_config),
                                       "NonUnicastMode",StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
-
+  NetDeviceContainer netRSUs = wifi80211p.Install (wifiPhy, wifi80211pMac, rsuNodes);
   //wifi80211p.EnableLogComponents ();
 
   //wifiPhy.EnablePcap ("v2v-ASA",netDevices);
   /* Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);
+  packetSocket.Install (rsuNodes);
 
   /*** 6. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
   mobility.Install (obuNodes);
-
-  /* Set the RSU to a fixed position (i.e. on the center of the map, in this case) */
-  Ptr<MobilityModel> mobilityRSU = obuNodes.Get (0)->GetObject<MobilityModel> ();
-  mobilityRSU->SetPosition (Vector (0, 0, 20.0)); // Normally, in SUMO, (0,0) is the center of the map
+  MobilityHelper mobilityRSU;
+  mobilityRSU.Install (rsuNodes);
 
   /*** 5. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
@@ -266,12 +271,20 @@ main (int argc, char *argv[])
   AreaSpeedAdvisorServer80211pHelper.SetAttribute ("CSV", StringValue(csv_name));
   AreaSpeedAdvisorServer80211pHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
-
-  ApplicationContainer AppServer = AreaSpeedAdvisorServer80211pHelper.Install (obuNodes.Get (0));
-
-  AppServer.Start (Seconds (0.0));
-  AppServer.Stop (simulationTime - Seconds (0.1));
-  ++nodeCounter;
+  int i = 0;
+  for (auto rsu : rsuData)
+    {
+      std::string id = std::get<0>(rsu);
+      float x = std::get<1>(rsu);
+      float y = std::get<2>(rsu);
+      Ptr<Node> rsuNode = rsuNodes.Get (i);
+      sumoClient->AddStation(id, x, y, 0.0, rsuNode);
+      ApplicationContainer AppServer = AreaSpeedAdvisorServer80211pHelper.Install (rsuNode);
+      AppServer.Start (Seconds (0.0));
+      AppServer.Stop (simulationTime - Seconds (0.1));
+      ++rsuCounter;
+      ++i;
+    }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
   areaSpeedAdvisorClient80211pHelper AreaSpeedAdvisorClient80211pHelper;

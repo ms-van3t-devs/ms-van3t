@@ -76,4 +76,28 @@ namespace ns3
 
       return num_pedestrians;
   }
+
+  std::vector<std::tuple<std::string, float, float>> XML_poli_count_stations(std::ifstream &file) {
+    if (!file.is_open()) {
+        return {};
+      }
+
+    std::vector<std::tuple<std::string, float, float>> rsu_data;
+    std::string line;
+
+    while (std::getline(file, line, '\n')) {
+        if (line.find("<!-- V2X:STATION -->") != std::string::npos) {
+            size_t start = line.find("poi_");
+            size_t end = line.find_first_not_of("0123456789", start + 4); // find the end of the id
+            std::string id = line.substr(start, end - start);
+            float x = std::stof(line.substr(line.find("x=") + 3, 8));
+            float y = std::stof(line.substr(line.find("y=") + 3, 8));
+            rsu_data.push_back(std::make_tuple(id, x, y));
+          }
+      }
+
+    file.close();
+    return rsu_data;
+  }
+
 }

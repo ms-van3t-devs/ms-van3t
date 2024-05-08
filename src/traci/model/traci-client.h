@@ -71,6 +71,10 @@ public:
 
   std::map< std::string, std::pair< StationType_t, Ptr<Node> > > get_NodeMap() {return m_NodeMap;};
 
+  void AddStation(std::string id, float x, float y, float z, Ptr<Node> node);
+
+  std::string GetStationId(Ptr<Node> node);
+
 
 private:
   // perform sumo simulation for a certain time step

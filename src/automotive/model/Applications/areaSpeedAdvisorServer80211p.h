@@ -87,6 +87,10 @@ class areaSpeedAdvisorServer80211p : public Application
 
     bool m_isTransmittingDENM;
 
+    bool m_send_cam;
+
+    std::string m_id;
+
     /* Counters */
     u_int m_cam_received;
     u_int m_denm_sent;
@@ -96,6 +100,8 @@ class areaSpeedAdvisorServer80211p : public Application
     EventId m_terminate_denm_ev; //!< Event to terminate the DENM
 
     Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+
+    uint64_t m_stationId_baseline = 1000000;
   };
 
 } // namespace ns3

@@ -50,9 +50,10 @@ main (int argc, char *argv[])
   std::string datarate_config;
 
   /*** 0.a App Options ***/
-  std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_EVW_map/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_TM_map/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2i_EVW_map/map.sumo.cfg";
+  std::string rsu_file = "stations.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2i_TM_map/map.sumo.cfg";
 
 
   std::string csv_name;
@@ -68,13 +69,15 @@ main (int argc, char *argv[])
   bool aggregate_out = false;
   bool send_cam = true;   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_prr_sup = true;
 
 
   double simTime = 100;
 
   int numberOfNodes;
   uint32_t nodeCounter = 0;
+  int numberOfRSUs;
+  uint32_t rsuCounter = 0;
 
   CommandLine cmd;
 
@@ -147,6 +150,11 @@ main (int argc, char *argv[])
     }
   numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
 
+  std::string rsu_path = sumo_folder + rsu_file;
+  std::ifstream rsu_file_stream (rsu_path.c_str());
+  std::vector<std::tuple<std::string, float, float>> rsuData = XML_poli_count_stations(rsu_file_stream);
+  numberOfRSUs = rsuData.size();
+
   xmlFreeDoc(rou_xml_file);
   xmlCleanupParser();
 
@@ -162,7 +170,11 @@ main (int argc, char *argv[])
 
   /*** 1. Create containers for OBUs ***/
   NodeContainer obuNodes;
-  obuNodes.Create(numberOfNodes+1);//for server
+  obuNodes.Create(numberOfNodes);
+
+  /*** 1.1 Create containers for RSUs ***/
+  NodeContainer rsuNodes;
+  rsuNodes.Create(numberOfRSUs);
 
   /*** 2. Create and setup channel   ***/
   YansWifiPhyHelper wifiPhy;
@@ -182,19 +194,19 @@ main (int argc, char *argv[])
   Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
+  NetDeviceContainer netRSUs = wifi80211p.Install (wifiPhy, wifi80211pMac, rsuNodes);
 
   //wifiPhy.EnablePcapAll ("ivimVehicleWarningExample");
   /*** 4. Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);
+  packetSocket.Install (rsuNodes);
 
   /*** 5. Setup Mobility and position node pool ***/
   MobilityHelper mobility;
   mobility.Install (obuNodes);
-
-  /* Set the RSU to a fixed position (i.e. on the center of the map, in this case) */
-  Ptr<MobilityModel> mobilityRSU = obuNodes.Get (0)->GetObject<MobilityModel> ();
-  mobilityRSU->SetPosition (Vector (130, 5, 20.0)); // Normally, in SUMO, (0,0) is the center of the map
+  MobilityHelper mobilityRSU;
+  mobilityRSU.Install (rsuNodes);
 
   /*** 6. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
@@ -247,11 +259,20 @@ main (int argc, char *argv[])
   emergencyVehicleWarningServerHelper.SetAttribute ("CSV", StringValue(csv_name));
   emergencyVehicleWarningServerHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
-  ApplicationContainer AppServer = emergencyVehicleWarningServerHelper.Install (obuNodes.Get (0));
-
-  AppServer.Start (Seconds (0.0));
-  AppServer.Stop (simulationTime - Seconds (0.1));
-  ++nodeCounter;
+  int i = 0;
+  for (auto rsu : rsuData)
+    {
+      std::string id = std::get<0>(rsu);
+      float x = std::get<1>(rsu);
+      float y = std::get<2>(rsu);
+      Ptr<Node> rsuNode = rsuNodes.Get (i);
+      sumoClient->AddStation(id, x, y, 0.0, rsuNode);
+      ApplicationContainer AppServer = emergencyVehicleWarningServerHelper.Install (rsuNode);
+      AppServer.Start (Seconds (0.0));
+      AppServer.Stop (simulationTime - Seconds (0.1));
+      ++rsuCounter;
+      ++i;
+    }
 
   /*** 8. Setup interface and application for dynamic nodes ***/
   emergencyVehicleWarningClient80211pHelper EmergencyVehicleWarningClientHelper;

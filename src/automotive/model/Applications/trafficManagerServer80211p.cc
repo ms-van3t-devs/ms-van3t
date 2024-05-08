@@ -56,7 +56,12 @@ namespace ns3
             "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
             MakePointerAccessor (&trafficManagerServer80211p::m_PRR_supervisor),
-            MakePointerChecker<PRRSupervisor> ());
+            MakePointerChecker<PRRSupervisor> ())
+        .AddAttribute ("SendCAM",
+            "To enable/disable the transmission of CAM messages",
+            BooleanValue(true),
+            MakeBooleanAccessor (&trafficManagerServer80211p::m_send_cam),
+            MakeBooleanChecker ());
         return tid;
   }
 
@@ -95,6 +100,8 @@ namespace ns3
      * The DENM dissemination starts only when the RSU receives CAMs from vehicles. The DENMs generation is stopped
      * if no CAM is received by the RSU for more than 5 seconds.
     */
+
+    m_id = m_client->GetStationId (this -> GetNode ());
 
     /* TX socket for DENMs and RX socket for CAMs (one socket only is necessary) */
     TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
@@ -136,11 +143,15 @@ namespace ns3
     m_denService.setSocketRx (m_socket);
     m_denService.addDENRxCallback (std::bind(&trafficManagerServer80211p::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
 
-    /* Setting a station ID (for instance, 777888999) */
-    m_denService.setStationProperties (777888999, StationType_roadSideUnit);
+    size_t start = m_id.find("_") + 1;
+    size_t end = m_id.find_first_not_of("0123456789", start); // find the end of the id
+    std::string id_str = m_id.substr(start, end - start);
+    uint64_t id = std::stoull(id_str);
+    m_denService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
 
     /* Set callback and station properties in CABasicService (which will only be used to receive CAMs) */
-    m_caService.setStationProperties (777888999, StationType_roadSideUnit);
+    m_caService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
+    m_caService.setSocketTx (m_socket);
     m_caService.setSocketRx (m_socket);
     m_caService.addCARxCallback (std::bind(&trafficManagerServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
@@ -150,10 +161,39 @@ namespace ns3
      * and then convert it to Latitude and Longitude
      * As SUMO is used here, we can rely on the TraCIAPI for this conversion
      */
-    Ptr<MobilityModel> mob = GetNode ()->GetObject<MobilityModel>();
-    libsumo::TraCIPosition rsuPos = m_client->TraCIAPI::simulation.convertXYtoLonLat (mob->GetPosition ().x,mob->GetPosition ().y);;
-    m_denService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
-    m_caService.setFixedPositionRSU (rsuPos.y,rsuPos.x);
+    libsumo::TraCIPosition rsuPosXY = m_client->TraCIAPI::poi.getPosition (m_id);
+    libsumo::TraCIPosition rsuPosLonLat = m_client->TraCIAPI::simulation.convertXYtoLonLat (rsuPosXY.x,rsuPosXY.y);
+
+    /* Compute GeoArea for DENMs */
+    GeoArea_t geoArea;
+    // Longitude and Latitude in [0.1 microdegree]
+    geoArea.posLong = rsuPosLonLat.x*DOT_ONE_MICRO;
+    geoArea.posLat = rsuPosLonLat.y*DOT_ONE_MICRO;
+    // Radius [m] of the circle that covers the whole square area of the map in (x,y)
+    geoArea.distA = 90;
+    // DistB [m] and angle [deg] equal to zero because we are defining a circular area as specified in ETSI EN 302 636-4-1 [9.8.5.2]
+    geoArea.distB = 0;
+    geoArea.angle = 0;
+    geoArea.shape = CIRCULAR;
+
+    m_denService.setGeoArea (geoArea);
+
+    m_denService.setFixedPositionRSU (rsuPosLonLat.y,rsuPosLonLat.x);
+    m_caService.setFixedPositionRSU (rsuPosLonLat.y,rsuPosLonLat.x);
+
+    VDP* traci_vdp = new VDPTraCI(m_client, m_id, true);
+
+    m_caService.setVDP(traci_vdp);
+
+    m_denService.setVDP(traci_vdp);
+
+    if(m_send_cam)
+      {
+        std::srand(Simulator::Now().GetNanoSeconds ());
+        double desync = ((double)std::rand()/RAND_MAX);
+        m_caService.startCamDissemination(desync);
+      }
+
 
     std::vector<std::string> tls_id_vec = m_client->TraCIAPI::trafficlights.getIDList ();
     for (std::string tlsid : tls_id_vec)

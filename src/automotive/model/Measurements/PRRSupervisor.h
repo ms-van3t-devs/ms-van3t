@@ -166,7 +166,7 @@ private:
 
   std::unordered_map<std::string,baselineVehicleData_t> m_packetbuff_map; //! key: packet, value: list of vehicle IDs
   std::unordered_map<std::string,int64_t> m_latency_map; //! key: packet, value: latency
-  std::unordered_map<std::string,uint64_t> m_vehicleid_map; //! key: packet, value: vehicle ID
+  std::unordered_map<std::string,uint64_t> m_id_map; //! key: packet, value: ID
   std::unordered_map<std::string,messageType_e> m_messagetype_map; //! key: packet, value: message type
   std::unordered_map<std::string,StationType_t> m_stationtype_map; //! key: packet, value: station type
 
@@ -176,12 +176,16 @@ private:
   double m_avg_latency_ms = 0.0;
   std::unordered_map<uint64_t,double> m_avg_PRR_per_veh; //! key: vehicle ID, value: PRR
   std::unordered_map<uint64_t,double> m_avg_PRR_per_ped; //! key: pedestrian ID, value: PRR
+  std::unordered_map<uint64_t,double> m_avg_PRR_per_rsu; //! key: RSU ID, value: PRR
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_veh;  //! key: vehicle ID, value: latency
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_ped;  //! key: pedestrian ID, value: latency
+  std::unordered_map<uint64_t,double> m_avg_latency_ms_per_rsu;  //! key: RSU ID, value: latency
   std::unordered_map<uint64_t,int> m_count_per_veh; //! key: vehicle ID, value: count
   std::unordered_map<uint64_t,int> m_count_per_ped;  //! key: pedestrian ID, value: count
+  std::unordered_map<uint64_t,int> m_count_per_rsu;  //! key: RSU ID, value: count
   std::unordered_map<uint64_t,uint64_t> m_count_latency_per_veh;    //! key: vehicle ID, value: latency
   std::unordered_map<uint64_t,uint64_t> m_count_latency_per_ped;    //! key: pedestrian ID, value: latency
+  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_rsu;    //! key: RSU ID, value: latency
 
   std::unordered_map<messageType_e,double> m_avg_PRR_per_messagetype; //! key: message type, value: PRR
   std::unordered_map<messageType_e,double> m_avg_latency_ms_per_messagetype; //! key: message type, value: latency
@@ -199,6 +203,8 @@ private:
   bool m_excluded_vehID_enabled = false;
 
   double m_pprcomp_timeout = 3.0;
+
+  uint64_t m_stationId_baseline = 1000000;
 };
 }
 

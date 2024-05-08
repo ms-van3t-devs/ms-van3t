@@ -52,6 +52,7 @@ main (int argc, char *argv[])
 
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_map/";
   std::string mob_trace = "cars.rou.xml";
+  std::string eNodeB_file = "stations.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2i_map/map.sumo.cfg";
 
   /*** 0.a App Options ***/
@@ -79,9 +80,12 @@ main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_prr_sup = true;
 
   double simTime = 100;
+
+  int numberOfENodeBs;
+  uint32_t eNodeBCounter = 0;
 
   CommandLine cmd;
 
@@ -144,6 +148,11 @@ main (int argc, char *argv[])
     }
   numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
 
+  std::string eNodeB_path = sumo_folder + eNodeB_file;
+  std::ifstream eNodeB_file_stream (eNodeB_path.c_str());
+  std::vector<std::tuple<std::string, float, float>> eNodeBData = XML_poli_count_stations(eNodeB_file_stream);
+  numberOfENodeBs = eNodeBData.size();
+
   xmlFreeDoc(rou_xml_file);
   xmlCleanupParser();
 
@@ -191,24 +200,22 @@ main (int argc, char *argv[])
   /* interface 0 is localhost, 1 is the p2p device */
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
+  // p2ph.EnablePcap ("trial", internetDevices.Get(0));
+
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   /*** 3. Create containers for UEs and eNB ***/
   NodeContainer ueNodes;
-  NodeContainer enbNodes;
-  enbNodes.Create(1);
   ueNodes.Create(numberOfNodes);
+  NodeContainer enbNodes;
+  enbNodes.Create(numberOfENodeBs);
 
   /*** 4. Create and install mobility (SUMO will be attached later) ***/
   MobilityHelper mobility;
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
-
-  /* Set the eNB to a fixed position */
-  Ptr<MobilityModel> mobilityeNBn = enbNodes.Get (0)->GetObject<MobilityModel> ();
-  mobilityeNBn->SetPosition (Vector (0, 0, 20.0)); // Normally, in SUMO, (0,0) is the center of the map
 
   /*** 5. Install LTE Devices to the nodes + assign IP to UE***/
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
@@ -230,10 +237,14 @@ main (int argc, char *argv[])
     }
 
   for (uint16_t i = 0; i < numberOfNodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
-        /* side effect: the default EPS bearer will be activated */
-      }
+    {
+      for (uint16_t j = 0; j < numberOfENodeBs; j++)
+        {
+          lteHelper->Attach (ueLteDevs.Get (i), enbLteDevs.Get (j));
+        }
+    }
+
+  lteHelper->AddX2Interface (enbNodes);
 
   /*** 6. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
@@ -285,11 +296,21 @@ main (int argc, char *argv[])
   AreaSpeedAdvisorServerLTEHelper.SetAttribute ("CSV", StringValue(csv_name));
   AreaSpeedAdvisorServerLTEHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
 
-  ApplicationContainer AppServer = AreaSpeedAdvisorServerLTEHelper.Install (remoteHostContainer.Get (0));
+  int i = 0;
+  for (auto e : eNodeBData)
+    {
+      std::string id = std::get<0> (e);
+      float x = std::get<1> (e);
+      float y = std::get<2> (e);
+      Ptr<Node> eNodeB = enbNodes.Get (i);
+      sumoClient->AddStation (id, x, y, 0.0, eNodeB);
+      ++eNodeBCounter;
+      ++i;
+    }
 
+  ApplicationContainer AppServer = AreaSpeedAdvisorServerLTEHelper.Install (remoteHostContainer.Get (0));
   AppServer.Start (Seconds (0.0));
   AppServer.Stop (simulationTime - Seconds (0.1));
-
 
   /*** 8. Setup interface and application for dynamic nodes ***/
   areaSpeedAdvisorClientLTEHelper AreaSpeedAdvisorClientLTEHelper;
@@ -338,7 +359,7 @@ main (int argc, char *argv[])
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
   /* To enable statistics collection of LTE module */
-  //lteHelper->EnableTraces ();
+  // lteHelper->EnableTraces ();
 
   /*** 9. Start Simulation ***/
   Simulator::Stop (simulationTime);

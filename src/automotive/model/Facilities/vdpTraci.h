@@ -42,6 +42,7 @@ namespace ns3 {
      * @param node_id The node ID of the SUMO vehicle.
      */
     VDPTraCI(Ptr<TraciClient> traci_client, std::string node_id);
+    VDPTraCI(Ptr<TraciClient> traci_client, std::string node_id, bool isStatic);
     VDPTraCI();
 
     void setProperties(Ptr<TraciClient> traci_client,std::string node_id) {m_traci_client=traci_client; m_id=node_id;}
@@ -149,6 +150,7 @@ namespace ns3 {
     private:
       std::string m_id;
       Ptr<TraciClient> m_traci_client;
+      bool m_isStatic;
   };
 }
 
