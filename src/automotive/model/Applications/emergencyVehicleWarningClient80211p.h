@@ -1,5 +1,5 @@
-#ifndef emergencyVehicleWarningClient_H
-#define emergencyVehicleWarningClient_H
+#ifndef emergencyVehicleWarningClient80211P_H
+#define emergencyVehicleWarningClient80211P_H
 
 
 #include "ns3/application.h"
@@ -15,7 +15,7 @@
 #include "ns3/traci-client.h"
 namespace ns3 {
 
-class emergencyVehicleWarningClient : public Application
+class emergencyVehicleWarningClient80211p : public Application
 {
   public:
 
@@ -25,9 +25,9 @@ class emergencyVehicleWarningClient : public Application
      */
     static TypeId GetTypeId (void);
 
-    emergencyVehicleWarningClient ();
+    emergencyVehicleWarningClient80211p ();
 
-    virtual ~emergencyVehicleWarningClient ();
+    virtual ~emergencyVehicleWarningClient80211p ();
 
     void StopApplicationNow ();
 
@@ -113,5 +113,5 @@ class emergencyVehicleWarningClient : public Application
 
 } // namespace ns3
 
-#endif /* emergencyVehicleWarningClient_H */
+#endif /* emergencyVehicleWarningClient80211P_H */
 

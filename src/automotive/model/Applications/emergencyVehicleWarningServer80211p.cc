@@ -19,8 +19,8 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "emergencyVehicleWarningServer.h"
-#include "emergencyVehicleWarningClient.h"
+#include "emergencyVehicleWarningServer80211p.h"
+#include "emergencyVehicleWarningClient80211p.h"
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -37,50 +37,50 @@ namespace ns3
 {
   NS_LOG_COMPONENT_DEFINE("emergencyVehicleWarningServer");
 
-  NS_OBJECT_ENSURE_REGISTERED(emergencyVehicleWarningServer);
+  NS_OBJECT_ENSURE_REGISTERED(emergencyVehicleWarningServer80211p);
 
   TypeId
-  emergencyVehicleWarningServer::GetTypeId (void)
+  emergencyVehicleWarningServer80211p::GetTypeId (void)
   {
     static TypeId tid =
         TypeId ("ns3::emergencyVehicleWarningServer")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<emergencyVehicleWarningServer> ()
+        .AddConstructor<emergencyVehicleWarningServer80211p> ()
         .AddAttribute ("AggregateOutput",
            "If it is true, the server will print every second an aggregate output about cam and denm",
            BooleanValue (false),
-           MakeBooleanAccessor (&emergencyVehicleWarningServer::m_aggregate_output),
+           MakeBooleanAccessor (&emergencyVehicleWarningServer80211p::m_aggregate_output),
            MakeBooleanChecker ())
         .AddAttribute ("RealTime",
            "To compute properly timestamps",
            BooleanValue(false),
-           MakeBooleanAccessor (&emergencyVehicleWarningServer::m_real_time),
+           MakeBooleanAccessor (&emergencyVehicleWarningServer80211p::m_real_time),
            MakeBooleanChecker ())
         .AddAttribute ("CSV",
             "CSV log name",
             StringValue (),
-            MakeStringAccessor (&emergencyVehicleWarningServer::m_csv_name),
+            MakeStringAccessor (&emergencyVehicleWarningServer80211p::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("PRRSupervisor",
             "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
-            MakePointerAccessor (&emergencyVehicleWarningServer::m_PRR_supervisor),
+            MakePointerAccessor (&emergencyVehicleWarningServer80211p::m_PRR_supervisor),
             MakePointerChecker<PRRSupervisor> ())
         .AddAttribute ("Client",
            "TraCI client for SUMO",
            PointerValue (0),
-           MakePointerAccessor (&emergencyVehicleWarningServer::m_client),
+           MakePointerAccessor (&emergencyVehicleWarningServer80211p::m_client),
            MakePointerChecker<TraciClient> ())
         .AddAttribute ("SendCAM",
            "To enable/disable the transmission of CAM messages",
            BooleanValue(true),
-           MakeBooleanAccessor (&emergencyVehicleWarningServer::m_send_cam),
+           MakeBooleanAccessor (&emergencyVehicleWarningServer80211p::m_send_cam),
            MakeBooleanChecker ());
         return tid;
   }
 
-  emergencyVehicleWarningServer::emergencyVehicleWarningServer ()
+  emergencyVehicleWarningServer80211p::emergencyVehicleWarningServer80211p ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
@@ -90,13 +90,13 @@ namespace ns3
     m_isTransmittingDENM = false;
   }
 
-  emergencyVehicleWarningServer::~emergencyVehicleWarningServer ()
+  emergencyVehicleWarningServer80211p::~emergencyVehicleWarningServer80211p ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  emergencyVehicleWarningServer::DoDispose (void)
+  emergencyVehicleWarningServer80211p::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
@@ -104,7 +104,7 @@ namespace ns3
 
 
   void
-  emergencyVehicleWarningServer::StartApplication (void)
+  emergencyVehicleWarningServer80211p::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
 
@@ -172,7 +172,7 @@ namespace ns3
     /* Set sockets, callback and station properties in iviService */
     m_iviService.setSocketTx (m_socket);
     m_iviService.setSocketRx (m_socket);
-    m_iviService.addIVIRxCallback (std::bind(&emergencyVehicleWarningServer::receiveIVIM,this,std::placeholders::_1,std::placeholders::_2));
+    m_iviService.addIVIRxCallback (std::bind(&emergencyVehicleWarningServer80211p::receiveIVIM,this,std::placeholders::_1,std::placeholders::_2));
 
     // Setting geoArea address for ivims and realTime
     m_iviService.setGeoArea (geoArea);
@@ -188,7 +188,7 @@ namespace ns3
     m_caService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
     m_caService.setSocketTx (m_socket);
     m_caService.setSocketRx (m_socket);
-    m_caService.addCARxCallback (std::bind(&emergencyVehicleWarningServer::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&emergencyVehicleWarningServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
     // Set the RSU position in the CA,DEN and IVI basic service (mandatory for any RSU object)
     // As the position must be specified in (lat, lon), we must take it from the mobility model and then convert it to Latitude and Longitude
@@ -217,14 +217,14 @@ namespace ns3
 
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)
-      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &emergencyVehicleWarningServer::aggregateOutput, this);
+      m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &emergencyVehicleWarningServer80211p::aggregateOutput, this);
 
 
     TriggerIvim ();
   }
 
   void
-  emergencyVehicleWarningServer::StopApplication ()
+  emergencyVehicleWarningServer80211p::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_aggegateOutputEvent);
@@ -238,14 +238,14 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningServer::StopApplicationNow ()
+  emergencyVehicleWarningServer80211p::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  emergencyVehicleWarningServer::TriggerIvim ()
+  emergencyVehicleWarningServer80211p::TriggerIvim ()
   {
     // Trigger the iviData
     m_ivim_sent++;
@@ -381,25 +381,25 @@ namespace ns3
 
     m_iviService.appIVIM_trigger(Data);
 
-    Simulator::Schedule (Seconds (1), &emergencyVehicleWarningServer::RepeatIvim, this);
+    Simulator::Schedule (Seconds (1), &emergencyVehicleWarningServer80211p::RepeatIvim, this);
 
   }
 
   void
-  emergencyVehicleWarningServer::RepeatIvim ()
+  emergencyVehicleWarningServer80211p::RepeatIvim ()
   {
 
         iviData Data = m_iviData;
 
         m_iviService.appIVIM_repetition(Data);
 
-        Simulator::Schedule (Seconds (1), &emergencyVehicleWarningServer::RepeatIvim, this);
+        Simulator::Schedule (Seconds (1), &emergencyVehicleWarningServer80211p::RepeatIvim, this);
 
 
   }
 
   void
-  emergencyVehicleWarningServer::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
+  emergencyVehicleWarningServer80211p::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     m_cam_received++;
 
@@ -415,7 +415,7 @@ namespace ns3
   }
 
   long
-  emergencyVehicleWarningServer::compute_timestampIts ()
+  emergencyVehicleWarningServer80211p::compute_timestampIts ()
   {
     /* To get millisec since  2004-01-01T00:00:00:000Z */
     auto time = std::chrono::system_clock::now(); // get the current time
@@ -427,14 +427,14 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningServer::aggregateOutput()
+  emergencyVehicleWarningServer80211p::aggregateOutput()
   {
     std::cout << Simulator::Now () << "," << m_cam_received << "," << m_denm_sent << std::endl;
-    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &emergencyVehicleWarningServer::aggregateOutput, this);
+    m_aggegateOutputEvent = Simulator::Schedule (Seconds(1), &emergencyVehicleWarningServer80211p::aggregateOutput, this);
   }
 
   void
-  emergencyVehicleWarningServer::receiveIVIM (iviData ivim, Address from)
+  emergencyVehicleWarningServer80211p::receiveIVIM (iviData ivim, Address from)
   {
 
     /* Must be modified such as if the vehicle is inside the 'restricted line zone', it must follow some specific instruction

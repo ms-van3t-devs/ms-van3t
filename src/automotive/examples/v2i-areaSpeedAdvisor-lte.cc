@@ -238,14 +238,10 @@ main (int argc, char *argv[])
 
   for (uint16_t i = 0; i < numberOfNodes; i++)
     {
-<<<<<<< HEAD
       for (uint16_t j = 0; j < numberOfENodeBs; j++)
         {
           lteHelper->Attach (ueLteDevs.Get (i), enbLteDevs.Get (j));
         }
-=======
-      lteHelper->Attach (ueLteDevs.Get (i));
->>>>>>> fe49cd56cf924e25ee21c0dc2531a9dafbddea15
     }
 
   lteHelper->AddX2Interface (enbNodes);

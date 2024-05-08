@@ -1,5 +1,5 @@
-#ifndef emergencyVehicleWarningSERVER_H
-#define emergencyVehicleWarningSERVER_H
+#ifndef emergencyVehicleWarningServer80211P_H
+#define emergencyVehicleWarningServer80211P_H
 
 
 
@@ -16,7 +16,7 @@
 #include "ns3/traci-client.h"
 namespace ns3 {
 
-class emergencyVehicleWarningServer : public Application
+class emergencyVehicleWarningServer80211p : public Application
 {
   public:
     /**
@@ -25,9 +25,9 @@ class emergencyVehicleWarningServer : public Application
      */
     static TypeId GetTypeId (void);
 
-    emergencyVehicleWarningServer ();
+    emergencyVehicleWarningServer80211p ();
 
-    virtual ~emergencyVehicleWarningServer ();
+    virtual ~emergencyVehicleWarningServer80211p ();
 
     /**
      * \brief Callback to handle a CAM reception.
@@ -107,4 +107,4 @@ class emergencyVehicleWarningServer : public Application
 
 
 
-#endif // emergencyVehicleWarningSERVER_H
+#endif // emergencyVehicleWarningServer80211p_H

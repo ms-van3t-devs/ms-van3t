@@ -19,7 +19,7 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "emergencyVehicleWarningClient.h"
+#include "emergencyVehicleWarningClient80211p.h"
 
 #include "ns3/CAM.h"
 #include "ns3/DENM.h"
@@ -37,62 +37,62 @@
 namespace ns3
 {
 
-  NS_LOG_COMPONENT_DEFINE("emergencyVehicleWarningClient");
+  NS_LOG_COMPONENT_DEFINE("emergencyVehicleWarningClient80211p");
 
-  NS_OBJECT_ENSURE_REGISTERED(emergencyVehicleWarningClient);
+  NS_OBJECT_ENSURE_REGISTERED(emergencyVehicleWarningClient80211p);
 
   TypeId
-  emergencyVehicleWarningClient::GetTypeId (void)
+  emergencyVehicleWarningClient80211p::GetTypeId (void)
   {
     static TypeId tid =
-        TypeId ("ns3::emergencyVehicleWarningClient")
+        TypeId ("ns3::emergencyVehicleWarningClient80211p")
         .SetParent<Application> ()
         .SetGroupName ("Applications")
-        .AddConstructor<emergencyVehicleWarningClient> ()
+        .AddConstructor<emergencyVehicleWarningClient80211p> ()
         .AddAttribute ("RealTime",
             "To compute properly timestamps",
             BooleanValue(false),
-            MakeBooleanAccessor (&emergencyVehicleWarningClient::m_real_time),
+            MakeBooleanAccessor (&emergencyVehicleWarningClient80211p::m_real_time),
             MakeBooleanChecker ())
         .AddAttribute ("IpAddr",
             "IpAddr",
             Ipv4AddressValue ("10.0.0.1"),
-            MakeIpv4AddressAccessor (&emergencyVehicleWarningClient::m_ipAddress),
+            MakeIpv4AddressAccessor (&emergencyVehicleWarningClient80211p::m_ipAddress),
             MakeIpv4AddressChecker ())
         .AddAttribute ("PrintSummary",
             "To print summary at the end of simulation",
             BooleanValue(false),
-            MakeBooleanAccessor (&emergencyVehicleWarningClient::m_print_summary),
+            MakeBooleanAccessor (&emergencyVehicleWarningClient80211p::m_print_summary),
             MakeBooleanChecker ())
         .AddAttribute ("CSV",
             "CSV log name",
             StringValue (),
-            MakeStringAccessor (&emergencyVehicleWarningClient::m_csv_name),
+            MakeStringAccessor (&emergencyVehicleWarningClient80211p::m_csv_name),
             MakeStringChecker ())
         .AddAttribute ("Model",
             "Physical and MAC layer communication model",
             StringValue (""),
-            MakeStringAccessor (&emergencyVehicleWarningClient::m_model),
+            MakeStringAccessor (&emergencyVehicleWarningClient80211p::m_model),
             MakeStringChecker ())
         .AddAttribute ("Client",
             "TraCI client for SUMO",
             PointerValue (0),
-            MakePointerAccessor (&emergencyVehicleWarningClient::m_client),
+            MakePointerAccessor (&emergencyVehicleWarningClient80211p::m_client),
             MakePointerChecker<TraciClient> ())
         .AddAttribute ("PRRSupervisor",
             "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
-            MakePointerAccessor (&emergencyVehicleWarningClient::m_PRR_supervisor),
+            MakePointerAccessor (&emergencyVehicleWarningClient80211p::m_PRR_supervisor),
             MakePointerChecker<PRRSupervisor> ())
         .AddAttribute ("SendCAM",
             "To enable/disable the transmission of CAM messages",
             BooleanValue(true),
-            MakeBooleanAccessor (&emergencyVehicleWarningClient::m_send_cam),
+            MakeBooleanAccessor (&emergencyVehicleWarningClient80211p::m_send_cam),
             MakeBooleanChecker ());
         return tid;
   }
 
-  emergencyVehicleWarningClient::emergencyVehicleWarningClient ()
+  emergencyVehicleWarningClient80211p::emergencyVehicleWarningClient80211p ()
   {
     NS_LOG_FUNCTION(this);
     m_client = nullptr;
@@ -109,20 +109,20 @@ namespace ns3
     m_heading_threshold = 45; // Max heading angle difference between the normal vehicles and the emergenecy vehicle, that triggers a reaction in the normal vehicles
   }
 
-  emergencyVehicleWarningClient::~emergencyVehicleWarningClient ()
+  emergencyVehicleWarningClient80211p::~emergencyVehicleWarningClient80211p ()
   {
     NS_LOG_FUNCTION(this);
   }
 
   void
-  emergencyVehicleWarningClient::DoDispose (void)
+  emergencyVehicleWarningClient80211p::DoDispose (void)
   {
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
 
   void
-  emergencyVehicleWarningClient::StartApplication (void)
+  emergencyVehicleWarningClient80211p::StartApplication (void)
   {
     NS_LOG_FUNCTION(this);
 
@@ -206,14 +206,14 @@ namespace ns3
     m_caService.setSocketTx (m_socket);
     m_caService.setSocketRx (m_socket);
     m_caService.setStationProperties (std::stol(m_id.substr (3)), (long)stationtype);
-    m_caService.addCARxCallback (std::bind(&emergencyVehicleWarningClient::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
+    m_caService.addCARxCallback (std::bind(&emergencyVehicleWarningClient80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
     m_caService.setRealTime (m_real_time);
 
     /* Set sockets, callback and station properties and TraCI VDP in iviService */
     m_iviService.setSocketTx (m_socket);
     m_iviService.setSocketRx (m_socket);
     m_iviService.setStationProperties (std::stol(m_id.substr (3)),(long)stationtype);
-    m_iviService.addIVIRxCallback (std::bind(&emergencyVehicleWarningClient::receiveIVIM,this,std::placeholders::_1,std::placeholders::_2));
+    m_iviService.addIVIRxCallback (std::bind(&emergencyVehicleWarningClient80211p::receiveIVIM,this,std::placeholders::_1,std::placeholders::_2));
     m_iviService.setRealTime (m_real_time);
 
 
@@ -239,7 +239,7 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningClient::StopApplication ()
+  emergencyVehicleWarningClient80211p::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel(m_speed_ev);
@@ -269,14 +269,14 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningClient::StopApplicationNow ()
+  emergencyVehicleWarningClient80211p::StopApplicationNow ()
   {
     NS_LOG_FUNCTION(this);
     StopApplication ();
   }
 
   void
-  emergencyVehicleWarningClient::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
+  emergencyVehicleWarningClient80211p::receiveCAM (asn1cpp::Seq<CAM> cam, Address from)
   {
     /* Implement CAM strategy here */
    m_cam_received++;
@@ -308,7 +308,7 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningClient::receiveIVIM (iviData ivim, Address from)
+  emergencyVehicleWarningClient80211p::receiveIVIM (iviData ivim, Address from)
   {
         //std::cout<<"Received a new IVIM."<<std::endl;
         m_ivim_received++;
@@ -391,7 +391,7 @@ namespace ns3
                   }
 
                 /*Schedule timeout for Relevance Zone check*/
-                Simulator::Schedule(Seconds (1),&emergencyVehicleWarningClient::checkRelevanceZone,this);
+                Simulator::Schedule(Seconds (1),&emergencyVehicleWarningClient80211p::checkRelevanceZone,this);
 
               }
           }
@@ -399,14 +399,14 @@ namespace ns3
   }
 
   void
-  emergencyVehicleWarningClient::checkRelevanceZone ()
+  emergencyVehicleWarningClient80211p::checkRelevanceZone ()
   {
     /*Check if inside relevance zone */
     if ( m_client->TraCIAPI::vehicle.getPosition (m_id).x>=(m_endRel.x) &&
           m_client->TraCIAPI::vehicle.getPosition (m_id).y<=(m_segmentUpper) &&
           m_client->TraCIAPI::vehicle.getPosition (m_id).y>=(m_segmentLower)){
           /*Schedule timeout for Relevance Zone check*/
-         Simulator::Schedule(Seconds (1),&emergencyVehicleWarningClient::checkRelevanceZone,this);
+         Simulator::Schedule(Seconds (1),&emergencyVehicleWarningClient80211p::checkRelevanceZone,this);
 
          if (m_client->TraCIAPI::vehicle.getLaneIndex (m_id) !=0){
 
@@ -418,12 +418,12 @@ namespace ns3
 
         /*If client is outside the relevance zone, set speed back to normal */
          Simulator::Remove(m_speed_ev);
-         m_speed_ev = Simulator::Schedule (Seconds (0.1), &emergencyVehicleWarningClient::SetMaxSpeed, this);
+         m_speed_ev = Simulator::Schedule (Seconds (0.1), &emergencyVehicleWarningClient80211p::SetMaxSpeed, this);
        }
   }
 
   void
-  emergencyVehicleWarningClient::SetMaxSpeed ()
+  emergencyVehicleWarningClient80211p::SetMaxSpeed ()
   {
     libsumo::TraCIColor normal;
     normal.r=255;normal.g=255;normal.b=0;normal.a=255;

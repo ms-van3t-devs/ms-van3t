@@ -23,8 +23,8 @@ Set(source_files
     model/Applications/trafficManagerServer80211p.cc
     model/Applications/trafficManagerClientLTE.cc
     model/Applications/trafficManagerServerLTE.cc
-    model/Applications/emergencyVehicleWarningServer.cc
-    model/Applications/emergencyVehicleWarningClient.cc
+    model/Applications/emergencyVehicleWarningServer80211p.cc
+    model/Applications/emergencyVehicleWarningClient80211p.cc
 
     model/Applications/emergencyVehicleAlert.cc
     model/Facilities/denBasicService.cc
@@ -1310,8 +1310,8 @@ set(header_files
     model/Applications/trafficManagerServer80211p.h
     model/Applications/trafficManagerClientLTE.h
     model/Applications/trafficManagerServerLTE.h
-    model/Applications/emergencyVehicleWarningServer.h
-    model/Applications/emergencyVehicleWarningClient.h
+    model/Applications/emergencyVehicleWarningServer80211p.h
+    model/Applications/emergencyVehicleWarningClient80211p.h
     model/Facilities/ividata.h
     model/Facilities/iviService.h
     model/Facilities/BSMap.h
