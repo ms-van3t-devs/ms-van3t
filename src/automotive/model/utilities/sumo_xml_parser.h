@@ -13,7 +13,7 @@ namespace ns3 {
 
   int XML_rou_count_vehicles(xmlDocPtr doc);
   int XML_rou_count_pedestrians(xmlDocPtr doc);
-  std::vector<std::tuple<std::string, float, float>> XML_poli_count_RSUs(std::ifstream &file);
+  std::vector<std::tuple<std::string, float, float>> XML_poli_count_stations(std::ifstream &file);
 }
 
 #endif

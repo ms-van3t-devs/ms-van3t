@@ -52,7 +52,7 @@ main (int argc, char *argv[])
   /*** 0.a App Options ***/
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2i_TM_map/";
   std::string mob_trace = "cars.rou.xml";
-  std::string rsu_file = "rsu.xml";
+  std::string rsu_file = "stations.xml";
   std::string sumo_config ="src/automotive/examples/sumo_files_v2i_TM_map/map.sumo.cfg";
 
 
@@ -152,7 +152,7 @@ main (int argc, char *argv[])
 
   std::string rsu_path = sumo_folder + rsu_file;
   std::ifstream rsu_file_stream (rsu_path.c_str());
-  std::vector<std::tuple<std::string, float, float>> rsuData = XML_poli_count_RSUs(rsu_file_stream);
+  std::vector<std::tuple<std::string, float, float>> rsuData = XML_poli_count_stations(rsu_file_stream);
   numberOfRSUs = rsuData.size();
 
   xmlFreeDoc(rou_xml_file);
@@ -266,7 +266,7 @@ main (int argc, char *argv[])
       float x = std::get<1>(rsu);
       float y = std::get<2>(rsu);
       Ptr<Node> rsuNode = rsuNodes.Get (i);
-      sumoClient->AddRSU(id, x, y, 0.0, rsuNode);
+      sumoClient->AddStation(id, x, y, 0.0, rsuNode);
       ApplicationContainer AppServer = emergencyVehicleWarningServerHelper.Install (rsuNode);
       AppServer.Start (Seconds (0.0));
       AppServer.Stop (simulationTime - Seconds (0.1));
