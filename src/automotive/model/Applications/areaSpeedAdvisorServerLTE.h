@@ -98,6 +98,8 @@ namespace ns3 {
     u_int m_cam_received;
     u_int m_denm_sent;
 
+    uint64_t m_stationId_baseline = 1000000;
+
     EventId m_aggegateOutputEvent; //!< Event to create aggregate output
 
     Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;

@@ -71,9 +71,9 @@ public:
 
   std::map< std::string, std::pair< StationType_t, Ptr<Node> > > get_NodeMap() {return m_NodeMap;};
 
-  void AddRSU(std::string id, float x, float y, float z, Ptr<Node> node);
+  void AddStation(std::string id, float x, float y, float z, Ptr<Node> node);
 
-  std::string GetRSUId(Ptr<Node> node);
+  std::string GetStationId(Ptr<Node> node);
 
 
 private:

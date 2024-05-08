@@ -4,6 +4,6 @@
 -->
 
 <additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
-    <!-- V2X:RSU --><poi id="poi_0" color="orange" layer="202.00" x="-118.20" y="-53.30"/>
-    <!-- V2X:RSU --><poi id="poi_1" color="orange" layer="202.00" x="168.8" y="-53.30"/>
+    <!-- V2X:STATION --><poi id="poi_0" color="orange" layer="202.00" x="-118.20" y="-53.30"/>
+    <!-- V2X:STATION --><poi id="poi_1" color="orange" layer="202.00" x="168.8" y="-53.30"/>
 </additional>

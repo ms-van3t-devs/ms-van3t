@@ -154,18 +154,18 @@ namespace ns3
 
     // Bind the socket to local address
     if (m_socket->Bind (local_denm) == -1)
-    {
-      NS_FATAL_ERROR ("Failed to bind server UDP socket");
-    }
+      {
+        NS_FATAL_ERROR ("Failed to bind server UDP socket");
+      }
 
     // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
 
     if(m_PRR_supervisor!=nullptr)
-    {
-      m_geoNet->setPRRSupervisor(m_PRR_supervisor);
-    }
+      {
+        m_geoNet->setPRRSupervisor(m_PRR_supervisor);
+      }
 
     m_btp->setGeoNet(m_geoNet);
     m_denService.setBTP(m_btp);
@@ -194,12 +194,12 @@ namespace ns3
     libsumo::TraCIPosition servicePos = m_client->TraCIAPI::simulation.convertXYtoLonLat (0,0);
     m_denService.setFixedPositionRSU (servicePos.y,servicePos.x);
     m_caService.setFixedPositionRSU (servicePos.y,servicePos.x);
-    
+
     if (!m_csv_name.empty ())
-    {
-      m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);
-      m_csv_ofstream_cam << "messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration" << std::endl;
-    }
+      {
+        m_csv_ofstream_cam.open (m_csv_name+"-server.csv",std::ofstream::trunc);
+        m_csv_ofstream_cam << "messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration" << std::endl;
+      }
 
     /* If aggregate output is enabled, start it */
     if (m_aggregate_output)

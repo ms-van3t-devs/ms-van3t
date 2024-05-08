@@ -107,7 +107,7 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
 
-    m_id = m_client->GetRSUId (this -> GetNode ());
+    m_id = m_client->GetStationId (this -> GetNode ());
 
     /* TX socket for DENMs and RX socket for CAMs (one socket only is necessary) */
     TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
@@ -149,12 +149,16 @@ namespace ns3
     m_denService.setSocketRx (m_socket);
     m_denService.addDENRxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveDENM,this,std::placeholders::_1,std::placeholders::_2));
 
-    uint64_t id = std::stoi(m_id.substr (m_id.find("_") + 1));
+    size_t start = m_id.find("_") + 1;
+    size_t end = m_id.find_first_not_of("0123456789", start); // find the end of the id
+    std::string id_str = m_id.substr(start, end - start);
+    uint64_t id = std::stoull(id_str);
     m_denService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
 
     /* Set callback and station properties in CABasicService */
     m_caService.setStationProperties (m_stationId_baseline + id, StationType_roadSideUnit);
     m_caService.setSocketRx (m_socket);
+    m_caService.setSocketTx (m_socket);
     m_caService.addCARxCallback (std::bind(&areaSpeedAdvisorServer80211p::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
 
     libsumo::TraCIPosition rsuPosXY = m_client->TraCIAPI::poi.getPosition (m_id);

@@ -634,7 +634,7 @@ TraciClient::getVehicleNodeMapIds()
     return ids;
 }
 
-void TraciClient::AddRSU(std::string id, float x, float y, float z, Ptr<Node> node)
+void TraciClient::AddStation(std::string id, float x, float y, float z, Ptr<Node> node)
 {
   // Add RSU to the map
   std::pair<StationType_t, Ptr<ns3::Node>> inNode;
@@ -644,12 +644,12 @@ void TraciClient::AddRSU(std::string id, float x, float y, float z, Ptr<Node> no
   // register in the map (link vehicle to node!)
   m_NodeMap.insert(std::pair<std::string, std::pair<StationType_t, Ptr<ns3::Node>>>(id, inNode));
 
-  // Set the position of the RSU
+  // Set the position of the Station
   Ptr<MobilityModel> mob = node->GetObject<MobilityModel>();
   mob->SetPosition(Vector(x, y, z));
 }
 
-std::string TraciClient::GetRSUId(Ptr<Node> node)
+std::string TraciClient::GetStationId(Ptr<Node> node)
 {
   NS_LOG_FUNCTION (this);
 
