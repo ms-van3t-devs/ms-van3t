@@ -356,6 +356,9 @@ int main (int argc, char *argv[])
   std::cout << "Average latency veh 4 (ms): " << prrSup->getAverageLatency_vehicle (4) << std::endl;
 
   std::cout << "RX packet count: " << packet_count << std::endl;
+  std::cout << "RX packet count (from PRR Supervisor): " << prrSup->getNumberRx_overall () << std::endl;
+  std::cout << "TX packet count (from PRR Supervisor): " << prrSup->getNumberTx_overall () << std::endl;
+  std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << prrSup->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
 
   Simulator::Destroy ();
 

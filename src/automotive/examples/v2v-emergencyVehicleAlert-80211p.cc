@@ -326,18 +326,33 @@ main (int argc, char *argv[])
       for(int i=1;i<numberOfNodes+1;i++) {
           std::cout << "Average latency of vehicle " << i << " (ms): " << prrSup->getAverageLatency_vehicle (i) << std::endl;
           std::cout << "Average PRR of vehicle " << i << " (%): " << prrSup->getAveragePRR_vehicle (i) << std::endl;
+          std::cout << "Total number of TX packets by vehicle " << i << ": " << prrSup->getNumberTx_vehicle(i) << std::endl;
+          std::cout << "Total number of RX packets by vehicle " << i << ": " << prrSup->getNumberRx_vehicle(i) << std::endl;
       }
 
       std::cout << "Average latency of CAMs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_cam) << std::endl;
       std::cout << "Average PRR of CAMs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_cam) << std::endl;
+      std::cout << "Total number of CAMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_cam) << std::endl;
+      std::cout << "Total number of CAMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_cam) << std::endl;
+
       std::cout << "Average latency of DENMSs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_denm) << std::endl;
       std::cout << "Average PRR of DENMSs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_denm) << std::endl;
+      std::cout << "Total number of DENMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_denm) << std::endl;
+      std::cout << "Total number of DENMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_denm) << std::endl;
+
       std::cout << "Average latency of CPMs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
       std::cout << "Average PRR of CPMs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Total number of CPMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Total number of CPMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
+
       std::cout << "Average latency of GN Beacons (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
       std::cout << "Average PRR of GN Beacons (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
-    }
+      std::cout << "Total number of GN Beacons transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Total number of GN Beacons received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
 
+      std::cout << "Total number of TX packets: " << prrSup->getNumberTx_overall() << std::endl;
+      std::cout << "Total number of RX packets: " << prrSup->getNumberRx_overall() << std::endl;
+    }
 
   return 0;
 }

@@ -79,7 +79,7 @@ public:
   void setTraCIClient(Ptr<TraciClient> traci_ptr) {m_traci_ptr = traci_ptr;}
 
   /**
-   * @brief This function is called everytime a packet is sent in the simulation by the GeoNet object.
+   * @brief This function is called everytime a packet is sent in the simulation by the GeoNet object. It is not expected to be called by the user.
    * @param buf  The buffer containing the packet.
    * @param lat   The latitude of the sender.
    * @param lon   The longitude of the sender.
@@ -88,7 +88,7 @@ public:
    */
   void signalSentPacket(std::string buf,double lat,double lon,uint64_t vehicleID, messageType_e messagetype);
   /**
-   * @brief This function is called everytime a packet is received in the simulation by the GeoNet object.
+   * @brief This function is called everytime a packet is received in the simulation by the GeoNet object. It is not expected to be called by the user.
    * @param buf  The buffer containing the packet.
    * @param vehicleID  The ID of the receiver.
    */
@@ -106,6 +106,111 @@ public:
   double getAverageLatency_overall(void) {return m_avg_latency_ms;}
 
   /**
+   * @brief Get the total number of packets transmitted in the whole simulation.
+   * @return  The total number of packets transmitted.
+   */
+  uint64_t getNumberTx_overall(void) {return m_total_tx;}
+  /**
+   * @brief Get the average number of transmitted packets over all road users.
+   * @return  The average number of transmitted packets.
+   */
+  double getAverageNumberTx_overall(void) {
+    uint64_t totalTx = 0;
+    uint64_t totalUsers = 0;
+
+    // Sum up the total number of transmitted packets for each vehicle
+    for (const auto &pair : m_ntx_per_veh) {
+        totalTx += pair.second;
+    }
+
+    // Sum up the total number of transmitted packets for each pedestrian
+    for (const auto &pair : m_ntx_per_ped) {
+        totalTx += pair.second;
+    }
+
+    // Sum up the total number of transmitted packets for each RSU
+    for (const auto &pair : m_ntx_per_rsu) {
+        totalTx += pair.second;
+    }
+
+    // Calculate the total number of road users
+    totalUsers = m_ntx_per_veh.size() + m_ntx_per_ped.size() + m_ntx_per_rsu.size();
+
+    // Compute the average number of transmitted packets over all road users
+    double averageTx = totalUsers > 0 ? static_cast<double>(totalTx) / static_cast<double>(totalUsers) : 0.0;
+
+    return averageTx;
+  }
+  /**
+   * @brief Get the total number of packets received in the whole simulation.
+   * @return  The total number of packets received.
+   */
+  uint64_t getNumberRx_overall(void) {return m_total_rx;}
+  /**
+   * @brief Get the average number of received packets over all road users.
+   * @return  The average number of received packets.
+   */
+  double getAverageNumberRx_overall(void) {
+    uint64_t totalRx = 0;
+    uint64_t totalUsers = 0;
+
+    // Sum up the total number of received packets for each vehicle
+    for (const auto &pair : m_nrx_per_veh) {
+        totalRx += pair.second;
+    }
+
+    // Sum up the total number of received packets for each pedestrian
+    for (const auto &pair : m_nrx_per_ped) {
+        totalRx += pair.second;
+    }
+
+    // Sum up the total number of received packets for each RSU
+    for (const auto &pair : m_nrx_per_rsu) {
+        totalRx += pair.second;
+    }
+
+    // Calculate the total number of road users
+    totalUsers = m_nrx_per_veh.size() + m_nrx_per_ped.size() + m_nrx_per_rsu.size();
+
+    // Compute the average number of received packets over all road users
+    double averageRx = totalUsers > 0 ? static_cast<double>(totalRx) / static_cast<double>(totalUsers) : 0.0;
+
+    return averageRx;
+  }
+
+  /**
+   * @brief Get the average number of vehicles within the PRR baseline for all road users.
+   * @return  The average number of vehicles within the baseline.
+   */
+  double getAverageNumberOfVehiclesInBaseline_overall() {
+    double totalAverageVehiclesInBaseline = 0;
+    uint64_t totalUsers = 0;
+
+    // Sum up the average number of vehicles within the baseline for each vehicle
+    for (const auto &pair : m_avg_nvehbsln_per_veh) {
+        totalAverageVehiclesInBaseline += pair.second;
+    }
+
+    // Sum up the average number of vehicles within the baseline for each pedestrian
+    for (const auto &pair : m_avg_nvehbsln_per_ped) {
+        totalAverageVehiclesInBaseline += pair.second;
+    }
+
+    // Sum up the average number of vehicles within the baseline for each RSU
+    for (const auto &pair : m_avg_nvehbsln_per_rsu) {
+        totalAverageVehiclesInBaseline += pair.second;
+    }
+
+    // Calculate the total number of samples
+    totalUsers = m_avg_nvehbsln_per_veh.size() + m_avg_nvehbsln_per_ped.size() + m_avg_nvehbsln_per_rsu.size();
+
+    // Compute the average number of vehicles within the baseline during the whole simulation
+    double averageVehiclesInBaseline = totalUsers > 0 ? static_cast<double>(totalAverageVehiclesInBaseline) / static_cast<double>(totalUsers) : 0.0;
+
+    return averageVehiclesInBaseline;
+  }
+
+  /**
    * @brief Get the average PRR for all the messages sent and received by a specific vehicle.
    * @param vehicleID  The ID of the vehicle.
    * @return  The average PRR.
@@ -117,9 +222,56 @@ public:
    * @return  The average latency [ms]
    */
   double getAverageLatency_vehicle(uint64_t vehicleID) {return m_avg_latency_ms_per_veh[vehicleID];}
+  /**
+   * @brief Get the total number of packets transmitted by a specific vehicle.
+   * @param vehicleID  The ID of the vehicle.
+   * @return  The total number of packets transmitted.
+   */
+  uint64_t getNumberTx_vehicle(uint64_t vehicleID) {return m_ntx_per_veh[vehicleID];}
+  /**
+   * @brief Get the total number of packets received by a specific vehicle.
+   * @param vehicleID  The ID of the vehicle.
+   * @return  The total number of packets received.
+   */
+  uint64_t getNumberRx_vehicle(uint64_t vehicleID) {return m_nrx_per_veh[vehicleID];}
 
+  /**
+   * @brief Get the average number of vehicles within the PRR baseline for a specific vehicle.
+   * @param vehicleID  The ID of the vehicle.
+   * @return  The average number of vehicles within the baseline.
+   */
+  double getAverageNumberOfVehiclesInBaseline_vehicle(uint64_t vehicleID) {return m_avg_nvehbsln_per_veh[vehicleID];}
+
+  /**
+   * @brief Get the average PRR for all the messages sent and received by a specific VRU/pedestrian.
+   * @param rsuID  The ID of the VRU.
+   * @return  The average PRR.
+   */
   double getAveragePRR_pedestrian(uint64_t pedestrianID) {return m_avg_PRR_per_ped[pedestrianID];}
+  /**
+   * @brief Get the average latency for all the messages sent and received by a specific VRU/pedestrian.
+   * @param pedestrianID  The ID of the VRU.
+   * @return  The average latency [ms]
+   */
   double getAverageLatency_pedestrian(uint64_t pedestrianID) {return m_avg_latency_ms_per_ped[pedestrianID];}
+  /**
+   * @brief Get the total number of packets transmitted by a specific VRU/pedestrian.
+   * @param pedestrianID  The ID of the VRU.
+   * @return  The total number of packets transmitted.
+   */
+  uint64_t getNumberTx_pedestrian(uint64_t pedestrianID) {return m_ntx_per_ped[pedestrianID];}
+  /**
+   * @brief Get the total number of packets received by a specific VRU/pedestrian.
+   * @param pedestrianID  The ID of the VRU.
+   * @return  The total number of packets received.
+   */
+  uint64_t getNumberRx_pedestrian(uint64_t pedestrianID) {return m_nrx_per_ped[pedestrianID];}
+  /**
+   * @brief Get the average number of vehicles within the PRR baseline for a specific VRU/pedestrian.
+   * @param pedestrianID  The ID of the VRU.
+   * @return  The average number of vehicles within the baseline.
+   */
+  double getAverageNumberOfVehiclesInBaseline_pedestrian(uint64_t pedestrianID) {return m_avg_nvehbsln_per_ped[pedestrianID];}
 
   /**
    * @brief Get the average PRR for all the messages of a specific type sent and received in the simulation.
@@ -133,6 +285,43 @@ public:
    * @return  The average latency [ms]
    */
   double getAverageLatency_messagetype(messageType_e messagetype) {return m_avg_latency_ms_per_messagetype[messagetype];}
+  /**
+   * @brief Get the total number of packets transmitted given a specific message type.
+   * @param messagetype  The ETSI message type.
+   * @return  The total number of packets transmitted.
+   */
+  uint64_t getNumberTx_messagetype(messageType_e messagetype) {return m_ntx_per_messagetype[messagetype];}
+  /**
+   * @brief Get the total number of packets received given a specific message type.
+   * @param messagetype  The ETSI message type.
+   * @return  The total number of packets received.
+   */
+  uint64_t getNumberRx_messagetype(messageType_e messagetype) {return m_nrx_per_messagetype[messagetype];}
+  /**
+   * @brief Get the average number of vehicles within the PRR baseline for a specific message type.
+   * @param messagetype  The ETSI message type.
+   * @return  The average number of vehicles within the baseline.
+   */
+  double getAverageNumberOfVehiclesInBaseline_messagetype(messageType_e messagetype) {return m_avg_nvehbsln_per_messagetype[messagetype];}
+
+  /**
+   * @brief Get the total number of packets transmitted by a specific RSU.
+   * @param rsuID  The ID of the RSU.
+   * @return  The total number of packets transmitted by that specific RSU.
+   */
+  uint64_t getNumberTx_rsu(uint64_t rsuID) {return m_ntx_per_rsu[rsuID];}
+  /**
+   * @brief Get the total number of packets received by a specific RSU.
+   * @param rsuID  The ID of the RSU.
+   * @return  The total number of packets received by that specific RSU.
+   */
+  uint64_t getNumberRx_rsu(uint64_t rsuID) {return m_nrx_per_rsu[rsuID];}
+  /**
+   * @brief Get the average number of vehicles within the PRR baseline for a specific RSU.
+   * @param messagetype  The ID of the VRU.
+   * @return  The average number of vehicles within the baseline.
+   */
+  double getAverageNumberOfVehiclesInBaseline_rsu(uint64_t rsuID) {return m_avg_nvehbsln_per_rsu[rsuID];}
 
   void enableVerboseOnStdout() {m_verbose_stdout=true;}
   void disableVerboseOnStdout() {m_verbose_stdout=false;}
@@ -158,7 +347,7 @@ public:
    * periodicity as the one of GeoNetworking beacons, when no CAMs are being exchanged.
    * With this function, the timeout can be adjusted depending on the user needs.
    *
-   * @param prr_comp_timeout_sec
+   * @param prr_comp_timeout_sec The new timeout value in seconds.
    */
   void modifyPRRComputationTimeout(double prr_comp_timeout_sec) {m_pprcomp_timeout=prr_comp_timeout_sec;}
 private:
@@ -172,6 +361,8 @@ private:
 
   int m_count = 0;
   uint64_t m_count_latency = 0;
+  uint64_t m_total_tx = 0.0;
+  uint64_t m_total_rx = 0.0;
   double m_avg_PRR = 0.0;
   double m_avg_latency_ms = 0.0;
   std::unordered_map<uint64_t,double> m_avg_PRR_per_veh; //! key: vehicle ID, value: PRR
@@ -180,17 +371,34 @@ private:
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_veh;  //! key: vehicle ID, value: latency
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_ped;  //! key: pedestrian ID, value: latency
   std::unordered_map<uint64_t,double> m_avg_latency_ms_per_rsu;  //! key: RSU ID, value: latency
+  std::unordered_map<uint64_t,uint64_t> m_ntx_per_veh;  //! key: vehicle ID, value: total number of packets transmitted per vehicle
+  std::unordered_map<uint64_t,uint64_t> m_ntx_per_ped;  //! key: pedestrian ID, value: total number of packets transmitted per VRU
+  std::unordered_map<uint64_t,uint64_t> m_ntx_per_rsu;  //! key: RSU ID, value:  total number of packets transmitted per RSU
+  std::unordered_map<uint64_t,uint64_t> m_nrx_per_veh;  //! key: vehicle ID, value: total number of packets received per vehicle
+  std::unordered_map<uint64_t,uint64_t> m_nrx_per_ped;  //! key: pedestrian ID, value: total number of packets received per VRU
+  std::unordered_map<uint64_t,uint64_t> m_nrx_per_rsu;  //! key: RSU ID, value: total number of packets received per RSU
+  std::unordered_map<uint64_t,double> m_avg_nvehbsln_per_veh;  //! key: vehicle ID, value: average number of road users within the baseline used for the PRR computation
+  std::unordered_map<uint64_t,double> m_avg_nvehbsln_per_ped;  //! key: pedestrian ID, value: average number of road users within the baseline used for the PRR computation
+  std::unordered_map<uint64_t,double> m_avg_nvehbsln_per_rsu;  //! key: RSU ID, value: average number of road users within the baseline used for the PRR computation
+
   std::unordered_map<uint64_t,int> m_count_per_veh; //! key: vehicle ID, value: count
   std::unordered_map<uint64_t,int> m_count_per_ped;  //! key: pedestrian ID, value: count
   std::unordered_map<uint64_t,int> m_count_per_rsu;  //! key: RSU ID, value: count
-  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_veh;    //! key: vehicle ID, value: latency
-  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_ped;    //! key: pedestrian ID, value: latency
-  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_rsu;    //! key: RSU ID, value: latency
+  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_veh;    //! key: vehicle ID, value: count for latency computation
+  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_ped;    //! key: pedestrian ID, value: count for latency computation
+  std::unordered_map<uint64_t,uint64_t> m_count_latency_per_rsu;    //! key: RSU ID, value: count for latency computation
+  std::unordered_map<uint64_t,uint64_t> m_count_nvehbsln_per_veh;    //! key: vehicle ID, value: count for average number of vehicles within the baseline computation
+  std::unordered_map<uint64_t,uint64_t> m_count_nvehbsln_per_ped;    //! key: pedestrian ID, value: count for average number of vehicles within the baseline computation
+  std::unordered_map<uint64_t,uint64_t> m_count_nvehbsln_per_rsu;    //! key: RSU ID, value: count for average number of vehicles within the baseline computation
 
   std::unordered_map<messageType_e,double> m_avg_PRR_per_messagetype; //! key: message type, value: PRR
   std::unordered_map<messageType_e,double> m_avg_latency_ms_per_messagetype; //! key: message type, value: latency
   std::unordered_map<messageType_e,int> m_count_per_messagetype; //! key: message type, value: count
   std::unordered_map<messageType_e,uint64_t> m_count_latency_per_messagetype; //! key: message type, value: latency
+  std::unordered_map<messageType_e,uint64_t> m_ntx_per_messagetype; //! key: message type, value: total number of packets transmitted per message type
+  std::unordered_map<messageType_e,uint64_t> m_nrx_per_messagetype; //! key: message type, value: total number of packets received per message type
+  std::unordered_map<messageType_e,uint64_t> m_count_nvehbsln_per_messagetype; //! key: message type, value: count for average number of vehicles within the baseline computation
+  std::unordered_map<messageType_e,double> m_avg_nvehbsln_per_messagetype;  //! key: message type, value: average number of road users within the baseline used for the PRR computation for that message type
 
   Ptr<TraciClient> m_traci_ptr = nullptr;
   double m_baseline_m = 150.0;

@@ -132,6 +132,17 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
   m_id_map[buf] = nodeID;
 
   m_messagetype_map[buf] = messagetype;
+
+  if(m_stationtype_map[buf]==StationType_pedestrian) {
+      m_ntx_per_ped[nodeID]++;
+  } else if(m_stationtype_map[buf]==StationType_roadSideUnit) {
+      m_ntx_per_rsu[nodeID]++;
+  } else {
+      m_ntx_per_veh[nodeID]++;
+  }
+
+  m_total_tx++;
+  m_ntx_per_messagetype[messagetype]++;
 }
 
 void
@@ -163,18 +174,18 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
         }
     }
 
+  messageType_e messagetype = m_messagetype_map[buf];
+  StationType_t station_type = m_stationtype_map[buf];
+  uint64_t senderID = m_id_map[buf];
+
   // Compute latency in ms
   if(m_latency_map.count(buf)>0)
     {
-      uint64_t senderID = m_id_map[buf];
-      messageType_e messagetype = m_messagetype_map[buf];
-
       curr_latency_ms = static_cast<double>(Simulator::Now ().GetNanoSeconds () - m_latency_map[buf])/1000000.0;
       m_count_latency++;
 
       m_avg_latency_ms += (curr_latency_ms-m_avg_latency_ms)/m_count_latency;
 
-      StationType_t station_type = m_stationtype_map[buf];
       if(station_type == StationType_pedestrian){
 
           if(m_count_latency_per_ped.count(senderID)<=0) {
@@ -235,6 +246,17 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
           std::cout << "|Latency| ID: " << nodeID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
         }
     }
+
+  m_total_rx++;
+  m_nrx_per_messagetype[m_messagetype_map[buf]]++;
+
+  if(m_stationtype_map[buf]==StationType_pedestrian) {
+    m_nrx_per_ped[nodeID]++;
+  } else if(m_stationtype_map[buf]==StationType_roadSideUnit) {
+    m_nrx_per_rsu[nodeID]++;
+  } else {
+    m_nrx_per_veh[nodeID]++;
+  }
 }
 
 void
@@ -248,7 +270,44 @@ PRRSupervisor::computePRR(std::string buf)
       messageType_e messagetype = m_messagetype_map[buf];
       StationType_t station_type = m_stationtype_map[buf];
 
-      PRR = (double) m_packetbuff_map[buf].x/(double) (m_packetbuff_map[buf].nodeList.size()-1.0);
+      // Number of vehicles/other road users in the baseline ("Y" in the PRR formula)
+      double nvehbsln = (double) (m_packetbuff_map[buf].nodeList.size())-1.0;
+
+      if (station_type == StationType_pedestrian){
+        if(m_count_nvehbsln_per_ped.count(senderID)<=0) {
+            m_count_nvehbsln_per_ped[senderID]=0;
+        }
+
+        m_count_nvehbsln_per_ped[senderID]++;
+        m_avg_nvehbsln_per_ped[senderID] += (nvehbsln-m_avg_nvehbsln_per_ped[senderID]) / static_cast<double>(m_count_nvehbsln_per_ped[senderID]);
+      } else if(station_type == StationType_roadSideUnit) {
+        if(m_count_nvehbsln_per_rsu.count(senderID)<=0) {
+            m_count_nvehbsln_per_rsu[senderID]=0;
+        }
+
+        m_count_nvehbsln_per_rsu[senderID]++;
+        m_avg_nvehbsln_per_rsu[senderID] += (nvehbsln-m_avg_nvehbsln_per_rsu[senderID]) / static_cast<double>(m_count_nvehbsln_per_rsu[senderID]);
+      } else {
+        if(m_count_nvehbsln_per_veh.count(senderID)<=0) {
+            m_count_nvehbsln_per_veh[senderID]=0;
+        }
+
+        m_count_nvehbsln_per_veh[senderID]++;
+        m_avg_nvehbsln_per_veh[senderID] += (nvehbsln-m_avg_nvehbsln_per_veh[senderID]) / static_cast<double>(m_count_nvehbsln_per_veh[senderID]);
+
+        if(m_verbose_stdout == true) {
+          std::cout << "|Number of vehicles in the baseline| Vehicle ID: " << senderID << " Current: " << nvehbsln << " - Average: " << m_avg_nvehbsln_per_veh[senderID] << std::endl;
+        }
+      }
+
+      if(m_avg_nvehbsln_per_messagetype.count(messagetype)<=0) {
+          m_avg_nvehbsln_per_messagetype[messagetype]=0;
+      }
+
+      m_count_nvehbsln_per_messagetype[messagetype]++;
+      m_avg_nvehbsln_per_messagetype[messagetype] += (nvehbsln-m_avg_nvehbsln_per_messagetype[messagetype]) / static_cast<double>(m_count_nvehbsln_per_messagetype[messagetype]);
+
+      PRR = (double) m_packetbuff_map[buf].x/nvehbsln;
 
       if(PRR>1) {
           std::cerr << "Value of X: " << (double) m_packetbuff_map[buf].x << " - value of Y: " << (double) (m_packetbuff_map[buf].nodeList.size()-1.0) << std::endl;
