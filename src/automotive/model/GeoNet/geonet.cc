@@ -82,6 +82,7 @@ namespace ns3 {
       }
     // ETSI EN 302 636-4-1 [10.2.2] : the egoPV shall be updated with a minimum freq of th GN constant itsGNminUpdateFrequencyEPV
     m_GNAddress = m_GNAddress.MakeManagedconfiguredAddress (m_GnLocalGnAddr,m_stationtype); //! Initial address config on MANAGED(1) mode ETSI EN 302 636-4-1 [10.2.1.3]
+    m_event_Beacon.Cancel();
     m_event_Beacon = Simulator::Schedule(MilliSeconds(1),&GeoNet::setBeacon,this); //Should be at start-up but set with a little delay
   }
 
