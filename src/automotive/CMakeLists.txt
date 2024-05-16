@@ -38,6 +38,7 @@ Set(source_files
     model/utilities/sumo_xml_parser.cc
     model/Applications/v2xEmulator.cc
     model/Measurements/PRRSupervisor.cc
+    model/Measurements/CBRSupervisor.cc
     model/Facilities/ividata.cc
     model/Facilities/iviService.cc
     model/Facilities/BSMap.cc
@@ -1296,6 +1297,7 @@ set(header_files
     model/utilities/sumo-sensor.h
     model/Applications/v2xEmulator.h
     model/Measurements/PRRSupervisor.h
+    model/Measurements/CBRSupervisor.h
     model/utilities/csv-utils.h
 
     model/Facilities/signalInfoUtils.h
