@@ -78,7 +78,6 @@ main (int argc, char *argv[])
   double m_baseline_prr = 150.0;
   bool m_prr_sup = true;
 
-
   double simTime = 100;
 
   int numberOfNodes;
@@ -337,7 +336,6 @@ main (int argc, char *argv[])
 
   /*** 8. Start Simulation ***/
   Simulator::Stop (simulationTime);
-
   Simulator::Run ();
   Simulator::Destroy ();
 

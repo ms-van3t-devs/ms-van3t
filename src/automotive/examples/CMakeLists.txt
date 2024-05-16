@@ -106,3 +106,13 @@ build_lib_example(
         ${libwave}
         ${libtraci}
 )
+
+build_lib_example(
+        NAME v2v-cam-congestion-80211p
+        SOURCE_FILES v2v-cam-congestion-80211p.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+        ${libwave}
+        ${libtraci}
+)
+

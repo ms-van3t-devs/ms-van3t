@@ -60,10 +60,11 @@
 #include "ns3/wave-mac-helper.h"
 #include "ns3/packet-socket-helper.h"
 #include "ns3/gn-utils.h"
+#include "ns3/CBRSupervisor.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211p");
+NS_LOG_COMPONENT_DEFINE ("V2VCAMCongestion80211p");
 
 // ******* DEFINE HERE ANY LOCAL GLOBAL VARIABLE, ACCESSIBLE FROM ANY FUNCTION IN THIS FILE *******
 // Variables defined here should always be "static"
@@ -114,14 +115,14 @@ int main (int argc, char *argv[])
   double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 23.0; // IEEE 802.11p transmission power in dBm (default: 23 dBm)
   xmlDocPtr rou_xml_file;
-  double simTime = 100.0; // Total simulation time (default: 100 seconds)
+  double simTime = 100.0; // Total simulation time (default: 150 seconds)
 
-
+  bool useCBRSupervisor = true; // Set to true to enable the CBRSupervisor mechanism
 
   // Set here the path to the SUMO XML files
-  std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map_congestion/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map_congestion/map.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -194,7 +195,7 @@ int main (int argc, char *argv[])
   NetDeviceContainer devices = wifi80211p.Install (wifiPhy, wifi80211pMac, c);
 
   // Enable saving to Wireshark PCAP traces
-  wifiPhy.EnablePcap ("v2v-80211p-student-application", devices);
+  // wifiPhy.EnablePcap ("v2v-80211p-student-application", devices);
 
   // Set up the link between SUMO and ns-3, to make each node "mobile" (i.e., linking each ns-3 node to each moving vehicle in ns-3,
   // which corresponds to installing the network stack to each SUMO vehicle)
@@ -253,6 +254,18 @@ int main (int argc, char *argv[])
   source_interfering->Connect (remote_source_interfering);
    // Important: this line lets you set the AC of the interfering traffic, through a User Priority (UP) value, like in real Linux kernels/OS
   source_interfering->SetPriority (interfering_up); // Setting the priority of the interfering traffic from vehicle 3
+
+  CBRSupervisor cbrSupObj;
+  Ptr<CBRSupervisor> cbrSup = &cbrSupObj;
+  if (useCBRSupervisor)
+    {
+      cbrSup->enableVerboseOnStdout();
+      cbrSup->enableWriteToFile();
+      cbrSup->setWindowValue(200);
+      cbrSup->setAlphaValue(0.5);
+      cbrSup->setSimulationTimeValue(simTime);
+      cbrSup->startCheckCBR();
+    }
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
@@ -358,9 +371,6 @@ int main (int argc, char *argv[])
   std::cout << "Average latency veh 4 (ms): " << prrSup->getAverageLatency_vehicle (4) << std::endl;
 
   std::cout << "RX packet count: " << packet_count << std::endl;
-  std::cout << "RX packet count (from PRR Supervisor): " << prrSup->getNumberRx_overall () << std::endl;
-  std::cout << "TX packet count (from PRR Supervisor): " << prrSup->getNumberTx_overall () << std::endl;
-  std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << prrSup->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
 
   Simulator::Destroy ();
 
