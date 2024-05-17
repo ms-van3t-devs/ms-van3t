@@ -35,6 +35,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/vehicle-visualizer-module.h"
 #include "ns3/PRRSupervisor.h"
+#include "ns3/CBRSupervisor.h"
 
 
 #include <unistd.h>
@@ -108,7 +109,7 @@ main (int argc, char *argv[])
 
 
   // Simulation parameters.
-  Time simTime = Seconds (100);
+  double simTime = 100.0;
   //Sidelink bearers activation time
   Time slBearersActivationTime = Seconds (2.0);
 
@@ -135,6 +136,7 @@ main (int argc, char *argv[])
   bool enableChannelRandomness = false;
   uint16_t channelUpdatePeriod = 500; //ms
   uint8_t mcs = 14;
+  bool useCbrSupervisor = true;
 
   /*
    * From here, we instruct the ns3::CommandLine class of all the input parameters
@@ -667,6 +669,19 @@ main (int argc, char *argv[])
       prrSup->setTraCIClient(sumoClient);
     }
 
+  CBRSupervisor cbrSupObj;
+  Ptr<CBRSupervisor> cbrSup = &cbrSupObj;
+  if (useCbrSupervisor)
+    {
+      cbrSup->setChannelTechnology ("Nr");
+      cbrSup->enableVerboseOnStdout ();
+      cbrSup->enableWriteToFile ();
+      cbrSup->setWindowValue (200);
+      cbrSup->setAlphaValue (0.5);
+      cbrSup->setSimulationTimeValue (simTime);
+      cbrSup->startCheckCBR ();
+    }
+
 
 
   /*** 7. Setup interface and application for dynamic nodes ***/
@@ -696,7 +711,7 @@ main (int argc, char *argv[])
       ApplicationContainer AppSample = EmergencyVehicleAlertHelper.Install (includedNode);
 
       AppSample.Start (Seconds (0.0));
-      AppSample.Stop (simTime - Simulator::Now () - Seconds (0.1));
+      AppSample.Stop (Seconds(simTime) - Simulator::Now () - Seconds (0.1));
 
       return includedNode;
     };
@@ -721,7 +736,7 @@ main (int argc, char *argv[])
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
   /*** 8. Start Simulation ***/
-  Simulator::Stop (simTime);
+  Simulator::Stop (Seconds(simTime));
 
   Simulator::Run ();
   Simulator::Destroy ();

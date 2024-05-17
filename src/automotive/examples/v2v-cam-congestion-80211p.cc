@@ -259,6 +259,7 @@ int main (int argc, char *argv[])
   Ptr<CBRSupervisor> cbrSup = &cbrSupObj;
   if (useCBRSupervisor)
     {
+      cbrSup->setChannelTechnology("80211p");
       cbrSup->enableVerboseOnStdout();
       cbrSup->enableWriteToFile();
       cbrSup->setWindowValue(200);
