@@ -23,9 +23,9 @@
 namespace ns3 {
   NS_LOG_COMPONENT_DEFINE ("CBRSupervisor");
 
-  std::unordered_map<std::string, std::vector<float>> currentBusyCBR;
-  std::unordered_map<std::string, std::vector<float>> currentIdleCBR;
-  std::unordered_map<std::string, std::vector<float>> averageCbr; //!< The exponential moving average CBR for each node
+  std::unordered_map<std::string, Time> currentBusyCBR;
+  std::unordered_map<std::string, std::vector<double>> averageCbr; //!< The exponential moving average CBR for each node
+  std::mutex mutex;
 
   CBRSupervisor::~CBRSupervisor ()
   {
@@ -33,22 +33,78 @@ namespace ns3 {
   }
 
   void
-  computeCBR (std::string context, Time start, Time duration, WifiPhyState state)
+  storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState state)
   {
     // End and start are expressed in ns
     std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
     std::size_t last = context.find ("/", first);
     std::string node = context.substr (first, last - first);
 
-    float duration_ns = duration.GetNanoSeconds ();
-    if (state == WifiPhyState::IDLE || state == WifiPhyState::SLEEP)
+    if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP)
       {
-        currentIdleCBR[node].push_back (duration_ns);
+        mutex.lock();
+        if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
+          {
+            currentBusyCBR[node] = duration;
+          } else
+          {
+            currentBusyCBR[node] += duration;
+          }
+        mutex.unlock();
       }
-    else
+  }
+
+  void
+  storeCBRNr(std::string context, Time duration)
+  {
+    std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
+    std::size_t last = context.find ("/", first);
+    std::string node = context.substr (first, last - first);
+
+    mutex.lock();
+    if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
       {
-        currentBusyCBR[node].push_back (duration_ns);
+        currentBusyCBR[node] = duration;
+      } else
+      {
+        currentBusyCBR[node] += duration;
       }
+    mutex.unlock();
+  }
+
+  void
+  CBRSupervisor::checkCBR ()
+  {
+    mutex.lock();
+
+    for (auto it = currentBusyCBR.begin (); it != currentBusyCBR.end (); ++it)
+      {
+        std::string node = it->first;
+        Time busyCbr = it->second;
+
+        if (busyCbr == Time(-1.0))
+          {
+            continue;
+          }
+        // std::cout << "Node " << node << " busy time: " << busyCbr.GetDouble() / 1e6 << std::endl;
+        double currentCbr = busyCbr.GetDouble() / (m_window * 1e6);
+
+        if (averageCbr.find (node) != averageCbr.end ())
+          {
+            // Exponential moving average
+            double new_cbr = m_alpha * averageCbr[node].back () + (1 - m_alpha) * currentCbr;
+            averageCbr[node].push_back (new_cbr);
+          }
+        else
+          {
+            averageCbr[node].push_back (currentCbr);
+          }
+        it->second = Time(-1.0);
+      }
+
+    mutex.unlock();
+
+    Simulator::Schedule (MilliSeconds (m_window), &CBRSupervisor::checkCBR, this);
   }
 
   void
@@ -70,7 +126,7 @@ namespace ns3 {
               {
                 continue;
               }
-            float cbr = it->second.back();
+            double cbr = it->second.back();
             std::cout << "Node " << node << ": " << std::fixed << std::setprecision(2) << cbr * 100 << "%" << std::endl;
             if (m_write_to_file)
               {
@@ -85,75 +141,30 @@ namespace ns3 {
   }
 
   void
-  CBRSupervisor::checkCBR ()
-  {
-    std::vector<std::string> visitedNodes;
-
-    for (auto it = currentBusyCBR.begin (); it != currentBusyCBR.end (); ++it)
-      {
-        std::string node = it->first;
-        visitedNodes.push_back (node);
-        std::vector<float> busyCbr = it->second;
-        std::vector<float> idleCbr = currentIdleCBR[node]; // Assuming you ensure node exists in currentIdleCBR
-        float idleSum = 0;
-        if (idleCbr.empty ())
-          {
-            idleSum = 0;
-          }
-        else
-          {
-            idleSum = std::accumulate (idleCbr.begin (), idleCbr.end (), 0.0f);
-          }
-
-        float busySum = std::accumulate (busyCbr.begin (), busyCbr.end (), 0.0f);
-
-        float current_cbr = busySum / (busySum + idleSum);
-        if (averageCbr.find (node) != averageCbr.end ())
-          {
-            // Exponential moving average
-            float new_cbr = m_alpha * averageCbr[node].back () + (1 - m_alpha) * current_cbr;
-            averageCbr[node].push_back (new_cbr);
-          }
-        else
-          {
-            averageCbr[node].push_back (current_cbr);
-          }
-      }
-
-    // Check for the nodes that hasn't listened the channel busy
-    for (auto it = currentIdleCBR.begin (); it != currentIdleCBR.end (); ++it)
-      {
-        std::string node = it->first;
-        if (std::find (visitedNodes.begin (), visitedNodes.end (), node) == visitedNodes.end ())
-          {
-            // The node has not been considered for the busy channel
-            if (averageCbr.find (node) != averageCbr.end ())
-              {
-                // Exponential moving average with current CBR = 0
-                float new_cbr = m_alpha * averageCbr[node].back () + (1 - m_alpha) * 0;
-                averageCbr[node].push_back (new_cbr);
-              }
-            else
-              {
-                averageCbr[node].push_back (0.0);
-              }
-          }
-      }
-
-    currentIdleCBR.clear ();
-    currentBusyCBR.clear ();
-
-    // Schedule the next CBR check
-    Simulator::Schedule (MilliSeconds (m_window), &CBRSupervisor::checkCBR, this);
-  }
-
-  void
   CBRSupervisor::startCheckCBR ()
   {
-    Time current = Simulator::Now ();
-    Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&computeCBR));
+
+    if (m_channel_technology == "80211p")
+      {
+        Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&storeCBR80211p));
+      } else if (m_channel_technology == "Nr")
+      {
+        Config::Connect("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/ChannelOccupied", MakeCallback(&storeCBRNr));
+      }
     Simulator::Schedule (MilliSeconds(m_window), &CBRSupervisor::checkCBR, this);
     Simulator::Schedule (Seconds (m_simulation_time), &CBRSupervisor::logLastCBRs, this);
+
+  }
+
+  std::tuple<std::string, float>
+  CBRSupervisor::getCBRForNode (std::string node)
+  {
+    if (averageCbr.find (node) != averageCbr.end ())
+      {
+        return std::make_tuple (node, averageCbr[node].back ());
+      } else {
+        return std::make_tuple (node, -1.0);
+      }
   }
 
 }

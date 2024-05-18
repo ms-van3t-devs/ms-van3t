@@ -149,6 +149,7 @@ class emergencyVehicleAlert : public Application
     EventId m_update_denm_ev; //!< Event to update the DENM
 
     bool m_send_cam;
+    bool m_send_cpm;
 
     Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
 

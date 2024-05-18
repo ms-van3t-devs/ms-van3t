@@ -105,7 +105,12 @@ namespace ns3
             "To enable/disable the transmission of CAM messages",
             BooleanValue(true),
             MakeBooleanAccessor (&emergencyVehicleAlert::m_send_cam),
-            MakeBooleanChecker ());
+            MakeBooleanChecker ())
+        .AddAttribute ("SendCPM",
+           "To enable/disable the transmission of CPM messages",
+           BooleanValue(true),
+           MakeBooleanAccessor (&emergencyVehicleAlert::m_send_cpm),
+           MakeBooleanChecker ());
         return tid;
   }
 
@@ -294,7 +299,10 @@ namespace ns3
     }
 
     /* Schedule CPM dissemination */
-    m_cpService.startCpmDissemination ();
+    if(m_send_cpm == true)
+    {
+      m_cpService.startCpmDissemination ();
+    }
 
     if (!m_csv_name.empty ())
     {
