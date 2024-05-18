@@ -49,7 +49,7 @@ public:
    */
   void disableWriteToFile() {m_write_to_file=false;}
   /**
-   * @breif This function sets the window value.
+   * @breif This function sets the window value in Milliseconds.
    */
   void setWindowValue(float window) {m_window=window;}
   /**
@@ -57,7 +57,7 @@ public:
    */
   void setAlphaValue(float alpha) {m_alpha=alpha;}
   /**
-   * @breif This function sets the simulation time.
+   * @breif This function sets the simulation time in Seconds.
    */
   void setSimulationTimeValue(float simTime) {m_simulation_time=simTime;}
   /**
@@ -84,13 +84,9 @@ public:
 
 private:
   /**
-   * @breif This function computes the CBR for each node in 802.11p channel technology.
+   * @breif This function computes the CBR for each node..
    */
-  void checkCBR80211p();
-  /**
-   * @breif This function computes the total CBR in NR-V2X channel technology.
-   */
-  void checkCBRNr();
+  void checkCBR();
   /**
    * @breif This function logs the last CBR values for each node and write the results into a file.
    */
@@ -101,6 +97,7 @@ private:
   bool m_write_to_file = false; //!< True if the CBR values are written to a file, false otherwise
   std::string m_channel_technology; //!< The channel technology used
   float m_simulation_time; //!< The simulation time
+  std::mutex m_mutex; //!< Mutex to protect the access to the CBR values
 };
 } // namespace ns3
 
