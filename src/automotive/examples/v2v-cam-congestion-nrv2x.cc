@@ -84,9 +84,9 @@ int
 main (int argc, char *argv[])
 {
 
-  std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map_congestion/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map_congestion/map.sumo.cfg";
 
   /*** 0.a App Options ***/
   bool verbose = true;
@@ -106,6 +106,7 @@ main (int argc, char *argv[])
   xmlDocPtr rou_xml_file;
   double m_baseline_prr = 150.0;
   bool m_prr_sup = false;
+  bool useCBRSupervisor = true;
 
 
   // Simulation parameters.
@@ -668,6 +669,19 @@ main (int argc, char *argv[])
       prrSup->setTraCIClient(sumoClient);
     }
 
+  CBRSupervisor cbrSupObj;
+  Ptr<CBRSupervisor> cbrSup = &cbrSupObj;
+  if (useCBRSupervisor)
+    {
+      cbrSup->setChannelTechnology("Nr");
+      cbrSup->enableVerboseOnStdout();
+      cbrSup->enableWriteToFile();
+      cbrSup->setWindowValue(100);
+      cbrSup->setAlphaValue(0.5);
+      cbrSup->setSimulationTimeValue(simTime);
+      cbrSup->startCheckCBR();
+    }
+
   /*** 7. Setup interface and application for dynamic nodes ***/
   emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;
   EmergencyVehicleAlertHelper.SetAttribute ("Client", PointerValue (sumoClient));
@@ -676,6 +690,7 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("nrv2x"));
   EmergencyVehicleAlertHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  EmergencyVehicleAlertHelper.SetAttribute ("SendCPM", BooleanValue(false));
 
   /* callback function for node creation */
   int i=0;

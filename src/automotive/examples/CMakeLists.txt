@@ -116,3 +116,12 @@ build_lib_example(
         ${libtraci}
 )
 
+build_lib_example(
+        NAME v2v-cam-congestion-nrv2x
+        SOURCE_FILES v2v-cam-congestion-nrv2x.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+        ${libnr}
+        ${libtraci}
+)
+

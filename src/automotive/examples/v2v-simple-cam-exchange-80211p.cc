@@ -51,6 +51,7 @@
 #include "ns3/mobility-helper.h"
 #include <iostream>
 #include "ns3/PRRSupervisor.h"
+#include "ns3/CBRSupervisor.h"
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/BSMap.h"
 #include "ns3/caBasicService.h"
@@ -225,7 +226,7 @@ int main (int argc, char *argv[])
   // Vehicle 3 should *not* be considered in the computation of latency and PRR, as it generates only interfering traffic
   prrSup->addExcludedID(3);
   // This function enables printing the current and average latency and PRR for each received packet
-  prrSup->enableVerboseOnStdout ();
+  // prrSup->enableVerboseOnStdout ();
 
   // Create a new socket for the generation of broadcast interfering traffic
   // With the aim of sending generic broadcast packets, we use a PacketSocket

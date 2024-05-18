@@ -87,24 +87,6 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   packet_count++;
 }
 
-static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
-                             uint32_t pktCount, Time pktInterval )
-{
-  // Generate interfering traffic by sending pktCount packets (filled in with zeros), every pktInterval
-  if (pktCount > 0)
-    {
-      // "Create<Packet> (pktSize)" creates a new packet of size pktSize bytes, composed by default by all zeros
-      socket->Send (Create<Packet> (pktSize));
-      // Schedule again the same function (to send the next packet), and decrease by one the packet count
-      Simulator::Schedule (pktInterval, &GenerateTraffic_interfering,
-                           socket, pktSize,pktCount - 1, pktInterval);
-    }
-  else
-    {
-      socket->Close ();
-    }
-}
-
 int main (int argc, char *argv[])
 {
   std::string phyMode ("OfdmRate6MbpsBW10MHz"); // Default IEEE 802.11p data rate
@@ -115,7 +97,7 @@ int main (int argc, char *argv[])
   double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 23.0; // IEEE 802.11p transmission power in dBm (default: 23 dBm)
   xmlDocPtr rou_xml_file;
-  double simTime = 100.0; // Total simulation time (default: 150 seconds)
+  double simTime = 100.0; // Total simulation time (default: 100 seconds)
 
   bool useCBRSupervisor = true; // Set to true to enable the CBRSupervisor mechanism
 
@@ -226,7 +208,7 @@ int main (int argc, char *argv[])
   // Vehicle 3 should *not* be considered in the computation of latency and PRR, as it generates only interfering traffic
   prrSup->addExcludedID(3);
   // This function enables printing the current and average latency and PRR for each received packet
-  prrSup->enableVerboseOnStdout ();
+  // prrSup->enableVerboseOnStdout ();
 
   // Create a new socket for the generation of broadcast interfering traffic
   // With the aim of sending generic broadcast packets, we use a PacketSocket
@@ -280,57 +262,42 @@ int main (int argc, char *argv[])
     {
       unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
 
-      if(vehicleID=="veh3")
-      {
-        // The interfering traffic generation will start after 1 second ("Seconds (1.0)"), by calling the "GenerateTraffic_interfering" function
-        // Then:
-        // - the socket which will be used for the transmission of interfering traffic is pointed by "source_interfering"
-        // - each interfering traffic packet will be quite large (2000 Bytes)
-        // - interfering traffic is set to last for "simTime*1000" packets, as we send each interfering packet every 1 ms and simTime is specified in seconds
-        // - interfering packets will be sent every 1 ms ("MilliSeconds (1)"), to analyse a scenario with a relatively congested channel
-        Simulator::ScheduleWithContext (source_interfering->GetNode ()->GetId (),
-                                        Seconds (1.0), &GenerateTraffic_interfering,
-                                        source_interfering, 2000, simTime*1000.0, MilliSeconds (1));
-      }
-      else
-      {
-          // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
-          Ptr<Socket> sock;
-          sock=GeoNet::createGNPacketSocket(c.Get(nodeID));
-          // Set the proper AC, through the specified UP
-          sock->SetPriority (up);
+      // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
+      Ptr<Socket> sock;
+      sock=GeoNet::createGNPacketSocket(c.Get(nodeID));
+      // Set the proper AC, through the specified UP
+      sock->SetPriority (up);
 
-          // Create a new Basic Service Container object, which includes, for the current vehicle, both the ETSI CA Basic Service, for the transmission/reception
-          // of periodic CAMs, and the ETSI DEN Basic Service, for the transmission/reception of event-based DENMs
-          // An ETSI Basic Services container is a wrapper class to enable easy handling of both CAMs and DENMs
-          // The station ID is set to be equal to the SUMO ID without "veh" (i.e., the station ID of "veh1" will be "1")
-          Ptr<BSContainer> bs_container = CreateObject<BSContainer>(std::stol(vehicleID.substr(3)),StationType_passengerCar,sumoClient,false,sock);
-          // Setup the PRRsupervisor inside the BSContainer, to make each vehicle collect latency and PRR metrics
-          bs_container->linkPRRSupervisor(prrSup);
-          // This is needed just to simplify the whole application
-          bs_container->disablePRRSupervisorForGNBeacons ();
+      // Create a new Basic Service Container object, which includes, for the current vehicle, both the ETSI CA Basic Service, for the transmission/reception
+      // of periodic CAMs, and the ETSI DEN Basic Service, for the transmission/reception of event-based DENMs
+      // An ETSI Basic Services container is a wrapper class to enable easy handling of both CAMs and DENMs
+      // The station ID is set to be equal to the SUMO ID without "veh" (i.e., the station ID of "veh1" will be "1")
+      Ptr<BSContainer> bs_container = CreateObject<BSContainer>(std::stol(vehicleID.substr(3)),StationType_passengerCar,sumoClient,false,sock);
+      // Setup the PRRsupervisor inside the BSContainer, to make each vehicle collect latency and PRR metrics
+      bs_container->linkPRRSupervisor(prrSup);
+      // This is needed just to simplify the whole application
+      bs_container->disablePRRSupervisorForGNBeacons ();
 
-          // Set the function which will be called every time a CAM is received, i.e., receiveCAM()
-          bs_container->addCAMRxCallback (std::bind(&receiveCAM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
-          // Setup the new ETSI Basic Services container
-          // The first parameter is true is you want to setup a CA Basic Service (for sending/receiving CAMs)
-          // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
-          // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
-          bs_container->setupContainer(true,false,false);
+      // Set the function which will be called every time a CAM is received, i.e., receiveCAM()
+      bs_container->addCAMRxCallback (std::bind(&receiveCAM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
+      // Setup the new ETSI Basic Services container
+      // The first parameter is true is you want to setup a CA Basic Service (for sending/receiving CAMs)
+      // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
+      // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
+      bs_container->setupContainer(true,false,false);
 
-          // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
-          // retrieve the right BSContainer given a vehicle ID
-          basicServices.add(bs_container);
+      // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
+      // retrieve the right BSContainer given a vehicle ID
+      basicServices.add(bs_container);
 
-          // Start transmitting CAMs
-          // We randomize the instant in time in which the CAM dissemination is going to start
-          // This simulates different startup times for the OBUs of the different vehicles, and
-          // reduces the risk of multiple vehicles trying to send CAMs are the same time (causing more collisions);
-          // "desync" is a value between 0 and 1 (seconds) after which the CAM dissemination should start
-          std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
-          double desync = ((double)std::rand()/RAND_MAX);
-          bs_container->getCABasicService ()->startCamDissemination (desync);
-      }
+      // Start transmitting CAMs
+      // We randomize the instant in time in which the CAM dissemination is going to start
+      // This simulates different startup times for the OBUs of the different vehicles, and
+      // reduces the risk of multiple vehicles trying to send CAMs are the same time (causing more collisions);
+      // "desync" is a value between 0 and 1 (seconds) after which the CAM dissemination should start
+      std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
+      double desync = ((double)std::rand()/RAND_MAX);
+      bs_container->getCABasicService ()->startCamDissemination (desync);
 
       return c.Get(nodeID);
     };

@@ -91,13 +91,12 @@ private:
    * @breif This function logs the last CBR values for each node and write the results into a file.
    */
   void logLastCBRs();
-  float m_window; //!< The window for the CBR computation
+  double m_window; //!< The window for the CBR computation
   float m_alpha; //!< The alpha parameter for the exponential moving average
   bool m_verbose_stdout = false; //!< True if the verbose mode is enabled, false otherwise
   bool m_write_to_file = false; //!< True if the CBR values are written to a file, false otherwise
   std::string m_channel_technology; //!< The channel technology used
   float m_simulation_time; //!< The simulation time
-  std::mutex m_mutex; //!< Mutex to protect the access to the CBR values
 };
 } // namespace ns3
 

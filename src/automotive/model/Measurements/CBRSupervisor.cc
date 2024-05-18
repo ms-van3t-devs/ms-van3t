@@ -23,8 +23,8 @@
 namespace ns3 {
   NS_LOG_COMPONENT_DEFINE ("CBRSupervisor");
 
-  std::unordered_map<std::string, float> currentBusyCBR;
-  std::unordered_map<std::string, std::vector<float>> averageCbr; //!< The exponential moving average CBR for each node
+  std::unordered_map<std::string, Time> currentBusyCBR;
+  std::unordered_map<std::string, std::vector<double>> averageCbr; //!< The exponential moving average CBR for each node
   std::mutex mutex;
 
   CBRSupervisor::~CBRSupervisor ()
@@ -40,16 +40,15 @@ namespace ns3 {
     std::size_t last = context.find ("/", first);
     std::string node = context.substr (first, last - first);
 
-    float durationNs = duration.GetNanoSeconds ();
     if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP)
       {
         mutex.lock();
-        if (currentBusyCBR[node] == -1.0 || currentBusyCBR.find(node) == currentBusyCBR.end())
+        if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
           {
-            currentBusyCBR[node] = durationNs;
+            currentBusyCBR[node] = duration;
           } else
           {
-            currentBusyCBR[node] += durationNs;
+            currentBusyCBR[node] += duration;
           }
         mutex.unlock();
       }
@@ -61,14 +60,14 @@ namespace ns3 {
     std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
     std::size_t last = context.find ("/", first);
     std::string node = context.substr (first, last - first);
-    float durationNs = duration.GetNanoSeconds ();
+
     mutex.lock();
-    if (currentBusyCBR[node] == -1.0 || currentBusyCBR.find(node) == currentBusyCBR.end())
+    if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
       {
-        currentBusyCBR[node] = durationNs;
+        currentBusyCBR[node] = duration;
       } else
       {
-        currentBusyCBR[node] += durationNs;
+        currentBusyCBR[node] += duration;
       }
     mutex.unlock();
   }
@@ -81,25 +80,26 @@ namespace ns3 {
     for (auto it = currentBusyCBR.begin (); it != currentBusyCBR.end (); ++it)
       {
         std::string node = it->first;
-        float busyCbr = it->second;
+        Time busyCbr = it->second;
 
-        if (busyCbr == -1.0)
+        if (busyCbr == Time(-1.0))
           {
             continue;
           }
+        // std::cout << "Node " << node << " busy time: " << busyCbr.GetDouble() / 1e6 << std::endl;
+        double currentCbr = busyCbr.GetDouble() / (m_window * 1e6);
 
-        float currentCbr = busyCbr / (m_window * 1e6);
         if (averageCbr.find (node) != averageCbr.end ())
           {
             // Exponential moving average
-            float new_cbr = m_alpha * averageCbr[node].back () + (1 - m_alpha) * currentCbr;
+            double new_cbr = m_alpha * averageCbr[node].back () + (1 - m_alpha) * currentCbr;
             averageCbr[node].push_back (new_cbr);
           }
         else
           {
             averageCbr[node].push_back (currentCbr);
           }
-        it->second = -1.0;
+        it->second = Time(-1.0);
       }
 
     mutex.unlock();
@@ -126,7 +126,7 @@ namespace ns3 {
               {
                 continue;
               }
-            float cbr = it->second.back();
+            double cbr = it->second.back();
             std::cout << "Node " << node << ": " << std::fixed << std::setprecision(2) << cbr * 100 << "%" << std::endl;
             if (m_write_to_file)
               {
