@@ -86,7 +86,7 @@ class trafficManagerServerLTE : public Application
     std::map <std::string,EventId> m_timeout_map;
     std::mutex m_load_Mutex;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
   };
 
 } // namespace ns3

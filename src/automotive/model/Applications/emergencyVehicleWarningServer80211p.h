@@ -91,7 +91,7 @@ class emergencyVehicleWarningServer80211p : public Application
     u_int m_denm_sent;
     int m_ivim_sent;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
     bool m_send_cam;
 

@@ -90,7 +90,7 @@ class trafficManagerServer80211p : public Application
     std::map <std::string,EventId> m_timeout_map;
     std::mutex m_load_Mutex;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
     uint64_t m_stationId_baseline = 1000000;
   };

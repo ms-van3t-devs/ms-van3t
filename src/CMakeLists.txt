@@ -77,8 +77,8 @@ if(${NS3_MONOLIB})
   add_library(
     ${lib-ns3-monolib} SHARED ${PROJECT_SOURCE_DIR}/build-support/empty.cc
                               "${lib-ns3-static-objs}"
-          automotive/model/Measurements/CBRSupervisor.h
-          automotive/model/Measurements/CBRSupervisor.cc
+          automotive/model/DCC/DCC.h
+          automotive/model/DCC/DCC.cc
   )
   set_target_properties(
     ${lib-ns3-monolib} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE

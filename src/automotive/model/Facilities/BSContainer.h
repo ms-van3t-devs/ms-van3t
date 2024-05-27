@@ -3,8 +3,9 @@
 
 #include "ns3/caBasicService.h"
 #include "ns3/denBasicService.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include "ns3/VRUBasicService.h"
+#include "ns3/cpBasicService.h"
 
 namespace ns3
 {
@@ -21,13 +22,14 @@ namespace ns3
     void setSocket(Ptr<Socket> socket_rxtx);
     void setMobilityClient(Ptr<TraciClient> mobility_client) {m_mobility_client=mobility_client;}
 
-    void linkPRRSupervisor(Ptr<PRRSupervisor> prrsup) {m_prrsup_ptr=prrsup;}
+    void linkMetricSupervisor(Ptr<MetricSupervisor> metSup) {m_metric_sup_ptr=metSup;}
     void enablePRRSupervisorForGNBeacons() {m_prrsup_beacons=true;}
     void disablePRRSupervisorForGNBeacons() {m_prrsup_beacons=false;}
 
     void addCAMRxCallback(std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
     void addDENMRxCallback(std::function<void(denData,Address,unsigned long,long,SignalInfo)> rx_callback) {m_DENReceiveCallbackExtended=rx_callback;}
     void addVAMRxCallback(std::function<void(asn1cpp::Seq<VAM>, Address)> rx_callback) {m_VAMReceiveCallback=rx_callback;}
+    void addCPMRxCallback(std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CPMReceiveCallbackExtended=rx_callback;}
 
     void setRealTime(bool real_time){m_real_time=real_time;}
 
@@ -36,6 +38,7 @@ namespace ns3
     Ptr<CABasicService> getCABasicService() {return &m_cabs;}
     Ptr<DENBasicService> getDENBasicService() {return &m_denbs;}
     Ptr<VRUBasicService> getVRUBasicService() {return &m_vrubs;}
+    Ptr<CPBasicService> getCPBasicService() {return &m_cpbs;}
 
     // Function to easily retrieve a pointer to the Mobility Client leveraged by this BSContainer
     // Currently, only SUMO/TraCI clients are supported
@@ -51,7 +54,7 @@ namespace ns3
     // For example, if vehicles in the XML file have id "carX", you should call "changeSUMO_ID_prefix("car")"
     void changeSUMO_ID_prefix(std::string new_prefix) {m_sumo_vehid_prefix=new_prefix;}
 
-    void setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled);
+    void setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled, bool CPBasicService_enabled);
 
     // Function to setup a circular GeoArea for DENMs - it must be called at least once when sending/receiving DENMs
     // Then, it may be called as many times as desired to change the DENMs GeoArea
@@ -70,6 +73,7 @@ namespace ns3
     std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> m_CAReceiveCallbackExtended;
     std::function<void(denData,Address,unsigned long,long,SignalInfo)> m_DENReceiveCallbackExtended;
     std::function<void(asn1cpp::Seq<VAM>, Address)> m_VAMReceiveCallback;
+    std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> m_CPMReceiveCallbackExtended;
 
     // ETSI Transport and Networking layer pointers
     Ptr<btp> m_btp;
@@ -80,10 +84,11 @@ namespace ns3
     CABasicService m_cabs;
     DENBasicService m_denbs;
     VRUBasicService m_vrubs;
+    CPBasicService m_cpbs;
 
     bool m_real_time;
     Ptr<TraciClient> m_mobility_client;
-    Ptr<PRRSupervisor> m_prrsup_ptr;
+    Ptr<MetricSupervisor> m_metric_sup_ptr;
     bool m_prrsup_beacons;
 
     Ptr<Socket> m_socket; // Socket for reception and transmission of messages
@@ -110,6 +115,7 @@ namespace ns3
     bool m_DENMs_enabled = false;
     bool m_CAMs_enabled = false;
     bool m_VAMs_enabled = false;
+    bool m_CPMs_enabled = false;
   };
 }
 

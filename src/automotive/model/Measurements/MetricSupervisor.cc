@@ -15,35 +15,39 @@
 
 * Created by:
     *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
-        *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
-        */
+    *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
+    *  Diego Gasco, Politecnico di Torino (diego.gasco@polito.it, diego.gasco99@gmail.com)
+*/
 
-#include "PRRSupervisor.h"
+#include "MetricSupervisor.h"
 #include <sstream>
 #include <cfloat>
 
 #define DEG_2_RAD(val) ((val)*M_PI/180.0)
 
         namespace {
-  double PRRSupervisor_haversineDist(double lat_a, double lon_a, double lat_b, double lon_b) {
+  double MetricSupervisor_haversineDist(double lat_a, double lon_a, double lat_b, double lon_b) {
     // 12742000 is the mean Earth radius (6371 km) * 2 * 1000 (to convert from km to m)
     return 12742000.0*asin(sqrt(sin(DEG_2_RAD(lat_b-lat_a)/2)*sin(DEG_2_RAD(lat_b-lat_a)/2)+cos(DEG_2_RAD(lat_a))*cos(DEG_2_RAD(lat_b))*sin(DEG_2_RAD(lon_b-lon_a)/2)*sin(DEG_2_RAD(lon_b-lon_a)/2)));
   }
 }
 
 namespace ns3 {
-NS_LOG_COMPONENT_DEFINE("PRRSupervisor");
+NS_LOG_COMPONENT_DEFINE("MetricSupervisor");
+
+std::unordered_map<std::string, Time> currentBusyCBR;
+std::mutex m_mutex;
 
 TypeId
-PRRSupervisor::GetTypeId ()
+MetricSupervisor::GetTypeId ()
 {
-  static TypeId tid = TypeId("ns3::PRRSupervisor")
+  static TypeId tid = TypeId("ns3::MetricSupervisor")
                           .SetParent <Object>()
-                          .AddConstructor <PRRSupervisor>();
+                          .AddConstructor <MetricSupervisor>();
   return tid;
 }
 
-PRRSupervisor::~PRRSupervisor ()
+MetricSupervisor::~MetricSupervisor ()
 {
   NS_LOG_FUNCTION(this);
 
@@ -59,7 +63,7 @@ PRRSupervisor::~PRRSupervisor ()
 }
 
 std::string
-PRRSupervisor::bufToString(uint8_t *buf, uint32_t bufsize)
+MetricSupervisor::bufToString(uint8_t *buf, uint32_t bufsize)
 {
   std::stringstream bufss;
 
@@ -74,7 +78,7 @@ PRRSupervisor::bufToString(uint8_t *buf, uint32_t bufsize)
 }
 
 void
-PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t nodeID, messageType_e messagetype)
+MetricSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_t nodeID, messageType_e messagetype)
 {
   EventId computePRR_id;
 
@@ -117,14 +121,14 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
         m_stationtype_map[buf] = station_type;
 
       if(m_excluded_vehID_enabled==false || (m_excluded_vehID_list.find(stationID)==m_excluded_vehID_list.end())) {
-          if(PRRSupervisor_haversineDist(lat,lon,pos.y,pos.x)<=m_baseline_m)
+          if(MetricSupervisor_haversineDist(lat,lon,pos.y,pos.x)<=m_baseline_m)
             {
               m_packetbuff_map[buf].nodeList.push_back(stationID);
             }
         }
     }
 
-  computePRR_id = Simulator::Schedule(MilliSeconds (m_pprcomp_timeout*1000.0), &PRRSupervisor::computePRR, this, buf);
+  computePRR_id = Simulator::Schedule(MilliSeconds (m_pprcomp_timeout*1000.0), &MetricSupervisor::computePRR, this, buf);
   eventList.push_back (computePRR_id);
 
   m_latency_map[buf] = Simulator::Now ().GetNanoSeconds ();
@@ -146,7 +150,7 @@ PRRSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint64_
 }
 
 void
-PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
+MetricSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
 {
   baselineVehicleData_t currBaselineData;
   double curr_latency_ms = DBL_MAX;
@@ -242,7 +246,7 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
       m_count_latency_per_messagetype[messagetype]++;
       m_avg_latency_ms_per_messagetype[messagetype] += (curr_latency_ms - m_avg_latency_ms_per_messagetype[messagetype])/m_count_latency_per_messagetype[messagetype];
 
-      if(m_verbose_stdout == true) {
+      if(m_prr_verbose_stdout == true) {
           std::cout << "|Latency| ID: " << nodeID << " Current: " << curr_latency_ms << " - Average: " << m_avg_latency_ms << std::endl;
         }
     }
@@ -260,7 +264,7 @@ PRRSupervisor::signalReceivedPacket(std::string buf, uint64_t nodeID)
 }
 
 void
-PRRSupervisor::computePRR(std::string buf)
+MetricSupervisor::computePRR(std::string buf)
 {
   double PRR = 0.0;
 
@@ -295,7 +299,7 @@ PRRSupervisor::computePRR(std::string buf)
         m_count_nvehbsln_per_veh[senderID]++;
         m_avg_nvehbsln_per_veh[senderID] += (nvehbsln-m_avg_nvehbsln_per_veh[senderID]) / static_cast<double>(m_count_nvehbsln_per_veh[senderID]);
 
-        if(m_verbose_stdout == true) {
+        if(m_prr_verbose_stdout == true) {
           std::cout << "|Number of vehicles in the baseline| Vehicle ID: " << senderID << " Current: " << nvehbsln << " - Average: " << m_avg_nvehbsln_per_veh[senderID] << std::endl;
         }
       }
@@ -311,13 +315,13 @@ PRRSupervisor::computePRR(std::string buf)
 
       if(PRR>1) {
           std::cerr << "Value of X: " << (double) m_packetbuff_map[buf].x << " - value of Y: " << (double) (m_packetbuff_map[buf].nodeList.size()-1.0) << std::endl;
-          NS_FATAL_ERROR ("Error. Computed a PRR greater than 1. This is not possible. Please check how you configured your simulation and the PRRSupervisor.");
+          NS_FATAL_ERROR ("Error. Computed a PRR greater than 1. This is not possible. Please check how you configured your simulation and the MetricSupervisor.");
         }
 
       m_count++;
       m_avg_PRR += (PRR-m_avg_PRR)/m_count;
 
-      if(m_verbose_stdout) {
+      if(m_prr_verbose_stdout) {
           std::cout << "|PRR| Current: " << PRR << " - Average: " << m_avg_PRR << std::endl;
         }
 
@@ -382,4 +386,175 @@ PRRSupervisor::computePRR(std::string buf)
   // Some time has passed -> remove the packet from the latency map too
   m_latency_map.erase(buf);
 }
+
+void
+storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState state)
+{
+  // End and start are expressed in ns
+  std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
+  std::size_t last = context.find ("/", first);
+  std::string node = context.substr (first, last - first);
+
+  if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP)
+    {
+      m_mutex.lock();
+      if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
+        {
+          currentBusyCBR[node] = duration;
+        } else
+        {
+          currentBusyCBR[node] += duration;
+        }
+      m_mutex.unlock();
+    }
 }
+
+void
+storeCBRNr(std::string context, Time duration)
+{
+  std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
+  std::size_t last = context.find ("/", first);
+  std::string node = context.substr (first, last - first);
+
+  m_mutex.lock();
+  if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
+    {
+      currentBusyCBR[node] = duration;
+    } else
+    {
+      currentBusyCBR[node] += duration;
+    }
+  m_mutex.unlock();
+}
+
+void
+MetricSupervisor::checkCBR ()
+{
+
+  std::map<std::basic_string<char>, std::pair<StationType_t, Ptr<Node>>> nodes = m_traci_ptr->get_NodeMap();
+
+  m_mutex.lock();
+
+  for (auto it = nodes.begin (); it != nodes.end (); ++it)
+    {
+      std::string node = it->first;
+      std::basic_string<char> node_id = std::to_string(it->second.second->GetId ());
+      Time busyCbr = currentBusyCBR[node_id];
+
+      if (busyCbr == Time(-1.0))
+        {
+          continue;
+        }
+      // std::cout << "Node " << node << " busy time: " << busyCbr.GetDouble() / 1e6 << std::endl;
+      double currentCbr = busyCbr.GetDouble() / (m_cbr_window * 1e6);
+
+      if (m_average_cbr.find (node) != m_average_cbr.end ())
+        {
+          // Exponential moving average
+          double new_cbr = m_cbr_alpha * m_average_cbr[node].back () + (1 - m_cbr_alpha) * currentCbr;
+          m_average_cbr[node].push_back (new_cbr);
+        }
+      else
+        {
+          m_average_cbr[node].push_back (currentCbr);
+        }
+    }
+
+  for(auto it = currentBusyCBR.begin(); it != currentBusyCBR.end(); ++it)
+    {
+      it->second = Time(-1.0);
+    }
+
+  m_mutex.unlock();
+
+  Simulator::Schedule (MilliSeconds (m_cbr_window), &MetricSupervisor::checkCBR, this);
+}
+
+void
+MetricSupervisor::logLastCBRs ()
+{
+  if (m_cbr_verbose_stdout)
+    {
+      std::ofstream file;
+      std::cout << "CBR last values for each node:" << std::endl;
+      if (m_cbr_write_to_file)
+        {
+          file.open ("cbr_values.txt", std::ios_base::out);
+          file << "CBR last values for each node:" << std::endl;
+        }
+      for (auto it = m_average_cbr.begin (); it !=m_average_cbr.end (); ++it)
+        {
+          std::string node = it->first;
+          if (it->second.empty ())
+            {
+              continue;
+            }
+          double cbr = it->second.back();
+          std::cout << "Node " << node << ": " << std::fixed << std::setprecision(2) << cbr * 100 << "%" << std::endl;
+          if (m_cbr_write_to_file)
+            {
+              file << "Node " << node << ": " << std::fixed << std::setprecision(2) << cbr * 100 << "%" << std::endl;
+            }
+        }
+      if (m_cbr_write_to_file)
+        {
+          file.close ();
+        }
+    }
+}
+
+void
+MetricSupervisor::startCheckCBR ()
+{
+  // Assert that the parameters for the CBR are set
+  NS_ASSERT_MSG(m_cbr_window > 0, "CBR window must be greater than 0");
+  NS_ASSERT_MSG(m_cbr_alpha >= 0 && m_cbr_alpha <= 1, "CBR alpha must be between 0 and 1");
+  NS_ASSERT_MSG (m_channel_technology != "", "Channel technology must be set, choose between 80211p and Nr");
+  NS_ASSERT_MSG (m_simulation_time > 0, "Simulation time must be greater than 0");
+
+  if (m_channel_technology == "80211p")
+    {
+      Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&storeCBR80211p));
+    } else if (m_channel_technology == "Nr")
+    {
+      Config::Connect("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/ChannelOccupied", MakeCallback(&storeCBRNr));
+    }
+  Simulator::Schedule (MilliSeconds(m_cbr_window), &MetricSupervisor::checkCBR, this);
+  Simulator::Schedule (Seconds (m_simulation_time), &MetricSupervisor::logLastCBRs, this);
+
+}
+
+std::tuple<std::string, float>
+MetricSupervisor::getCBRPerNode (std::string node)
+{
+  if (m_average_cbr.find (node) != m_average_cbr.end ())
+    {
+      return std::make_tuple (node, m_average_cbr[node].back ());
+    } else {
+      return std::make_tuple (node, -1.0);
+    }
+}
+
+float MetricSupervisor::getAverageCBROverall ()
+{
+  float sum = 0;
+  int count = 0;
+  for (auto it = m_average_cbr.begin (); it != m_average_cbr.end (); ++it)
+    {
+      if (it->second.empty ())
+        {
+          continue;
+        }
+      sum += it->second.back ();
+      count++;
+    }
+  return sum / count;
+}
+
+
+std::mutex& MetricSupervisor::getCBRMutex()
+{
+  return m_mutex;
+}
+
+} // namespace ns3

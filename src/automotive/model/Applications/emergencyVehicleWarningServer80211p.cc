@@ -62,11 +62,11 @@ namespace ns3
             StringValue (),
             MakeStringAccessor (&emergencyVehicleWarningServer80211p::m_csv_name),
             MakeStringChecker ())
-        .AddAttribute ("PRRSupervisor",
-            "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
+        .AddAttribute ("MetricSupervisor",
+            "Metric Supervisor to compute metrics according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
-            MakePointerAccessor (&emergencyVehicleWarningServer80211p::m_PRR_supervisor),
-            MakePointerChecker<PRRSupervisor> ())
+            MakePointerAccessor (&emergencyVehicleWarningServer80211p::m_metric_supervisor),
+            MakePointerChecker<MetricSupervisor> ())
         .AddAttribute ("Client",
            "TraCI client for SUMO",
            PointerValue (0),
@@ -160,9 +160,9 @@ namespace ns3
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
 
-    if(m_PRR_supervisor!=nullptr)
+    if(m_metric_supervisor!=nullptr)
     {
-      m_geoNet->setPRRSupervisor(m_PRR_supervisor);
+      m_geoNet->setMetricSupervisor(m_metric_supervisor);
     }
 
     m_btp->setGeoNet(m_geoNet);

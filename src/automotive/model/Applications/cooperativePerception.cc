@@ -77,11 +77,11 @@ namespace ns3
             PointerValue (0),
             MakePointerAccessor (&cooperativePerception::m_opencda_client),
             MakePointerChecker<OpenCDAClient> ())
-        .AddAttribute ("PRRSupervisor",
-            "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
+        .AddAttribute ("MetricSupervisor",
+            "Metric Supervisor to compute metrics according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
             MakePointerAccessor (&cooperativePerception::m_PRR_supervisor),
-            MakePointerChecker<PRRSupervisor> ())
+            MakePointerChecker<MetricSupervisor> ())
         .AddAttribute ("SendCAM",
             "To enable/disable the transmission of CAM messages",
             BooleanValue(true),

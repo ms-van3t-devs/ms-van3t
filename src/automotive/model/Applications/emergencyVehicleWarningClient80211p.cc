@@ -79,11 +79,11 @@ namespace ns3
             PointerValue (0),
             MakePointerAccessor (&emergencyVehicleWarningClient80211p::m_client),
             MakePointerChecker<TraciClient> ())
-        .AddAttribute ("PRRSupervisor",
-            "PRR Supervisor to compute PRR according to 3GPP TR36.885 V14.0.0 page 70",
+        .AddAttribute ("MetricSupervisor",
+            "Metric Supervisor to compute metrics according to 3GPP TR36.885 V14.0.0 page 70",
             PointerValue (0),
-            MakePointerAccessor (&emergencyVehicleWarningClient80211p::m_PRR_supervisor),
-            MakePointerChecker<PRRSupervisor> ())
+            MakePointerAccessor (&emergencyVehicleWarningClient80211p::m_metric_supervisor),
+            MakePointerChecker<MetricSupervisor> ())
         .AddAttribute ("SendCAM",
             "To enable/disable the transmission of CAM messages",
             BooleanValue(true),
@@ -141,9 +141,9 @@ namespace ns3
     m_btp = CreateObject <btp>();
     m_geoNet = CreateObject <GeoNet>();
 
-    if(m_PRR_supervisor!=nullptr)
+    if(m_metric_supervisor!=nullptr)
     {
-      m_geoNet->setPRRSupervisor(m_PRR_supervisor);
+      m_geoNet->setMetricSupervisor(m_metric_supervisor);
     }
 
     m_btp->setGeoNet(m_geoNet);

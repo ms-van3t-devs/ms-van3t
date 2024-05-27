@@ -1,25 +1,28 @@
-#ifndef PRRSUPERVISOR_H
-#define PRRSUPERVISOR_H
+#ifndef METRICSUPERVISOR_H
+#define METRICSUPERVISOR_H
 
 #include <list>
 #include <unordered_map>
 #include <string>
 #include "ns3/traci-client.h"
 #include "ns3/event-id.h"
+#include "ns3/wifi-phy-state.h"
 
 namespace ns3 {
 
 /**
  * \ingroup automotive
  *
- * \brief This class is used to supervise the Packet Reception Ratio (PRR) and One-way latency of messages in the simulation.
+ * \brief This class is used to compute some metrics such as the Packet Reception Ratio (PRR), Channel Busy Ratio (CBR, and One-way latency of messages in the simulation.
  *
  * This class provides capabilities for computing PRR and Latency values for:
  * - All the messages sent and received in the simulation
  * - All the messages sent and received by a specific vehicle
  * - All the messages of a specific type (i.e CAM, DENM, CPM, IVIM or VAM) sent and received in the simulation
+ *
+ * This class provides capabilities for computing the CBR for all the nodes in the simulation.
  */
-class PRRSupervisor : public Object {
+class MetricSupervisor : public Object {
 
   typedef struct baselineVehicleData {
     std::list<uint64_t> nodeList;
@@ -60,15 +63,15 @@ public:
    * \brief Default constructor
    *
    */
-  PRRSupervisor() {}
+  MetricSupervisor() {}
   /**
    * \brief Constructor
    *
    * This constructor initializes the PRRSupervisor object.
    * @param baseline_m The baseline distance in meters to consider for a packet to be received.
    */
-  PRRSupervisor(int baseline_m) : m_baseline_m(baseline_m) {}
-  virtual ~PRRSupervisor();
+  MetricSupervisor(int baseline_m) : m_baseline_m(baseline_m) {}
+  virtual ~MetricSupervisor();
 
   static std::string bufToString(uint8_t *buf, uint32_t bufsize);
 
@@ -323,8 +326,10 @@ public:
    */
   double getAverageNumberOfVehiclesInBaseline_rsu(uint64_t rsuID) {return m_avg_nvehbsln_per_rsu[rsuID];}
 
-  void enableVerboseOnStdout() {m_verbose_stdout=true;}
-  void disableVerboseOnStdout() {m_verbose_stdout=false;}
+  void enablePRRVerboseOnStdout() {m_prr_verbose_stdout=true;}
+  void disablePRRVerboseOnStdout() {m_prr_verbose_stdout=false;}
+  void enableCBRVerboseOnStdout() {m_cbr_verbose_stdout=true;}
+  void disableCBRVerboseOnStdout() {m_cbr_verbose_stdout=false;}
 
   /**
    * @brief Add a vehicle ID to the list of IDs to be excluded from the PRR computation.
@@ -350,8 +355,78 @@ public:
    * @param prr_comp_timeout_sec The new timeout value in seconds.
    */
   void modifyPRRComputationTimeout(double prr_comp_timeout_sec) {m_pprcomp_timeout=prr_comp_timeout_sec;}
+
+
+  void startCheckCBR();
+  /**
+   * @breif This function enables the writing of the CBR values to a file.
+   */
+  void enableCBRWriteToFile() {m_cbr_write_to_file=true;}
+  /**
+   * @breif This function disables the writing of the CBR values to a file.
+   */
+  void disableCBRWriteToFile() {m_cbr_write_to_file=false;}
+  /**
+   * @breif This function sets the window value in Milliseconds.
+   */
+  void setCBRWindowValue(float window) {m_cbr_window=window;}
+  /**
+   * @breif This function sets the alpha value.
+   */
+  void setCBRAlphaValue(float alpha) {m_cbr_alpha=alpha;}
+  /**
+   * @breif This function sets the simulation time in Seconds.
+   */
+  void setSimulationTimeValue(float simTime) {m_simulation_time=simTime;}
+  /**
+   * @breif This function sets the channel technology.
+   */
+  void setChannelTechnology(std::string channelTechnology)
+  {
+    // Define the set of valid channel technologies
+    std::set<std::string> validChannelTechnologies = {"80211p", "Nr", "Lte", "CV2X"};
+
+    // Check if the provided channelTechnology is valid
+    if (validChannelTechnologies.find(channelTechnology) == validChannelTechnologies.end()) {
+        // If the channelTechnology is not valid, throw an error
+        NS_FATAL_ERROR("Invalid channel technology. Must be one of '80211p', 'Nr', 'Lte', or 'CV2X'.");
+      }
+
+    // If the channelTechnology is valid, set it
+    m_channel_technology = channelTechnology;
+  }
+  /**
+   * @breif This function gets the CBR for a specific node.
+   */
+  std::tuple<std::string, float> getCBRPerNode(std::string node);
+  /**
+   * @breif This function gets the overall CBR.
+   */
+  float getAverageCBROverall();
+  /**
+   * @breif This function gets the mutex to access the CBR values.
+   */
+  std::mutex& getCBRMutex();
+  /**
+   * @breif This function gets the CBR values for all the nodes.
+   */
+  std::unordered_map<std::string, std::vector<double>> getCBRValues() {return m_average_cbr;};
+  /**
+   * @breif This function gets the channel technology.
+   */
+  std::string getChannelTechnology() {return m_channel_technology;};
+
 private:
   void computePRR(std::string buf);
+
+  /**
+   * @breif This function computes the CBR for each node..
+   */
+  void checkCBR();
+  /**
+   * @breif This function logs the last CBR values for each node and write the results into a file.
+   */
+  void logLastCBRs();
 
   std::unordered_map<std::string,baselineVehicleData_t> m_packetbuff_map; //! key: packet, value: list of vehicle IDs
   std::unordered_map<std::string,int64_t> m_latency_map; //! key: packet, value: latency
@@ -403,7 +478,8 @@ private:
   Ptr<TraciClient> m_traci_ptr = nullptr;
   double m_baseline_m = 150.0;
 
-  bool m_verbose_stdout = false;
+  bool m_prr_verbose_stdout = false;
+  bool m_cbr_verbose_stdout = false;
 
   std::list<EventId> eventList;
 
@@ -413,8 +489,15 @@ private:
   double m_pprcomp_timeout = 3.0;
 
   uint64_t m_stationId_baseline = 1000000;
+
+  double m_cbr_window = -1; //!< The window for the CBR computation
+  float m_cbr_alpha = -1; //!< The alpha parameter for the exponential moving average
+  bool m_cbr_write_to_file = false; //!< True if the CBR values are written to a file, false otherwise
+  std::string m_channel_technology = ""; //!< The channel technology used
+  float m_simulation_time = -1; //!< The simulation time
+  std::unordered_map<std::string, std::vector<double>> m_average_cbr; //!< The exponential moving average CBR for each node
 };
 }
 
 
-#endif // PRRSUPERVISOR_H
+#endif // METRICSUPERVISOR_H

@@ -15,7 +15,7 @@ def get_options():
     optParser.add_option(
         "-m", "--minGap", type="float", default=1.0, help="vehicle min gap, negative numbers denote the center of a uniform distribution [x-0.2, x+0.2]")
     optParser.add_option(
-        "-s", "--maxSpeed", type="float", default=13.89, help="vehicle max speed, negative numbers denote the center of a uniform distribution [x-3, x+3]")
+        "-s", "--maxSpeed", type="float", default=6.00, help="vehicle max speed, negative numbers denote the center of a uniform distribution [x-3, x+3]")
     optParser.add_option(
         "-d", "--speedDev", type="float", default=0.5, help="speed dev (see SUMO spec)")
     optParser.add_option(
@@ -29,7 +29,7 @@ def get_options():
     optParser.add_option(
         "-n", "--name", default="veh", help="base name for vehicles")
     optParser.add_option(
-        "-t", "--total", default=30, help="Total number of vehicles to be created. If 0, begin and end are used to create the vehicles")
+        "-t", "--total", default=75, help="Total number of vehicles to be created. If 0, begin and end are used to create the vehicles")
     
     (options, args) = optParser.parse_args()
     

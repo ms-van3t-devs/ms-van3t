@@ -111,7 +111,7 @@ main (int argc, char *argv[])
   uint32_t nodeCounter = 0;
 
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_metric_sup = false;
 
 
   // Simulation parameters.
@@ -154,7 +154,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("realtime", "Use the realtime scheduler or not", realtime);
   cmd.AddValue ("opencda-config", "Location and name of OpenCDA configuration file", opencda_config);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric supervisor or not",m_metric_sup);
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
 
   cmd.AddValue ("simTime",
@@ -678,12 +678,12 @@ main (int argc, char *argv[])
   /* If active perception is specified in OpenCDA's config YAML (eg. ms_van3t_example_ml). Default -> false */
   opencda_client->SetAttribute ("ApplyML", BooleanValue(opencda_ml));
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setOpenCDACLient (opencda_client);
+      metSup = &metSupObj;
+      metSup->setOpenCDACLient (opencda_client);
     }
 
 
@@ -741,7 +741,7 @@ main (int argc, char *argv[])
   /* stop OpenCDA and CARLA simulation */
   opencda_client->stopSimulation ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -760,14 +760,14 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << txPower << "," << metSup->getAveragePRR_overall () << "," << metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
 
       for(int i=1;i<numberOfNodes+1;i++) {
-          std::cout << "Average latency of vehicle " << i << " (ms): " << prrSup->getAverageLatency_vehicle (i) << std::endl;
-          std::cout << "Average PRR of vehicle " << i << " (%): " << prrSup->getAveragePRR_vehicle (i) << std::endl;
+          std::cout << "Average latency of vehicle " << i << " (ms): " << metSup->getAverageLatency_vehicle (i) << std::endl;
+          std::cout << "Average PRR of vehicle " << i << " (%): " << metSup->getAveragePRR_vehicle (i) << std::endl;
       }
     }
 

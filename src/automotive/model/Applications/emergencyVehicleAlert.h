@@ -1,7 +1,7 @@
 #ifndef EMERGENCYVEHICLEALERT_H
 #define EMERGENCYVEHICLEALERT_H
 
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
@@ -151,7 +151,7 @@ class emergencyVehicleAlert : public Application
     bool m_send_cam;
     bool m_send_cpm;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
   };
 

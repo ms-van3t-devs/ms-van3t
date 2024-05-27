@@ -193,14 +193,20 @@ namespace ns3
     void setProtectedCommunicationsZonesRSU(asn1cpp::Seq<RSUContainerHighFrequency> sequence) {m_protectedCommunicationsZonesRSU = sequence;}
 
     /**
+     * @brief Set the future time to check CAM condition
+     * @param nextCAM The next time to check VAM condition
+     */
+    void setCheckCamGenMs(long nextCAM) {m_T_CheckCamGen_ms = nextCAM;};
+
+    /**
      * @brief Stop the CAM dissemination
      *
      * This function stops the CAM dissemination process.
      */
     uint64_t terminateDissemination();
 
-    const long T_GenCamMin_ms = 100;
-    const long T_GenCamMax_ms = 1000;
+    long T_GenCamMin_ms = 100;
+    long T_GenCamMax_ms = 1000;
 
   private:
     const size_t m_MaxPHLength = 23;

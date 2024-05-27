@@ -69,7 +69,7 @@ main (int argc, char *argv[])
   bool aggregate_out = false;
   bool send_cam = true;   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = true;
+  bool m_metric_sup = true;
 
 
   double simTime = 100;
@@ -97,7 +97,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
   cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric supervisor or not",m_metric_sup);
 
   /* Cmd Line option for 802.11p */
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
@@ -243,12 +243,12 @@ main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setTraCIClient(sumoClient);
+      metSup = &metSupObj;
+      metSup->setTraCIClient(sumoClient);
     }
 
   /*** 7. Create and Setup application for the server ***/
@@ -257,7 +257,7 @@ main (int argc, char *argv[])
   emergencyVehicleWarningServerHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   emergencyVehicleWarningServerHelper.SetAttribute ("AggregateOutput", BooleanValue(aggregate_out));
   emergencyVehicleWarningServerHelper.SetAttribute ("CSV", StringValue(csv_name));
-  emergencyVehicleWarningServerHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  emergencyVehicleWarningServerHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   int i = 0;
   for (auto rsu : rsuData)
@@ -282,7 +282,7 @@ main (int argc, char *argv[])
   EmergencyVehicleWarningClientHelper.SetAttribute ("Model", StringValue ("80211p"));
   EmergencyVehicleWarningClientHelper.SetAttribute ("CSV", StringValue(csv_name));
   EmergencyVehicleWarningClientHelper.SetAttribute ("SendCAM", BooleanValue (send_cam));
-  EmergencyVehicleWarningClientHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  EmergencyVehicleWarningClientHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   /* callback function for node creation */
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
@@ -327,7 +327,7 @@ main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -346,10 +346,10 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << txPower << "," << metSup->getAveragePRR_overall () << "," <<metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
     }
 
   return 0;

@@ -60,7 +60,7 @@ private:
 
   bool m_send_cam;
 
-  Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+  Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 };
 }
 #endif // trafficManagerClientLTE_H

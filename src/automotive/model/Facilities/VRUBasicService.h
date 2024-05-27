@@ -85,6 +85,12 @@ public:
     
     const long T_GenVamMin_ms = 100;
     const long T_GenVamMax_ms = 5000;
+
+    /**
+     * @brief Set the next time to check VAM condition
+     * @param nextVAM The next time to check VAM condition
+     */
+    void setCheckVamGenMs(long nextVAM) {m_T_CheckVamGen_ms = nextVAM;};
     
 private:
     void initDissemination();
