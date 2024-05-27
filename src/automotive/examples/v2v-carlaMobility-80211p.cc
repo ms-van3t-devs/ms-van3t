@@ -27,7 +27,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/packet-socket-helper.h"
 #include "ns3/vehicle-visualizer-module.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include <unistd.h>
 
 
@@ -86,7 +86,7 @@ main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_metric_sup = false;
 
   double simTime = 20;
 
@@ -103,7 +103,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("send-cam", "Turn on or off the transmission of CAMs, thus turning on or off the whole V2X application",send_cam);
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the PRR supervisor or not",m_metric_sup);
   cmd.AddValue ("penetrationRate", "Rate of vehicles equipped with wireless communication devices", penetrationRate);
 
   /* Cmd Line option for 802.11p */
@@ -270,12 +270,12 @@ main (int argc, char *argv[])
   opencda_client->SetAttribute ("ApplyML", BooleanValue(opencda_ml));
 
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setOpenCDACLient (opencda_client);
+      metSup = &metSupObj;
+      metSup->setOpenCDACLient (opencda_client);
     }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
@@ -330,7 +330,7 @@ main (int argc, char *argv[])
   /* stop OpenCDA and CARLA simulation */
   opencda_client->stopSimulation ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -349,14 +349,14 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << txPower << "," << metSup->getAveragePRR_overall () << "," << metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
 
       for(int i=1;i<numberOfNodes+1;i++) {
-          std::cout << "Average latency of vehicle " << i << " (ms): " << prrSup->getAverageLatency_vehicle (i) << std::endl;
-          std::cout << "Average PRR of vehicle " << i << " (%): " << prrSup->getAveragePRR_vehicle (i) << std::endl;
+          std::cout << "Average latency of vehicle " << i << " (ms): " << metSup->getAverageLatency_vehicle (i) << std::endl;
+          std::cout << "Average PRR of vehicle " << i << " (%): " << metSup->getAveragePRR_vehicle (i) << std::endl;
       }
     }
 

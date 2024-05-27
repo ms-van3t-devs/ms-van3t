@@ -27,7 +27,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/packet-socket-helper.h"
 #include "ns3/vehicle-visualizer-module.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include <unistd.h>
 
 using namespace ns3;
@@ -71,7 +71,7 @@ main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_metric_sup = false;
 
   double simTime = 100;
 
@@ -95,7 +95,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
   cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric supervisor or not",m_metric_sup);
   cmd.AddValue ("penetrationRate", "Rate of vehicles equipped with wireless communication devices", penetrationRate);
 
   /* Cmd Line option for 802.11p */
@@ -236,14 +236,14 @@ main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setTraCIClient(sumoClient);
+      metSup = &metSupObj;
+      metSup->setTraCIClient(sumoClient);
       // Uncomment this to enable verbose output from the PRRsupervisor, printing latency and PRR for each single packet
-      // prrSup->enableVerboseOnStdout();
+      // metSup->enablePRRVerboseOnStdout();
     }
 
   /*** 7. Setup interface and application for dynamic nodes ***/
@@ -254,7 +254,7 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("80211p"));
   EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
   EmergencyVehicleAlertHelper.SetAttribute ("SendCAM", BooleanValue (send_cam));
-  EmergencyVehicleAlertHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  EmergencyVehicleAlertHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   /* callback function for node creation */
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
@@ -299,7 +299,7 @@ main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -318,40 +318,40 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << txPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << txPower << "," << metSup->getAveragePRR_overall () << "," << metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
 
       for(int i=1;i<numberOfNodes+1;i++) {
-          std::cout << "Average latency of vehicle " << i << " (ms): " << prrSup->getAverageLatency_vehicle (i) << std::endl;
-          std::cout << "Average PRR of vehicle " << i << " (%): " << prrSup->getAveragePRR_vehicle (i) << std::endl;
-          std::cout << "Total number of TX packets by vehicle " << i << ": " << prrSup->getNumberTx_vehicle(i) << std::endl;
-          std::cout << "Total number of RX packets by vehicle " << i << ": " << prrSup->getNumberRx_vehicle(i) << std::endl;
+          std::cout << "Average latency of vehicle " << i << " (ms): " << metSup->getAverageLatency_vehicle (i) << std::endl;
+          std::cout << "Average PRR of vehicle " << i << " (%): " << metSup->getAveragePRR_vehicle (i) << std::endl;
+          std::cout << "Total number of TX packets by vehicle " << i << ": " << metSup->getNumberTx_vehicle(i) << std::endl;
+          std::cout << "Total number of RX packets by vehicle " << i << ": " << metSup->getNumberRx_vehicle(i) << std::endl;
       }
 
-      std::cout << "Average latency of CAMs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_cam) << std::endl;
-      std::cout << "Average PRR of CAMs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_cam) << std::endl;
-      std::cout << "Total number of CAMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_cam) << std::endl;
-      std::cout << "Total number of CAMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_cam) << std::endl;
+      std::cout << "Average latency of CAMs (ms): " << metSup->getAverageLatency_messagetype (MetricSupervisor::messageType_cam) << std::endl;
+      std::cout << "Average PRR of CAMs (%): " << metSup->getAveragePRR_messagetype (MetricSupervisor::messageType_cam) << std::endl;
+      std::cout << "Total number of CAMs transmitted: " << metSup->getNumberTx_messagetype (MetricSupervisor::messageType_cam) << std::endl;
+      std::cout << "Total number of CAMs received: " << metSup->getNumberRx_messagetype (MetricSupervisor::messageType_cam) << std::endl;
 
-      std::cout << "Average latency of DENMSs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_denm) << std::endl;
-      std::cout << "Average PRR of DENMSs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_denm) << std::endl;
-      std::cout << "Total number of DENMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_denm) << std::endl;
-      std::cout << "Total number of DENMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_denm) << std::endl;
+      std::cout << "Average latency of DENMSs (ms): " << metSup->getAverageLatency_messagetype (MetricSupervisor::messageType_denm) << std::endl;
+      std::cout << "Average PRR of DENMSs (%): " << metSup->getAveragePRR_messagetype (MetricSupervisor::messageType_denm) << std::endl;
+      std::cout << "Total number of DENMs transmitted: " << metSup->getNumberTx_messagetype (MetricSupervisor::messageType_denm) << std::endl;
+      std::cout << "Total number of DENMs received: " << metSup->getNumberRx_messagetype (MetricSupervisor::messageType_denm) << std::endl;
 
-      std::cout << "Average latency of CPMs (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
-      std::cout << "Average PRR of CPMs (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
-      std::cout << "Total number of CPMs transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
-      std::cout << "Total number of CPMs received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Average latency of CPMs (ms): " << metSup->getAverageLatency_messagetype (MetricSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Average PRR of CPMs (%): " << metSup->getAveragePRR_messagetype (MetricSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Total number of CPMs transmitted: " << metSup->getNumberTx_messagetype (MetricSupervisor::messageType_cpm) << std::endl;
+      std::cout << "Total number of CPMs received: " << metSup->getNumberRx_messagetype (MetricSupervisor::messageType_cpm) << std::endl;
 
-      std::cout << "Average latency of GN Beacons (ms): " << prrSup->getAverageLatency_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
-      std::cout << "Average PRR of GN Beacons (%): " << prrSup->getAveragePRR_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
-      std::cout << "Total number of GN Beacons transmitted: " << prrSup->getNumberTx_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
-      std::cout << "Total number of GN Beacons received: " << prrSup->getNumberRx_messagetype (PRRSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Average latency of GN Beacons (ms): " << metSup->getAverageLatency_messagetype (MetricSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Average PRR of GN Beacons (%): " << metSup->getAveragePRR_messagetype (MetricSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Total number of GN Beacons transmitted: " << metSup->getNumberTx_messagetype (MetricSupervisor::messageType_GNbeacon) << std::endl;
+      std::cout << "Total number of GN Beacons received: " << metSup->getNumberRx_messagetype (MetricSupervisor::messageType_GNbeacon) << std::endl;
 
-      std::cout << "Total number of TX packets: " << prrSup->getNumberTx_overall() << std::endl;
-      std::cout << "Total number of RX packets: " << prrSup->getNumberRx_overall() << std::endl;
+      std::cout << "Total number of TX packets: " << metSup->getNumberTx_overall() << std::endl;
+      std::cout << "Total number of RX packets: " << metSup->getNumberRx_overall() << std::endl;
     }
 
   return 0;

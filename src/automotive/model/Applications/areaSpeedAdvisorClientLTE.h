@@ -1,7 +1,7 @@
 #ifndef AREASPEEDADVISORCLIENTLTE_H
 #define AREASPEEDADVISORCLIENTLTE_H
 
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"
@@ -77,7 +77,7 @@ class areaSpeedAdvisorClientLTE : public Application
 
     bool m_send_cam;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
   };
 
 } // namespace ns3

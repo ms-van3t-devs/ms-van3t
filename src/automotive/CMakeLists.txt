@@ -37,9 +37,8 @@ Set(source_files
     model/Facilities/caBasicService.cc
     model/utilities/sumo_xml_parser.cc
     model/Applications/v2xEmulator.cc
-    model/Measurements/PRRSupervisor.cc
-    model/Measurements/CBRSupervisor.cc
-    model/Facilities/ividata.cc
+    model/Measurements/MetricSupervisor.cc
+        model/Facilities/ividata.cc
     model/Facilities/iviService.cc
     model/Facilities/BSMap.cc
     model/Facilities/BSContainer.cc
@@ -47,6 +46,7 @@ Set(source_files
     model/Facilities/LDM.cc
     model/Facilities/phPoints.cc
     model/utilities/sumo-sensor.cc
+    model/DCC/DCC.cc
 
     model/Facilities/caBasicService_v1.cc
     model/Facilities/denBasicService_v1.cc
@@ -1296,11 +1296,11 @@ set(header_files
     model/Facilities/ldm-utils.h
     model/utilities/sumo-sensor.h
     model/Applications/v2xEmulator.h
-    model/Measurements/PRRSupervisor.h
-    model/Measurements/CBRSupervisor.h
-    model/utilities/csv-utils.h
+    model/Measurements/MetricSupervisor.h
+        model/utilities/csv-utils.h
 
     model/Facilities/signalInfoUtils.h
+    model/DCC/DCC.h
     
     helper/emergencyVehicleWarningServer80211p-helper.h
     helper/emergencyVehicleWarningClient80211p-helper.h

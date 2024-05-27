@@ -8,7 +8,7 @@
 #include "ns3/vehicle-visualizer-module.h"
 #include "ns3/gn-utils.h"
 #include "ns3/btp.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include "ns3/caBasicService.h"
 #include "ns3/denBasicService.h"
 #include "ns3/VRUBasicService.h"
@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_metric_sup = false;
   bool m_VAM_metrics = true;
 
   double simTime = 250;
@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
   cmd.AddValue ("send-cam", "Turn on or off the transmission of CAMs, thus turning on or off the whole V2X application",send_cam);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric Supervisor or not",m_metric_sup);
 
   /* Cmd Line option for 802.11p */
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
@@ -257,12 +257,12 @@ int main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setTraCIClient(sumoClient);
+      metSup = &metSupObj;
+      metSup->setTraCIClient(sumoClient);
     }
 
   // Creation of the file where VAM metrics will be stored
@@ -306,8 +306,8 @@ int main (int argc, char *argv[])
       // An ETSI Basic Services container is a wrapper class to enable easy handling of both CAMs and DENMs
       Ptr<BSContainer> bs_container = CreateObject<BSContainer>(nodeID,station_type,sumoClient,false,sock);
 
-      // Setup the PRRsupervisor inside the BSContainer, to make each station collect latency and PRR metrics
-      bs_container->linkPRRSupervisor(prrSup);
+      // Setup the Metricsupervisor inside the BSContainer, to make each station collect latency and PRR metrics
+      bs_container->linkMetricSupervisor(metSup);
 
       // Setup the file where VAM metrics will be stored
       bs_container->setVAMmetricsfile (full_csv_VAM_name, m_VAM_metrics);
@@ -327,7 +327,7 @@ int main (int argc, char *argv[])
       // The first parameter should be true is you want to setup a CA Basic Service (for sending/receiving CAMs)
       // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
       // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
-      bs_container->setupContainer(true,false,true);
+      bs_container->setupContainer(true,false,true, false);
 
       // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
       // retrieve the right BSContainer given a vehicle ID
@@ -370,7 +370,7 @@ int main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative != "")
       {
@@ -393,9 +393,9 @@ int main (int argc, char *argv[])
         }
 
         csv_cum_ofstream << txPower << "," << datarate << "," << numberOfNodes_veh << "," << numberOfNodes_ped << "," <<
-                            prrSup->getAveragePRR_overall() << "," <<
-                            prrSup->getAveragePRR_pedestrian (1000) << "," << prrSup->getAverageLatency_overall () <<
-                            "," <<  prrSup->getAverageLatency_pedestrian (1000) <<
+                            metSup->getAveragePRR_overall() << "," <<
+                            metSup->getAveragePRR_pedestrian (1000) << "," << metSup->getAverageLatency_overall () <<
+                            "," <<  metSup->getAverageLatency_pedestrian (1000) <<
                             "," << received_CAMs_veh << "," << received_CAMs_ped << "," << received_VAMs_veh << "," <<
                             received_VAMs_ped << std::endl;
       }

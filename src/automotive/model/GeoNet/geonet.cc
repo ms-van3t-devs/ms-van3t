@@ -57,7 +57,7 @@ namespace ns3 {
     m_egoPV = {};
 
     m_RSU_epv_set=false;
-    m_PRRSupervisor_ptr = NULL;
+    m_metric_supervisor_ptr = NULL;
 
     m_PRRsupervisor_beacons = true;
   }
@@ -381,7 +381,7 @@ namespace ns3 {
       return UNSPECIFIED_ERROR;
     }
 
-    if(m_PRRSupervisor_ptr!=nullptr)
+    if(m_metric_supervisor_ptr!=nullptr)
     {
       uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
 
@@ -389,7 +389,7 @@ namespace ns3 {
 
       int messagetype = get_messageID_from_BTP_port (dataRequest._messagePort);
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<PRRSupervisor::messageType_e>(messagetype));
+      m_metric_supervisor_ptr->signalSentPacket (MetricSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<MetricSupervisor::messageType_e>(messagetype));
 
       delete[] buffer;
     }
@@ -452,7 +452,7 @@ namespace ns3 {
       return UNSPECIFIED_ERROR;
     }
 
-    if(m_PRRSupervisor_ptr!=nullptr)
+    if(m_metric_supervisor_ptr!=nullptr)
     {
       uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
 
@@ -460,7 +460,7 @@ namespace ns3 {
 
       int messagetype = get_messageID_from_BTP_port (dataRequest._messagePort);
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<PRRSupervisor::messageType_e>(messagetype));
+      m_metric_supervisor_ptr->signalSentPacket (MetricSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, static_cast<MetricSupervisor::messageType_e>(messagetype));
 
       delete[] buffer;
     }
@@ -502,13 +502,13 @@ namespace ns3 {
       return UNSPECIFIED_ERROR;
     }
 
-    if(m_PRRSupervisor_ptr!=nullptr && m_PRRsupervisor_beacons==true)
+    if(m_metric_supervisor_ptr!=nullptr && m_PRRsupervisor_beacons==true)
     {
       uint8_t *buffer = new uint8_t[dataRequest.data->GetSize ()];
 
       dataRequest.data->CopyData (buffer,dataRequest.data->GetSize ());
 
-      m_PRRSupervisor_ptr->signalSentPacket (PRRSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, PRRSupervisor::messageType_GNbeacon);
+      m_metric_supervisor_ptr->signalSentPacket (MetricSupervisor::bufToString (buffer,dataRequest.data->GetSize ()),m_egoPV.POS_EPV.lat,m_egoPV.POS_EPV.lon,m_station_id, MetricSupervisor::messageType_GNbeacon);
       delete[] buffer;
     }
 
@@ -657,7 +657,7 @@ namespace ns3 {
 
     uint8_t *buffer;
     uint32_t dataSize;
-    if(m_PRRSupervisor_ptr!=nullptr)
+    if(m_metric_supervisor_ptr!=nullptr)
     {
       buffer = new uint8_t[dataIndication.data->GetSize ()];
 
@@ -699,11 +699,11 @@ namespace ns3 {
     dataIndication.GNType = commonHeader.GetHeaderType();
     dataIndication.lenght = commonHeader.GetPayload ();
 
-    if(m_PRRSupervisor_ptr!=nullptr)
+    if(m_metric_supervisor_ptr!=nullptr)
     {
         if(dataIndication.GNType!=BEACON || m_PRRsupervisor_beacons==true)
         {
-            m_PRRSupervisor_ptr->signalReceivedPacket(PRRSupervisor::bufToString (buffer,dataSize),m_station_id);
+            m_metric_supervisor_ptr->signalReceivedPacket(MetricSupervisor::bufToString (buffer,dataSize),m_station_id);
         }
 
         delete[] buffer;

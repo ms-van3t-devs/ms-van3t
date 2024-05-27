@@ -4,7 +4,7 @@
 #include "ns3/OpenCDAClient.h"
 #include "ns3/vdpopencda.h"
 #include "ns3/opencda-sensor.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include "ns3/traci-client.h"
 #include "ns3/application.h"
 #include "ns3/asn_utils.h"

@@ -32,7 +32,7 @@ namespace ns3
  * and also increases the number of information sources for V2X-equipped road users.
  *
  */
-class CPBasicService: public SignalInfoUtils
+class CPBasicService: public Object, public SignalInfoUtils
 { 
 public:
   /**
@@ -120,6 +120,8 @@ public:
    */
   void setRedundancyMitigation(bool choice){m_redundancy_mitigation = choice;}
   void disableRedundancyMitigation(){m_redundancy_mitigation = false;}
+
+  void setCheckCpmGenMs(long nextCPM) {m_N_GenCpm=nextCPM;};
 
   const long T_GenCpmMin_ms = 100;
   const long T_GenCpm_ms = 100;

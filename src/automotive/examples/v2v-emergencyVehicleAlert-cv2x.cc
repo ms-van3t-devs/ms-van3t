@@ -28,7 +28,7 @@
 #include "ns3/sumo_xml_parser.h"
 #include <ns3/node-list.h>
 #include "ns3/vehicle-visualizer-module.h"
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include <unistd.h>
 
 using namespace ns3;
@@ -77,7 +77,7 @@ main (int argc, char *argv[])
   uint16_t t2 = 100;                      // T2 value of selection window
   uint16_t slBandwidth;                   // Sidelink bandwidth
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = false;
+  bool m_metric_sup = false;
 
   double simTime = 100;
 
@@ -113,7 +113,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("pRsvp", "Resource Reservation Interval", pRsvp);
   cmd.AddValue ("probResourceKeep", "Probability for selecting previous resource again", probResourceKeep);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric supervisor or not",m_metric_sup);
 
   cmd.AddValue("sim-time", "Total duration of the simulation [s])", simTime);
 
@@ -389,12 +389,12 @@ main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setTraCIClient(sumoClient);
+      metSup = &metSupObj;
+      metSup->setTraCIClient(sumoClient);
     }
   /*** 7. Setup interface and application for dynamic nodes ***/
   emergencyVehicleAlertHelper EmergencyVehicleAlertHelper;
@@ -403,7 +403,7 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("PrintSummary", BooleanValue (true));
   EmergencyVehicleAlertHelper.SetAttribute ("CSV", StringValue(csv_name));
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("cv2x"));
-  EmergencyVehicleAlertHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  EmergencyVehicleAlertHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   /* callback function for node creation */
   int i=0;
@@ -453,7 +453,7 @@ main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -472,10 +472,10 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "current_txpower_dBm,avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << ueTxPower << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << ueTxPower << "," << metSup->getAveragePRR_overall () << "," << metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
     }
 
   return 0;

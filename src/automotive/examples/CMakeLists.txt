@@ -108,8 +108,8 @@ build_lib_example(
 )
 
 build_lib_example(
-        NAME v2v-cam-congestion-80211p
-        SOURCE_FILES v2v-cam-congestion-80211p.cc
+        NAME v2v-congestion-80211p
+        SOURCE_FILES v2v-congestion-80211p.cc
         LIBRARIES_TO_LINK
         ${libautomotive}
         ${libwave}

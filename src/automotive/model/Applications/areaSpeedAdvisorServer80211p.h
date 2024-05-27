@@ -99,7 +99,7 @@ class areaSpeedAdvisorServer80211p : public Application
     EventId m_update_denm_ev; //!< Event to update the DENM
     EventId m_terminate_denm_ev; //!< Event to terminate the DENM
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
     uint64_t m_stationId_baseline = 1000000;
   };

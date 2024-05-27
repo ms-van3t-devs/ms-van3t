@@ -53,6 +53,8 @@ main (int argc, char *argv[])
 
   double simTime = 200;
 
+  bool useCBRSupervisor = true;
+
   std::string csv_name;
   std::string csv_name_cumulative;
   std::string sumo_netstate_file_name;
@@ -60,7 +62,7 @@ main (int argc, char *argv[])
   // Disabling this option turns off the whole V2X application (useful for comparing the situation when the application is enabled and the one in which it is disabled)
   bool send_cam = true;
   double m_baseline_prr = 150.0;
-  bool m_prr_sup = true;
+  bool m_metric_sup = true;
 
   //Traffic Lights phase duration
   int phase_time = 20;
@@ -95,7 +97,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("csv-log-cumulative", "Name of the CSV log file for the cumulative (average) PRR and latency data", csv_name_cumulative);
   cmd.AddValue ("netstate-dump-file", "Name of the SUMO netstate-dump file containing the vehicle-related information throughout the whole simulation", sumo_netstate_file_name);
   cmd.AddValue ("baseline", "Baseline for PRR calculation", m_baseline_prr);
-  cmd.AddValue ("prr-sup","Use the PRR supervisor or not",m_prr_sup);
+  cmd.AddValue ("met-sup","Use the Metric supervisor or not",m_metric_sup);
 
   cmd.AddValue ("phase-time", "Duration of traffic lights phases", phase_time);
   cmd.AddValue ("threshold","Threshold multiplier for traffic light phase preemption",threshold);
@@ -279,12 +281,12 @@ main (int argc, char *argv[])
       sumoClient->SetAttribute ("VehicleVisualizer", PointerValue (vehicleVis));
   }
 
-  Ptr<PRRSupervisor> prrSup = NULL;
-  PRRSupervisor prrSupObj(m_baseline_prr);
-  if(m_prr_sup)
+  Ptr<MetricSupervisor> metSup = NULL;
+  MetricSupervisor metSupObj(m_baseline_prr);
+  if(m_metric_sup)
     {
-      prrSup = &prrSupObj;
-      prrSup->setTraCIClient(sumoClient);
+      metSup = &metSupObj;
+      metSup->setTraCIClient(sumoClient);
     }
 
   /*** 6. Create and Setup application for the server ***/
@@ -293,7 +295,7 @@ main (int argc, char *argv[])
   TrafficManagerServerLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
   TrafficManagerServerLTEHelper.SetAttribute ("PhaseTime", UintegerValue(phase_time));
   TrafficManagerServerLTEHelper.SetAttribute ("Threshold", DoubleValue(threshold));
-  TrafficManagerServerLTEHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  TrafficManagerServerLTEHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   int i = 0;
   for (auto e : eNodeBData)
@@ -318,8 +320,9 @@ main (int argc, char *argv[])
   TrafficManagerClientLTEHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
   TrafficManagerClientLTEHelper.SetAttribute ("PrintSummary", BooleanValue(print_summary));
   TrafficManagerClientLTEHelper.SetAttribute ("RealTime", BooleanValue(realtime));
-  TrafficManagerClientLTEHelper.SetAttribute ("PRRSupervisor", PointerValue (prrSup));
+  TrafficManagerClientLTEHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
   TrafficManagerClientLTEHelper.SetAttribute ("SendCAM", BooleanValue (send_cam));
+
 
   /* callback function for node creation */
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
@@ -363,7 +366,7 @@ main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
-  if(m_prr_sup)
+  if(m_metric_sup)
     {
       if(csv_name_cumulative!="")
       {
@@ -382,10 +385,10 @@ main (int argc, char *argv[])
           csv_cum_ofstream << "avg_PRR,avg_latency_ms" << std::endl;
         }
 
-        csv_cum_ofstream << "," << prrSup->getAveragePRR_overall () << "," << prrSup->getAverageLatency_overall () << std::endl;
+        csv_cum_ofstream << "," << metSup->getAveragePRR_overall () << "," << metSup->getAverageLatency_overall () << std::endl;
       }
-      std::cout << "Average PRR: " << prrSup->getAveragePRR_overall () << std::endl;
-      std::cout << "Average latency (ms): " << prrSup->getAverageLatency_overall () << std::endl;
+      std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
+      std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
     }
 
 

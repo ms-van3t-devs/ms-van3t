@@ -1,7 +1,7 @@
 #ifndef GEONET_H
 #define GEONET_H
 
-#include "ns3/PRRSupervisor.h"
+#include "ns3/MetricSupervisor.h"
 #include <stdint.h>
 #include <string>
 #include <map>
@@ -23,7 +23,6 @@
 #include "ns3/gn-address.h"
 #include "ns3/longpositionvector.h"
 #include "ns3/btpdatarequest.h"
-#include "ns3/PRRSupervisor.h"
 #include "ns3/VRUdp.h"
 
 extern "C" {
@@ -131,10 +130,10 @@ namespace ns3
        */
       void receiveGN(Ptr<Socket> socket);
       /**
-       * @brief Set the PRR supervisor object.
-       * @param PRRSupervisor_ptr
+       * @brief Set the Metric supervisor object.
+       * @param MetricSupervisor_ptr
        */
-      void setPRRSupervisor(Ptr<PRRSupervisor> PRRSupervisor_ptr) {m_PRRSupervisor_ptr=PRRSupervisor_ptr;}
+      void setMetricSupervisor(Ptr<MetricSupervisor> metric_supervisor_ptr) {m_metric_supervisor_ptr=metric_supervisor_ptr;}
       void cleanup();
       /**
        * @brief Disable the PRR supervisor for beacons.
@@ -236,7 +235,7 @@ namespace ns3
       uint16_t m_GnDefaultTrafficClass = 0;
       bool m_RSU_epv_set = false;
 
-      Ptr<PRRSupervisor> m_PRRSupervisor_ptr = nullptr;
+      Ptr<MetricSupervisor> m_metric_supervisor_ptr = nullptr;
       bool m_PRRsupervisor_beacons = true;
 
       bool m_EPVupdate_running = true;

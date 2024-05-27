@@ -40,7 +40,7 @@ namespace ns3
     m_mobility_client = nullptr;
     m_LDM = nullptr;
 
-    m_prrsup_ptr = nullptr;
+    m_metric_sup_ptr = nullptr;
     m_prrsup_beacons = true;
 
     m_sumo_vehid_prefix = "veh";
@@ -64,7 +64,7 @@ namespace ns3
     m_mobility_client = nullptr;
     m_LDM = nullptr;
 
-    m_prrsup_ptr = nullptr;
+    m_metric_sup_ptr = nullptr;
     m_prrsup_beacons = true;
 
     m_sumo_vehid_prefix = "veh";
@@ -116,8 +116,8 @@ namespace ns3
   }
 
   void
-  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled) {
-    if(CABasicService_enabled==false && DENBasicService_enabled==false && VRUBasicService_enabled==false) {
+  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled,bool CPMBasicService_enabled) {
+    if(CABasicService_enabled==false && DENBasicService_enabled==false && VRUBasicService_enabled==false && CPMBasicService_enabled==false) {
       NS_FATAL_ERROR("Error. Called setupContainer() asking for enabling zero Basic Services. Aborting simulation.");
     }
 
@@ -143,8 +143,8 @@ namespace ns3
     m_btp = CreateObject <btp>();
     m_gn = CreateObject <GeoNet>();
 
-    if(m_prrsup_ptr!=nullptr) {
-      m_gn->setPRRSupervisor (m_prrsup_ptr);
+    if(m_metric_sup_ptr!=nullptr) {
+      m_gn->setMetricSupervisor (m_metric_sup_ptr);
     }
 
     if(m_prrsup_beacons==false) {
@@ -176,6 +176,10 @@ namespace ns3
         if(CABasicService_enabled==true) {
           m_cabs.setVDP(m_vdp_ptr);
         }
+        if (CPMBasicService_enabled==true)
+          {
+            m_cpbs.setVDP (m_vdp_ptr);
+          }
       }
 
     if(DENBasicService_enabled==true) {
@@ -213,8 +217,25 @@ namespace ns3
         m_btp->setVRUdp(m_vrudp_ptr);
 
         if(VRUBasicService_enabled==true) {
-          m_vrubs.setVRUdp (m_vrudp_ptr);
-        }
+            m_vrubs.setVRUdp (m_vrudp_ptr);
+          }
+      }
+
+    if(CPMBasicService_enabled==true)
+      {
+        m_cpbs.setBTP (m_btp);
+        m_cpbs.setSocketTx (m_socket);
+        m_cpbs.setSocketRx (m_socket);
+        m_cpbs.setLDM (m_LDM);
+
+        // Remember that setStationProperties() must always be called *after* setBTP()
+        m_cpbs.setStationProperties (m_station_id, m_stationtype);
+
+        if(m_CPMReceiveCallbackExtended!=nullptr) {
+            m_cpbs.addCPRxCallbackExtended (m_CPMReceiveCallbackExtended);
+          }
+
+        m_CPMs_enabled = true;
       }
 
     m_is_configured = true;
@@ -257,6 +278,10 @@ namespace ns3
 
     if(m_VAMs_enabled==true) {
       m_vrubs.terminateDissemination();
+    }
+
+    if (m_CPMs_enabled == true) {
+      m_cpbs.terminateDissemination();
     }
 
     if(m_gn!=nullptr) {

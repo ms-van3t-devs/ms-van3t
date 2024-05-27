@@ -102,7 +102,7 @@ namespace ns3 {
 
     EventId m_aggegateOutputEvent; //!< Event to create aggregate output
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
     std::map <Address, int> m_veh_position; //!< To trigger the DENM sending. If int = 0 the vehicle with Address is in the slow-speed area, 1 in the high-speed area
   };

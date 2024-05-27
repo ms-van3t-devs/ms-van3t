@@ -101,7 +101,7 @@ class emergencyVehicleWarningClient80211p : public Application
 
     bool m_send_cam;
 
-    Ptr<PRRSupervisor> m_PRR_supervisor = nullptr;
+    Ptr<MetricSupervisor> m_metric_supervisor = nullptr;
 
     EventId m_speed_ev; //!< Event to change the vehicle speed
     EventId m_send_denm_ev; //!< Event to send the DENM
