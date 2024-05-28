@@ -82,6 +82,13 @@ void DCC::reactiveDCC()
       if (m_veh_states.find(stationId) != m_veh_states.end())
         {
           oldState = m_veh_states[stationId];
+          
+          if (oldState == state)
+            {
+              // Nothing to change in the node setup
+              continue;
+            }
+
           if (state - oldState > 1)
             {
               // If the new state is much more restrictive than the old one
