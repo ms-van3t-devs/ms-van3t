@@ -27,6 +27,7 @@ public:
 
   typedef enum ReactiveState
   {
+    Undefined = -1,
     Relaxed,
     Active1,
     Active2,
@@ -36,6 +37,7 @@ public:
 
   typedef struct ReactiveParametersRelaxed
   {
+    double m_cbr_threshold = 0.20;
     double m_tx_power = 33.0;
     long m_tx_inter_packet_time = 100;
     // double m_tx_data_rate = 3.0;
@@ -44,6 +46,7 @@ public:
 
   typedef struct ReactiveParametersActive1
   {
+    double m_cbr_threshold = 0.30;
     double m_tx_power = 25.0;
     long m_tx_inter_packet_time = 200;
     // double m_tx_data_rate = 3.0;
@@ -52,6 +55,7 @@ public:
 
   typedef struct ReactiveParametersActive2
   {
+    double m_cbr_threshold = 0.40;
     double m_tx_power = 20.0;
     long m_tx_inter_packet_time = 400;
     // double m_tx_data_rate = 3.0;
@@ -60,6 +64,7 @@ public:
 
   typedef struct ReactiveParametersActive3
   {
+    double m_cbr_threshold = 0.50;
     double m_tx_power = 15.0;
     long m_tx_inter_packet_time = 500;
     // double m_tx_data_rate = 3.0;
@@ -73,14 +78,6 @@ public:
     // double m_tx_data_rate = 12.0;
     double m_sensitivity = -65.0;
   } ReactiveParametersRestricted;
-
-  typedef struct CBRThresholds
-  {
-    double m_cbr_threshold_relaxed = 0.20;
-    double m_cbr_threshold_active1 = 0.30;
-    double m_cbr_threshold_active2 = 0.40;
-    double m_cbr_threshold_active3 = 0.50;
-  } CBRThresholds;
 
   static TypeId GetTypeId(void);
   /**
@@ -120,10 +117,15 @@ public:
   void SetBSMap(Ptr<BSMap> bs_map) {m_bs_map = bs_map;};
   void SetReactive(bool reactive) {m_reactive = reactive;};
   /**
-   * \brief Start the DCC mechanism
+   * \brief Start the reactive DCC mechanism
    *
    */
   void reactiveDCC();
+  /**
+   * \brief Start the adaptive DCC mechanism
+   *
+   */
+  void adaptiveDCC();
 
 
 private:
@@ -134,7 +136,6 @@ private:
   Ptr<TraciClient> m_traci_client = NULL; //!< Pointer to the TraciClient object
   Ptr<BSMap> m_bs_map = NULL; //!< Pointer to the BSMap object
 
-  DCC::CBRThresholds m_cbr_thresholds = DCC::CBRThresholds(); //!< CBR thresholds for the different states
   DCC::ReactiveParametersRelaxed m_reactive_parameters_relaxed = DCC::ReactiveParametersRelaxed(); //!< Parameters for the Relaxed state
   DCC::ReactiveParametersActive1 m_reactive_parameters_active1 = DCC::ReactiveParametersActive1(); //!< Parameters for the Active1 state
   DCC::ReactiveParametersActive2 m_reactive_parameters_active2 = DCC::ReactiveParametersActive2(); //!< Parameters for the Active2 state
@@ -142,6 +143,19 @@ private:
   DCC::ReactiveParametersRestricted m_reactive_parameters_restricted = DCC::ReactiveParametersRestricted(); //!< Parameters for the Restricted state
 
   std::unordered_map<uint32_t, DCC::ReactiveState> m_veh_states; //!< Map to store the state of each vehicle
+
+  double m_CBR_its;
+  double m_alpha = 0.016;
+  double m_beta = 0.0012;
+  double m_CBR_target = 0.68;
+  double m_delta_max = 0.03;
+  double m_delta_min = 0.0006;
+  double m_Gmax = 0.0005;
+  double m_Gmin = -0.00025;
+  double m_delta = 0;
+  Time m_Tonpp = Seconds(0); //Duration of last transmission
+
+  void ToffUpdateAfterCBRupdate();
 
 };
 
