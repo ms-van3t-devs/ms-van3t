@@ -706,30 +706,14 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
   EmergencyVehicleAlertHelper.SetAttribute ("SendCPM", BooleanValue(false));
 
-  /*TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
-  std::unordered_map<uint32_t, Ptr<Socket>> source_interfering;
-  uint32_t number = allSlUesContainer.GetN();
-  for(uint32_t i = 0; i < number; i++)
-    {
-      Ptr<Socket> socket = Socket::CreateSocket (allSlUesContainer.Get (i), tid);
-      PacketSocketAddress local_source_interfering;
-      local_source_interfering.SetSingleDevice (allSlUesContainer.Get(i)->GetDevice(0)->GetIfIndex ());
-      local_source_interfering.SetPhysicalAddress (allSlUesContainer.Get(i)->GetDevice(0)->GetAddress());
-      local_source_interfering.SetProtocol (2048); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
-      if (socket->Bind (local_source_interfering) == -1)
-        {
-          NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
-        }
-      PacketSocketAddress remote_source_interfering;
-      remote_source_interfering.SetSingleDevice (allSlUesContainer.Get(i)->GetDevice(0)->GetIfIndex());
-      // Set the broadcast MAC address as interfering traffic will be broadcasted by vehicle 3
-      remote_source_interfering.SetPhysicalAddress (allSlUesContainer.Get(i)->GetDevice(0)->GetBroadcast());
-      remote_source_interfering.SetProtocol (2048); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
-      socket->Connect (remote_source_interfering);
-      // Important: this line lets you set the AC of the interfering traffic, through a User Priority (UP) value, like in real Linux kernels/OS
-      socket->SetPriority (0); // Setting the priority of the interfering traffic from vehicle 0
-      source_interfering[i] = socket;
-    }*/
+  Ptr<DCC> dcc = NULL;
+  DCC dccObj = DCC();
+  dcc = &dccObj;
+  dcc->SetDCCInterval(MilliSeconds (200));
+  dcc->SetTraciClient (sumoClient);
+  dcc->SetMetricSupervisor (metSup);
+  dcc->reactiveDCC();
+  dcc->SetNrHelper(nrHelper);
 
   /* callback function for node creation */
   int i=0;
@@ -748,16 +732,11 @@ main (int argc, char *argv[])
       //ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer AppSample = EmergencyVehicleAlertHelper.Install (includedNode);
 
+      // TODO
+      //dcc->AddCABasicService ();
+
       AppSample.Start (Seconds (0.0));
       AppSample.Stop (Seconds(simTime) - Simulator::Now () - Seconds (0.1));
-
-      /*unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
-      uint32_t id = source_interfering[nodeID]->GetNode()->GetId();
-      Simulator::ScheduleWithContext (id,
-                                      Seconds (1.0), &GenerateTraffic_interfering,
-                                      source_interfering[nodeID], 500, simTime*2000, MilliSeconds (5));*/
-
-
 
       return includedNode;
     };

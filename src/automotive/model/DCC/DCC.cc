@@ -150,7 +150,6 @@ void DCC::reactiveDCC()
       std::string nodeID_str = std::to_string (nodeID_int);
       Ptr<NetDevice> netDevice = m_traci_client->get_NodeMap()[id].second->GetDevice (0);
       Ptr<WifiNetDevice> wifiDevice;
-      Ptr<NrNetDevice> nrDevice = nullptr;
 
       Ptr<WifiPhy> phy80211p = nullptr;
 
@@ -165,10 +164,6 @@ void DCC::reactiveDCC()
               phy80211p = wifiDevice->GetPhy ();
             }
         }
-      else if (m_metric_supervisor->getChannelTechnology() == "Nr")
-        {
-          nrDevice = DynamicCast<NrNetDevice> (netDevice);
-        }
 
         switch (state)
           {
@@ -179,9 +174,9 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_relaxed.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_relaxed.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && nrDevice != nullptr)
+            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
               {
-                nrDevice->SetAttribute ("TxPower", DoubleValue(m_reactive_parameters_relaxed.m_tx_power));
+                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_relaxed.m_tx_power);
               }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
@@ -206,9 +201,9 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active1.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active1.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && nrDevice != nullptr)
+            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
               {
-                nrDevice->SetAttribute ("TxPower", DoubleValue(m_reactive_parameters_active1.m_tx_power));
+                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active1.m_tx_power);
               }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
@@ -232,9 +227,9 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active2.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active2.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && nrDevice != nullptr)
+            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
               {
-                nrDevice->SetAttribute ("TxPower", DoubleValue(m_reactive_parameters_active2.m_tx_power));
+                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active2.m_tx_power);
               }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
@@ -258,9 +253,9 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active3.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active3.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && nrDevice != nullptr)
+            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
               {
-                nrDevice->SetAttribute ("TxPower", DoubleValue(m_reactive_parameters_active3.m_tx_power));
+                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active3.m_tx_power);
               }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
@@ -284,9 +279,9 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_restricted.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_restricted.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && nrDevice != nullptr)
+            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
               {
-                nrDevice->SetAttribute ("TxPower", DoubleValue(m_reactive_parameters_restricted.m_tx_power));
+                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_restricted.m_tx_power);
               }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
