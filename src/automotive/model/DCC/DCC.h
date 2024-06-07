@@ -5,9 +5,10 @@
 #include <vector>
 #include "ns3/MetricSupervisor.h"
 #include "ns3/wifi-net-device.h"
+#include "ns3/nr-net-device.h"
 #include "ns3/net-device.h"
 #include "ns3/wifi-phy.h"
-#include "ns3/wifi-mac.h"
+#include "ns3/nr-ue-phy.h"
 #include "ns3/traci-client.h"
 #include "ns3/BSMap.h"
 
@@ -105,16 +106,32 @@ public:
     * \param reactive_interval Time interval for DCC
     */
   void SetDCCInterval(Time dcc_interval) {m_dcc_interval = dcc_interval;};
+  /**
+    * \brief Set the CAM Basic Service
+    *
+    * \param nodeID id of the node
+    * \param caBasicService basic service for CAMs
+    */
+  void AddCABasicService(std::string nodeID, Ptr<CABasicService> caBasicService) {m_caService[nodeID] = caBasicService;};
+  /**
+    * \brief Set the CPM Basic Service
+    *
+    * \param nodeID id of the node
+    * \param cpBasicService basic service for CPMs
+    */
+  void AddCPBasicService(std::string nodeID, Ptr<CPBasicService> cpBasicService) {m_cpService[nodeID] = cpBasicService;};
+  /**
+    * \brief Set the VRU Basic Service
+    *
+    * \param nodeID id of the node
+    * \param vruBasicService basic service for VRUs
+    */
+  void AddVRUBasicService(std::string nodeID, Ptr<VRUBasicService> vruBasicService) {m_vruService[nodeID] = vruBasicService;};
     /**
      * \brief Set the DCC modality (reactive or proactive)
      *
      * \param reactive Boolean to indicate if the DCC is reactive or proactive
      */
-  /** \brief Set the BSMap
-   *
-   * \param bs_map Pointer to the BSMap object
-   */
-  void SetBSMap(Ptr<BSMap> bs_map) {m_bs_map = bs_map;};
   void SetReactive(bool reactive) {m_reactive = reactive;};
   /**
    * \brief Start the reactive DCC mechanism
@@ -134,7 +151,9 @@ private:
   Time m_dcc_interval = Time(-1.0); //!< Time interval for DCC
   Ptr<MetricSupervisor> m_metric_supervisor = NULL; //!< Pointer to the MetricSupervisor object
   Ptr<TraciClient> m_traci_client = NULL; //!< Pointer to the TraciClient object
-  Ptr<BSMap> m_bs_map = NULL; //!< Pointer to the BSMap object
+  std::unordered_map<std::string, Ptr<CABasicService>> m_caService; //!< Pointer to the CABasicService object
+  std::unordered_map<std::string, Ptr<CPBasicService>> m_cpService; //!< Pointer to the CPBasicService object
+  std::unordered_map<std::string, Ptr<VRUBasicService>> m_vruService; //!< Pointer to the VRUBasicService object
 
   DCC::ReactiveParametersRelaxed m_reactive_parameters_relaxed = DCC::ReactiveParametersRelaxed(); //!< Parameters for the Relaxed state
   DCC::ReactiveParametersActive1 m_reactive_parameters_active1 = DCC::ReactiveParametersActive1(); //!< Parameters for the Active1 state

@@ -239,15 +239,6 @@ int main (int argc, char *argv[])
   metSup->setSimulationTimeValue(simTime);
   metSup->startCheckCBR();
 
-  /*Ptr<DCC> dcc = NULL;
-  DCC dccObj = DCC();
-  dcc = &dccObj;
-  dcc->SetBSMap (&basicServices);
-  dcc->SetTraciClient(sumoClient);
-  dcc->SetDCCInterval(MilliSeconds (200));
-  dcc->SetMetricSupervisor (metSup);
-  dcc->reactiveDCC();*/
-
   // Create a new socket for the generation of broadcast interfering traffic
   // With the aim of sending generic broadcast packets, we use a PacketSocket
   // This kind of facility enables the transmission of data with a customizable
@@ -281,6 +272,13 @@ int main (int argc, char *argv[])
       source_interfering[i] = socket;
     }
 
+  Ptr<DCC> dcc = NULL;
+  DCC dccObj = DCC();
+  dcc = &dccObj;
+  dcc->SetDCCInterval(MilliSeconds (200));
+  dcc->SetTraciClient (sumoClient);
+  dcc->SetMetricSupervisor (metSup);
+  dcc->reactiveDCC();
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
@@ -295,7 +293,7 @@ int main (int argc, char *argv[])
       uint32_t id = source_interfering[nodeID]->GetNode()->GetId();
       Simulator::ScheduleWithContext (id,
                                       Seconds (1.0), &GenerateTraffic_interfering,
-                                      source_interfering[nodeID], 500, simTime*2000, MilliSeconds (5));
+                                      source_interfering[nodeID], 1000, simTime*2000, MilliSeconds (5));
       // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
       Ptr<Socket> sock;
       sock=GeoNet::createGNPacketSocket(c.Get(nodeID));
@@ -325,6 +323,11 @@ int main (int argc, char *argv[])
       // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
       // retrieve the right BSContainer given a vehicle ID
       basicServices.add(bs_container);
+
+      // Set DCC
+      dcc->AddCABasicService(std::to_string(nodeID), bs_container->getCABasicService());
+      dcc->AddCPBasicService(std::to_string (nodeID), bs_container->getCPBasicService());
+      // dcc->AddVRUBasicService(std::to_string(nodeID), bs_container->getVRUBasicService());
 
       // Start transmitting CAMs
       // We randomize the instant in time in which the CAM dissemination is going to start
@@ -380,13 +383,12 @@ int main (int argc, char *argv[])
 
   std::cout << "RX packet count: " << cam_packet_count + cpm_packet_count << std::endl;
 
-  /*std::vector<std::tuple<double, double>> res = metSup->getCBRValuesPerChannelOccupation();
+  std::vector<std::tuple<double, double>> res = metSup->getCBRValuesPerChannelOccupation();
 
   for(auto it : res)
     {
       std::cout << std::get<0>(it) << " " << std::get<1>(it) << std::endl;
     }
-    */
 
   Simulator::Destroy ();
 

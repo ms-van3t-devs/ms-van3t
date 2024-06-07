@@ -519,7 +519,7 @@ private:
 
   uint32_t m_total_bytes = 0; //!< The total number of bytes received in the simulation
   double m_total_area = 0.0; //!< The total area for the simulation
-  double m_channel_window = 5; //!< The time window (in Seconds) for the getChannelOccupationBytesPerSquareMeterPerSeconds function
+  double m_channel_window = 2; //!< The time window (in Seconds) for the getChannelOccupationBytesPerSquareMeterPerSeconds function
   uint64_t m_received_bytes_checkpoint = 0; //!< The number of received bytes until the last time window checkpoint
   std::vector<std::tuple<double, double>> m_cbr_bytes_per_second_per_square_meter; //!< The number of packet per second per square meter;
 };
