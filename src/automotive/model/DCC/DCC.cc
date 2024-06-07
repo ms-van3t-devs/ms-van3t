@@ -46,9 +46,6 @@ void DCC::reactiveDCC()
   NS_ASSERT_MSG (m_metric_supervisor != nullptr, "Metric Supervisor not set");
   NS_ASSERT_MSG (m_dcc_interval != Time(Seconds(-1.0)), "DCC interval not set");
 
-  std::mutex& mutex = m_metric_supervisor->getCBRMutex();
-  mutex.lock();
-
   std::unordered_map<std::string, std::vector<double>> cbrs = m_metric_supervisor->getCBRValues();
   for (auto it = cbrs.begin(); it != cbrs.end(); ++it)
     {
@@ -233,7 +230,6 @@ void DCC::reactiveDCC()
       m_veh_states[stationId] = state;
     }
 
-  mutex.unlock();
 
   Simulator::Schedule(m_dcc_interval, &DCC::reactiveDCC, this);
 }

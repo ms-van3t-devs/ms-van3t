@@ -36,7 +36,9 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE("MetricSupervisor");
 
 std::unordered_map<std::string, Time> currentBusyCBR;
-std::mutex m_mutex;
+std::unordered_map<std::string, std::pair<Time, WifiPhyState>> nodeLastState80211p;
+std::unordered_map<std::string, Time> nodeDurationStateNr;
+Time lastCBRCheck = Time(-1.0);
 
 TypeId
 MetricSupervisor::GetTypeId ()
@@ -391,40 +393,57 @@ void
 storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState state)
 {
   // End and start are expressed in ns
+  // In this case Duration is the time the channel was in the specific state (referred to the past)
   std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
   std::size_t last = context.find ("/", first);
   std::string node = context.substr (first, last - first);
 
   if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP)
     {
-      m_mutex.lock();
-      if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
+      // Check if the last measurement for busy state started before the last CBR check
+      // In this case we need to consider only the time from the last CBR check
+      // The time before the last CBR check was already considered in the logic of the check
+      if (start < lastCBRCheck)
+        {
+          duration -= lastCBRCheck - start;
+        }
+      if (currentBusyCBR.find(node) == currentBusyCBR.end())
         {
           currentBusyCBR[node] = duration;
         } else
         {
           currentBusyCBR[node] += duration;
         }
-      m_mutex.unlock();
+      // Storing the current state and the current time is essential
+      // Situations where the next CBR check happens before the end of the current busy state must be handled with this method
+      nodeLastState80211p[node].first = Simulator::Now();
+      nodeLastState80211p[node].second = WifiPhyState::CCA_BUSY;
+    }
+  else
+    {
+      nodeLastState80211p[node].first = Simulator::Now();
+      nodeLastState80211p[node].second = WifiPhyState::IDLE;
     }
 }
 
 void
 storeCBRNr(std::string context, Time duration)
 {
+  // In this case Duration is the time the channel will be in a busy state (referred to the future)
   std::size_t first = context.find ("/NodeList/") + 10; // 10 is the length of "/NodeList/"
   std::size_t last = context.find ("/", first);
   std::string node = context.substr (first, last - first);
 
-  m_mutex.lock();
-  if (currentBusyCBR[node] == Time(-1.0) || currentBusyCBR.find(node) == currentBusyCBR.end())
+  // How long the state will last?
+  nodeDurationStateNr[node] = Simulator::Now() + duration;
+
+  if (currentBusyCBR.find(node) == currentBusyCBR.end())
     {
       currentBusyCBR[node] = duration;
     } else
     {
       currentBusyCBR[node] += duration;
     }
-  m_mutex.unlock();
 }
 
 void
@@ -432,20 +451,41 @@ MetricSupervisor::checkCBR ()
 {
 
   std::map<std::basic_string<char>, std::pair<StationType_t, Ptr<Node>>> nodes = m_traci_ptr->get_NodeMap();
-
-  m_mutex.lock();
+  std::unordered_map<std::string, Time> nextTimeToAddNr;
 
   for (auto it = nodes.begin (); it != nodes.end (); ++it)
     {
       std::string node = it->first;
       std::basic_string<char> node_id = std::to_string(it->second.second->GetId ());
-      Time busyCbr = currentBusyCBR[node_id];
 
-      if (busyCbr == Time(-1.0))
+      if (currentBusyCBR.find(node_id) == currentBusyCBR.end())
         {
           continue;
         }
-      // std::cout << "Node " << node << " busy time: " << busyCbr.GetDouble() / 1e6 << std::endl;
+
+      Time busyCbr = currentBusyCBR[node_id];
+
+      // We are in the middle of a busy state
+      if(m_channel_technology == "80211p" && nodeLastState80211p[node_id].second == WifiPhyState::CCA_BUSY)
+        {
+          // 80211p duration refers to the past time the channel was busy
+          // We need to add the time from the last check if the state is still busy
+          busyCbr += Simulator::Now() - nodeLastState80211p[node_id].first;
+        }
+
+      if(m_channel_technology == "Nr")
+        {
+          // NR duration refers to the future time the channel will be busy
+          // We need to subtract the time that will be busy after this check
+          // This time will be added in the next check (see below)
+          if (nodeDurationStateNr[node_id] > Simulator::Now())
+            {
+              Time nextToAdd = nodeDurationStateNr[node_id] - Simulator::Now();
+              busyCbr -= nextToAdd;
+              nextTimeToAddNr[node_id] = nextToAdd;
+            }
+        }
+
       double currentCbr = busyCbr.GetDouble() / (m_cbr_window * 1e6);
 
       if (m_average_cbr.find (node) != m_average_cbr.end ())
@@ -460,12 +500,19 @@ MetricSupervisor::checkCBR ()
         }
     }
 
-  for(auto it = currentBusyCBR.begin(); it != currentBusyCBR.end(); ++it)
+  currentBusyCBR.clear();
+  if(m_channel_technology == "80211p")
+    nodeLastState80211p.clear();
+  if(m_channel_technology == "Nr")
     {
-      it->second = Time(-1.0);
+      nodeDurationStateNr.clear();
+      for(auto it : nextTimeToAddNr)
+        {
+          currentBusyCBR[it.first] = it.second;
+        }
     }
 
-  m_mutex.unlock();
+  lastCBRCheck = Simulator::Now();
 
   Simulator::Schedule (MilliSeconds (m_cbr_window), &MetricSupervisor::checkCBR, this);
 }
@@ -529,7 +576,8 @@ MetricSupervisor::getCBRPerNode (std::string node)
 {
   if (m_average_cbr.find (node) != m_average_cbr.end ())
     {
-      return std::make_tuple (node, m_average_cbr[node].back ());
+      std::tuple<std::string, double> ret = std::make_tuple (node, m_average_cbr[node].back ());
+      return ret;
     } else {
       return std::make_tuple (node, -1.0);
     }
@@ -552,9 +600,53 @@ float MetricSupervisor::getAverageCBROverall ()
 }
 
 
-std::mutex& MetricSupervisor::getCBRMutex()
+std::unordered_map<std::string, std::vector<double>> MetricSupervisor::getCBRValues()
 {
-  return m_mutex;
+  std::unordered_map<std::string, std::vector<double>> cbr_values = m_average_cbr;
+  return cbr_values;
 }
+
+
+void
+MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter ()
+{
+  if (m_total_area == 0)
+    {
+      std::vector<std::basic_string<char>> lanes = m_traci_ptr->TraCIAPI::lane.getIDList();
+      double totalArea = 0;
+      for (auto it : lanes)
+        {
+          double length = m_traci_ptr->TraCIAPI::lane.getLength (it);
+          double weight = m_traci_ptr->TraCIAPI::lane.getWidth (it);
+          totalArea += length * weight;
+        }
+
+      m_total_area = totalArea;
+    }
+  uint32_t bytes = m_total_bytes;
+  uint64_t receivedBytesWithinTimeWindow;
+  if (m_received_bytes_checkpoint != 0)
+    {
+      receivedBytesWithinTimeWindow = bytes - m_received_bytes_checkpoint;
+    }
+  else
+    {
+      receivedBytesWithinTimeWindow = bytes;
+    }
+  m_received_bytes_checkpoint = bytes;
+
+  double result = (double) receivedBytesWithinTimeWindow / (m_total_area * m_channel_window);
+
+  double cbr = getAverageCBROverall();
+
+  Simulator::Schedule(Seconds(m_channel_window), &MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter, this);
+
+  if (cbr > 0.0)
+    {
+      m_cbr_bytes_per_second_per_square_meter.push_back(std::make_tuple (cbr, result));
+    }
+
+}
+
 
 } // namespace ns3

@@ -78,6 +78,27 @@ GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> >
     }
 }
 
+static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
+                             uint32_t pktCount, Time pktInterval )
+{
+  // Generate interfering traffic by sending pktCount packets (filled in with zeros), every pktInterval
+  if (pktCount > 0)
+    {
+      // "Create<Packet> (pktSize)" creates a new packet of size pktSize bytes, composed by default by all zeros
+      if (socket->Send (Create<Packet> (pktSize)) != -1 && pktCount%100==0)
+        {
+          // std::cout << "Interfering packet sent" << std::endl;
+        }
+      // Schedule again the same function (to send the next packet), and decrease by one the packet count
+      Simulator::Schedule (pktInterval, &GenerateTraffic_interfering,
+                           socket, pktSize, pktCount - 1, pktInterval);
+    }
+  else
+    {
+      socket->Close ();
+    }
+}
+
 
 int
 main (int argc, char *argv[])
@@ -104,11 +125,11 @@ main (int argc, char *argv[])
 
   xmlDocPtr rou_xml_file;
   double m_baseline_prr = 150.0;
-  bool m_metric_sup = false;
+  bool m_metric_sup = true;
 
 
   // Simulation parameters.
-  double simTime = 100.0;
+  double simTime = 50.0;
   //Sidelink bearers activation time
   Time slBearersActivationTime = Seconds (2.0);
 
@@ -670,7 +691,7 @@ main (int argc, char *argv[])
       metSup->enableCBRVerboseOnStdout();
       metSup->enableCBRWriteToFile();
       metSup->setCBRWindowValue(100);
-      metSup->setCBRAlphaValue(0.5);
+      metSup->setCBRAlphaValue(0.1);
       metSup->setSimulationTimeValue(simTime);
       metSup->startCheckCBR();
     }
@@ -684,6 +705,31 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("nrv2x"));
   EmergencyVehicleAlertHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
   EmergencyVehicleAlertHelper.SetAttribute ("SendCPM", BooleanValue(false));
+
+  /*TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
+  std::unordered_map<uint32_t, Ptr<Socket>> source_interfering;
+  uint32_t number = allSlUesContainer.GetN();
+  for(uint32_t i = 0; i < number; i++)
+    {
+      Ptr<Socket> socket = Socket::CreateSocket (allSlUesContainer.Get (i), tid);
+      PacketSocketAddress local_source_interfering;
+      local_source_interfering.SetSingleDevice (allSlUesContainer.Get(i)->GetDevice(0)->GetIfIndex ());
+      local_source_interfering.SetPhysicalAddress (allSlUesContainer.Get(i)->GetDevice(0)->GetAddress());
+      local_source_interfering.SetProtocol (2048); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
+      if (socket->Bind (local_source_interfering) == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
+        }
+      PacketSocketAddress remote_source_interfering;
+      remote_source_interfering.SetSingleDevice (allSlUesContainer.Get(i)->GetDevice(0)->GetIfIndex());
+      // Set the broadcast MAC address as interfering traffic will be broadcasted by vehicle 3
+      remote_source_interfering.SetPhysicalAddress (allSlUesContainer.Get(i)->GetDevice(0)->GetBroadcast());
+      remote_source_interfering.SetProtocol (2048); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
+      socket->Connect (remote_source_interfering);
+      // Important: this line lets you set the AC of the interfering traffic, through a User Priority (UP) value, like in real Linux kernels/OS
+      socket->SetPriority (0); // Setting the priority of the interfering traffic from vehicle 0
+      source_interfering[i] = socket;
+    }*/
 
   /* callback function for node creation */
   int i=0;
@@ -704,6 +750,14 @@ main (int argc, char *argv[])
 
       AppSample.Start (Seconds (0.0));
       AppSample.Stop (Seconds(simTime) - Simulator::Now () - Seconds (0.1));
+
+      /*unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
+      uint32_t id = source_interfering[nodeID]->GetNode()->GetId();
+      Simulator::ScheduleWithContext (id,
+                                      Seconds (1.0), &GenerateTraffic_interfering,
+                                      source_interfering[nodeID], 500, simTime*2000, MilliSeconds (5));*/
+
+
 
       return includedNode;
     };

@@ -367,7 +367,7 @@ public:
    */
   void disableCBRWriteToFile() {m_cbr_write_to_file=false;}
   /**
-   * @breif This function sets the window value in Milliseconds.
+   * @breif This function sets the CBR window value in Milliseconds.
    */
   void setCBRWindowValue(float window) {m_cbr_window=window;}
   /**
@@ -396,6 +396,11 @@ public:
     m_channel_technology = channelTechnology;
   }
   /**
+   * @breif This function sets the window value for Channel Occupation checks in Seconds.
+   */
+  void setChannelWindowValue(float window) {m_channel_window=window;}
+
+  /**
    * @breif This function gets the CBR for a specific node.
    */
   std::tuple<std::string, float> getCBRPerNode(std::string node);
@@ -404,17 +409,32 @@ public:
    */
   float getAverageCBROverall();
   /**
-   * @breif This function gets the mutex to access the CBR values.
-   */
-  std::mutex& getCBRMutex();
-  /**
    * @breif This function gets the CBR values for all the nodes.
    */
-  std::unordered_map<std::string, std::vector<double>> getCBRValues() {return m_average_cbr;};
+  std::unordered_map<std::string, std::vector<double>> getCBRValues();
   /**
    * @breif This function gets the channel technology.
    */
   std::string getChannelTechnology() {return m_channel_technology;};
+  /**
+   * @brief This function starts the channelOccupationBytesPerSecondsPerSquareMeter.
+   */
+  void startChannelOccupationBytesPerSecondsPerSquareMeter() {Simulator::Schedule (Seconds(m_channel_window), &MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter, this);};
+  /**
+   * @brief This function stores the relation between CBR (first member of the tuple) and the number of bytes per square meter per second (second member of the tuple).
+   */
+  void channelOccupationBytesPerSecondsPerSquareMeter();
+  /**
+   * @brief This function updates the size fo received bytes
+   */
+   void updateBytesReceived(uint32_t bytesReceived)
+   {
+     m_total_bytes += bytesReceived;
+   }
+   /**
+    * @brief This function gets all the CBR values (first member of each tuple) paired with the Channel Occupation Bytes per Second per Square meter (second member of each tuple)
+    */
+    std::vector<std::tuple<double, double>> getCBRValuesPerChannelOccupation() {return m_cbr_bytes_per_second_per_square_meter;};
 
 private:
   void computePRR(std::string buf);
@@ -496,6 +516,12 @@ private:
   std::string m_channel_technology = ""; //!< The channel technology used
   float m_simulation_time = -1; //!< The simulation time
   std::unordered_map<std::string, std::vector<double>> m_average_cbr; //!< The exponential moving average CBR for each node
+
+  uint32_t m_total_bytes = 0; //!< The total number of bytes received in the simulation
+  double m_total_area = 0.0; //!< The total area for the simulation
+  double m_channel_window = 5; //!< The time window (in Seconds) for the getChannelOccupationBytesPerSquareMeterPerSeconds function
+  uint64_t m_received_bytes_checkpoint = 0; //!< The number of received bytes until the last time window checkpoint
+  std::vector<std::tuple<double, double>> m_cbr_bytes_per_second_per_square_meter; //!< The number of packet per second per square meter;
 };
 }
 

@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
   double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 33.0; // IEEE 802.11p transmission power in dBm
   xmlDocPtr rou_xml_file;
-  double simTime = 100.0; // Total simulation time (default: 100 seconds)
+  double simTime = 20.0; // Total simulation time (default: 100 seconds)
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map_congestion/";
@@ -235,18 +235,18 @@ int main (int argc, char *argv[])
   metSup->enableCBRVerboseOnStdout();
   metSup->enableCBRWriteToFile();
   metSup->setCBRWindowValue(200);
-  metSup->setCBRAlphaValue(0.2);
+  metSup->setCBRAlphaValue(0.1);
   metSup->setSimulationTimeValue(simTime);
   metSup->startCheckCBR();
 
-  Ptr<DCC> dcc = NULL;
+  /*Ptr<DCC> dcc = NULL;
   DCC dccObj = DCC();
   dcc = &dccObj;
   dcc->SetBSMap (&basicServices);
   dcc->SetTraciClient(sumoClient);
   dcc->SetDCCInterval(MilliSeconds (200));
   dcc->SetMetricSupervisor (metSup);
-  dcc->reactiveDCC();
+  dcc->reactiveDCC();*/
 
   // Create a new socket for the generation of broadcast interfering traffic
   // With the aim of sending generic broadcast packets, we use a PacketSocket
@@ -257,24 +257,29 @@ int main (int argc, char *argv[])
   PacketSocketHelper packetSocket;
   packetSocket.Install(c);
   TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
-  Ptr<Socket> source_interfering = Socket::CreateSocket (c.Get (0), tid);
-  PacketSocketAddress local_source_interfering;
-  local_source_interfering.SetSingleDevice (c.Get(0)->GetDevice(0)->GetIfIndex ());
-  local_source_interfering.SetPhysicalAddress (c.Get(0)->GetDevice(0)->GetAddress());
-  local_source_interfering.SetProtocol (0x88B5); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
-  if (source_interfering->Bind (local_source_interfering) == -1)
-  {
-    NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
-  }
-
-  PacketSocketAddress remote_source_interfering;
-  remote_source_interfering.SetSingleDevice (c.Get(0)->GetDevice(0)->GetIfIndex());
-  // Set the broadcast MAC address as interfering traffic will be broadcasted by vehicle 3
-  remote_source_interfering.SetPhysicalAddress (c.Get(0)->GetDevice(0)->GetBroadcast());
-  remote_source_interfering.SetProtocol (0x88B5); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
-  source_interfering->Connect (remote_source_interfering);
-   // Important: this line lets you set the AC of the interfering traffic, through a User Priority (UP) value, like in real Linux kernels/OS
-  source_interfering->SetPriority (interfering_up); // Setting the priority of the interfering traffic from vehicle 0
+  std::unordered_map<uint32_t, Ptr<Socket>> source_interfering;
+  uint32_t number = c.GetN();
+  for(uint32_t i = 0; i < number; i++)
+    {
+      Ptr<Socket> socket = Socket::CreateSocket (c.Get (i), tid);
+      PacketSocketAddress local_source_interfering;
+      local_source_interfering.SetSingleDevice (c.Get(i)->GetDevice(0)->GetIfIndex ());
+      local_source_interfering.SetPhysicalAddress (c.Get(i)->GetDevice(0)->GetAddress());
+      local_source_interfering.SetProtocol (0x88B5); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
+      if (socket->Bind (local_source_interfering) == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
+        }
+      PacketSocketAddress remote_source_interfering;
+      remote_source_interfering.SetSingleDevice (c.Get(i)->GetDevice(0)->GetIfIndex());
+      // Set the broadcast MAC address as interfering traffic will be broadcasted by vehicle 3
+      remote_source_interfering.SetPhysicalAddress (c.Get(i)->GetDevice(0)->GetBroadcast());
+      remote_source_interfering.SetProtocol (0x88B5); // Setting the "Local Experimental Ethertype 1" to send interfering traffic
+      socket->Connect (remote_source_interfering);
+      // Important: this line lets you set the AC of the interfering traffic, through a User Priority (UP) value, like in real Linux kernels/OS
+      socket->SetPriority (interfering_up); // Setting the priority of the interfering traffic from vehicle 0
+      source_interfering[i] = socket;
+    }
 
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
@@ -287,56 +292,49 @@ int main (int argc, char *argv[])
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
+      uint32_t id = source_interfering[nodeID]->GetNode()->GetId();
+      Simulator::ScheduleWithContext (id,
+                                      Seconds (1.0), &GenerateTraffic_interfering,
+                                      source_interfering[nodeID], 500, simTime*2000, MilliSeconds (5));
+      // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
+      Ptr<Socket> sock;
+      sock=GeoNet::createGNPacketSocket(c.Get(nodeID));
+      // Set the proper AC, through the specified UP
+      sock->SetPriority (up);
 
-      if(vehicleID=="veh1")
-        {
-          Simulator::ScheduleWithContext (source_interfering->GetNode ()->GetId (),
-                                          Seconds (1.0), &GenerateTraffic_interfering,
-                                          source_interfering, 2000, simTime*2000, MilliSeconds (5));
-        }
-      else
-        {
-          // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
-          Ptr<Socket> sock;
-          sock=GeoNet::createGNPacketSocket(c.Get(nodeID));
-          // Set the proper AC, through the specified UP
-          sock->SetPriority (up);
+      // Create a new Basic Service Container object, which includes, for the current vehicle, both the ETSI CA Basic Service, for the transmission/reception
+      // of periodic CAMs, and the ETSI DEN Basic Service, for the transmission/reception of event-based DENMs
+      // An ETSI Basic Services container is a wrapper class to enable easy handling of both CAMs and DENMs
+      // The station ID is set to be equal to the SUMO ID without "veh" (i.e., the station ID of "veh1" will be "1")
+      Ptr<BSContainer> bs_container = CreateObject<BSContainer>(std::stol(vehicleID.substr(3)),StationType_passengerCar,sumoClient,false,sock);
+      // Setup the Metricupervisor inside the BSContainer, to make each vehicle collect latency and Metric metrics
+      bs_container->linkMetricSupervisor(metSup);
+      // This is needed just to simplify the whole application
+      bs_container->disablePRRSupervisorForGNBeacons ();
 
-          // Create a new Basic Service Container object, which includes, for the current vehicle, both the ETSI CA Basic Service, for the transmission/reception
-          // of periodic CAMs, and the ETSI DEN Basic Service, for the transmission/reception of event-based DENMs
-          // An ETSI Basic Services container is a wrapper class to enable easy handling of both CAMs and DENMs
-          // The station ID is set to be equal to the SUMO ID without "veh" (i.e., the station ID of "veh1" will be "1")
-          Ptr<BSContainer> bs_container = CreateObject<BSContainer>(std::stol(vehicleID.substr(3)),StationType_passengerCar,sumoClient,false,sock);
-          // Setup the Metricupervisor inside the BSContainer, to make each vehicle collect latency and Metric metrics
-          bs_container->linkMetricSupervisor(metSup);
-          // This is needed just to simplify the whole application
-          bs_container->disablePRRSupervisorForGNBeacons ();
+      // Set the function which will be called every time a CAM is received, i.e., receiveCAM()
+      bs_container->addCAMRxCallback (std::bind(&receiveCAM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
+      // Setup the new ETSI Basic Services container
+      // The first parameter is true is you want to setup a CA Basic Service (for sending/receiving CAMs)
+      // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
+      // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
 
-          // Set the function which will be called every time a CAM is received, i.e., receiveCAM()
-          bs_container->addCAMRxCallback (std::bind(&receiveCAM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
-          // Setup the new ETSI Basic Services container
-          // The first parameter is true is you want to setup a CA Basic Service (for sending/receiving CAMs)
-          // The second parameter should be true if you want to setup a DEN Basic Service (for sending/receiving DENMs)
-          // The third parameter should be true if you want to setup a VRU Basic Service (for sending/receiving VAMs)
+      bs_container->addCPMRxCallback (std::bind(&receiveCPM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
+      bs_container->setupContainer(true,false,false, true);
 
-          bs_container->addCPMRxCallback (std::bind(&receiveCPM,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5));
-          bs_container->setupContainer(true,false,false, true);
+      // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
+      // retrieve the right BSContainer given a vehicle ID
+      basicServices.add(bs_container);
 
-          // Store the container for this vehicle inside a local global BSMap, i.e., a structure (similar to a hash table) which allows you to easily
-          // retrieve the right BSContainer given a vehicle ID
-          basicServices.add(bs_container);
-
-          // Start transmitting CAMs
-          // We randomize the instant in time in which the CAM dissemination is going to start
-          // This simulates different startup times for the OBUs of the different vehicles, and
-          // reduces the risk of multiple vehicles trying to send CAMs are the same time (causing more collisions);
-          // "desync" is a value between 0 and 1 (seconds) after which the CAM dissemination should start
-          std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
-          double desync = ((double)std::rand()/RAND_MAX);
-          bs_container->getCABasicService ()->startCamDissemination (desync);
-          bs_container->getCPBasicService()->startCpmDissemination();
-        }
-
+      // Start transmitting CAMs
+      // We randomize the instant in time in which the CAM dissemination is going to start
+      // This simulates different startup times for the OBUs of the different vehicles, and
+      // reduces the risk of multiple vehicles trying to send CAMs are the same time (causing more collisions);
+      // "desync" is a value between 0 and 1 (seconds) after which the CAM dissemination should start
+      std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
+      double desync = ((double)std::rand()/RAND_MAX);
+      bs_container->getCABasicService ()->startCamDissemination (desync);
+      bs_container->getCPBasicService()->startCpmDissemination();
 
       return c.Get(nodeID);
     };
@@ -362,6 +360,8 @@ int main (int argc, char *argv[])
   // Link ns-3 and SUMO
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
+  metSup->startChannelOccupationBytesPerSecondsPerSquareMeter();
+
   // Start simulation, which will last for simTime seconds
   Simulator::Stop (Seconds(simTime));
   Simulator::Run ();
@@ -371,7 +371,7 @@ int main (int argc, char *argv[])
 
   std::cout << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
   std::cout << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
-  std::cout << "Average PRR: " << metSup->getAveragePRR_vehicle(1) << std::endl;
+  // std::cout << "Average PRR: " << metSup->getAveragePRR_vehicle(1) << std::endl;
 
   std::cout << "Average latency veh 1 (ms): " << metSup->getAverageLatency_vehicle (1) << std::endl;
   std::cout << "Average latency veh 2 (ms): " << metSup->getAverageLatency_vehicle (2) << std::endl;
@@ -379,6 +379,14 @@ int main (int argc, char *argv[])
   std::cout << "Average latency veh 4 (ms): " << metSup->getAverageLatency_vehicle (4) << std::endl;
 
   std::cout << "RX packet count: " << cam_packet_count + cpm_packet_count << std::endl;
+
+  /*std::vector<std::tuple<double, double>> res = metSup->getCBRValuesPerChannelOccupation();
+
+  for(auto it : res)
+    {
+      std::cout << std::get<0>(it) << " " << std::get<1>(it) << std::endl;
+    }
+    */
 
   Simulator::Destroy ();
 
