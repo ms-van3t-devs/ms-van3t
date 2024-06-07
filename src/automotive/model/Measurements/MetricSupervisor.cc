@@ -637,6 +637,8 @@ MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter ()
 
   double result = (double) receivedBytesWithinTimeWindow / (m_total_area * m_channel_window);
 
+  m_bytes_per_second_per_square_meter.push_back(result);
+
   double cbr = getAverageCBROverall();
 
   Simulator::Schedule(Seconds(m_channel_window), &MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter, this);

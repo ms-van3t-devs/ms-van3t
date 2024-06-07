@@ -435,6 +435,10 @@ public:
     * @brief This function gets all the CBR values (first member of each tuple) paired with the Channel Occupation Bytes per Second per Square meter (second member of each tuple)
     */
     std::vector<std::tuple<double, double>> getCBRValuesPerChannelOccupation() {return m_cbr_bytes_per_second_per_square_meter;};
+    /**
+    * @brief This function gets the Channel Occupation Bytes per Second per Square meter
+    */
+    std::vector<double> getBytesPerSecondPerSquareMeter() {return m_bytes_per_second_per_square_meter;};
 
 private:
   void computePRR(std::string buf);
@@ -521,6 +525,7 @@ private:
   double m_total_area = 0.0; //!< The total area for the simulation
   double m_channel_window = 2; //!< The time window (in Seconds) for the getChannelOccupationBytesPerSquareMeterPerSeconds function
   uint64_t m_received_bytes_checkpoint = 0; //!< The number of received bytes until the last time window checkpoint
+  std::vector<double> m_bytes_per_second_per_square_meter; //!< The number of bytes per second per square meter
   std::vector<std::tuple<double, double>> m_cbr_bytes_per_second_per_square_meter; //!< The number of packet per second per square meter;
 };
 }
