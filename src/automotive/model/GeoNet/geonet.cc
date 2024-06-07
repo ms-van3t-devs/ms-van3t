@@ -703,6 +703,7 @@ namespace ns3 {
     {
         if(dataIndication.GNType!=BEACON || m_PRRsupervisor_beacons==true)
         {
+          m_metric_supervisor_ptr->updateBytesReceived(dataSize);
             m_metric_supervisor_ptr->signalReceivedPacket(MetricSupervisor::bufToString (buffer,dataSize),m_station_id);
         }
 

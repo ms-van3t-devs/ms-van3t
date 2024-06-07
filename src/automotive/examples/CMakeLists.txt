@@ -117,8 +117,8 @@ build_lib_example(
 )
 
 build_lib_example(
-        NAME v2v-cam-congestion-nrv2x
-        SOURCE_FILES v2v-cam-congestion-nrv2x.cc
+        NAME v2v-congestion-nrv2x
+        SOURCE_FILES v2v-congestion-nrv2x.cc
         LIBRARIES_TO_LINK
         ${libautomotive}
         ${libnr}

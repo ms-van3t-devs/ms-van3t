@@ -78,6 +78,27 @@ GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> >
     }
 }
 
+static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
+                             uint32_t pktCount, Time pktInterval )
+{
+  // Generate interfering traffic by sending pktCount packets (filled in with zeros), every pktInterval
+  if (pktCount > 0)
+    {
+      // "Create<Packet> (pktSize)" creates a new packet of size pktSize bytes, composed by default by all zeros
+      if (socket->Send (Create<Packet> (pktSize)) != -1 && pktCount%100==0)
+        {
+          // std::cout << "Interfering packet sent" << std::endl;
+        }
+      // Schedule again the same function (to send the next packet), and decrease by one the packet count
+      Simulator::Schedule (pktInterval, &GenerateTraffic_interfering,
+                           socket, pktSize, pktCount - 1, pktInterval);
+    }
+  else
+    {
+      socket->Close ();
+    }
+}
+
 
 int
 main (int argc, char *argv[])
@@ -104,11 +125,11 @@ main (int argc, char *argv[])
 
   xmlDocPtr rou_xml_file;
   double m_baseline_prr = 150.0;
-  bool m_metric_sup = false;
+  bool m_metric_sup = true;
 
 
   // Simulation parameters.
-  double simTime = 100.0;
+  double simTime = 50.0;
   //Sidelink bearers activation time
   Time slBearersActivationTime = Seconds (2.0);
 
@@ -670,7 +691,7 @@ main (int argc, char *argv[])
       metSup->enableCBRVerboseOnStdout();
       metSup->enableCBRWriteToFile();
       metSup->setCBRWindowValue(100);
-      metSup->setCBRAlphaValue(0.5);
+      metSup->setCBRAlphaValue(0.1);
       metSup->setSimulationTimeValue(simTime);
       metSup->startCheckCBR();
     }
@@ -684,6 +705,15 @@ main (int argc, char *argv[])
   EmergencyVehicleAlertHelper.SetAttribute ("Model", StringValue ("nrv2x"));
   EmergencyVehicleAlertHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
   EmergencyVehicleAlertHelper.SetAttribute ("SendCPM", BooleanValue(false));
+
+  Ptr<DCC> dcc = NULL;
+  DCC dccObj = DCC();
+  dcc = &dccObj;
+  dcc->SetDCCInterval(MilliSeconds (200));
+  dcc->SetTraciClient (sumoClient);
+  dcc->SetMetricSupervisor (metSup);
+  dcc->reactiveDCC();
+  dcc->SetNrHelper(nrHelper);
 
   /* callback function for node creation */
   int i=0;
@@ -701,6 +731,9 @@ main (int argc, char *argv[])
 
       //ApplicationContainer CAMSenderApp = CamSenderHelper.Install (includedNode);
       ApplicationContainer AppSample = EmergencyVehicleAlertHelper.Install (includedNode);
+
+      // TODO
+      //dcc->AddCABasicService ();
 
       AppSample.Start (Seconds (0.0));
       AppSample.Stop (Seconds(simTime) - Simulator::Now () - Seconds (0.1));
