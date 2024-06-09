@@ -47,14 +47,12 @@ void DCC::reactiveDCC()
   for (auto it = cbrs.begin(); it != cbrs.end(); ++it)
     {
       std::string id = it->first;
-      std::string numericPart = id.substr (3);
-      long stationId = std::stol (numericPart);
       double current_cbr = it->second.back();
       ReactiveState oldState = ReactiveState::Undefined;
       ReactiveState state;
-      if (m_veh_states.find(stationId) != m_veh_states.end())
+      if (m_states.find(id) != m_states.end())
         {
-          oldState = m_veh_states[stationId];
+          oldState = m_states[id];
         }
 
       if (current_cbr < m_reactive_parameters_relaxed.m_cbr_threshold)
@@ -298,7 +296,7 @@ void DCC::reactiveDCC()
               }
             break;
           }
-      m_veh_states[stationId] = state;
+      m_states[id] = state;
     }
 
   Simulator::Schedule(m_dcc_interval, &DCC::reactiveDCC, this);

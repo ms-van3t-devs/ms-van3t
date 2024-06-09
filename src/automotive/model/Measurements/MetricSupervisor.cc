@@ -455,7 +455,8 @@ MetricSupervisor::checkCBR ()
 
   for (auto it = nodes.begin (); it != nodes.end (); ++it)
     {
-      std::string node = it->first;
+      std::string item = it->first;
+
       std::basic_string<char> node_id = std::to_string(it->second.second->GetId ());
 
       if (currentBusyCBR.find(node_id) == currentBusyCBR.end())
@@ -488,15 +489,15 @@ MetricSupervisor::checkCBR ()
 
       double currentCbr = busyCbr.GetDouble() / (m_cbr_window * 1e6);
 
-      if (m_average_cbr.find (node) != m_average_cbr.end ())
+      if (m_average_cbr.find (item) != m_average_cbr.end ())
         {
           // Exponential moving average
-          double new_cbr = m_cbr_alpha * m_average_cbr[node].back () + (1 - m_cbr_alpha) * currentCbr;
-          m_average_cbr[node].push_back (new_cbr);
+          double new_cbr = m_cbr_alpha * m_average_cbr[item].back () + (1 - m_cbr_alpha) * currentCbr;
+          m_average_cbr[item].push_back (new_cbr);
         }
       else
         {
-          m_average_cbr[node].push_back (currentCbr);
+          m_average_cbr[item].push_back (currentCbr);
         }
     }
 
@@ -571,15 +572,14 @@ MetricSupervisor::startCheckCBR ()
 
 }
 
-std::tuple<std::string, float>
-MetricSupervisor::getCBRPerNode (std::string node)
+double
+MetricSupervisor::getCBRPerItem (std::string itemID)
 {
-  if (m_average_cbr.find (node) != m_average_cbr.end ())
+  if (m_average_cbr.find (itemID) != m_average_cbr.end ())
     {
-      std::tuple<std::string, double> ret = std::make_tuple (node, m_average_cbr[node].back ());
-      return ret;
+      return m_average_cbr[itemID].back();
     } else {
-      return std::make_tuple (node, -1.0);
+      return -1.0;
     }
 }
 
