@@ -403,7 +403,7 @@ public:
   /**
    * @breif This function gets the CBR for a specific node.
    */
-  std::tuple<std::string, float> getCBRPerNode(std::string node);
+  double getCBRPerItem(std::string vehicleID);
   /**
    * @breif This function gets the overall CBR.
    */

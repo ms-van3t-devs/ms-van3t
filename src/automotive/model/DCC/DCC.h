@@ -178,7 +178,7 @@ private:
   DCC::ReactiveParametersActive3 m_reactive_parameters_active3 = DCC::ReactiveParametersActive3(); //!< Parameters for the Active3 state
   DCC::ReactiveParametersRestricted m_reactive_parameters_restricted = DCC::ReactiveParametersRestricted(); //!< Parameters for the Restricted state
 
-  std::unordered_map<uint32_t, DCC::ReactiveState> m_veh_states; //!< Map to store the state of each vehicle
+  std::unordered_map<std::string, DCC::ReactiveState> m_states; //!< Map to store the state of each vehicle
 
   double m_CBR_its;
   double m_alpha = 0.016;
