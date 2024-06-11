@@ -5,13 +5,13 @@
 #include <vector>
 #include "ns3/MetricSupervisor.h"
 #include "ns3/wifi-net-device.h"
-#include "ns3/nr-net-device.h"
+//#include "ns3/nr-net-device.h"
 #include "ns3/net-device.h"
 #include "ns3/wifi-phy.h"
-#include "ns3/nr-ue-phy.h"
+//#include "ns3/nr-ue-phy.h"
 #include "ns3/traci-client.h"
 #include "ns3/BSMap.h"
-#include "ns3/nr-module.h"
+//#include "ns3/nr-module.h"
 
 namespace ns3 {
 
@@ -112,16 +112,16 @@ public:
     *
     * \param nrHelper NRHelper object
     */
-  void SetNrHelper(Ptr<NrHelper> nrHelper) {
-    if(m_metric_supervisor != nullptr && m_metric_supervisor->getChannelTechnology() == "Nr")
-      {
-        m_nr_helper = nrHelper;
-      }
-    else
-      {
-        NS_FATAL_ERROR ("Metric Supervisor is not set or the channel technology is not Nr");
-      }
-  };
+  // void SetNrHelper(Ptr<NrHelper> nrHelper) {
+  //   if(m_metric_supervisor != nullptr && m_metric_supervisor->getChannelTechnology() == "Nr")
+  //     {
+  //       m_nr_helper = nrHelper;
+  //     }
+  //   else
+  //     {
+  //       NS_FATAL_ERROR ("Metric Supervisor is not set or the channel technology is not Nr");
+  //     }
+  // };
   /**
     * \brief Set the CAM Basic Service
     *
@@ -170,7 +170,7 @@ private:
   std::unordered_map<std::string, Ptr<CABasicService>> m_caService; //!< Pointer to the CABasicService object
   std::unordered_map<std::string, Ptr<CPBasicService>> m_cpService; //!< Pointer to the CPBasicService object
   std::unordered_map<std::string, Ptr<VRUBasicService>> m_vruService; //!< Pointer to the VRUBasicService object
-  Ptr<NrHelper> m_nr_helper = nullptr; //!< Pointer to the NRHelper object
+  //Ptr<NrHelper> m_nr_helper = nullptr; //!< Pointer to the NRHelper object
 
   DCC::ReactiveParametersRelaxed m_reactive_parameters_relaxed = DCC::ReactiveParametersRelaxed(); //!< Parameters for the Relaxed state
   DCC::ReactiveParametersActive1 m_reactive_parameters_active1 = DCC::ReactiveParametersActive1(); //!< Parameters for the Active1 state

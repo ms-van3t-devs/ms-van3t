@@ -172,10 +172,10 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_relaxed.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_relaxed.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-              {
-                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_relaxed.m_tx_power);
-              }
+            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
+            //   {
+            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_relaxed.m_tx_power);
+            //   }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
               {
@@ -199,10 +199,10 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active1.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active1.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-              {
-                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active1.m_tx_power);
-              }
+            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
+            //   {
+            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active1.m_tx_power);
+            //   }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
               {
@@ -225,10 +225,10 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active2.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active2.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-              {
-                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active2.m_tx_power);
-              }
+            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
+            //   {
+            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active2.m_tx_power);
+            //   }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
               {
@@ -251,10 +251,10 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_active3.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_active3.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-              {
-                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active3.m_tx_power);
-              }
+            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
+            //   {
+            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active3.m_tx_power);
+            //   }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
               {
@@ -277,10 +277,10 @@ void DCC::reactiveDCC()
                 phy80211p->SetTxPowerEnd (m_reactive_parameters_restricted.m_tx_power);
                 phy80211p->SetRxSensitivity (m_reactive_parameters_restricted.m_sensitivity);
               }
-            else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-              {
-                m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_restricted.m_tx_power);
-              }
+            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
+            //   {
+            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_restricted.m_tx_power);
+            //   }
 
             if (m_caService.find(nodeID_str) != m_caService.end())
               {
