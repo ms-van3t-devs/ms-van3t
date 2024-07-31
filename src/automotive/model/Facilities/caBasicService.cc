@@ -611,7 +611,7 @@ namespace ns3
     if(m_lowFreqContainerEnabled == true)
     {
       // Send a low frequency container only if at least 500 ms have passed since the last CAM with a low frequency container
-      if(lastCamGenLowFrequency==-1 ||(computeTimestampUInt64 ()-lastCamGenLowFrequency)>=500)
+      if(lastCamGenLowFrequency==-1 || (computeTimestampUInt64 ()-lastCamGenLowFrequency)/1e6>=500.0)
       {
         auto vehicleRole = m_vdp->getVehicleRole ();
         auto exteriorLights = m_vdp->getExteriorLights ();
