@@ -22,7 +22,7 @@ extern "C" {
 namespace ns3
 {
 
-class CPBasicServiceV1: public SignalInfoUtils
+class CPBasicServiceV1: public Object, public SignalInfoUtils
 {
 public:
   CPBasicServiceV1();
@@ -46,11 +46,28 @@ public:
   void setRedundancyMitigation(bool choice){m_redundancy_mitigation = choice;}
   void disableRedundancyMitigation(){m_redundancy_mitigation = false;}
 
+  /**
+     * @brief Set the future time to check CPM condition
+     * @param nextCPM The next time to check CPM condition
+     */
+  void setCheckCpmGenMs(long nextCPM) {m_N_GenCpm = nextCPM;};
+
   const long T_GenCpmMin_ms = 100;
   const long T_GenCpm_ms = 100;
   const long T_GenCpmMax_ms = 1000;
   const long m_T_AddSensorInformation = 1000;
 
+  /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CPM condition after an update of delta value
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+  void toffUpdateAfterDeltaUpdate(double delta);
+
+  /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CPM condition after a transmission
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+  void toffUpdateAfterTransmission();
 
 private:
 
@@ -65,7 +82,6 @@ private:
   std::function<void(asn1cpp::Seq<CPMV1>, Address)> m_CPReceiveCallback;
   std::function<void(asn1cpp::Seq<CPMV1>, Address, Ptr<Packet>)> m_CPReceiveCallbackPkt;
   std::function<void(asn1cpp::Seq<CPMV1>, Address, StationID_t, StationType_t, SignalInfo)> m_CPReceiveCallbackExtended;
-
 
   Ptr<btp> m_btp;
 
@@ -106,6 +122,10 @@ private:
   // ns-3 event IDs used to properly stop the simulation with terminateDissemination()
   EventId m_event_cpmDisseminationStart;
   EventId m_event_cpmSend;
+
+  double m_last_transmission = 0;
+  double m_Ton_pp = 0;
+  double m_last_delta = 0;
 };
 }
 

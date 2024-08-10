@@ -128,6 +128,18 @@ public:
   const long T_GenCpmMax_ms = 1000;
   const long m_T_AddSensorInformation = 1000;
 
+  /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CPM condition after an update of delta value
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+  void toffUpdateAfterDeltaUpdate(double delta);
+
+  /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CPM condition after a transmission
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+  void toffUpdateAfterTransmission();
+
 
 private:
 
@@ -190,6 +202,10 @@ private:
   // ns-3 event IDs used to properly stop the simulation with terminateDissemination()
   EventId m_event_cpmDisseminationStart;
   EventId m_event_cpmSend;
+
+  double m_last_transmission = 0;
+  double m_Ton_pp = 0;
+  double m_last_delta = 0;
 };
 }
 #endif // CPBASICSERVICE_H

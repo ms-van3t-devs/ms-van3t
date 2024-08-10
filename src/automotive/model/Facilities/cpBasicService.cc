@@ -54,7 +54,7 @@ namespace ns3 {
     m_T_LastSensorInfoContainer = -1;
 
     m_N_GenCpmMax=1000;
-    m_N_GenCpm=100;
+    m_N_GenCpm=T_GenCpmMin_ms;
 
     m_vehicle=true;
     m_redundancy_mitigation = true;
@@ -424,6 +424,14 @@ namespace ns3 {
 
     m_cpm_sent++;
 
+    // Estimation of the transmission time
+    m_last_transmission = (double) Simulator::Now().GetMilliSeconds();
+    uint32_t packetSize = packet->GetSize();
+    m_Ton_pp = (double) (NanoSeconds((packetSize * 8) / 0.006) + MicroSeconds(68)).GetNanoSeconds();
+    m_Ton_pp = m_Ton_pp / 1e6;
+
+    toffUpdateAfterTransmission();
+
     // Store the time in which the last CPM (i.e. this one) has been generated and successfully sent
     m_T_GenCpm_ms=now-lastCpmGen;
     lastCpmGen = now;
@@ -538,5 +546,29 @@ namespace ns3 {
         int_tstamp=tv.tv_sec*1e9+tv.tv_nsec;
       }
     return int_tstamp;
+  }
+
+  void
+  CPBasicService::toffUpdateAfterDeltaUpdate(double delta)
+  {
+    if (m_last_transmission == 0)
+      return;
+    double waiting = Simulator::Now().GetMilliSeconds() - m_last_transmission;
+    double aux = m_Ton_pp / delta * (m_N_GenCpm - waiting) / m_N_GenCpm + waiting;
+    aux = std::max (aux, 25.0);
+    double new_gen_time = std::min (aux, 1000.0);
+    setCheckCpmGenMs ((long) new_gen_time);
+    m_last_delta = delta;
+  }
+
+  void
+  CPBasicService::toffUpdateAfterTransmission()
+  {
+    if (m_last_delta == 0)
+      return;
+    double aux = m_Ton_pp / m_last_delta;
+    double new_gen_time = std::max(aux, 25.0);
+    new_gen_time = std::min(new_gen_time, 1000.0);
+    setCheckCpmGenMs ((long) new_gen_time);
   }
 }

@@ -2,10 +2,12 @@
 #define BSCONTAINER_H
 
 #include "ns3/caBasicService.h"
+#include "ns3/caBasicService_v1.h"
 #include "ns3/denBasicService.h"
 #include "ns3/MetricSupervisor.h"
 #include "ns3/VRUBasicService.h"
 #include "ns3/cpBasicService.h"
+#include "ns3/cpBasicService_v1.h"
 
 namespace ns3
 {

@@ -548,6 +548,14 @@ VRUBasicService_error_t VRUBasicService::generateAndEncodeVam(){
 
   m_vam_sent++;
 
+  // Estimation of the transmission time
+  m_last_transmission = (double) Simulator::Now().GetMilliSeconds();
+  uint32_t packetSize = packet->GetSize();
+  m_Ton_pp = (double) (NanoSeconds((packetSize * 8) / 0.006) + MicroSeconds(68)).GetNanoSeconds();
+  m_Ton_pp = m_Ton_pp / 1e6;
+
+  toffUpdateAfterTransmission();
+
   // Compute the time in which the VAM has been sent
   now = computeTimestampUInt64 ()/NANO_TO_MILLI;
 
@@ -611,6 +619,30 @@ int64_t VRUBasicService::computeTimestampUInt64()
     }
 
   return int_tstamp;
+}
+
+void
+VRUBasicService::toffUpdateAfterDeltaUpdate(double delta)
+{
+  if (m_last_transmission == 0)
+    return;
+  double waiting = Simulator::Now().GetMilliSeconds() - m_last_transmission;
+  double aux = m_Ton_pp / delta * (m_T_CheckVamGen_ms - waiting) / m_T_CheckVamGen_ms + waiting;
+  aux = std::max (aux, 25.0);
+  double new_gen_time = std::min (aux, 1000.0);
+  setCheckVamGenMs ((long) new_gen_time);
+  m_last_delta = delta;
+}
+
+void
+VRUBasicService::toffUpdateAfterTransmission()
+{
+  if (m_last_delta == 0)
+    return;
+  double aux = m_Ton_pp / m_last_delta;
+  double new_gen_time = std::max(aux, 25.0);
+  new_gen_time = std::min(new_gen_time, 1000.0);
+  setCheckVamGenMs ((long) new_gen_time);
 }
 
 }

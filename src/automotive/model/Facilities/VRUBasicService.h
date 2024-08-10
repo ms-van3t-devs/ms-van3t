@@ -91,6 +91,18 @@ public:
      * @param nextVAM The next time to check VAM condition
      */
     void setCheckVamGenMs(long nextVAM) {m_T_CheckVamGen_ms = nextVAM;};
+
+    /**
+     * @brief Used for DCC Adaptive approach to set the future time to check VAM condition after an update of delta value
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+    void toffUpdateAfterDeltaUpdate(double delta);
+
+    /**
+     * @brief Used for DCC Adaptive approach to set the future time to check VAM condition after a transmission
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+    void toffUpdateAfterTransmission();
     
 private:
     void initDissemination();
@@ -165,6 +177,10 @@ private:
 
     // Boolean/Enum variables to enable/disable the presence of certain optional containers in the VAM messages
     bool m_lowFreqContainerEnabled;
+
+    double m_last_transmission = 0;
+    double m_Ton_pp = 0;
+    double m_last_delta = 0;
 };
 
 }

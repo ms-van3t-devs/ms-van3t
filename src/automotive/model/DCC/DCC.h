@@ -130,12 +130,26 @@ public:
     */
   void AddCABasicService(std::string nodeID, Ptr<CABasicService> caBasicService) {m_caService[nodeID] = caBasicService;};
   /**
+    * \brief Set the CAM Basic Service (Version 1)
+    *
+    * \param nodeID id of the node
+    * \param caBasicService basic service for CAMs
+    */
+  void AddCABasicServiceV1(std::string nodeID, Ptr<CABasicServiceV1> caBasicService) {m_caServiceV1[nodeID] = caBasicService;};
+  /**
     * \brief Set the CPM Basic Service
     *
     * \param nodeID id of the node
     * \param cpBasicService basic service for CPMs
     */
   void AddCPBasicService(std::string nodeID, Ptr<CPBasicService> cpBasicService) {m_cpService[nodeID] = cpBasicService;};
+  /**
+    * \brief Set the CPM Basic Service (Version 1)
+    *
+    * \param nodeID id of the node
+    * \param cpBasicService basic service for CPMs
+    */
+  void AddCPBasicService(std::string nodeID, Ptr<CPBasicServiceV1> cpBasicService) {m_cpServiceV1[nodeID] = cpBasicService;};
   /**
     * \brief Set the VRU Basic Service
     *
@@ -168,7 +182,9 @@ private:
   Ptr<MetricSupervisor> m_metric_supervisor = NULL; //!< Pointer to the MetricSupervisor object
   Ptr<TraciClient> m_traci_client = NULL; //!< Pointer to the TraciClient object
   std::unordered_map<std::string, Ptr<CABasicService>> m_caService; //!< Pointer to the CABasicService object
+  std::unordered_map<std::string, Ptr<CABasicServiceV1>> m_caServiceV1; //!< Pointer to the CABasicService object
   std::unordered_map<std::string, Ptr<CPBasicService>> m_cpService; //!< Pointer to the CPBasicService object
+  std::unordered_map<std::string, Ptr<CPBasicServiceV1>> m_cpServiceV1; //!< Pointer to the CPBasicService object
   std::unordered_map<std::string, Ptr<VRUBasicService>> m_vruService; //!< Pointer to the VRUBasicService object
   //Ptr<NrHelper> m_nr_helper = nullptr; //!< Pointer to the NRHelper object
 
@@ -180,7 +196,7 @@ private:
 
   std::unordered_map<std::string, DCC::ReactiveState> m_states; //!< Map to store the state of each vehicle
 
-  double m_CBR_its;
+  std::unordered_map<std::string, double> m_CBR_its;
   double m_alpha = 0.016;
   double m_beta = 0.0012;
   double m_CBR_target = 0.68;
@@ -189,9 +205,6 @@ private:
   double m_Gmax = 0.0005;
   double m_Gmin = -0.00025;
   double m_delta = 0;
-  Time m_Tonpp = Seconds(0); //Duration of last transmission
-
-  void ToffUpdateAfterCBRupdate();
 
 };
 
