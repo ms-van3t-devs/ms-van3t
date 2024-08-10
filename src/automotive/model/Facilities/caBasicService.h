@@ -194,9 +194,21 @@ namespace ns3
 
     /**
      * @brief Set the future time to check CAM condition
-     * @param nextCAM The next time to check VAM condition
+     * @param nextCAM The next time to check CAM condition
      */
     void setCheckCamGenMs(long nextCAM) {m_T_CheckCamGen_ms = nextCAM;};
+
+    /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CAM condition after an update of delta value
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+    void toffUpdateAfterDeltaUpdate(double delta);
+
+    /**
+     * @brief Used for DCC Adaptive approach to set the future time to check CAM condition after a transmission
+     * @param delta new delta value calculated through DCC adaptive approach
+     */
+    void toffUpdateAfterTransmission();
 
     /**
      * @brief Stop the CAM dissemination
@@ -239,11 +251,9 @@ namespace ns3
     std::function<void(asn1cpp::Seq<CAM>, Address, Ptr<Packet>)> m_CAReceiveCallbackPkt;
     std::function<void(asn1cpp::Seq<CAM>, Address, StationId_t, StationType_t, SignalInfo)> m_CAReceiveCallbackExtended;
 
-
     Ptr<btp> m_btp; //! BTP object
 
-
-    long m_T_CheckCamGen_ms; //! CAM generation check interval
+    double m_T_CheckCamGen_ms; //! CAM generation check interval
 
     long m_T_GenCam_ms; //! CAM generation interval
 
@@ -303,6 +313,10 @@ namespace ns3
     // Boolean/Enum variables to enable/disable the presence of certain optional containers in the CAM messages
     bool m_lowFreqContainerEnabled;
     bool m_specialVehContainerEnabled;
+
+    double m_last_transmission = 0;
+    double m_Ton_pp = 0;
+    double m_last_delta = 0;
   };
 }
 

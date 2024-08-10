@@ -278,7 +278,8 @@ int main (int argc, char *argv[])
   dcc->SetDCCInterval(MilliSeconds (200));
   dcc->SetTraciClient (sumoClient);
   dcc->SetMetricSupervisor (metSup);
-  dcc->reactiveDCC();
+  dcc->adaptiveDCC();
+  // dcc->reactiveDCC();
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 

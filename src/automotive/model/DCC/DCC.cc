@@ -181,9 +181,17 @@ void DCC::reactiveDCC()
               {
                 m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
               }
+            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+              {
+                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
+              }
             if (m_cpService.find(nodeID_str) != m_cpService.end())
               {
                 m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
+              }
+            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+              {
+                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
               }
             if(m_vruService.find(nodeID_str) != m_vruService.end())
               {
@@ -208,9 +216,17 @@ void DCC::reactiveDCC()
               {
                 m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
               }
+            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+              {
+                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
+              }
             if (m_cpService.find(nodeID_str) != m_cpService.end())
               {
                 m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
+              }
+            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+              {
+                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
               }
             if(m_vruService.find(nodeID_str) != m_vruService.end())
               {
@@ -234,9 +250,17 @@ void DCC::reactiveDCC()
               {
                 m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
               }
+            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+              {
+                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
+              }
             if (m_cpService.find(nodeID_str) != m_cpService.end())
               {
                 m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
+              }
+            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+              {
+                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
               }
             if(m_vruService.find(nodeID_str) != m_vruService.end())
               {
@@ -260,9 +284,17 @@ void DCC::reactiveDCC()
               {
                 m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
               }
+            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+              {
+                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
+              }
             if (m_cpService.find(nodeID_str) != m_cpService.end())
               {
                 m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
+              }
+            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+              {
+                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
               }
             if(m_vruService.find(nodeID_str) != m_vruService.end())
               {
@@ -286,9 +318,17 @@ void DCC::reactiveDCC()
               {
                 m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
               }
+            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+              {
+                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
+              }
             if (m_cpService.find(nodeID_str) != m_cpService.end())
               {
                 m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
+              }
+            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+              {
+                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
               }
             if(m_vruService.find(nodeID_str) != m_vruService.end())
               {
@@ -302,85 +342,87 @@ void DCC::reactiveDCC()
   Simulator::Schedule(m_dcc_interval, &DCC::reactiveDCC, this);
 }
 
-/*
-
-Work in progress
-
-void DCC::ToffUpdateAfterCBRupdate(){
-
-  // Necesito el Toff y el waiting
-  double aux;
-  double waiting;
-
-
-  waiting = Simulator::Now().GetDouble() - (LastTx);
-
-  aux = Tonpp.GetDouble()/m_delta * (Toff.GetDouble() - waiting) / Toff.GetDouble() + waiting;
-
-  if(aux < 25*1000000){
-      aux = 25*1000000;
-    }
-
-  if(aux > 1000000000){
-      Toff = Seconds(1);
-    }
-  else{
-      Toff = NanoSeconds(aux);
-    }
-}
-
-
 void DCC::adaptiveDCC()
 {
   NS_LOG_INFO ("Starting DCC check");
-
-  NS_ASSERT_MSG (m_bs_map != nullptr, "BS Map not set");
   NS_ASSERT_MSG (m_traci_client != nullptr, "TraCI client not set");
   NS_ASSERT_MSG (m_metric_supervisor != nullptr, "Metric Supervisor not set");
   NS_ASSERT_MSG (m_dcc_interval != Time (Seconds (-1.0)), "DCC interval not set");
 
-  std::mutex &mutex = m_metric_supervisor->getCBRMutex ();
-  mutex.lock ();
-
   std::unordered_map<std::string, std::vector<double>> cbrs = m_metric_supervisor->getCBRValues ();
 
-  double delta_offset = 0;
-  double aux = 0;
-  double CBR = 0; // To retrieve from each node
-  double CBR_Before = 0; // To retrieve from each node
+  for (auto it = cbrs.begin (); it != cbrs.end (); ++it)
+    {
+      std::string id = it->first;
+      int nodeID_int = m_traci_client->get_NodeMap ()[id].second->GetId ();
+      std::string nodeID_str = std::to_string (nodeID_int);
+      double current_cbr = it->second.back ();
+      double previous_cbr;
+      if (it->second.size() < 2)
+        {
+          previous_cbr = 0;
+        }
+      else
+        {
+          previous_cbr = it->second[it->second.size () - 2];
+        }
+      double delta_offset;
 
-  m_CBR_its = 0.5*m_CBR_its + 0.25* (CBR_Before + CBR); //Step 1
-
-  aux = m_beta*(m_CBR_target - m_CBR_its);
-
-  if((m_CBR_target - m_CBR_its) > 0){ // step 2
-
-      if(aux > m_Gmax){
-          delta_offset = m_Gmax;
-        }else {
-          delta_offset = aux;
+      // Step 1
+      if (m_CBR_its.find(id) != m_CBR_its.end())
+        {
+          m_CBR_its[id] = 0.5 * m_CBR_its[id] + 0.25 * ((current_cbr + previous_cbr) / 2);
+        }
+      else
+        {
+          m_CBR_its[id] = (current_cbr + previous_cbr) / 2;
         }
 
-    }
-  else{
+      if ((m_CBR_target - m_CBR_its[id]) > 0) // Step 2
+        {
+          delta_offset = std::min (m_beta * (m_CBR_target - m_CBR_its[id]), m_Gmax);
+        }
+      else
+        {
+          delta_offset = std::max (m_beta * (m_CBR_target - m_CBR_its[id]), m_Gmin);
+        }
 
-      if(aux > m_Gmin){
-          delta_offset = aux;
-        }else{
-          delta_offset = m_Gmin;
+      m_delta = (1 - m_alpha) * m_delta + delta_offset; // Step 3
+
+      if (m_delta > m_delta_max) // Step 4
+        {
+          m_delta = m_delta_max;
+        }
+
+      if (m_delta < m_delta_min) // Step 5
+        {
+          m_delta = m_delta_min;
+        }
+
+      if (m_caService.find (nodeID_str) != m_caService.end ())
+        {
+          m_caService[nodeID_str]->toffUpdateAfterDeltaUpdate (m_delta);
+        }
+      if (m_caServiceV1.find (nodeID_str) != m_caServiceV1.end ())
+        {
+          m_caServiceV1[nodeID_str]->toffUpdateAfterDeltaUpdate (m_delta);
+        }
+      if (m_cpService.find (nodeID_str) != m_cpService.end ())
+        {
+          m_cpService[nodeID_str]->toffUpdateAfterDeltaUpdate(m_delta);
+        }
+      if (m_cpServiceV1.find (nodeID_str) != m_cpServiceV1.end ())
+        {
+          m_cpServiceV1[nodeID_str]->toffUpdateAfterDeltaUpdate(m_delta);
+        }
+      if (m_vruService.find (nodeID_str) != m_vruService.end ())
+        {
+          m_vruService[nodeID_str]->toffUpdateAfterDeltaUpdate(m_delta);
         }
     }
 
-  m_delta = (1-m_alpha) * m_delta + delta_offset; //step 3
-
-  if(m_delta > m_delta_max) //step 4
-    m_delta = m_delta_max;
-
-  if(m_delta < m_delta_min) // step 5
-    m_delta = m_delta_min;
-
-  ToffUpdateAfterCBRupdate();
+  Simulator::Schedule(m_dcc_interval, &DCC::adaptiveDCC, this);
 }
-*/
+
 }
 

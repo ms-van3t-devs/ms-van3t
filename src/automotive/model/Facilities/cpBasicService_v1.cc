@@ -371,6 +371,14 @@ CPBasicServiceV1::generateAndEncodeCPM()
   dataRequest.data = packet;
   m_btp->sendBTP(dataRequest);
 
+  // Estimation of the transmission time
+  m_last_transmission = (double) Simulator::Now().GetMilliSeconds();
+  uint32_t packetSize = packet->GetSize();
+  m_Ton_pp = (double) (NanoSeconds((packetSize * 8) / 0.006) + MicroSeconds(68)).GetNanoSeconds();
+  m_Ton_pp = m_Ton_pp / 1e6;
+
+  toffUpdateAfterTransmission();
+
   m_cpm_sent++;
 
   // Store the time in which the last CPM (i.e. this one) has been generated and successfully sent
@@ -468,11 +476,11 @@ CPBasicServiceV1::receiveCpm (BTPDataIndication_t dataIndication, Address from)
 int64_t
 CPBasicServiceV1::computeTimestampUInt64()
 {
-  int64_t int_tstamp=0;
+  int64_t int_tstamp = 0;
 
   if (!m_real_time)
     {
-      int_tstamp=Simulator::Now ().GetNanoSeconds ();
+      int_tstamp = Simulator::Now ().GetNanoSeconds ();
     }
   else
     {
@@ -480,8 +488,32 @@ CPBasicServiceV1::computeTimestampUInt64()
 
       clock_gettime (CLOCK_MONOTONIC, &tv);
 
-      int_tstamp=tv.tv_sec*1e9+tv.tv_nsec;
+      int_tstamp = tv.tv_sec * 1e9 + tv.tv_nsec;
     }
   return int_tstamp;
 }
+
+  void
+  CPBasicServiceV1::toffUpdateAfterDeltaUpdate(double delta)
+  {
+    if (m_last_transmission == 0)
+      return;
+    double waiting = Simulator::Now().GetMilliSeconds() - m_last_transmission;
+    double aux = m_Ton_pp / delta * (m_N_GenCpm - waiting) / m_N_GenCpm + waiting;
+    aux = std::max (aux, 25.0);
+    double new_gen_time = std::min (aux, 1000.0);
+    setCheckCpmGenMs ((long) new_gen_time);
+    m_last_delta = delta;
+  }
+
+  void
+  CPBasicServiceV1::toffUpdateAfterTransmission()
+  {
+    if (m_last_delta == 0)
+      return;
+    double aux = m_Ton_pp / m_last_delta;
+    double new_gen_time = std::max(aux, 25.0);
+    new_gen_time = std::min(new_gen_time, 1000.0);
+    setCheckCpmGenMs ((long) new_gen_time);
+  }
 }
