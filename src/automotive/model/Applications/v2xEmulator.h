@@ -7,8 +7,11 @@
 
 #include "ns3/denBasicService.h"
 #include "ns3/caBasicService.h"
+#include "ns3/cpBasicService.h"
 
 #include "ns3/btp.h"
+#include "ns3/sumo-sensor.h"
+#include "ns3/LDM.h"
 #include "ns3/traci-client.h"
 
 namespace ns3 {
@@ -28,6 +31,7 @@ public:
 
 //  void receiveCAM (CAM_t *cam, Address from);
   void receiveCAM (asn1cpp::Seq<CAM> cam, Address from);
+  void receiveCPM (asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from);
 
   void receiveDENM(denData denm, Address from);
 
@@ -40,9 +44,13 @@ private:
 
   DENBasicService m_denService; //!< DEN Basic Service object
   CABasicService m_caService; //!< CA Basic Service object
+  CPBasicService m_cpService; //!< CP Basic Service object
 
   Ptr<btp> m_btp; //! BTP object
   Ptr<GeoNet> m_geoNet; //! GeoNetworking Object
+
+  Ptr<SUMOSensor> m_sensor;
+  Ptr<LDM> m_LDM; //! LDM object
 
   Ptr<Socket> m_socket; //!< Client socket
 
@@ -51,12 +59,15 @@ private:
   void TriggerDenm ();
   void UpdateDenm (DEN_ActionID actionid);
 
+  vehicleData_t translateCPMdata(asn1cpp::Seq<CollectivePerceptionMessage> cpm,asn1cpp::Seq<PerceivedObject> object, int objectIndex);
+
   long compute_timestampIts ();
 
   Ptr<TraciClient> m_client; //!< TraCI client
   std::string m_id; //!< vehicle id
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
   bool m_send_denm; //!< To decide if CAM dissemination is active or not
+  bool m_send_cpm;
 
   // UDP mode parameters
   Ipv4Address m_udpmode_ipAddress;

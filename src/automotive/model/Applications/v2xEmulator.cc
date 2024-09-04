@@ -147,6 +147,18 @@ namespace ns3
           NS_FATAL_ERROR ("Error: cannot connect UDP socket.");
         }
     }
+    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
+    //Create LDM and sensor object
+    m_LDM = CreateObject<LDM>();
+    m_LDM->setStationID(m_id);
+    m_LDM->setTraCIclient(m_client);
+    m_LDM->setVDP(traci_vdp);
+
+    m_sensor = CreateObject<SUMOSensor>();
+    m_sensor->setStationID(m_id);
+    m_sensor->setTraCIclient(m_client);
+    m_sensor->setVDP(traci_vdp);
+    m_sensor->setLDM (m_LDM);
 
     // Create new BTP and GeoNet objects and set them in DENBasicService and CABasicService
     m_btp = CreateObject <btp>();
@@ -154,6 +166,10 @@ namespace ns3
     m_btp->setGeoNet(m_geoNet);
     m_denService.setBTP(m_btp);
     m_caService.setBTP(m_btp);
+    m_cpService.setBTP(m_btp);
+
+    m_caService.setLDM(m_LDM);
+    m_cpService.setLDM(m_LDM);
 
     /* Set sockets, callback and station properties in DENBasicService */
     m_denService.setSocketRx (m_socket);
@@ -169,10 +185,19 @@ namespace ns3
     m_caService.addCARxCallback (std::bind(&v2xEmulator::receiveCAM,this,std::placeholders::_1,std::placeholders::_2));
     m_caService.setRealTime (true);
 
+    /* Set sockets, callback, station properties and TraCI VDP in CPBasicService */
+    m_cpService.setSocketTx (m_socket);
+    m_cpService.setSocketRx (m_socket);
+    m_cpService.setStationProperties (std::stol(m_id.substr (3)), StationType_passengerCar);
+    m_cpService.addCPRxCallback (std::bind(&v2xEmulator::receiveCPM,this,std::placeholders::_1,std::placeholders::_2));
+    m_cpService.setRealTime (true);
+    m_cpService.setTraCIclient (m_client);
+
     /* Set TraCI vdp for GeoNet object */
-    VDP* traci_vdp = new VDPTraCI(m_client,m_id);
+
     m_caService.setVDP(traci_vdp);
     m_denService.setVDP(traci_vdp);
+    m_cpService.setVDP(traci_vdp);
 
     /* Schedule CAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());
@@ -191,9 +216,15 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     Simulator::Cancel (m_sendDenmEvent);
     m_socket->ShutdownRecv ();
-    uint64_t cam_sent;
+    uint64_t cam_sent, cpm_sent;
     cam_sent = m_caService.terminateDissemination ();
+    cpm_sent = m_cpService.terminateDissemination ();
+    m_denService.cleanup();
+    m_LDM->cleanup();
+    m_sensor->cleanup();
+
     std::cout<<"Number of CAMs sent for vehicle " <<m_id<< ": "<<cam_sent<<std::endl;;
+    std::cout<<"Number of CPMs sent for vehicle " <<m_id<< ": "<<cpm_sent<<std::endl;;
 
 
     m_denService.cleanup();
@@ -287,6 +318,18 @@ namespace ns3
 
     /* Implement CAM strategy here */
     std::cout << "Vehicle with ID "<< m_id << " received a new CAM with stationID: "<< asn1cpp::getField(cam->header.stationId,StationID_t) << std::endl;
+  }
+
+  void
+  v2xEmulator::receiveCPM (asn1cpp::Seq<CollectivePerceptionMessage> cpm, ns3::Address from)
+  {
+        // Ignore messages coming from itself
+        // This is needed as broadcasted packets over a promiscuous inteface are also received back on the same socket
+        if(asn1cpp::getField(cpm->header.stationId,StationID_t)==std::stoul(m_id.substr (3)))
+                return;
+
+        /* Implement CPM strategy here */
+        std::cout << "Vehicle with ID "<< m_id << " received a new CPM with stationID: "<< asn1cpp::getField(cpm->header.stationId,StationID_t) << std::endl;
   }
 
   void
