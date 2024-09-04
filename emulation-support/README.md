@@ -34,4 +34,4 @@ Terminal window 1 (~/ms-van3t/ns-3-dev/emulation-support): `./ms-van3t-namespace
 
 Terminal window 2 (~/ms-van3t/ns-3-dev/emulation-support/UDP-AMQP-relayer): `./UDPAMQPrelayer --url 127.0.0.1:5672 --queue topic://tests`
 
-Terminal window 3 - to be launched to start a test (~/ms-van3t/ns-3-dev): `sudo ip netns exec ns1 ./waf --run "v2x-emulator --interface=veth1ns --subnet=10.10.7.0 --gateway=10.10.7.254 --udp=10.10.7.254:20000 --sumo-netns=ns1 --sim-time=500 --sumo-gui=false" `
+Terminal window 3 - to be launched to start a test (~/ms-van3t/ns-3-dev): `sudo ip netns exec ns1 ./ns3 run "v2x-emulator --interface=veth1ns --subnet=10.10.7.0 --gateway=10.10.7.254 --udp=10.10.7.254:20000 --sumo-netns=ns1 --sim-time=500 --sumo-gui=false" `
