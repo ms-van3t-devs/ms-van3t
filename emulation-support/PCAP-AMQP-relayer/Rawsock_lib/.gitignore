@@ -1,0 +1,6 @@
+# Executable files (examples)
+Example_receive
+Example_send
+
+# Possible object files when including the library as a submodule
+Rawsock_lib/*.o

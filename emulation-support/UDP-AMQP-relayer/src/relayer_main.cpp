@@ -177,13 +177,13 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
-		std::cout<<"recv_bytes: " << recv_bytes << std::endl;
-
-		for(int i=(skipGN == true ? 68 : 0);i<recv_bytes;i++) {
-			printf("%02X",buffer[i]);
-		}
+//		std::cout<<"recv_bytes: " << recv_bytes << std::endl;
+//
+//		for(int i=(skipGN == true ? 68 : 0);i<recv_bytes;i++) {
+//			printf("%02X",buffer[i]);
+//		}
 		// Just to add a newline at the end...
-		std::cout << std::endl;
+//		std::cout << std::endl;
 
 		if(skipGN == false) {
 			CAM_relayer_obj.sendCAM_AMQP(buffer,recv_bytes);

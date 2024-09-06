@@ -57,6 +57,11 @@ namespace ns3
             BooleanValue (true),
             MakeBooleanAccessor (&v2xEmulator::m_send_denm),
             MakeBooleanChecker ())
+        .AddAttribute ("SendCPM",
+           "Enable the CPM transmission",
+           BooleanValue (true),
+           MakeBooleanAccessor (&v2xEmulator::m_send_cpm),
+           MakeBooleanChecker ())
         .AddAttribute ("DestinationIPv4",
             "Destination IPv4 address when working in UDP mode",
             Ipv4AddressValue ("192.168.1.1"),
@@ -205,6 +210,10 @@ namespace ns3
     if (m_send_cam)
       m_caService.startCamDissemination(desync);
 
+    /* Schedule CPM dissemination */
+    if (m_send_cpm)
+      m_cpService.startCpmDissemination();
+
     /* Schedule DENM dissemination */
     if (m_send_denm)
       v2xEmulator::TriggerDenm ();
@@ -223,8 +232,8 @@ namespace ns3
     m_LDM->cleanup();
     m_sensor->cleanup();
 
-    std::cout<<"Number of CAMs sent for vehicle " <<m_id<< ": "<<cam_sent<<std::endl;;
-    std::cout<<"Number of CPMs sent for vehicle " <<m_id<< ": "<<cpm_sent<<std::endl;;
+    std::cout<<"Number of CAMs sent for vehicle " <<m_id<< ": "<<cam_sent<<std::endl<< std::flush;
+    std::cout<<"Number of CPMs sent for vehicle " <<m_id<< ": "<<cpm_sent<<std::endl<< std::flush;
 
 
     m_denService.cleanup();

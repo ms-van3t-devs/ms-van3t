@@ -66,8 +66,8 @@ private:
   Ptr<TraciClient> m_client; //!< TraCI client
   std::string m_id; //!< vehicle id
   bool m_send_cam; //!< To decide if CAM dissemination is active or not
-  bool m_send_denm; //!< To decide if CAM dissemination is active or not
-  bool m_send_cpm;
+  bool m_send_denm; //!< To decide if DENM dissemination is active or not
+  bool m_send_cpm;  //!< To decide if CPM dissemination is active or not
 
   // UDP mode parameters
   Ipv4Address m_udpmode_ipAddress;

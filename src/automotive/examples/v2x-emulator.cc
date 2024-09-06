@@ -69,12 +69,13 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4helper;
 
   // Simulation parameters
-  std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2x_map/";
   std::string mob_trace = "cars.rou.xml";
-  std::string sumo_config = "src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
+  std::string sumo_config = "src/automotive/examples/sumo_files_v2x_map/map.sumo.cfg";
   std::string sumo_netns = "";
   bool sendCam = true;
   bool sendDenm = true;
+  bool sendCpm = true;
 
   bool verbose = true;
   bool sumo_gui = true;
@@ -101,6 +102,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("interface", "Name of the physical interface to send V2X messages to", deviceName);
   cmd.AddValue ("sim-time", "Total duration of the emulation [s]", emuTime);
   cmd.AddValue ("send-cam", "To trigger the CAM dissemination", sendCam);
+  cmd.AddValue ("send-cpm", "To trigger the CPM dissemination", sendCpm);
   cmd.AddValue ("send-denm", "To trigger the DENM dissemination", sendDenm);
   cmd.AddValue ("udp", "[UDP mode] To enable UDP mode and specify UDP port and IP address where the V2X messages are redirected (format: <IP>:<port>)", udpIp);
   cmd.AddValue ("gateway", "[UDP mode] To specify the gateway at which the UDP/IP packets will be sent", gwstr);
@@ -214,6 +216,7 @@ main (int argc, char *argv[])
   emuHelper.SetAttribute ("Client", (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
   emuHelper.SetAttribute ("SendCAM", (BooleanValue) sendCam);
   emuHelper.SetAttribute ("SendDENM", (BooleanValue) sendDenm);
+  emuHelper.SetAttribute ("SendCPM", (BooleanValue) sendCpm);
   if(udpIp!="")
   {
     emuHelper.SetAttribute ("DestinationIPv4", Ipv4AddressValue(destAddr));
