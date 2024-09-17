@@ -184,7 +184,6 @@ int main(int argc, char *argv[]) {
 
     int returnValue;
     while((returnValue = pcap_next_ex(pcap, &header, &data)) > 0) {
-        std::cout << returnValue << std::endl;
 
         unsigned long current_s,current_us;
 		struct timespec time, rem;
