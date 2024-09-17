@@ -108,6 +108,15 @@ build_lib_example(
 )
 
 build_lib_example(
+        NAME v2v-simple-cam-exchange-80211p-with-Security
+        SOURCE_FILES v2v-simple-cam-exchange-80211p-with-Security.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+        ${libwave}
+        ${libtraci}
+)
+
+build_lib_example(
         NAME v2v-congestion-80211p
         SOURCE_FILES v2v-congestion-80211p.cc
         LIBRARIES_TO_LINK

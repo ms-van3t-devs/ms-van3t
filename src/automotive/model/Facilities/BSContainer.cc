@@ -116,7 +116,7 @@ namespace ns3
   }
 
   void
-  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled,bool CPMBasicService_enabled) {
+  BSContainer::setupContainer(bool CABasicService_enabled,bool DENBasicService_enabled,bool VRUBasicService_enabled,bool CPMBasicService_enabled,bool m_security) {
     if(CABasicService_enabled==false && DENBasicService_enabled==false && VRUBasicService_enabled==false && CPMBasicService_enabled==false) {
       NS_FATAL_ERROR("Error. Called setupContainer() asking for enabling zero Basic Services. Aborting simulation.");
     }
@@ -146,6 +146,8 @@ namespace ns3
     if(m_metric_sup_ptr!=nullptr) {
       m_gn->setMetricSupervisor (m_metric_sup_ptr);
     }
+
+    m_gn->setSecurity(m_security);
 
     if(m_prrsup_beacons==false) {
       m_gn->disablePRRsupervisorForBeacons();

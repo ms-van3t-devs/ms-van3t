@@ -1,3 +1,7 @@
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+link_libraries(${OPENSSL_LIBRARIES})
+
 Set(source_files
     helper/areaSpeedAdvisorClient80211p-helper.cc
     helper/areaSpeedAdvisorServer80211p-helper.cc
@@ -38,7 +42,7 @@ Set(source_files
     model/utilities/sumo_xml_parser.cc
     model/Applications/v2xEmulator.cc
     model/Measurements/MetricSupervisor.cc
-        model/Facilities/ividata.cc
+    model/Facilities/ividata.cc
     model/Facilities/iviService.cc
     model/Facilities/BSMap.cc
     model/Facilities/BSContainer.cc
@@ -46,6 +50,7 @@ Set(source_files
     model/Facilities/LDM.cc
     model/Facilities/phPoints.cc
     model/utilities/sumo-sensor.cc
+    model/Security/security.cc
     model/DCC/DCC.cc
 
     model/Facilities/caBasicService_v1.cc
@@ -551,6 +556,7 @@ Set(source_files
         model/ASN1/full-v1-v2/ISO14823Code.c
         model/ASN1/full-v1-v2/Iso3833VehicleType.c
         model/ASN1/full-v1-v2/IssuerIdentifier.c
+        model/ASN1/full-v1-v2/IssuerIdentifierSec.c
         model/ASN1/full-v1-v2/ItineraryPath.c
         model/ASN1/full-v1-v2/ItineraryPathV1.c
         model/ASN1/full-v1-v2/ItsPduHeader.c
@@ -1259,6 +1265,282 @@ Set(source_files
         model/ASN1/full-v1-v2/ZoneLength.c
         model/ASN1/full-v1-v2/ZSensorOffsetV1.c
 
+        #-----------------------------------
+        #       SECURITY PART .C FILES
+        #-----------------------------------
+
+        model/ASN1/full-v1-v2/IdentifiedRegion.c
+        model/ASN1/full-v1-v2/uper_support.c
+        model/ASN1/full-v1-v2/KnownLongitude.c
+        model/ASN1/full-v1-v2/PsidSspRange.c
+        model/ASN1/full-v1-v2/NativeInteger_xer.c
+        model/ASN1/full-v1-v2/Uint16.c
+        model/ASN1/full-v1-v2/NULL_aper.c
+        model/ASN1/full-v1-v2/PolygonalRegion.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted.c
+        model/ASN1/full-v1-v2/ANY_jer.c
+        model/ASN1/full-v1-v2/PsidSsp.c
+        model/ASN1/full-v1-v2/aper_support.c
+        model/ASN1/full-v1-v2/SequenceOfPsid.c
+        model/ASN1/full-v1-v2/ServiceSpecificPermissions.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_print.c
+        model/ASN1/full-v1-v2/NativeInteger_print.c
+        model/ASN1/full-v1-v2/constr_CHOICE.c
+        model/ASN1/full-v1-v2/Elevation.c
+        model/ASN1/full-v1-v2/NativeInteger_uper.c
+        model/ASN1/full-v1-v2/OCTET_STRING_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_rfill.c
+        model/ASN1/full-v1-v2/constr_CHOICE_ber.c
+        model/ASN1/full-v1-v2/CertificateType.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_xer.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted.c
+        model/ASN1/full-v1-v2/constr_SET_OF_uper.c
+        model/ASN1/full-v1-v2/NULL_ber.c
+        model/ASN1/full-v1-v2/INTEGER_jer.c
+        model/ASN1/full-v1-v2/INTEGER.c
+        model/ASN1/full-v1-v2/constr_SET_OF_jer.c
+        model/ASN1/full-v1-v2/NativeEnumerated_aper.c
+        model/ASN1/full-v1-v2/Uint3.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_ber.c
+        model/ASN1/full-v1-v2/KnownLatitude.c
+        model/ASN1/full-v1-v2/Signature.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_jer.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_jer.c
+        model/ASN1/full-v1-v2/BIT_STRING_rfill.c
+        model/ASN1/full-v1-v2/EcdsaP256Signature.c
+        model/ASN1/full-v1-v2/Uint8.c
+        model/ASN1/full-v1-v2/ANY_ber.c
+        model/ASN1/full-v1-v2/HeaderInfoContributorId.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_jer.c
+        model/ASN1/full-v1-v2/PreSharedKeyRecipientInfo.c
+        model/ASN1/full-v1-v2/CertificateBase.c
+        model/ASN1/full-v1-v2/constr_SET_OF_xer.c
+        model/ASN1/full-v1-v2/ExtensionModuleVersion.c
+        model/ASN1/full-v1-v2/ToBeSignedCertificate.c
+        model/ASN1/full-v1-v2/ValidityPeriod.c
+        model/ASN1/full-v1-v2/OPEN_TYPE.c
+        model/ASN1/full-v1-v2/asn_codecs_prim.c
+        model/ASN1/full-v1-v2/ENUMERATED_uper.c
+        model/ASN1/full-v1-v2/ENUMERATED_aper.c
+        model/ASN1/full-v1-v2/INTEGER_aper.c
+        model/ASN1/full-v1-v2/constr_SET_OF_aper.c
+        model/ASN1/full-v1-v2/SspRange.c
+        model/ASN1/full-v1-v2/xer_encoder.c
+        model/ASN1/full-v1-v2/HashedId8.c
+        model/ASN1/full-v1-v2/PublicVerificationKey.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Unsecured.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_xer.c
+        model/ASN1/full-v1-v2/RectangularRegion.c
+        model/ASN1/full-v1-v2/ANY_uper.c
+        model/ASN1/full-v1-v2/ENUMERATED_oer.c
+        model/ASN1/full-v1-v2/asn_application.c
+        model/ASN1/full-v1-v2/MissingCrlIdentifier.c
+        model/ASN1/full-v1-v2/UnknownLatitude.c
+        model/ASN1/full-v1-v2/CrlSeries.c
+        model/ASN1/full-v1-v2/OneEightyDegreeInt.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_uper.c
+        model/ASN1/full-v1-v2/HashedId3.c
+        model/ASN1/full-v1-v2/EcdsaP384Signature.c
+        model/ASN1/full-v1-v2/IValue.c
+        model/ASN1/full-v1-v2/NULL.c
+        model/ASN1/full-v1-v2/uper_encoder.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_aper.c
+        model/ASN1/full-v1-v2/ThreeDLocation.c
+        model/ASN1/full-v1-v2/ExtId.c
+        model/ASN1/full-v1-v2/SequenceOfRectangularRegion.c
+        model/ASN1/full-v1-v2/SymmRecipientInfo.c
+        model/ASN1/full-v1-v2/ObjectDescriptor.c
+        model/ASN1/full-v1-v2/ANY.c
+        model/ASN1/full-v1-v2/SignerIdentifier.c
+        model/ASN1/full-v1-v2/Uint64.c
+        model/ASN1/full-v1-v2/SequenceOfUint16.c
+        model/ASN1/full-v1-v2/BIT_STRING_print.c
+        model/ASN1/full-v1-v2/SequenceOfCertificate.c
+        model/ASN1/full-v1-v2/asn_internal.c
+        model/ASN1/full-v1-v2/Latitude.c
+        model/ASN1/full-v1-v2/SequenceOfPsidGroupPermissions.c
+        model/ASN1/full-v1-v2/SymmetricEncryptionKey.c
+        model/ASN1/full-v1-v2/aper_opentype.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data.c
+        model/ASN1/full-v1-v2/aper_decoder.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Signed.c
+        model/ASN1/full-v1-v2/BIT_STRING_jer.c
+        model/ASN1/full-v1-v2/VerificationKeyIndicator.c
+        model/ASN1/full-v1-v2/INTEGER_rfill.c
+        model/ASN1/full-v1-v2/constr_SET_OF_ber.c
+        model/ASN1/full-v1-v2/EtsiTs103097Certificate.c
+        model/ASN1/full-v1-v2/Hostname.c
+        model/ASN1/full-v1-v2/RegionAndSubregions.c
+        model/ASN1/full-v1-v2/NativeInteger_jer.c
+        model/ASN1/full-v1-v2/NativeEnumerated_oer.c
+        model/ASN1/full-v1-v2/Ieee1609Dot2Content.c
+        model/ASN1/full-v1-v2/per_opentype.c
+        model/ASN1/full-v1-v2/HashedId32.c
+        model/ASN1/full-v1-v2/SequenceOfHashedId3.c
+        model/ASN1/full-v1-v2/NULL_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_xer.c
+        model/ASN1/full-v1-v2/CircularRegion.c
+        model/ASN1/full-v1-v2/BitmapSspRange.c
+        model/ASN1/full-v1-v2/NativeInteger_rfill.c
+        model/ASN1/full-v1-v2/xer_decoder.c
+        model/ASN1/full-v1-v2/ber_tlv_tag.c
+        model/ASN1/full-v1-v2/Time32.c
+        model/ASN1/full-v1-v2/aper_encoder.c
+        model/ASN1/full-v1-v2/CertificateId.c
+        model/ASN1/full-v1-v2/Opaque.c
+        model/ASN1/full-v1-v2/SequenceOfRecipientInfo.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_xer.c
+        model/ASN1/full-v1-v2/BIT_STRING_xer.c
+        model/ASN1/full-v1-v2/SubjectPermissions.c
+        model/ASN1/full-v1-v2/NULL_uper.c
+        model/ASN1/full-v1-v2/jer_decoder.c
+        model/ASN1/full-v1-v2/constr_CHOICE_uper.c
+        model/ASN1/full-v1-v2/HeaderInfo.c
+        model/ASN1/full-v1-v2/EtsiTs102941DeltaCtlRequest.c
+        model/ASN1/full-v1-v2/Longitude.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_ber.c
+        model/ASN1/full-v1-v2/GeographicRegion.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_aper.c
+        model/ASN1/full-v1-v2/SymmetricCiphertext.c
+        model/ASN1/full-v1-v2/asn_SEQUENCE_OF.c
+        model/ASN1/full-v1-v2/HashedId10.c
+        model/ASN1/full-v1-v2/NativeEnumerated_uper.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_ber.c
+        model/ASN1/full-v1-v2/oer_decoder.c
+        model/ASN1/full-v1-v2/Ieee1609Dot2Data.c
+        model/ASN1/full-v1-v2/per_support.c
+        model/ASN1/full-v1-v2/uper_decoder.c
+        model/ASN1/full-v1-v2/INTEGER_uper.c
+        model/ASN1/full-v1-v2/INTEGER_print.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_rfill.c
+        model/ASN1/full-v1-v2/Psid.c
+        model/ASN1/full-v1-v2/SequenceOfPsidSspRange.c
+        model/ASN1/full-v1-v2/EXTERNAL.c
+        model/ASN1/full-v1-v2/EndEntityType.c
+        model/ASN1/full-v1-v2/constr_CHOICE_aper.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_rfill.c
+        model/ASN1/full-v1-v2/NULL_xer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_uper.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_xer.c
+        model/ASN1/full-v1-v2/LinkageSeed.c
+        model/ASN1/full-v1-v2/NativeEnumerated_xer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_ber.c
+        model/ASN1/full-v1-v2/UTF8String.c
+        model/ASN1/full-v1-v2/EtsiOriginatingHeaderInfoExtension.c
+        model/ASN1/full-v1-v2/ContributedExtensionBlock.c
+        model/ASN1/full-v1-v2/LaId.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_jer.c
+        model/ASN1/full-v1-v2/ENUMERATED.c
+        model/ASN1/full-v1-v2/OCTET_STRING.c
+        model/ASN1/full-v1-v2/HashAlgorithm.c
+        model/ASN1/full-v1-v2/NativeInteger_aper.c
+        model/ASN1/full-v1-v2/asn_bit_data.c
+        model/ASN1/full-v1-v2/NativeInteger_ber.c
+        model/ASN1/full-v1-v2/constraints.c
+        model/ASN1/full-v1-v2/EciesP256EncryptedKey.c
+        model/ASN1/full-v1-v2/constr_CHOICE_jer.c
+        model/ASN1/full-v1-v2/BIT_STRING_uper.c
+        model/ASN1/full-v1-v2/NativeInteger.c
+        model/ASN1/full-v1-v2/INTEGER_ber.c
+        model/ASN1/full-v1-v2/INTEGER_xer.c
+        model/ASN1/full-v1-v2/ANY_aper.c
+        model/ASN1/full-v1-v2/ANY_xer.c
+        model/ASN1/full-v1-v2/OCTET_STRING_aper.c
+        model/ASN1/full-v1-v2/der_encoder.c
+        model/ASN1/full-v1-v2/UTF8String_rfill.c
+        model/ASN1/full-v1-v2/TwoDLocation.c
+        model/ASN1/full-v1-v2/CountryOnly.c
+        model/ASN1/full-v1-v2/EtsiTs102941CtlRequest.c
+        model/ASN1/full-v1-v2/SignedData.c
+        model/ASN1/full-v1-v2/EtsiTs102941CrlRequest.c
+        model/ASN1/full-v1-v2/SubjectAssurance.c
+        model/ASN1/full-v1-v2/ber_tlv_length.c
+        model/ASN1/full-v1-v2/SequenceOfOctetString.c
+        model/ASN1/full-v1-v2/OCTET_STRING_oer.c
+        model/ASN1/full-v1-v2/EncryptionKey.c
+        model/ASN1/full-v1-v2/constr_CHOICE_oer.c
+        model/ASN1/full-v1-v2/INTEGER_oer.c
+        model/ASN1/full-v1-v2/PsidGroupPermissions.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_jer.c
+        model/ASN1/full-v1-v2/EccP256CurvePoint.c
+        model/ASN1/full-v1-v2/LinkageData.c
+        model/ASN1/full-v1-v2/BasePublicEncryptionKey.c
+        model/ASN1/full-v1-v2/oer_encoder.c
+        model/ASN1/full-v1-v2/NinetyDegreeInt.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted-Unicast.c
+        model/ASN1/full-v1-v2/ToBeSignedData.c
+        model/ASN1/full-v1-v2/SymmAlgorithm.c
+        model/ASN1/full-v1-v2/PduFunctionalType.c
+        model/ASN1/full-v1-v2/per_decoder.c
+        model/ASN1/full-v1-v2/UnknownLongitude.c
+        model/ASN1/full-v1-v2/PublicEncryptionKey.c
+        model/ASN1/full-v1-v2/GraphicString.c
+        model/ASN1/full-v1-v2/NULL_jer.c
+        model/ASN1/full-v1-v2/asn_random_fill.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_oer.c
+        model/ASN1/full-v1-v2/Extension.c
+        model/ASN1/full-v1-v2/constr_SET_OF_print.c
+        model/ASN1/full-v1-v2/BIT_STRING_oer.c
+        model/ASN1/full-v1-v2/CountryAndRegions.c
+        model/ASN1/full-v1-v2/AesCcmCiphertext.c
+        model/ASN1/full-v1-v2/PKRecipientInfo.c
+        model/ASN1/full-v1-v2/SequenceOfPsidSsp.c
+        model/ASN1/full-v1-v2/OCTET_STRING_uper.c
+        model/ASN1/full-v1-v2/NativeEnumerated_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_aper.c
+        model/ASN1/full-v1-v2/EncryptedData.c
+        model/ASN1/full-v1-v2/xer_support.c
+        model/ASN1/full-v1-v2/OCTET_STRING_print.c
+        model/ASN1/full-v1-v2/oer_support.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_xer.c
+        model/ASN1/full-v1-v2/Uint32.c
+        model/ASN1/full-v1-v2/Time64.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER.c
+        model/ASN1/full-v1-v2/ContributedExtensionBlocks.c
+        model/ASN1/full-v1-v2/uper_opentype.c
+        model/ASN1/full-v1-v2/OCTET_STRING_ber.c
+        model/ASN1/full-v1-v2/OCTET_STRING_xer.c
+        model/ASN1/full-v1-v2/asn_SET_OF.c
+        model/ASN1/full-v1-v2/ber_decoder.c
+        model/ASN1/full-v1-v2/RecipientInfo.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_print.c
+        model/ASN1/full-v1-v2/HashedData.c
+        model/ASN1/full-v1-v2/constr_SET_OF.c
+        model/ASN1/full-v1-v2/SignedDataPayload.c
+        model/ASN1/full-v1-v2/LinkageValue.c
+        model/ASN1/full-v1-v2/jer_support.c
+        model/ASN1/full-v1-v2/GroupLinkageValue.c
+        model/ASN1/full-v1-v2/SequenceOfUint8.c
+        model/ASN1/full-v1-v2/EccP384CurvePoint.c
+        model/ASN1/full-v1-v2/per_encoder.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted-Unicast.c
+        model/ASN1/full-v1-v2/UTF8String_print.c
+        model/ASN1/full-v1-v2/EncryptedDataEncryptionKey.c
+        model/ASN1/full-v1-v2/Duration.c
+        model/ASN1/full-v1-v2/BitmapSsp.c
+        model/ASN1/full-v1-v2/SequenceOfIdentifiedRegion.c
+        model/ASN1/full-v1-v2/NativeInteger_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_print.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedExternalPayload.c
+        model/ASN1/full-v1-v2/EtsiTs103097HeaderInfoExtensionId.c
+        model/ASN1/full-v1-v2/BIT_STRING.c
+        model/ASN1/full-v1-v2/CountryAndSubregions.c
+        model/ASN1/full-v1-v2/OCTET_STRING_rfill.c
+        model/ASN1/full-v1-v2/NULL_print.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF.c
+        model/ASN1/full-v1-v2/Countersignature.c
+        model/ASN1/full-v1-v2/constr_SET_OF_rfill.c
+        model/ASN1/full-v1-v2/SequenceOfRegionAndSubregions.c
+        model/ASN1/full-v1-v2/NativeEnumerated.c
+        model/ASN1/full-v1-v2/constr_TYPE.c
+        model/ASN1/full-v1-v2/constr_SET_OF_oer.c
+        model/ASN1/full-v1-v2/ENUMERATED_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_uper.c
+        model/ASN1/full-v1-v2/NULL_rfill.c
+        model/ASN1/full-v1-v2/jer_encoder.c
+
         #model/ASN1/asn1-v2/MessageFrame.c
     #model/ASN1/asn1-v2/Control-addGrpC.c
     #model/ASN1/asn1-v2/IssuerIdentifier.c
@@ -1297,9 +1579,10 @@ set(header_files
     model/utilities/sumo-sensor.h
     model/Applications/v2xEmulator.h
     model/Measurements/MetricSupervisor.h
-        model/utilities/csv-utils.h
+    model/utilities/csv-utils.h
 
     model/Facilities/signalInfoUtils.h
+    model/Security/security.h
     model/DCC/DCC.h
     
     helper/emergencyVehicleWarningServer80211p-helper.h
@@ -1780,6 +2063,7 @@ set(header_files
         model/ASN1/full-v1-v2/ISO14823Code.h
         model/ASN1/full-v1-v2/Iso3833VehicleType.h
         model/ASN1/full-v1-v2/IssuerIdentifier.h
+        model/ASN1/full-v1-v2/IssuerIdentifierSec.h
         model/ASN1/full-v1-v2/ItineraryPath.h
         model/ASN1/full-v1-v2/ItineraryPathV1.h
         model/ASN1/full-v1-v2/ItsPduHeader.h
@@ -2446,6 +2730,191 @@ set(header_files
         model/ASN1/full-v1-v2/ZoneLength.h
         model/ASN1/full-v1-v2/ZSensorOffsetV1.h
 
+        #-----------------------------------
+        #       SECURITY PART .H FILES
+        #-----------------------------------
+
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted.h
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER.h
+        model/ASN1/full-v1-v2/constr_SET_OF.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Unsecured.h
+        model/ASN1/full-v1-v2/asn_SET_OF.h
+        model/ASN1/full-v1-v2/Uint16.h
+        model/ASN1/full-v1-v2/asn_config.h
+        model/ASN1/full-v1-v2/EtsiTs103097Certificate.h
+        model/ASN1/full-v1-v2/HeaderInfoContributorId.h
+        model/ASN1/full-v1-v2/ExtensionModuleVersion.h
+        model/ASN1/full-v1-v2/CountryAndSubregions.h
+        model/ASN1/full-v1-v2/Uint3.h
+        model/ASN1/full-v1-v2/CountryOnly.h
+        model/ASN1/full-v1-v2/Ieee1609Dot2Data.h
+        model/ASN1/full-v1-v2/oer_decoder.h
+        model/ASN1/full-v1-v2/Signature.h
+        model/ASN1/full-v1-v2/ENUMERATED.h
+        model/ASN1/full-v1-v2/EXTERNAL.h
+        model/ASN1/full-v1-v2/PsidSsp.h
+        model/ASN1/full-v1-v2/ToBeSignedData.h
+        model/ASN1/full-v1-v2/oer_encoder.h
+        model/ASN1/full-v1-v2/Time32.h
+        model/ASN1/full-v1-v2/AesCcmCiphertext.h
+        model/ASN1/full-v1-v2/PolygonalRegion.h
+        model/ASN1/full-v1-v2/EccP256CurvePoint.h
+        model/ASN1/full-v1-v2/asn_codecs_prim.h
+        model/ASN1/full-v1-v2/ContributedExtensionBlock.h
+        model/ASN1/full-v1-v2/SubjectPermissions.h
+        model/ASN1/full-v1-v2/GeographicRegion.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted-Unicast.h
+        model/ASN1/full-v1-v2/ExtId.h
+        model/ASN1/full-v1-v2/Longitude.h
+        model/ASN1/full-v1-v2/LinkageSeed.h
+        model/ASN1/full-v1-v2/HashAlgorithm.h
+        model/ASN1/full-v1-v2/ber_tlv_tag.h
+        model/ASN1/full-v1-v2/asn_internal.h
+        model/ASN1/full-v1-v2/VerificationKeyIndicator.h
+        model/ASN1/full-v1-v2/HeaderInfo.h
+        model/ASN1/full-v1-v2/der_encoder.h
+        model/ASN1/full-v1-v2/jer_decoder.h
+        model/ASN1/full-v1-v2/xer_encoder.h
+        model/ASN1/full-v1-v2/ber_tlv_length.h
+        model/ASN1/full-v1-v2/HashedId32.h
+        model/ASN1/full-v1-v2/EncryptionKey.h
+        model/ASN1/full-v1-v2/LinkageValue.h
+        model/ASN1/full-v1-v2/RegionAndSubregions.h
+        model/ASN1/full-v1-v2/per_opentype.h
+        model/ASN1/full-v1-v2/Time64.h
+        model/ASN1/full-v1-v2/EncryptedDataEncryptionKey.h
+        model/ASN1/full-v1-v2/IValue.h
+        model/ASN1/full-v1-v2/Latitude.h
+        model/ASN1/full-v1-v2/NULL.h
+        model/ASN1/full-v1-v2/asn_bit_data.h
+        model/ASN1/full-v1-v2/aper_encoder.h
+        model/ASN1/full-v1-v2/ValidityPeriod.h
+        model/ASN1/full-v1-v2/Hostname.h
+        model/ASN1/full-v1-v2/SequenceOfPsidGroupPermissions.h
+        model/ASN1/full-v1-v2/Uint64.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted-Unicast.h
+        model/ASN1/full-v1-v2/per_support.h
+        model/ASN1/full-v1-v2/Extension.h
+        model/ASN1/full-v1-v2/KnownLongitude.h
+        model/ASN1/full-v1-v2/UnknownLongitude.h
+        model/ASN1/full-v1-v2/ThreeDLocation.h
+        model/ASN1/full-v1-v2/Psid.h
+        model/ASN1/full-v1-v2/SequenceOfIdentifiedRegion.h
+        model/ASN1/full-v1-v2/aper_support.h
+        model/ASN1/full-v1-v2/RectangularRegion.h
+        model/ASN1/full-v1-v2/EccP384CurvePoint.h
+        model/ASN1/full-v1-v2/SignedData.h
+        model/ASN1/full-v1-v2/GroupLinkageValue.h
+        model/ASN1/full-v1-v2/CertificateId.h
+        model/ASN1/full-v1-v2/uper_decoder.h
+        model/ASN1/full-v1-v2/TwoDLocation.h
+        model/ASN1/full-v1-v2/ANY.h
+        model/ASN1/full-v1-v2/asn_ioc.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedExternalPayload.h
+        model/ASN1/full-v1-v2/jer_encoder.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted.h
+        model/ASN1/full-v1-v2/xer_support.h
+        model/ASN1/full-v1-v2/INTEGER.h
+        model/ASN1/full-v1-v2/HashedData.h
+        model/ASN1/full-v1-v2/NativeInteger.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Signed.h
+        model/ASN1/full-v1-v2/BitmapSsp.h
+        model/ASN1/full-v1-v2/KnownLatitude.h
+        model/ASN1/full-v1-v2/asn_application.h
+        model/ASN1/full-v1-v2/SequenceOfRectangularRegion.h
+        model/ASN1/full-v1-v2/SequenceOfRecipientInfo.h
+        model/ASN1/full-v1-v2/UnknownLatitude.h
+        model/ASN1/full-v1-v2/NinetyDegreeInt.h
+        model/ASN1/full-v1-v2/SequenceOfCertificate.h
+        model/ASN1/full-v1-v2/EtsiOriginatingHeaderInfoExtension.h
+        model/ASN1/full-v1-v2/asn_system.h
+        model/ASN1/full-v1-v2/EtsiTs102941CtlRequest.h
+        model/ASN1/full-v1-v2/CertificateType.h
+        model/ASN1/full-v1-v2/ber_decoder.h
+        model/ASN1/full-v1-v2/SequenceOfPsid.h
+        model/ASN1/full-v1-v2/RecipientInfo.h
+        model/ASN1/full-v1-v2/SequenceOfRegionAndSubregions.h
+        model/ASN1/full-v1-v2/Opaque.h
+        model/ASN1/full-v1-v2/asn_constant.h
+        model/ASN1/full-v1-v2/SequenceOfUint8.h
+        model/ASN1/full-v1-v2/EtsiTs102941DeltaCtlRequest.h
+        model/ASN1/full-v1-v2/SymmetricCiphertext.h
+        model/ASN1/full-v1-v2/constr_TYPE.h
+        model/ASN1/full-v1-v2/constraints.h
+        model/ASN1/full-v1-v2/SequenceOfPsidSspRange.h
+        model/ASN1/full-v1-v2/Countersignature.h
+        model/ASN1/full-v1-v2/xer_decoder.h
+        model/ASN1/full-v1-v2/EcdsaP256Signature.h
+        model/ASN1/full-v1-v2/per_decoder.h
+        model/ASN1/full-v1-v2/SymmRecipientInfo.h
+        model/ASN1/full-v1-v2/EndEntityType.h
+        model/ASN1/full-v1-v2/IdentifiedRegion.h
+        model/ASN1/full-v1-v2/EcdsaP384Signature.h
+        model/ASN1/full-v1-v2/HashedId3.h
+        model/ASN1/full-v1-v2/asn_codecs.h
+        model/ASN1/full-v1-v2/MissingCrlIdentifier.h
+        model/ASN1/full-v1-v2/UTF8String.h
+        model/ASN1/full-v1-v2/SequenceOfPsidSsp.h
+        model/ASN1/full-v1-v2/Elevation.h
+        model/ASN1/full-v1-v2/OneEightyDegreeInt.h
+        model/ASN1/full-v1-v2/SymmetricEncryptionKey.h
+        model/ASN1/full-v1-v2/uper_opentype.h
+        model/ASN1/full-v1-v2/EtsiTs103097HeaderInfoExtensionId.h
+        model/ASN1/full-v1-v2/SequenceOfOctetString.h
+        model/ASN1/full-v1-v2/HashedId8.h
+        model/ASN1/full-v1-v2/PduFunctionalType.h
+        model/ASN1/full-v1-v2/PreSharedKeyRecipientInfo.h
+        model/ASN1/full-v1-v2/CircularRegion.h
+        model/ASN1/full-v1-v2/ContributedExtensionBlocks.h
+        model/ASN1/full-v1-v2/CertificateBase.h
+        model/ASN1/full-v1-v2/BasePublicEncryptionKey.h
+        model/ASN1/full-v1-v2/PKRecipientInfo.h
+        model/ASN1/full-v1-v2/PublicEncryptionKey.h
+        model/ASN1/full-v1-v2/OPEN_TYPE.h
+        model/ASN1/full-v1-v2/PsidSspRange.h
+        model/ASN1/full-v1-v2/SequenceOfUint16.h
+        model/ASN1/full-v1-v2/SubjectAssurance.h
+        model/ASN1/full-v1-v2/BitmapSspRange.h
+        model/ASN1/full-v1-v2/Uint32.h
+        model/ASN1/full-v1-v2/PublicVerificationKey.h
+        model/ASN1/full-v1-v2/BIT_STRING.h
+        model/ASN1/full-v1-v2/EtsiTs103097Data.h
+        model/ASN1/full-v1-v2/uper_encoder.h
+        model/ASN1/full-v1-v2/uper_support.h
+        model/ASN1/full-v1-v2/LaId.h
+        model/ASN1/full-v1-v2/EciesP256EncryptedKey.h
+        model/ASN1/full-v1-v2/Uint8.h
+        model/ASN1/full-v1-v2/aper_opentype.h
+        model/ASN1/full-v1-v2/CountryAndRegions.h
+        model/ASN1/full-v1-v2/PsidGroupPermissions.h
+        model/ASN1/full-v1-v2/oer_support.h
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF.h
+        model/ASN1/full-v1-v2/CrlSeries.h
+        model/ASN1/full-v1-v2/SspRange.h
+        model/ASN1/full-v1-v2/aper_decoder.h
+        model/ASN1/full-v1-v2/ServiceSpecificPermissions.h
+        model/ASN1/full-v1-v2/EncryptedData.h
+        model/ASN1/full-v1-v2/HashedId10.h
+        model/ASN1/full-v1-v2/Ieee1609Dot2Content.h
+        model/ASN1/full-v1-v2/jer_support.h
+        model/ASN1/full-v1-v2/Duration.h
+        model/ASN1/full-v1-v2/LinkageData.h
+        model/ASN1/full-v1-v2/EtsiTs102941CrlRequest.h
+        model/ASN1/full-v1-v2/per_encoder.h
+        model/ASN1/full-v1-v2/constr_CHOICE.h
+        model/ASN1/full-v1-v2/constr_SEQUENCE.h
+        model/ASN1/full-v1-v2/SignerIdentifier.h
+        model/ASN1/full-v1-v2/SequenceOfHashedId3.h
+        model/ASN1/full-v1-v2/ObjectDescriptor.h
+        model/ASN1/full-v1-v2/GraphicString.h
+        model/ASN1/full-v1-v2/asn_SEQUENCE_OF.h
+        model/ASN1/full-v1-v2/asn_random_fill.h
+        model/ASN1/full-v1-v2/OCTET_STRING.h
+        model/ASN1/full-v1-v2/SignedDataPayload.h
+        model/ASN1/full-v1-v2/ToBeSignedCertificate.h
+        model/ASN1/full-v1-v2/SymmAlgorithm.h
+        model/ASN1/full-v1-v2/NativeEnumerated.h
+
 
 
 
@@ -2939,6 +3408,7 @@ set_source_files_properties(
         model/ASN1/full-v1-v2/ISO14823Code.c
         model/ASN1/full-v1-v2/Iso3833VehicleType.c
         model/ASN1/full-v1-v2/IssuerIdentifier.c
+        model/ASN1/full-v1-v2/IssuerIdentifierSec.c
         model/ASN1/full-v1-v2/ItineraryPath.c
         model/ASN1/full-v1-v2/ItineraryPathV1.c
         model/ASN1/full-v1-v2/ItsPduHeader.c
@@ -3647,6 +4117,282 @@ set_source_files_properties(
         model/ASN1/full-v1-v2/ZoneLength.c
         model/ASN1/full-v1-v2/ZSensorOffsetV1.c
 
+        #-----------------------------------
+        #       SECURITY PART .C FILES
+        #-----------------------------------
+
+        model/ASN1/full-v1-v2/IdentifiedRegion.c
+        model/ASN1/full-v1-v2/uper_support.c
+        model/ASN1/full-v1-v2/KnownLongitude.c
+        model/ASN1/full-v1-v2/PsidSspRange.c
+        model/ASN1/full-v1-v2/NativeInteger_xer.c
+        model/ASN1/full-v1-v2/Uint16.c
+        model/ASN1/full-v1-v2/NULL_aper.c
+        model/ASN1/full-v1-v2/PolygonalRegion.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted.c
+        model/ASN1/full-v1-v2/ANY_jer.c
+        model/ASN1/full-v1-v2/PsidSsp.c
+        model/ASN1/full-v1-v2/aper_support.c
+        model/ASN1/full-v1-v2/SequenceOfPsid.c
+        model/ASN1/full-v1-v2/ServiceSpecificPermissions.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_print.c
+        model/ASN1/full-v1-v2/NativeInteger_print.c
+        model/ASN1/full-v1-v2/constr_CHOICE.c
+        model/ASN1/full-v1-v2/Elevation.c
+        model/ASN1/full-v1-v2/NativeInteger_uper.c
+        model/ASN1/full-v1-v2/OCTET_STRING_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_rfill.c
+        model/ASN1/full-v1-v2/constr_CHOICE_ber.c
+        model/ASN1/full-v1-v2/CertificateType.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_xer.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted.c
+        model/ASN1/full-v1-v2/constr_SET_OF_uper.c
+        model/ASN1/full-v1-v2/NULL_ber.c
+        model/ASN1/full-v1-v2/INTEGER_jer.c
+        model/ASN1/full-v1-v2/INTEGER.c
+        model/ASN1/full-v1-v2/constr_SET_OF_jer.c
+        model/ASN1/full-v1-v2/NativeEnumerated_aper.c
+        model/ASN1/full-v1-v2/Uint3.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_ber.c
+        model/ASN1/full-v1-v2/KnownLatitude.c
+        model/ASN1/full-v1-v2/Signature.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_jer.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_jer.c
+        model/ASN1/full-v1-v2/BIT_STRING_rfill.c
+        model/ASN1/full-v1-v2/EcdsaP256Signature.c
+        model/ASN1/full-v1-v2/Uint8.c
+        model/ASN1/full-v1-v2/ANY_ber.c
+        model/ASN1/full-v1-v2/HeaderInfoContributorId.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_jer.c
+        model/ASN1/full-v1-v2/PreSharedKeyRecipientInfo.c
+        model/ASN1/full-v1-v2/CertificateBase.c
+        model/ASN1/full-v1-v2/constr_SET_OF_xer.c
+        model/ASN1/full-v1-v2/ExtensionModuleVersion.c
+        model/ASN1/full-v1-v2/ToBeSignedCertificate.c
+        model/ASN1/full-v1-v2/ValidityPeriod.c
+        model/ASN1/full-v1-v2/OPEN_TYPE.c
+        model/ASN1/full-v1-v2/asn_codecs_prim.c
+        model/ASN1/full-v1-v2/ENUMERATED_uper.c
+        model/ASN1/full-v1-v2/ENUMERATED_aper.c
+        model/ASN1/full-v1-v2/INTEGER_aper.c
+        model/ASN1/full-v1-v2/constr_SET_OF_aper.c
+        model/ASN1/full-v1-v2/SspRange.c
+        model/ASN1/full-v1-v2/xer_encoder.c
+        model/ASN1/full-v1-v2/HashedId8.c
+        model/ASN1/full-v1-v2/PublicVerificationKey.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Unsecured.c
+        model/ASN1/full-v1-v2/asn_codecs_prim_xer.c
+        model/ASN1/full-v1-v2/RectangularRegion.c
+        model/ASN1/full-v1-v2/ANY_uper.c
+        model/ASN1/full-v1-v2/ENUMERATED_oer.c
+        model/ASN1/full-v1-v2/asn_application.c
+        model/ASN1/full-v1-v2/MissingCrlIdentifier.c
+        model/ASN1/full-v1-v2/UnknownLatitude.c
+        model/ASN1/full-v1-v2/CrlSeries.c
+        model/ASN1/full-v1-v2/OneEightyDegreeInt.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_uper.c
+        model/ASN1/full-v1-v2/HashedId3.c
+        model/ASN1/full-v1-v2/EcdsaP384Signature.c
+        model/ASN1/full-v1-v2/IValue.c
+        model/ASN1/full-v1-v2/NULL.c
+        model/ASN1/full-v1-v2/uper_encoder.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_aper.c
+        model/ASN1/full-v1-v2/ThreeDLocation.c
+        model/ASN1/full-v1-v2/ExtId.c
+        model/ASN1/full-v1-v2/SequenceOfRectangularRegion.c
+        model/ASN1/full-v1-v2/SymmRecipientInfo.c
+        model/ASN1/full-v1-v2/ObjectDescriptor.c
+        model/ASN1/full-v1-v2/ANY.c
+        model/ASN1/full-v1-v2/SignerIdentifier.c
+        model/ASN1/full-v1-v2/Uint64.c
+        model/ASN1/full-v1-v2/SequenceOfUint16.c
+        model/ASN1/full-v1-v2/BIT_STRING_print.c
+        model/ASN1/full-v1-v2/SequenceOfCertificate.c
+        model/ASN1/full-v1-v2/asn_internal.c
+        model/ASN1/full-v1-v2/Latitude.c
+        model/ASN1/full-v1-v2/SequenceOfPsidGroupPermissions.c
+        model/ASN1/full-v1-v2/SymmetricEncryptionKey.c
+        model/ASN1/full-v1-v2/aper_opentype.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data.c
+        model/ASN1/full-v1-v2/aper_decoder.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Signed.c
+        model/ASN1/full-v1-v2/BIT_STRING_jer.c
+        model/ASN1/full-v1-v2/VerificationKeyIndicator.c
+        model/ASN1/full-v1-v2/INTEGER_rfill.c
+        model/ASN1/full-v1-v2/constr_SET_OF_ber.c
+        model/ASN1/full-v1-v2/EtsiTs103097Certificate.c
+        model/ASN1/full-v1-v2/Hostname.c
+        model/ASN1/full-v1-v2/RegionAndSubregions.c
+        model/ASN1/full-v1-v2/NativeInteger_jer.c
+        model/ASN1/full-v1-v2/NativeEnumerated_oer.c
+        model/ASN1/full-v1-v2/Ieee1609Dot2Content.c
+        model/ASN1/full-v1-v2/per_opentype.c
+        model/ASN1/full-v1-v2/HashedId32.c
+        model/ASN1/full-v1-v2/SequenceOfHashedId3.c
+        model/ASN1/full-v1-v2/NULL_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_xer.c
+        model/ASN1/full-v1-v2/CircularRegion.c
+        model/ASN1/full-v1-v2/BitmapSspRange.c
+        model/ASN1/full-v1-v2/NativeInteger_rfill.c
+        model/ASN1/full-v1-v2/xer_decoder.c
+        model/ASN1/full-v1-v2/ber_tlv_tag.c
+        model/ASN1/full-v1-v2/Time32.c
+        model/ASN1/full-v1-v2/aper_encoder.c
+        model/ASN1/full-v1-v2/CertificateId.c
+        model/ASN1/full-v1-v2/Opaque.c
+        model/ASN1/full-v1-v2/SequenceOfRecipientInfo.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_xer.c
+        model/ASN1/full-v1-v2/BIT_STRING_xer.c
+        model/ASN1/full-v1-v2/SubjectPermissions.c
+        model/ASN1/full-v1-v2/NULL_uper.c
+        model/ASN1/full-v1-v2/jer_decoder.c
+        model/ASN1/full-v1-v2/constr_CHOICE_uper.c
+        model/ASN1/full-v1-v2/HeaderInfo.c
+        model/ASN1/full-v1-v2/EtsiTs102941DeltaCtlRequest.c
+        model/ASN1/full-v1-v2/Longitude.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_ber.c
+        model/ASN1/full-v1-v2/GeographicRegion.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_aper.c
+        model/ASN1/full-v1-v2/SymmetricCiphertext.c
+        model/ASN1/full-v1-v2/asn_SEQUENCE_OF.c
+        model/ASN1/full-v1-v2/HashedId10.c
+        model/ASN1/full-v1-v2/NativeEnumerated_uper.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_ber.c
+        model/ASN1/full-v1-v2/oer_decoder.c
+        model/ASN1/full-v1-v2/Ieee1609Dot2Data.c
+        model/ASN1/full-v1-v2/per_support.c
+        model/ASN1/full-v1-v2/uper_decoder.c
+        model/ASN1/full-v1-v2/INTEGER_uper.c
+        model/ASN1/full-v1-v2/INTEGER_print.c
+        model/ASN1/full-v1-v2/OPEN_TYPE_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_rfill.c
+        model/ASN1/full-v1-v2/Psid.c
+        model/ASN1/full-v1-v2/SequenceOfPsidSspRange.c
+        model/ASN1/full-v1-v2/EXTERNAL.c
+        model/ASN1/full-v1-v2/EndEntityType.c
+        model/ASN1/full-v1-v2/constr_CHOICE_aper.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_rfill.c
+        model/ASN1/full-v1-v2/NULL_xer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_uper.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_xer.c
+        model/ASN1/full-v1-v2/LinkageSeed.c
+        model/ASN1/full-v1-v2/NativeEnumerated_xer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_ber.c
+        model/ASN1/full-v1-v2/UTF8String.c
+        model/ASN1/full-v1-v2/EtsiOriginatingHeaderInfoExtension.c
+        model/ASN1/full-v1-v2/ContributedExtensionBlock.c
+        model/ASN1/full-v1-v2/LaId.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_jer.c
+        model/ASN1/full-v1-v2/ENUMERATED.c
+        model/ASN1/full-v1-v2/OCTET_STRING.c
+        model/ASN1/full-v1-v2/HashAlgorithm.c
+        model/ASN1/full-v1-v2/NativeInteger_aper.c
+        model/ASN1/full-v1-v2/asn_bit_data.c
+        model/ASN1/full-v1-v2/NativeInteger_ber.c
+        model/ASN1/full-v1-v2/constraints.c
+        model/ASN1/full-v1-v2/EciesP256EncryptedKey.c
+        model/ASN1/full-v1-v2/constr_CHOICE_jer.c
+        model/ASN1/full-v1-v2/BIT_STRING_uper.c
+        model/ASN1/full-v1-v2/NativeInteger.c
+        model/ASN1/full-v1-v2/INTEGER_ber.c
+        model/ASN1/full-v1-v2/INTEGER_xer.c
+        model/ASN1/full-v1-v2/ANY_aper.c
+        model/ASN1/full-v1-v2/ANY_xer.c
+        model/ASN1/full-v1-v2/OCTET_STRING_aper.c
+        model/ASN1/full-v1-v2/der_encoder.c
+        model/ASN1/full-v1-v2/UTF8String_rfill.c
+        model/ASN1/full-v1-v2/TwoDLocation.c
+        model/ASN1/full-v1-v2/CountryOnly.c
+        model/ASN1/full-v1-v2/EtsiTs102941CtlRequest.c
+        model/ASN1/full-v1-v2/SignedData.c
+        model/ASN1/full-v1-v2/EtsiTs102941CrlRequest.c
+        model/ASN1/full-v1-v2/SubjectAssurance.c
+        model/ASN1/full-v1-v2/ber_tlv_length.c
+        model/ASN1/full-v1-v2/SequenceOfOctetString.c
+        model/ASN1/full-v1-v2/OCTET_STRING_oer.c
+        model/ASN1/full-v1-v2/EncryptionKey.c
+        model/ASN1/full-v1-v2/constr_CHOICE_oer.c
+        model/ASN1/full-v1-v2/INTEGER_oer.c
+        model/ASN1/full-v1-v2/PsidGroupPermissions.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_jer.c
+        model/ASN1/full-v1-v2/EccP256CurvePoint.c
+        model/ASN1/full-v1-v2/LinkageData.c
+        model/ASN1/full-v1-v2/BasePublicEncryptionKey.c
+        model/ASN1/full-v1-v2/oer_encoder.c
+        model/ASN1/full-v1-v2/NinetyDegreeInt.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-Encrypted-Unicast.c
+        model/ASN1/full-v1-v2/ToBeSignedData.c
+        model/ASN1/full-v1-v2/SymmAlgorithm.c
+        model/ASN1/full-v1-v2/PduFunctionalType.c
+        model/ASN1/full-v1-v2/per_decoder.c
+        model/ASN1/full-v1-v2/UnknownLongitude.c
+        model/ASN1/full-v1-v2/PublicEncryptionKey.c
+        model/ASN1/full-v1-v2/GraphicString.c
+        model/ASN1/full-v1-v2/NULL_jer.c
+        model/ASN1/full-v1-v2/asn_random_fill.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_oer.c
+        model/ASN1/full-v1-v2/Extension.c
+        model/ASN1/full-v1-v2/constr_SET_OF_print.c
+        model/ASN1/full-v1-v2/BIT_STRING_oer.c
+        model/ASN1/full-v1-v2/CountryAndRegions.c
+        model/ASN1/full-v1-v2/AesCcmCiphertext.c
+        model/ASN1/full-v1-v2/PKRecipientInfo.c
+        model/ASN1/full-v1-v2/SequenceOfPsidSsp.c
+        model/ASN1/full-v1-v2/OCTET_STRING_uper.c
+        model/ASN1/full-v1-v2/NativeEnumerated_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF_aper.c
+        model/ASN1/full-v1-v2/EncryptedData.c
+        model/ASN1/full-v1-v2/xer_support.c
+        model/ASN1/full-v1-v2/OCTET_STRING_print.c
+        model/ASN1/full-v1-v2/oer_support.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_xer.c
+        model/ASN1/full-v1-v2/Uint32.c
+        model/ASN1/full-v1-v2/Time64.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER.c
+        model/ASN1/full-v1-v2/ContributedExtensionBlocks.c
+        model/ASN1/full-v1-v2/uper_opentype.c
+        model/ASN1/full-v1-v2/OCTET_STRING_ber.c
+        model/ASN1/full-v1-v2/OCTET_STRING_xer.c
+        model/ASN1/full-v1-v2/asn_SET_OF.c
+        model/ASN1/full-v1-v2/ber_decoder.c
+        model/ASN1/full-v1-v2/RecipientInfo.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE.c
+        model/ASN1/full-v1-v2/OBJECT_IDENTIFIER_print.c
+        model/ASN1/full-v1-v2/HashedData.c
+        model/ASN1/full-v1-v2/constr_SET_OF.c
+        model/ASN1/full-v1-v2/SignedDataPayload.c
+        model/ASN1/full-v1-v2/LinkageValue.c
+        model/ASN1/full-v1-v2/jer_support.c
+        model/ASN1/full-v1-v2/GroupLinkageValue.c
+        model/ASN1/full-v1-v2/SequenceOfUint8.c
+        model/ASN1/full-v1-v2/EccP384CurvePoint.c
+        model/ASN1/full-v1-v2/per_encoder.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedAndEncrypted-Unicast.c
+        model/ASN1/full-v1-v2/UTF8String_print.c
+        model/ASN1/full-v1-v2/EncryptedDataEncryptionKey.c
+        model/ASN1/full-v1-v2/Duration.c
+        model/ASN1/full-v1-v2/BitmapSsp.c
+        model/ASN1/full-v1-v2/SequenceOfIdentifiedRegion.c
+        model/ASN1/full-v1-v2/NativeInteger_oer.c
+        model/ASN1/full-v1-v2/constr_CHOICE_print.c
+        model/ASN1/full-v1-v2/EtsiTs103097Data-SignedExternalPayload.c
+        model/ASN1/full-v1-v2/EtsiTs103097HeaderInfoExtensionId.c
+        model/ASN1/full-v1-v2/BIT_STRING.c
+        model/ASN1/full-v1-v2/CountryAndSubregions.c
+        model/ASN1/full-v1-v2/OCTET_STRING_rfill.c
+        model/ASN1/full-v1-v2/NULL_print.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_OF.c
+        model/ASN1/full-v1-v2/Countersignature.c
+        model/ASN1/full-v1-v2/constr_SET_OF_rfill.c
+        model/ASN1/full-v1-v2/SequenceOfRegionAndSubregions.c
+        model/ASN1/full-v1-v2/NativeEnumerated.c
+        model/ASN1/full-v1-v2/constr_TYPE.c
+        model/ASN1/full-v1-v2/constr_SET_OF_oer.c
+        model/ASN1/full-v1-v2/ENUMERATED_jer.c
+        model/ASN1/full-v1-v2/constr_SEQUENCE_uper.c
+        model/ASN1/full-v1-v2/NULL_rfill.c
+        model/ASN1/full-v1-v2/jer_encoder.c
+
 
         PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
@@ -3654,21 +4400,22 @@ set(test_sources
 )
 
 build_lib(
-  LIBNAME automotive
-  SOURCE_FILES ${source_files}
-  HEADER_FILES ${header_files}
-  LIBRARIES_TO_LINK
-    ${libcore}
-    ${libfd-net-device}
-    ${libwifi}
-    ${libapplications}
-    ${libmobility}
-    ${libconfig-store}
-    ${libstats}
-    ${libgps-tc}
-    ${libnr}
-    ${libinternet}
-    ${libvehicle-visualizer}
-    ${libtraci}
-  TEST_SOURCES ${test_sources}
+        LIBNAME automotive
+        SOURCE_FILES ${source_files}
+        HEADER_FILES ${header_files}
+        LIBRARIES_TO_LINK
+        ${OPENSSL_LIBRARIES}
+        ${libcore}
+        ${libfd-net-device}
+        ${libwifi}
+        ${libapplications}
+        ${libmobility}
+        ${libconfig-store}
+        ${libstats}
+        ${libgps-tc}
+        ${libnr}
+        ${libinternet}
+        ${libvehicle-visualizer}
+        ${libtraci}
+        TEST_SOURCES ${test_sources}
 )
