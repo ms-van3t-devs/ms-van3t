@@ -29,6 +29,8 @@ add_executable(amqp_client amqp-client-main.cpp
         C-ITS/cpm.h
         C-ITS/basicHeader.cpp
         C-ITS/basicHeader.h
+        C-ITS/beacon-header.h
+        C-ITS/beacon-header.cpp
         C-ITS/btpHeader.cpp
         C-ITS/btpHeader.h
         C-ITS/commonHeader.cpp

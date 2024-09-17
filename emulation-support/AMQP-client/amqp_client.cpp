@@ -75,7 +75,6 @@ void AMQP_client::on_message(proton::delivery &dlvr, proton::message &msg) {
         qpid_decoder >> message_bin;
 
         message_bin_buf=message_bin.data ();
-        std::cout << "[AMQP client] Received a message of type " << msg.properties().get("type") << std::endl;
     } else {
             std::cout << "[AMQP client] Error: received a message in a non-binary AMQP type." << std::endl;
     }
@@ -89,10 +88,16 @@ void AMQP_client::on_message(proton::delivery &dlvr, proton::message &msg) {
 
     ETSImessageHandler handler;
     ETSImessageHandler::etsiDecodedData_t decoded_data;
-    if (handler.decodeMessage((uint8_t *)message_bin_buf, message_bin.size(), decoded_data) == 0)
+    auto result = handler.decodeMessage((uint8_t *)message_bin_buf, message_bin.size(), decoded_data);
+    if (result == 0)
     {
         std::string json_string = decoded_data.json_msg.dump();
         std::cout << "[AMQP client] Message successfully decoded into JSON: " << std::endl << json_string << std::endl;
+        return;
+    }
+    if (result == 1)
+    {
+        return ; //Ignore beacons
     }
     else
     {

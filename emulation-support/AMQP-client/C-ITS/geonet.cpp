@@ -94,6 +94,13 @@ GeoNet::decodeGN(unsigned char *packet, GNDataIndication_t* dataIndication)
 
     switch(dataIndication->GNType)
     {
+        case BEACON:
+            if((commonH.GetHeaderSubType ()==0))
+            {
+                dataIndication = processBeacon(dataIndication);
+                return GN_BEACON;
+            }
+            break;
         case TSB:
             if((commonH.GetHeaderSubType ()==0)) dataIndication = processSHB(dataIndication);
             else {
@@ -121,6 +128,32 @@ GeoNet::processSHB (GNDataIndication_t* dataIndication)
 
 
     //7) Pass the payload to the upper protocol entity
+    return dataIndication;
+}
+
+GNDataIndication_t *
+GeoNet::processBeacon(GNDataIndication_t *dataIndication) {
+    BeaconHeader beaconH;
+
+    beaconH.removeHeader(dataIndication->data);
+    dataIndication->data += 24;
+    dataIndication->SourcePV = beaconH.GetLongPositionV ();
+    dataIndication->GNType = BEACON;
+
+    std::cout << "[AMQP client] Received a message of type GN beacon" << std::endl;
+    std::cout << "GN beacon decoded: " << std::endl;
+    // Print in JSON style
+    std::cout << "{\n";
+    std::cout << "  \"SourcePV\": {\n";
+    std::cout << "    \"GnAddress\": \"" << dataIndication->SourcePV.GnAddress << "\",\n";
+    std::cout << "    \"TST\": " << dataIndication->SourcePV.TST << ",\n";
+    std::cout << "    \"latitude\": " << dataIndication->SourcePV.latitude << ",\n";
+    std::cout << "    \"longitude\": " << dataIndication->SourcePV.longitude << ",\n";
+    std::cout << "    \"positionAccuracy\": " << dataIndication->SourcePV.positionAccuracy << ",\n";
+    std::cout << "    \"speed\": " << dataIndication->SourcePV.speed << ",\n";
+    std::cout << "    \"heading\": " << dataIndication->SourcePV.heading << "\n";
+    std::cout << "  }\n";
+
     return dataIndication;
 }
 
@@ -223,6 +256,7 @@ uint8_t GeoNet::encodeLT(double seconds) {
     retval = (multiplier << 2) | base;
     return retval;
 }
+
 
 
 

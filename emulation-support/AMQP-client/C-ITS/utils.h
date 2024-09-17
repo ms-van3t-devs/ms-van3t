@@ -14,11 +14,12 @@
 
 typedef enum {
     GN_OK = 0,
-    GN_VERSION_ERROR = 1,
-    GN_SECURED_ERROR = 2,
-    GN_LIFETIME_ERROR = 3,
-    GN_HOP_LIMIT_ERROR = 4,
-    GN_TYPE_ERROR = 5,
+    GN_BEACON = 1,
+    GN_VERSION_ERROR = 2,
+    GN_SECURED_ERROR = 3,
+    GN_LIFETIME_ERROR = 4,
+    GN_HOP_LIMIT_ERROR = 5,
+    GN_TYPE_ERROR = 6,
 } gnError_e;
 
 typedef enum {

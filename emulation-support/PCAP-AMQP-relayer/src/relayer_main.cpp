@@ -148,42 +148,44 @@ int main(int argc, char *argv[]) {
     pthread_create(&curr_tid,&tattr,CAMrelayer_callback,(void *) &(CAM_relayer_obj));
     pthread_attr_destroy(&tattr);
 
-	// Wait for the sender to be open before moving on (as required and as described inside camrelayeramqp.h)
-	bool sender_ready_status;
+    // Wait for the sender to be open before moving on (as required and as described inside camrelayeramqp.h)
+    bool sender_ready_status;
 
-	std::cout << "Waiting for the AMQP sender to be ready..." << std::endl;
+    std::cout << "Waiting for the AMQP sender to be ready..." << std::endl;
 
-	sender_ready_status=CAM_relayer_obj.wait_sender_ready();
+    sender_ready_status=CAM_relayer_obj.wait_sender_ready();
 
-	std::cout << "Sender should be ready. Status (0 = error, 1 = ok): " << sender_ready_status << std::endl;
+    std::cout << "Sender should be ready. Status (0 = error, 1 = ok): " << sender_ready_status << std::endl;
 
 
 
-	GNmetadata_t gnmetadata;
+    GNmetadata_t gnmetadata;
 
-	char errbuff[PCAP_ERRBUF_SIZE];
-	//Open pcap file
-	pcap_t * pcap = pcap_open_offline(file.c_str(), errbuff);
+    char errbuff[PCAP_ERRBUF_SIZE];
+    //Open pcap file
+    pcap_t * pcap = pcap_open_offline(file.c_str(), errbuff);
 
-	struct pcap_pkthdr *header;
-	const u_char *data;
-	long pcount = 0;
+    struct pcap_pkthdr *header;
+    const u_char *data;
+    long pcount = 0;
 
 	//Open interface for packet injection
     pcap_t * ppcap = pcap_open_live(interface.c_str(), 800, 1, 20, errbuff);
 
-        if (ppcap == NULL) {
-            printf("Could not open interface for packet injection: %s", errbuff);
-            return 2;
-        }
+    if (ppcap == NULL) {
+        printf("Could not open interface for packet injection: %s", errbuff);
+        return 2;
+    }
 
-	unsigned long previous_s,previous_us;
+    unsigned long previous_s,previous_us;
     previous_s = 0;
     previous_us = 0;
 
 
-	int returnValue;
+    int returnValue;
     while((returnValue = pcap_next_ex(pcap, &header, &data)) > 0) {
+        std::cout << returnValue << std::endl;
+
         unsigned long current_s,current_us;
 		struct timespec time, rem;
 
@@ -191,18 +193,27 @@ int main(int argc, char *argv[]) {
             std::cerr << "End of pcap file or an error occurred." << std::endl;
         }
 
-		pcount++;
+        pcount++;
 
-		// This "if" has been added to avoid making the program crash if a message shorter than 60 B is received from ms-van3t (it should never happen, but we added this "if" just to be on the safe side)
-		if(skipGN == true && header->len <= 68) {
-			continue;
-		}
+        // This "if" has been added to avoid making the program crash if a message shorter than 60 B is received from ms-van3t (it should never happen, but we added this "if" just to be on the safe side)
+        if(skipGN == true && header->len <= 68) {
+                continue;
+        }
 
-//		for(unsigned int i=(skipGN == true ? 68 : 0);i<header->len;i++) {
-//			printf("%02X",data[i]);
-//		}
-//		// Just to add a newline at the end...
-//		std::cout << std::endl;
+        // Skip until we find 0x8947
+        int offset = -1;
+        for (unsigned int i = 0; i < header->len - 1; i++) {
+            if (data[i] == 0x89 && data[i + 1] == 0x47) {
+                offset = i;
+                break;
+              }
+          }
+
+        if (offset == -1) {
+            std::cerr << "Could not find 0x8947 in the packet. Skipping packet." << std::endl;
+            continue;
+          }
+        offset += 2; // Skip 0x8947
 
         //Take current packet capture timestamp
         current_s = header->ts.tv_sec;
@@ -218,9 +229,10 @@ int main(int argc, char *argv[]) {
         previous_s=current_s;
         previous_us=current_us;
 
+
         //Send packet
         if(skipGN == false) {
-			CAM_relayer_obj.sendCAM_AMQP((uint8_t*)data+14,header->len);
+			CAM_relayer_obj.sendCAM_AMQP((uint8_t*)data+offset,header->len);
 		} else {
 			CAM_relayer_obj.sendCAM_AMQP(((uint8_t*)data)+68,((int)header->len)-68);
 		}

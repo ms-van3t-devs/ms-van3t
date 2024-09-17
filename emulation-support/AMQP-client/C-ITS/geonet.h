@@ -14,6 +14,7 @@
 #include "basicHeader.h"
 #include "commonHeader.h"
 #include "shbHeader.h"
+#include "beacon-header.h"
 
 class GeoNet {
 
@@ -31,6 +32,7 @@ public:
 
 private:
     GNDataIndication_t* processSHB(GNDataIndication_t* dataIndication);
+    GNDataIndication_t* processBeacon(GNDataIndication_t* dataIndication);
     std::vector<unsigned char> encodeSHB(GNDataRequest_t dataRequest, commonHeader commonHeader, basicHeader basicHeader);
 
 

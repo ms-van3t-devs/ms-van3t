@@ -19,12 +19,15 @@ int ETSImessageHandler::decodeMessage(uint8_t *buffer, size_t buflen, etsiDecode
     GNDataIndication_t gndataIndication;
     BTPDataIndication_t btpDataIndication;
 
-    if(geonet.decodeGN(buffer,&gndataIndication)!= GN_OK)
-    {
-        //std::cerr << "[WARN] [Decoder] Warning: GeoNet unable to decode a received packet." << std::endl;
+    auto retval = geonet.decodeGN(buffer,&gndataIndication);
+
+    if( (retval != GN_OK) && (retval != GN_BEACON)) {
+        std::cerr << "[WARN] [Decoder] Warning: GN unable to decode a received packet." << std::endl;
         return -1;
     }
-
+    if (retval == GN_BEACON) {
+        return 1;
+    }
     if(BTP.decodeBTP(gndataIndication,&btpDataIndication)!= BTP_OK)
     {
         std::cerr << "[WARN] [Decoder] Warning: BTP unable to decode a received packet." << std::endl;
@@ -48,7 +51,7 @@ int ETSImessageHandler::decodeMessage(uint8_t *buffer, size_t buflen, etsiDecode
             std::cout << "Warning: unable to decode a received CAM." << std::endl;
         }
         else{
-            std::cout << "CAM decoded" << std::endl;
+            //std::cout << "CAM decoded" << std::endl;
             decoded_data.decoded_cam = decoded_cam;
 //            std::cout << "Station ID: " << asn1cpp::getField(decoded_cam->header.stationId,long) << ", "
 //            << " latitude: " << (double) asn1cpp::getField(decoded_cam->cam.camParameters.basicContainer.referencePosition.latitude,long) / DOT_ONE_MICRO<< ", "
