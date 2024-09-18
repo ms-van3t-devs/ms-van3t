@@ -9,8 +9,6 @@
 extern "C" {
 #endif
 
-#define min_val_CpmContainerId (1)
-#define max_val_CpmContainerId (16)
 #define min_val_AccelerationConfidence (0)
 #define max_val_AccelerationConfidence (102)
 #define min_val_AccelerationMagnitudeValue (0)
@@ -259,6 +257,18 @@ extern "C" {
 #define max_val_WrongWayDrivingSubCauseCode (255)
 #define min_val_YawRateValue (-32766)
 #define max_val_YawRateValue (32767)
+#define min_val_CooperationCost (-1000)
+#define max_val_CooperationCost (1000)
+#define min_val_PolynomStartX (0)
+#define max_val_PolynomStartX (2097151)
+#define min_val_PolynomEndX (0)
+#define max_val_PolynomEndX (2097151)
+#define min_val_PolynomXOffset (-8000000)
+#define max_val_PolynomXOffset (8000000)
+#define min_val_LaneCount (1)
+#define max_val_LaneCount (16)
+#define min_val_TimeOfPos (0)
+#define max_val_TimeOfPos (65535)
 
 
 #ifdef __cplusplus
