@@ -31,10 +31,15 @@ static const char* CarlaAdapter_method_names[] = {
   "/carla.CarlaAdapter/GetRandomSpawnPoint",
   "/carla.CarlaAdapter/GetActorLDM",
   "/carla.CarlaAdapter/InsertObject",
+  "/carla.CarlaAdapter/InsertObjects",
+  "/carla.CarlaAdapter/InsertCV",
   "/carla.CarlaAdapter/GetCartesian",
   "/carla.CarlaAdapter/GetGeo",
   "/carla.CarlaAdapter/hasLDM",
   "/carla.CarlaAdapter/SetControl",
+  "/carla.CarlaAdapter/GetCarlaWaypoint",
+  "/carla.CarlaAdapter/GetNextCarlaWaypoint",
+  "/carla.CarlaAdapter/GetGTaccuracy",
 };
 
 std::unique_ptr< CarlaAdapter::Stub> CarlaAdapter::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -53,10 +58,15 @@ CarlaAdapter::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chann
   , rpcmethod_GetRandomSpawnPoint_(CarlaAdapter_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetActorLDM_(CarlaAdapter_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_InsertObject_(CarlaAdapter_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetCartesian_(CarlaAdapter_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetGeo_(CarlaAdapter_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_hasLDM_(CarlaAdapter_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetControl_(CarlaAdapter_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_InsertObjects_(CarlaAdapter_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_InsertCV_(CarlaAdapter_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetCartesian_(CarlaAdapter_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetGeo_(CarlaAdapter_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_hasLDM_(CarlaAdapter_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetControl_(CarlaAdapter_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetCarlaWaypoint_(CarlaAdapter_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetNextCarlaWaypoint_(CarlaAdapter_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetGTaccuracy_(CarlaAdapter_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status CarlaAdapter::Stub::ExecuteOneTimeStep(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::carla::Boolean* response) {
@@ -266,6 +276,52 @@ void CarlaAdapter::Stub::async::InsertObject(::grpc::ClientContext* context, con
   return result;
 }
 
+::grpc::Status CarlaAdapter::Stub::InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::carla::DoubleValue* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::carla::ObjectsIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_InsertObjects_, context, request, response);
+}
+
+void CarlaAdapter::Stub::async::InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::carla::ObjectsIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_InsertObjects_, context, request, response, std::move(f));
+}
+
+void CarlaAdapter::Stub::async::InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_InsertObjects_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::PrepareAsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::carla::DoubleValue, ::carla::ObjectsIn, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_InsertObjects_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::AsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncInsertObjectsRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status CarlaAdapter::Stub::InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::carla::DoubleValue* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::carla::ObjectIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_InsertCV_, context, request, response);
+}
+
+void CarlaAdapter::Stub::async::InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::carla::ObjectIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_InsertCV_, context, request, response, std::move(f));
+}
+
+void CarlaAdapter::Stub::async::InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_InsertCV_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::PrepareAsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::carla::DoubleValue, ::carla::ObjectIn, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_InsertCV_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::AsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncInsertCVRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status CarlaAdapter::Stub::GetCartesian(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Vector* response) {
   return ::grpc::internal::BlockingUnaryCall< ::carla::Vector, ::carla::Vector, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetCartesian_, context, request, response);
 }
@@ -354,6 +410,75 @@ void CarlaAdapter::Stub::async::SetControl(::grpc::ClientContext* context, const
 ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* CarlaAdapter::Stub::AsyncSetControlRaw(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncSetControlRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status CarlaAdapter::Stub::GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetCarlaWaypoint_, context, request, response);
+}
+
+void CarlaAdapter::Stub::async::GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetCarlaWaypoint_, context, request, response, std::move(f));
+}
+
+void CarlaAdapter::Stub::async::GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetCarlaWaypoint_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* CarlaAdapter::Stub::PrepareAsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::carla::Waypoint, ::carla::Vector, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetCarlaWaypoint_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* CarlaAdapter::Stub::AsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetCarlaWaypointRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status CarlaAdapter::Stub::GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetNextCarlaWaypoint_, context, request, response);
+}
+
+void CarlaAdapter::Stub::async::GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetNextCarlaWaypoint_, context, request, response, std::move(f));
+}
+
+void CarlaAdapter::Stub::async::GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetNextCarlaWaypoint_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* CarlaAdapter::Stub::PrepareAsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::carla::Waypoint, ::carla::Vector, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetNextCarlaWaypoint_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* CarlaAdapter::Stub::AsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetNextCarlaWaypointRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status CarlaAdapter::Stub::GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::carla::DoubleValue* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::carla::ObjectMinimal, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetGTaccuracy_, context, request, response);
+}
+
+void CarlaAdapter::Stub::async::GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::carla::ObjectMinimal, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetGTaccuracy_, context, request, response, std::move(f));
+}
+
+void CarlaAdapter::Stub::async::GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetGTaccuracy_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::PrepareAsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::carla::DoubleValue, ::carla::ObjectMinimal, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetGTaccuracy_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* CarlaAdapter::Stub::AsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetGTaccuracyRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -452,6 +577,26 @@ CarlaAdapter::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       CarlaAdapter_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::ObjectsIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](CarlaAdapter::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::carla::ObjectsIn* req,
+             ::carla::DoubleValue* resp) {
+               return service->InsertObjects(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      CarlaAdapter_method_names[10],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::ObjectIn, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](CarlaAdapter::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::carla::ObjectIn* req,
+             ::carla::DoubleValue* resp) {
+               return service->InsertCV(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      CarlaAdapter_method_names[11],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Vector, ::carla::Vector, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](CarlaAdapter::Service* service,
              ::grpc::ServerContext* ctx,
@@ -460,7 +605,7 @@ CarlaAdapter::Service::Service() {
                return service->GetCartesian(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      CarlaAdapter_method_names[10],
+      CarlaAdapter_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Vector, ::carla::Vector, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](CarlaAdapter::Service* service,
@@ -470,7 +615,7 @@ CarlaAdapter::Service::Service() {
                return service->GetGeo(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      CarlaAdapter_method_names[11],
+      CarlaAdapter_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Number, ::carla::Boolean, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](CarlaAdapter::Service* service,
@@ -480,7 +625,7 @@ CarlaAdapter::Service::Service() {
                return service->hasLDM(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      CarlaAdapter_method_names[12],
+      CarlaAdapter_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Control, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](CarlaAdapter::Service* service,
@@ -488,6 +633,36 @@ CarlaAdapter::Service::Service() {
              const ::carla::Control* req,
              ::google::protobuf::Empty* resp) {
                return service->SetControl(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      CarlaAdapter_method_names[15],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](CarlaAdapter::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::carla::Vector* req,
+             ::carla::Waypoint* resp) {
+               return service->GetCarlaWaypoint(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      CarlaAdapter_method_names[16],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::Vector, ::carla::Waypoint, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](CarlaAdapter::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::carla::Vector* req,
+             ::carla::Waypoint* resp) {
+               return service->GetNextCarlaWaypoint(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      CarlaAdapter_method_names[17],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< CarlaAdapter::Service, ::carla::ObjectMinimal, ::carla::DoubleValue, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](CarlaAdapter::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::carla::ObjectMinimal* req,
+             ::carla::DoubleValue* resp) {
+               return service->GetGTaccuracy(ctx, req, resp);
              }, this)));
 }
 
@@ -557,6 +732,20 @@ CarlaAdapter::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
+::grpc::Status CarlaAdapter::Service::InsertObjects(::grpc::ServerContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status CarlaAdapter::Service::InsertCV(::grpc::ServerContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
 ::grpc::Status CarlaAdapter::Service::GetCartesian(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Vector* response) {
   (void) context;
   (void) request;
@@ -579,6 +768,27 @@ CarlaAdapter::Service::~Service() {
 }
 
 ::grpc::Status CarlaAdapter::Service::SetControl(::grpc::ServerContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status CarlaAdapter::Service::GetCarlaWaypoint(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status CarlaAdapter::Service::GetNextCarlaWaypoint(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status CarlaAdapter::Service::GetGTaccuracy(::grpc::ServerContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response) {
   (void) context;
   (void) request;
   (void) response;

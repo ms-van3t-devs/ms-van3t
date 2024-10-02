@@ -920,7 +920,7 @@ namespace ns3 {
 
        /** Decoding **/
        free(buffer);
-       decoded_ivim = asn1cpp::uper::decode(packetContent, IVIM);
+       decoded_ivim = asn1cpp::uper::decodeASN(packetContent, IVIM);
 
        iviData decodedData;
 

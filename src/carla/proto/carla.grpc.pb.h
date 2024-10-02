@@ -120,6 +120,20 @@ class CarlaAdapter final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Number>> PrepareAsyncInsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Number>>(PrepareAsyncInsertObjectRaw(context, request, cq));
     }
+    virtual ::grpc::Status InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::carla::DoubleValue* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> AsyncInsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(AsyncInsertObjectsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> PrepareAsyncInsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(PrepareAsyncInsertObjectsRaw(context, request, cq));
+    }
+    virtual ::grpc::Status InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::carla::DoubleValue* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> AsyncInsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(AsyncInsertCVRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> PrepareAsyncInsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(PrepareAsyncInsertCVRaw(context, request, cq));
+    }
     virtual ::grpc::Status GetCartesian(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Vector* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Vector>> AsyncGetCartesian(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Vector>>(AsyncGetCartesianRaw(context, request, cq));
@@ -148,6 +162,27 @@ class CarlaAdapter final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>> PrepareAsyncSetControl(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>>(PrepareAsyncSetControlRaw(context, request, cq));
     }
+    virtual ::grpc::Status GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>> AsyncGetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>>(AsyncGetCarlaWaypointRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>> PrepareAsyncGetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>>(PrepareAsyncGetCarlaWaypointRaw(context, request, cq));
+    }
+    virtual ::grpc::Status GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>> AsyncGetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>>(AsyncGetNextCarlaWaypointRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>> PrepareAsyncGetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>>(PrepareAsyncGetNextCarlaWaypointRaw(context, request, cq));
+    }
+    virtual ::grpc::Status GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::carla::DoubleValue* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> AsyncGetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(AsyncGetGTaccuracyRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>> PrepareAsyncGetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>>(PrepareAsyncGetGTaccuracyRaw(context, request, cq));
+    }
     class async_interface {
      public:
       virtual ~async_interface() {}
@@ -169,6 +204,10 @@ class CarlaAdapter final {
       virtual void GetActorLDM(::grpc::ClientContext* context, const ::carla::Number* request, ::carla::Objects* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void InsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::Number* response, std::function<void(::grpc::Status)>) = 0;
       virtual void InsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::Number* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void GetCartesian(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetCartesian(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void GetGeo(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, std::function<void(::grpc::Status)>) = 0;
@@ -177,6 +216,12 @@ class CarlaAdapter final {
       virtual void hasLDM(::grpc::ClientContext* context, const ::carla::Number* request, ::carla::Boolean* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void SetControl(::grpc::ClientContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
       virtual void SetControl(::grpc::ClientContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -200,6 +245,10 @@ class CarlaAdapter final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Objects>* PrepareAsyncGetActorLDMRaw(::grpc::ClientContext* context, const ::carla::Number& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Number>* AsyncInsertObjectRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Number>* PrepareAsyncInsertObjectRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* AsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* PrepareAsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* AsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* PrepareAsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Vector>* AsyncGetCartesianRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Vector>* PrepareAsyncGetCartesianRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Vector>* AsyncGetGeoRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
@@ -208,6 +257,12 @@ class CarlaAdapter final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Boolean>* PrepareAsynchasLDMRaw(::grpc::ClientContext* context, const ::carla::Number& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* AsyncSetControlRaw(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* PrepareAsyncSetControlRaw(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>* AsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>* PrepareAsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>* AsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::Waypoint>* PrepareAsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* AsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::carla::DoubleValue>* PrepareAsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -275,6 +330,20 @@ class CarlaAdapter final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Number>> PrepareAsyncInsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Number>>(PrepareAsyncInsertObjectRaw(context, request, cq));
     }
+    ::grpc::Status InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::carla::DoubleValue* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> AsyncInsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(AsyncInsertObjectsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> PrepareAsyncInsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(PrepareAsyncInsertObjectsRaw(context, request, cq));
+    }
+    ::grpc::Status InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::carla::DoubleValue* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> AsyncInsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(AsyncInsertCVRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> PrepareAsyncInsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(PrepareAsyncInsertCVRaw(context, request, cq));
+    }
     ::grpc::Status GetCartesian(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Vector* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Vector>> AsyncGetCartesian(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Vector>>(AsyncGetCartesianRaw(context, request, cq));
@@ -303,6 +372,27 @@ class CarlaAdapter final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>> PrepareAsyncSetControl(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>>(PrepareAsyncSetControlRaw(context, request, cq));
     }
+    ::grpc::Status GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>> AsyncGetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>>(AsyncGetCarlaWaypointRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>> PrepareAsyncGetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>>(PrepareAsyncGetCarlaWaypointRaw(context, request, cq));
+    }
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::carla::Waypoint* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>> AsyncGetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>>(AsyncGetNextCarlaWaypointRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>> PrepareAsyncGetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>>(PrepareAsyncGetNextCarlaWaypointRaw(context, request, cq));
+    }
+    ::grpc::Status GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::carla::DoubleValue* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> AsyncGetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(AsyncGetGTaccuracyRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>> PrepareAsyncGetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>>(PrepareAsyncGetGTaccuracyRaw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -324,6 +414,10 @@ class CarlaAdapter final {
       void GetActorLDM(::grpc::ClientContext* context, const ::carla::Number* request, ::carla::Objects* response, ::grpc::ClientUnaryReactor* reactor) override;
       void InsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::Number* response, std::function<void(::grpc::Status)>) override;
       void InsertObject(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::Number* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) override;
+      void InsertObjects(::grpc::ClientContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) override;
+      void InsertCV(::grpc::ClientContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) override;
       void GetCartesian(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, std::function<void(::grpc::Status)>) override;
       void GetCartesian(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, ::grpc::ClientUnaryReactor* reactor) override;
       void GetGeo(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Vector* response, std::function<void(::grpc::Status)>) override;
@@ -332,6 +426,12 @@ class CarlaAdapter final {
       void hasLDM(::grpc::ClientContext* context, const ::carla::Number* request, ::carla::Boolean* response, ::grpc::ClientUnaryReactor* reactor) override;
       void SetControl(::grpc::ClientContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
       void SetControl(::grpc::ClientContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)>) override;
+      void GetCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, std::function<void(::grpc::Status)>) override;
+      void GetNextCarlaWaypoint(::grpc::ClientContext* context, const ::carla::Vector* request, ::carla::Waypoint* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, std::function<void(::grpc::Status)>) override;
+      void GetGTaccuracy(::grpc::ClientContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -361,6 +461,10 @@ class CarlaAdapter final {
     ::grpc::ClientAsyncResponseReader< ::carla::Objects>* PrepareAsyncGetActorLDMRaw(::grpc::ClientContext* context, const ::carla::Number& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::carla::Number>* AsyncInsertObjectRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::carla::Number>* PrepareAsyncInsertObjectRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* AsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* PrepareAsyncInsertObjectsRaw(::grpc::ClientContext* context, const ::carla::ObjectsIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* AsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* PrepareAsyncInsertCVRaw(::grpc::ClientContext* context, const ::carla::ObjectIn& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::carla::Vector>* AsyncGetCartesianRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::carla::Vector>* PrepareAsyncGetCartesianRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::carla::Vector>* AsyncGetGeoRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
@@ -369,6 +473,12 @@ class CarlaAdapter final {
     ::grpc::ClientAsyncResponseReader< ::carla::Boolean>* PrepareAsynchasLDMRaw(::grpc::ClientContext* context, const ::carla::Number& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* AsyncSetControlRaw(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* PrepareAsyncSetControlRaw(::grpc::ClientContext* context, const ::carla::Control& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* AsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* PrepareAsyncGetCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* AsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::Waypoint>* PrepareAsyncGetNextCarlaWaypointRaw(::grpc::ClientContext* context, const ::carla::Vector& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* AsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::carla::DoubleValue>* PrepareAsyncGetGTaccuracyRaw(::grpc::ClientContext* context, const ::carla::ObjectMinimal& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_ExecuteOneTimeStep_;
     const ::grpc::internal::RpcMethod rpcmethod_Finish_;
     const ::grpc::internal::RpcMethod rpcmethod_GetManagedActorsIds_;
@@ -378,10 +488,15 @@ class CarlaAdapter final {
     const ::grpc::internal::RpcMethod rpcmethod_GetRandomSpawnPoint_;
     const ::grpc::internal::RpcMethod rpcmethod_GetActorLDM_;
     const ::grpc::internal::RpcMethod rpcmethod_InsertObject_;
+    const ::grpc::internal::RpcMethod rpcmethod_InsertObjects_;
+    const ::grpc::internal::RpcMethod rpcmethod_InsertCV_;
     const ::grpc::internal::RpcMethod rpcmethod_GetCartesian_;
     const ::grpc::internal::RpcMethod rpcmethod_GetGeo_;
     const ::grpc::internal::RpcMethod rpcmethod_hasLDM_;
     const ::grpc::internal::RpcMethod rpcmethod_SetControl_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetCarlaWaypoint_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetNextCarlaWaypoint_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetGTaccuracy_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -398,10 +513,15 @@ class CarlaAdapter final {
     virtual ::grpc::Status GetRandomSpawnPoint(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::carla::Transform* response);
     virtual ::grpc::Status GetActorLDM(::grpc::ServerContext* context, const ::carla::Number* request, ::carla::Objects* response);
     virtual ::grpc::Status InsertObject(::grpc::ServerContext* context, const ::carla::ObjectIn* request, ::carla::Number* response);
+    virtual ::grpc::Status InsertObjects(::grpc::ServerContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response);
+    virtual ::grpc::Status InsertCV(::grpc::ServerContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response);
     virtual ::grpc::Status GetCartesian(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Vector* response);
     virtual ::grpc::Status GetGeo(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Vector* response);
     virtual ::grpc::Status hasLDM(::grpc::ServerContext* context, const ::carla::Number* request, ::carla::Boolean* response);
     virtual ::grpc::Status SetControl(::grpc::ServerContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response);
+    virtual ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response);
+    virtual ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response);
+    virtual ::grpc::Status GetGTaccuracy(::grpc::ServerContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_ExecuteOneTimeStep : public BaseClass {
@@ -584,12 +704,52 @@ class CarlaAdapter final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodAsync(9);
+    }
+    ~WithAsyncMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestInsertObjects(::grpc::ServerContext* context, ::carla::ObjectsIn* request, ::grpc::ServerAsyncResponseWriter< ::carla::DoubleValue>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_InsertCV() {
+      ::grpc::Service::MarkMethodAsync(10);
+    }
+    ~WithAsyncMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestInsertCV(::grpc::ServerContext* context, ::carla::ObjectIn* request, ::grpc::ServerAsyncResponseWriter< ::carla::DoubleValue>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodAsync(9);
+      ::grpc::Service::MarkMethodAsync(11);
     }
     ~WithAsyncMethod_GetCartesian() override {
       BaseClassMustBeDerivedFromService(this);
@@ -600,7 +760,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetCartesian(::grpc::ServerContext* context, ::carla::Vector* request, ::grpc::ServerAsyncResponseWriter< ::carla::Vector>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -609,7 +769,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_GetGeo() {
-      ::grpc::Service::MarkMethodAsync(10);
+      ::grpc::Service::MarkMethodAsync(12);
     }
     ~WithAsyncMethod_GetGeo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -620,7 +780,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetGeo(::grpc::ServerContext* context, ::carla::Vector* request, ::grpc::ServerAsyncResponseWriter< ::carla::Vector>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -629,7 +789,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_hasLDM() {
-      ::grpc::Service::MarkMethodAsync(11);
+      ::grpc::Service::MarkMethodAsync(13);
     }
     ~WithAsyncMethod_hasLDM() override {
       BaseClassMustBeDerivedFromService(this);
@@ -640,7 +800,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequesthasLDM(::grpc::ServerContext* context, ::carla::Number* request, ::grpc::ServerAsyncResponseWriter< ::carla::Boolean>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -649,7 +809,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetControl() {
-      ::grpc::Service::MarkMethodAsync(12);
+      ::grpc::Service::MarkMethodAsync(14);
     }
     ~WithAsyncMethod_SetControl() override {
       BaseClassMustBeDerivedFromService(this);
@@ -660,10 +820,70 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetControl(::grpc::ServerContext* context, ::carla::Control* request, ::grpc::ServerAsyncResponseWriter< ::google::protobuf::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_ExecuteOneTimeStep<WithAsyncMethod_Finish<WithAsyncMethod_GetManagedActorsIds<WithAsyncMethod_GetManagedCAVsIds<WithAsyncMethod_GetManagedActorById<WithAsyncMethod_InsertVehicle<WithAsyncMethod_GetRandomSpawnPoint<WithAsyncMethod_GetActorLDM<WithAsyncMethod_InsertObject<WithAsyncMethod_GetCartesian<WithAsyncMethod_GetGeo<WithAsyncMethod_hasLDM<WithAsyncMethod_SetControl<Service > > > > > > > > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodAsync(15);
+    }
+    ~WithAsyncMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetCarlaWaypoint(::grpc::ServerContext* context, ::carla::Vector* request, ::grpc::ServerAsyncResponseWriter< ::carla::Waypoint>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodAsync(16);
+    }
+    ~WithAsyncMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetNextCarlaWaypoint(::grpc::ServerContext* context, ::carla::Vector* request, ::grpc::ServerAsyncResponseWriter< ::carla::Waypoint>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodAsync(17);
+    }
+    ~WithAsyncMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetGTaccuracy(::grpc::ServerContext* context, ::carla::ObjectMinimal* request, ::grpc::ServerAsyncResponseWriter< ::carla::DoubleValue>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_ExecuteOneTimeStep<WithAsyncMethod_Finish<WithAsyncMethod_GetManagedActorsIds<WithAsyncMethod_GetManagedCAVsIds<WithAsyncMethod_GetManagedActorById<WithAsyncMethod_InsertVehicle<WithAsyncMethod_GetRandomSpawnPoint<WithAsyncMethod_GetActorLDM<WithAsyncMethod_InsertObject<WithAsyncMethod_InsertObjects<WithAsyncMethod_InsertCV<WithAsyncMethod_GetCartesian<WithAsyncMethod_GetGeo<WithAsyncMethod_hasLDM<WithAsyncMethod_SetControl<WithAsyncMethod_GetCarlaWaypoint<WithAsyncMethod_GetNextCarlaWaypoint<WithAsyncMethod_GetGTaccuracy<Service > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_ExecuteOneTimeStep : public BaseClass {
    private:
@@ -908,18 +1128,72 @@ class CarlaAdapter final {
       ::grpc::CallbackServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::Number* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
+  class WithCallbackMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::carla::ObjectsIn, ::carla::DoubleValue>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::carla::ObjectsIn* request, ::carla::DoubleValue* response) { return this->InsertObjects(context, request, response); }));}
+    void SetMessageAllocatorFor_InsertObjects(
+        ::grpc::MessageAllocator< ::carla::ObjectsIn, ::carla::DoubleValue>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(9);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::ObjectsIn, ::carla::DoubleValue>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* InsertObjects(
+      ::grpc::CallbackServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_InsertCV() {
+      ::grpc::Service::MarkMethodCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::carla::ObjectIn, ::carla::DoubleValue>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::carla::ObjectIn* request, ::carla::DoubleValue* response) { return this->InsertCV(context, request, response); }));}
+    void SetMessageAllocatorFor_InsertCV(
+        ::grpc::MessageAllocator< ::carla::ObjectIn, ::carla::DoubleValue>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::ObjectIn, ::carla::DoubleValue>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* InsertCV(
+      ::grpc::CallbackServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
   class WithCallbackMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithCallbackMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodCallback(9,
+      ::grpc::Service::MarkMethodCallback(11,
           new ::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Vector>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::carla::Vector* request, ::carla::Vector* response) { return this->GetCartesian(context, request, response); }));}
     void SetMessageAllocatorFor_GetCartesian(
         ::grpc::MessageAllocator< ::carla::Vector, ::carla::Vector>* allocator) {
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(9);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
       static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Vector>*>(handler)
               ->SetMessageAllocator(allocator);
     }
@@ -940,13 +1214,13 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithCallbackMethod_GetGeo() {
-      ::grpc::Service::MarkMethodCallback(10,
+      ::grpc::Service::MarkMethodCallback(12,
           new ::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Vector>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::carla::Vector* request, ::carla::Vector* response) { return this->GetGeo(context, request, response); }));}
     void SetMessageAllocatorFor_GetGeo(
         ::grpc::MessageAllocator< ::carla::Vector, ::carla::Vector>* allocator) {
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
       static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Vector>*>(handler)
               ->SetMessageAllocator(allocator);
     }
@@ -967,13 +1241,13 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithCallbackMethod_hasLDM() {
-      ::grpc::Service::MarkMethodCallback(11,
+      ::grpc::Service::MarkMethodCallback(13,
           new ::grpc::internal::CallbackUnaryHandler< ::carla::Number, ::carla::Boolean>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::carla::Number* request, ::carla::Boolean* response) { return this->hasLDM(context, request, response); }));}
     void SetMessageAllocatorFor_hasLDM(
         ::grpc::MessageAllocator< ::carla::Number, ::carla::Boolean>* allocator) {
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
       static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Number, ::carla::Boolean>*>(handler)
               ->SetMessageAllocator(allocator);
     }
@@ -994,13 +1268,13 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithCallbackMethod_SetControl() {
-      ::grpc::Service::MarkMethodCallback(12,
+      ::grpc::Service::MarkMethodCallback(14,
           new ::grpc::internal::CallbackUnaryHandler< ::carla::Control, ::google::protobuf::Empty>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::carla::Control* request, ::google::protobuf::Empty* response) { return this->SetControl(context, request, response); }));}
     void SetMessageAllocatorFor_SetControl(
         ::grpc::MessageAllocator< ::carla::Control, ::google::protobuf::Empty>* allocator) {
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
       static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Control, ::google::protobuf::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
@@ -1015,7 +1289,88 @@ class CarlaAdapter final {
     virtual ::grpc::ServerUnaryReactor* SetControl(
       ::grpc::CallbackServerContext* /*context*/, const ::carla::Control* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_ExecuteOneTimeStep<WithCallbackMethod_Finish<WithCallbackMethod_GetManagedActorsIds<WithCallbackMethod_GetManagedCAVsIds<WithCallbackMethod_GetManagedActorById<WithCallbackMethod_InsertVehicle<WithCallbackMethod_GetRandomSpawnPoint<WithCallbackMethod_GetActorLDM<WithCallbackMethod_InsertObject<WithCallbackMethod_GetCartesian<WithCallbackMethod_GetGeo<WithCallbackMethod_hasLDM<WithCallbackMethod_SetControl<Service > > > > > > > > > > > > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Waypoint>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response) { return this->GetCarlaWaypoint(context, request, response); }));}
+    void SetMessageAllocatorFor_GetCarlaWaypoint(
+        ::grpc::MessageAllocator< ::carla::Vector, ::carla::Waypoint>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Waypoint>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetCarlaWaypoint(
+      ::grpc::CallbackServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Waypoint>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::carla::Vector* request, ::carla::Waypoint* response) { return this->GetNextCarlaWaypoint(context, request, response); }));}
+    void SetMessageAllocatorFor_GetNextCarlaWaypoint(
+        ::grpc::MessageAllocator< ::carla::Vector, ::carla::Waypoint>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::Vector, ::carla::Waypoint>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetNextCarlaWaypoint(
+      ::grpc::CallbackServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::carla::ObjectMinimal, ::carla::DoubleValue>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::carla::ObjectMinimal* request, ::carla::DoubleValue* response) { return this->GetGTaccuracy(context, request, response); }));}
+    void SetMessageAllocatorFor_GetGTaccuracy(
+        ::grpc::MessageAllocator< ::carla::ObjectMinimal, ::carla::DoubleValue>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::carla::ObjectMinimal, ::carla::DoubleValue>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetGTaccuracy(
+      ::grpc::CallbackServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_ExecuteOneTimeStep<WithCallbackMethod_Finish<WithCallbackMethod_GetManagedActorsIds<WithCallbackMethod_GetManagedCAVsIds<WithCallbackMethod_GetManagedActorById<WithCallbackMethod_InsertVehicle<WithCallbackMethod_GetRandomSpawnPoint<WithCallbackMethod_GetActorLDM<WithCallbackMethod_InsertObject<WithCallbackMethod_InsertObjects<WithCallbackMethod_InsertCV<WithCallbackMethod_GetCartesian<WithCallbackMethod_GetGeo<WithCallbackMethod_hasLDM<WithCallbackMethod_SetControl<WithCallbackMethod_GetCarlaWaypoint<WithCallbackMethod_GetNextCarlaWaypoint<WithCallbackMethod_GetGTaccuracy<Service > > > > > > > > > > > > > > > > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_ExecuteOneTimeStep : public BaseClass {
@@ -1171,12 +1526,46 @@ class CarlaAdapter final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodGeneric(9);
+    }
+    ~WithGenericMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_InsertCV() {
+      ::grpc::Service::MarkMethodGeneric(10);
+    }
+    ~WithGenericMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodGeneric(9);
+      ::grpc::Service::MarkMethodGeneric(11);
     }
     ~WithGenericMethod_GetCartesian() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1193,7 +1582,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_GetGeo() {
-      ::grpc::Service::MarkMethodGeneric(10);
+      ::grpc::Service::MarkMethodGeneric(12);
     }
     ~WithGenericMethod_GetGeo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1210,7 +1599,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_hasLDM() {
-      ::grpc::Service::MarkMethodGeneric(11);
+      ::grpc::Service::MarkMethodGeneric(13);
     }
     ~WithGenericMethod_hasLDM() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1227,13 +1616,64 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetControl() {
-      ::grpc::Service::MarkMethodGeneric(12);
+      ::grpc::Service::MarkMethodGeneric(14);
     }
     ~WithGenericMethod_SetControl() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
     ::grpc::Status SetControl(::grpc::ServerContext* /*context*/, const ::carla::Control* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodGeneric(15);
+    }
+    ~WithGenericMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodGeneric(16);
+    }
+    ~WithGenericMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodGeneric(17);
+    }
+    ~WithGenericMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1419,12 +1859,52 @@ class CarlaAdapter final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodRaw(9);
+    }
+    ~WithRawMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestInsertObjects(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_InsertCV() {
+      ::grpc::Service::MarkMethodRaw(10);
+    }
+    ~WithRawMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestInsertCV(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodRaw(9);
+      ::grpc::Service::MarkMethodRaw(11);
     }
     ~WithRawMethod_GetCartesian() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1435,7 +1915,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetCartesian(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1444,7 +1924,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_GetGeo() {
-      ::grpc::Service::MarkMethodRaw(10);
+      ::grpc::Service::MarkMethodRaw(12);
     }
     ~WithRawMethod_GetGeo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1455,7 +1935,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetGeo(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1464,7 +1944,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_hasLDM() {
-      ::grpc::Service::MarkMethodRaw(11);
+      ::grpc::Service::MarkMethodRaw(13);
     }
     ~WithRawMethod_hasLDM() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1475,7 +1955,7 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequesthasLDM(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1484,7 +1964,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetControl() {
-      ::grpc::Service::MarkMethodRaw(12);
+      ::grpc::Service::MarkMethodRaw(14);
     }
     ~WithRawMethod_SetControl() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1495,7 +1975,67 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetControl(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodRaw(15);
+    }
+    ~WithRawMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetCarlaWaypoint(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodRaw(16);
+    }
+    ~WithRawMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetNextCarlaWaypoint(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodRaw(17);
+    }
+    ~WithRawMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetGTaccuracy(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1697,12 +2237,56 @@ class CarlaAdapter final {
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
+  class WithRawCallbackMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodRawCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->InsertObjects(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* InsertObjects(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_InsertCV() {
+      ::grpc::Service::MarkMethodRawCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->InsertCV(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* InsertCV(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
   class WithRawCallbackMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawCallbackMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodRawCallback(9,
+      ::grpc::Service::MarkMethodRawCallback(11,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetCartesian(context, request, response); }));
@@ -1724,7 +2308,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawCallbackMethod_GetGeo() {
-      ::grpc::Service::MarkMethodRawCallback(10,
+      ::grpc::Service::MarkMethodRawCallback(12,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetGeo(context, request, response); }));
@@ -1746,7 +2330,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawCallbackMethod_hasLDM() {
-      ::grpc::Service::MarkMethodRawCallback(11,
+      ::grpc::Service::MarkMethodRawCallback(13,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->hasLDM(context, request, response); }));
@@ -1768,7 +2352,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawCallbackMethod_SetControl() {
-      ::grpc::Service::MarkMethodRawCallback(12,
+      ::grpc::Service::MarkMethodRawCallback(14,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
                    ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetControl(context, request, response); }));
@@ -1782,6 +2366,72 @@ class CarlaAdapter final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* SetControl(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodRawCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetCarlaWaypoint(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetCarlaWaypoint(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodRawCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetNextCarlaWaypoint(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetNextCarlaWaypoint(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodRawCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetGTaccuracy(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* GetGTaccuracy(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
@@ -2028,12 +2678,66 @@ class CarlaAdapter final {
     virtual ::grpc::Status StreamedInsertObject(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::ObjectIn,::carla::Number>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_InsertObjects : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_InsertObjects() {
+      ::grpc::Service::MarkMethodStreamed(9,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::carla::ObjectsIn, ::carla::DoubleValue>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::carla::ObjectsIn, ::carla::DoubleValue>* streamer) {
+                       return this->StreamedInsertObjects(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_InsertObjects() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status InsertObjects(::grpc::ServerContext* /*context*/, const ::carla::ObjectsIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedInsertObjects(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::ObjectsIn,::carla::DoubleValue>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_InsertCV : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_InsertCV() {
+      ::grpc::Service::MarkMethodStreamed(10,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::carla::ObjectIn, ::carla::DoubleValue>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::carla::ObjectIn, ::carla::DoubleValue>* streamer) {
+                       return this->StreamedInsertCV(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_InsertCV() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status InsertCV(::grpc::ServerContext* /*context*/, const ::carla::ObjectIn* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedInsertCV(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::ObjectIn,::carla::DoubleValue>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_GetCartesian : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_GetCartesian() {
-      ::grpc::Service::MarkMethodStreamed(9,
+      ::grpc::Service::MarkMethodStreamed(11,
         new ::grpc::internal::StreamedUnaryHandler<
           ::carla::Vector, ::carla::Vector>(
             [this](::grpc::ServerContext* context,
@@ -2060,7 +2764,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_GetGeo() {
-      ::grpc::Service::MarkMethodStreamed(10,
+      ::grpc::Service::MarkMethodStreamed(12,
         new ::grpc::internal::StreamedUnaryHandler<
           ::carla::Vector, ::carla::Vector>(
             [this](::grpc::ServerContext* context,
@@ -2087,7 +2791,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_hasLDM() {
-      ::grpc::Service::MarkMethodStreamed(11,
+      ::grpc::Service::MarkMethodStreamed(13,
         new ::grpc::internal::StreamedUnaryHandler<
           ::carla::Number, ::carla::Boolean>(
             [this](::grpc::ServerContext* context,
@@ -2114,7 +2818,7 @@ class CarlaAdapter final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetControl() {
-      ::grpc::Service::MarkMethodStreamed(12,
+      ::grpc::Service::MarkMethodStreamed(14,
         new ::grpc::internal::StreamedUnaryHandler<
           ::carla::Control, ::google::protobuf::Empty>(
             [this](::grpc::ServerContext* context,
@@ -2135,9 +2839,90 @@ class CarlaAdapter final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetControl(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::Control,::google::protobuf::Empty>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_ExecuteOneTimeStep<WithStreamedUnaryMethod_Finish<WithStreamedUnaryMethod_GetManagedActorsIds<WithStreamedUnaryMethod_GetManagedCAVsIds<WithStreamedUnaryMethod_GetManagedActorById<WithStreamedUnaryMethod_InsertVehicle<WithStreamedUnaryMethod_GetRandomSpawnPoint<WithStreamedUnaryMethod_GetActorLDM<WithStreamedUnaryMethod_InsertObject<WithStreamedUnaryMethod_GetCartesian<WithStreamedUnaryMethod_GetGeo<WithStreamedUnaryMethod_hasLDM<WithStreamedUnaryMethod_SetControl<Service > > > > > > > > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetCarlaWaypoint() {
+      ::grpc::Service::MarkMethodStreamed(15,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::carla::Vector, ::carla::Waypoint>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::carla::Vector, ::carla::Waypoint>* streamer) {
+                       return this->StreamedGetCarlaWaypoint(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetCarlaWaypoint(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::Vector,::carla::Waypoint>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetNextCarlaWaypoint : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetNextCarlaWaypoint() {
+      ::grpc::Service::MarkMethodStreamed(16,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::carla::Vector, ::carla::Waypoint>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::carla::Vector, ::carla::Waypoint>* streamer) {
+                       return this->StreamedGetNextCarlaWaypoint(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetNextCarlaWaypoint() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetNextCarlaWaypoint(::grpc::ServerContext* /*context*/, const ::carla::Vector* /*request*/, ::carla::Waypoint* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetNextCarlaWaypoint(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::Vector,::carla::Waypoint>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetGTaccuracy : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetGTaccuracy() {
+      ::grpc::Service::MarkMethodStreamed(17,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::carla::ObjectMinimal, ::carla::DoubleValue>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::carla::ObjectMinimal, ::carla::DoubleValue>* streamer) {
+                       return this->StreamedGetGTaccuracy(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetGTaccuracy() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetGTaccuracy(::grpc::ServerContext* /*context*/, const ::carla::ObjectMinimal* /*request*/, ::carla::DoubleValue* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetGTaccuracy(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::carla::ObjectMinimal,::carla::DoubleValue>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_ExecuteOneTimeStep<WithStreamedUnaryMethod_Finish<WithStreamedUnaryMethod_GetManagedActorsIds<WithStreamedUnaryMethod_GetManagedCAVsIds<WithStreamedUnaryMethod_GetManagedActorById<WithStreamedUnaryMethod_InsertVehicle<WithStreamedUnaryMethod_GetRandomSpawnPoint<WithStreamedUnaryMethod_GetActorLDM<WithStreamedUnaryMethod_InsertObject<WithStreamedUnaryMethod_InsertObjects<WithStreamedUnaryMethod_InsertCV<WithStreamedUnaryMethod_GetCartesian<WithStreamedUnaryMethod_GetGeo<WithStreamedUnaryMethod_hasLDM<WithStreamedUnaryMethod_SetControl<WithStreamedUnaryMethod_GetCarlaWaypoint<WithStreamedUnaryMethod_GetNextCarlaWaypoint<WithStreamedUnaryMethod_GetGTaccuracy<Service > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_ExecuteOneTimeStep<WithStreamedUnaryMethod_Finish<WithStreamedUnaryMethod_GetManagedActorsIds<WithStreamedUnaryMethod_GetManagedCAVsIds<WithStreamedUnaryMethod_GetManagedActorById<WithStreamedUnaryMethod_InsertVehicle<WithStreamedUnaryMethod_GetRandomSpawnPoint<WithStreamedUnaryMethod_GetActorLDM<WithStreamedUnaryMethod_InsertObject<WithStreamedUnaryMethod_GetCartesian<WithStreamedUnaryMethod_GetGeo<WithStreamedUnaryMethod_hasLDM<WithStreamedUnaryMethod_SetControl<Service > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_ExecuteOneTimeStep<WithStreamedUnaryMethod_Finish<WithStreamedUnaryMethod_GetManagedActorsIds<WithStreamedUnaryMethod_GetManagedCAVsIds<WithStreamedUnaryMethod_GetManagedActorById<WithStreamedUnaryMethod_InsertVehicle<WithStreamedUnaryMethod_GetRandomSpawnPoint<WithStreamedUnaryMethod_GetActorLDM<WithStreamedUnaryMethod_InsertObject<WithStreamedUnaryMethod_InsertObjects<WithStreamedUnaryMethod_InsertCV<WithStreamedUnaryMethod_GetCartesian<WithStreamedUnaryMethod_GetGeo<WithStreamedUnaryMethod_hasLDM<WithStreamedUnaryMethod_SetControl<WithStreamedUnaryMethod_GetCarlaWaypoint<WithStreamedUnaryMethod_GetNextCarlaWaypoint<WithStreamedUnaryMethod_GetGTaccuracy<Service > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace carla

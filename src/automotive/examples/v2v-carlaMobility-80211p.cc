@@ -14,8 +14,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
  * Created by:
- *  Marco Malinverno, Politecnico di Torino (marco.malinverno1@gmail.com)
- *  Francesco Raviglione, Politecnico di Torino (francescorav.es483@gmail.com)
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 #include "ns3/carla-module.h"
@@ -29,7 +27,6 @@
 #include "ns3/vehicle-visualizer-module.h"
 #include "ns3/MetricSupervisor.h"
 #include <unistd.h>
-
 
 using namespace ns3;
 
@@ -49,7 +46,7 @@ main (int argc, char *argv[])
   std::vector<float> rate_admitted_values{3,4.5,6,9,12,18,24,27};
   std::string datarate_config;
 
-  /*** 0.a Mobility Options ***/
+  /*** 0.a Mobility Options ----------------------------------------------------------------------------------*/
   std::string opencda_folder = "Opencda/";
   std::string opencda_config ="ms_van3t_example";
   bool opencda_ml = false;
@@ -71,7 +68,24 @@ main (int argc, char *argv[])
 
   std::string OpenCDA_HOME, CARLA_HOME, Python_Interpreter;
 
+  std::string carla_host = "localhost";
+  std::string carla_port = "2000";
+  //For remote usage
+  std::string carla_user = "username";
+  std::string carla_password = "password";
+  std::string opencda_host = "localhost";
+  std::string opencda_user = "username";
+  int opencdaCI_port = 1337; // OpenCDA CI gRPC server port
+  int tm_port = 8000; // CARLA Traffic Manager port
 
+  bool carla_gui = true; // Start CARLA with GUI
+  int carla_gpu = 0; // GPU ID to be used by CARLA
+  int openCDA_gpu = 0; // GPU ID to be used by OpenCDA (to load ML models)
+  bool carla_manual = false; // Whether the CARLA simulation is started manually by user or not
+  bool opencda_manual = false; // Whether OpenCDA is started manually by user or not
+  bool visualize_sensor = false; // Visualize ns-3 LDM information
+
+  /*** --------------------------------------------------------------------------------------------------*/
 
   bool verbose = true;
   bool realtime = false;
@@ -97,7 +111,6 @@ main (int argc, char *argv[])
 
   /* Cmd Line option for application */
   cmd.AddValue ("realtime", "Use the realtime scheduler or not", realtime);
-  cmd.AddValue ("opencda-config", "Location and name of OpenCDA configuration file", opencda_config);
   cmd.AddValue ("csv-log", "Name of the CSV log file", csv_name);
   cmd.AddValue ("vehicle-visualizer", "Activate the web-based vehicle visualizer for ms-van3t", vehicle_vis);
   cmd.AddValue ("send-cam", "Turn on or off the transmission of CAMs, thus turning on or off the whole V2X application",send_cam);
@@ -111,6 +124,22 @@ main (int argc, char *argv[])
   cmd.AddValue ("datarate", "802.11p channel data rate [Mbit/s]", datarate);
 
   cmd.AddValue("sim-time", "Total duration of the simulation [s]", simTime);
+
+  /* Cmd Line options for CARLA */
+  cmd.AddValue ("opencda-config", "Location and name of OpenCDA configuration file", opencda_config);
+  cmd.AddValue ("carla-host", "CARLA server host", carla_host);
+  cmd.AddValue ("carla-port", "CARLA server port", carla_port);
+  cmd.AddValue ("carla-user", "CARLA server username", carla_user);
+  cmd.AddValue ("carla-password", "CARLA server password for username", carla_password);
+  cmd.AddValue("opencda-host", "OpenCDA server host", opencda_host);
+  cmd.AddValue("opencda-user", "OpenCDA server username", opencda_user);
+  cmd.AddValue("carla-manual", "CARLA server manual mode (Default: false)", carla_manual);
+  cmd.AddValue("opencda-manual", "OpenCDA server manual mode (Default: false)", opencda_manual);
+  cmd.AddValue("opencdaCI-port", "OpenCDA server port", opencdaCI_port);
+  cmd.AddValue("tm-port", "CARLA Traffic Manager port", tm_port);
+  cmd.AddValue("carla-gui", "CARLA server GUI (Default: true)", carla_gui);
+  cmd.AddValue("carla-gpu", "CARLA server GPU ID (Default: 0)", carla_gpu);
+  cmd.AddValue("vis-sensor", "Visualize OpenCDA sensor from ns-3 side (i.e., LDM)", visualize_sensor);
 
   cmd.Parse (argc, argv);
 
@@ -258,14 +287,26 @@ main (int argc, char *argv[])
 
   /*** 6. Setup OpenCDA client ***/
   Ptr<OpenCDAClient> opencda_client = CreateObject<OpenCDAClient> ();
-  opencda_client->SetAttribute ("CARLAHost", StringValue ("localhost"));
   opencda_client->SetAttribute ("UpdateInterval", DoubleValue (0.05));
-  opencda_client->SetAttribute ("Port", UintegerValue (1337));
-  opencda_client->SetAttribute ("PenetrationRate",DoubleValue(0.5));
+  opencda_client->SetAttribute ("PenetrationRate",DoubleValue(penetrationRate));
   opencda_client->SetAttribute ("OpenCDA_config", StringValue(opencda_config));
   opencda_client->SetAttribute ("OpenCDA_HOME", StringValue(OpenCDA_HOME));
   opencda_client->SetAttribute ("CARLA_HOME", StringValue(CARLA_HOME));
   opencda_client->SetAttribute ("PythonInterpreter", StringValue(Python_Interpreter));
+  opencda_client->SetAttribute ("CARLAHost", StringValue(carla_host));
+  opencda_client->SetAttribute ("CARLAPort", UintegerValue(atoi(carla_port.c_str())));
+  opencda_client->SetAttribute ("CARLAUser", StringValue(carla_user));
+  opencda_client->SetAttribute ("CARLAPassword", StringValue(carla_password));
+  opencda_client->SetAttribute("OpenCDACIHost", StringValue(opencda_host));
+  opencda_client->SetAttribute("OpenCDACIUser", StringValue(opencda_user));
+  opencda_client->SetAttribute("OpenCDACIPassword", StringValue(carla_password));
+  opencda_client->SetAttribute("CARLAManual", BooleanValue(carla_manual));
+  opencda_client->SetAttribute("OpenCDAManual", BooleanValue (opencda_manual));
+  opencda_client->SetAttribute("OpenCDACIPort", UintegerValue(opencdaCI_port));
+  opencda_client->SetAttribute("CARLATMPort", UintegerValue(tm_port));
+  opencda_client->SetAttribute("CARLAGUI", BooleanValue(carla_gui));
+  opencda_client->SetAttribute("CARLAGPU", UintegerValue(carla_gpu));
+  opencda_client->SetAttribute("OpenCDAGPU", UintegerValue(carla_gpu));
   /* If active perception is specified in OpenCDA's config YAML (eg. ms_van3t_example_ml). Default -> false */
   opencda_client->SetAttribute ("ApplyML", BooleanValue(opencda_ml));
 

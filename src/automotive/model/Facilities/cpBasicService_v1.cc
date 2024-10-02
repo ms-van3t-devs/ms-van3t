@@ -464,7 +464,7 @@ CPBasicServiceV1::receiveCpm (BTPDataIndication_t dataIndication, Address from)
 
 
   /** Decoding **/
-  decoded_cpm = asn1cpp::uper::decode(packetContent, CPMV1);
+  decoded_cpm = asn1cpp::uper::decodeASN(packetContent, CPMV1);
 
   if(bool(decoded_cpm)==false) {
       NS_LOG_ERROR("Warning: unable to decode a received CPM.");
