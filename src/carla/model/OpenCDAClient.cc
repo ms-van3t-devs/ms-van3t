@@ -279,7 +279,7 @@ namespace ns3
               }
           }
 
-          usleep(1000000);
+          usleep(10000000);
 
           if (!m_opencda_manual) {
               m_opencda_pid = fork();
@@ -355,35 +355,26 @@ namespace ns3
           server_ready = true;
       }
       while (!server_ready) {
-              std::ifstream file("/tmp/opencdaCI_ready");
-              if (file.good()) {
-                  server_ready = true;
-                  file.close();
-                  std::cout << "OpenCDA Control Interface ready." << std::endl;
-              } else {
-                  if (m_opencda_host != "localhost") {
-                      // read /tmp/opencda_output.txt to see OpenCDA logs and check if there's a "Server ready" message
-                      std::string file_name = "/tmp/opencda_output_" + std::to_string(m_opencda_port) + ".txt";
-                      std::ifstream file(file_name.c_str());
-                        if (file.good()) {
-                            std::string line;
-                            while (std::getline(file, line)) {
-                                if (line.find("Server ready") != std::string::npos) {
-                                    server_ready = true;
-                                    break;
-                                }
-                            }
-                            file.close();
-                        }
-                  }
-                  else {
-                      // File does not exist, wait for 1 second before checking again
-                      std::cout << "Waiting for OpenCDA Control Interface to be ready." << std::endl;
-                      usleep(10000000);
-                  }
-
-              }
+          // read /tmp/opencda_output.txt to see OpenCDA logs and check if there's a "Server ready" message
+          std::string file_name = "/tmp/opencda_output_" + std::to_string(m_opencda_port) + ".txt";
+          std::ifstream file(file_name.c_str());
+            if (file.good()) {
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (line.find("Server ready") != std::string::npos) {
+                        server_ready = true;
+                        break;
+                    }
+                }
+                file.close();
+            }
+          else {
+              // File does not exist, wait for 1 second before checking again
+              std::cout << "Waiting for OpenCDA Control Interface to be ready." << std::endl;
+              usleep(10000000);
           }
+
+      }
 
       if(m_opencda_host != "localhost") {
           std::string kill_cmd;
@@ -395,7 +386,7 @@ namespace ns3
           else
             {
               kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host
-                                     + " 'ps -u " + m_opencda_user + " -o pid,cmd --no-header | grep python3 | head -n 1 | cut -d \" \" -f2 ' > /tmp/opencda_pid.txt";
+                                     + " 'ps -u " + m_opencda_user + " -o pid,cmd --no-header | grep python3 | head -n 1 | cut -d \" \" -f1 ' > /tmp/opencda_pid.txt";
             }
 
           system(kill_cmd.c_str());

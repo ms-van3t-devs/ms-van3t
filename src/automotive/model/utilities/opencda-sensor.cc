@@ -505,7 +505,7 @@ namespace ns3 {
     m_GUI = true;
     m_pldm = false;
     m_visualize = visualize;
-    m_cv_image = cv::Mat::zeros(1000, 2000, CV_8UC3);
+    m_cv_image = cv::Mat::zeros(1000, 1000, CV_8UC3);
     std::string windowName = "LDM vehicle " + m_string_id;
 
     if(m_visualize) {
@@ -532,10 +532,10 @@ namespace ns3 {
   void
   OpenCDASensor::updateGUI () {
     if (m_GUI) {
-        double x_center = 1700;
+        double x_center = 500;
         double y_center = 500;
-        double scale_x = 8;
-        double scale_y = 8;
+        double scale_x = 6;
+        double scale_y = 6;
         auto egoVehicle = m_opencda_client->GetManagedActorById(m_id);
         double x_offset = egoVehicle.location().x();
         double y_offset = egoVehicle.location().y();

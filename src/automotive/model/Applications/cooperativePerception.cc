@@ -86,7 +86,12 @@ namespace ns3
             "To enable/disable the transmission of CAM messages",
             BooleanValue(true),
             MakeBooleanAccessor (&cooperativePerception::m_send_cam),
-            MakeBooleanChecker ());
+            MakeBooleanChecker ())
+        .AddAttribute ("VisualizeSensor",
+           "To enable/disable the visualization of the sensor",
+           BooleanValue(false),
+           MakeBooleanAccessor (&cooperativePerception::m_vis_sensor),
+           MakeBooleanChecker ());
         return tid;
   }
 
@@ -98,6 +103,7 @@ namespace ns3
     m_print_summary = true;
     m_already_print = false;
     m_send_cam = true;
+    m_vis_sensor = false;
 
     m_cam_received = 0;
     m_cpm_received = 0;
@@ -163,6 +169,7 @@ namespace ns3
         m_opencda_sensor->setOpenCDAClient (m_opencda_client);
         m_opencda_sensor->setVDP(vdp);
         m_opencda_sensor->setLDM (m_LDM);
+        m_opencda_sensor->enableGUI(m_vis_sensor);
       }
     else
       {
@@ -255,9 +262,11 @@ namespace ns3
     /* Schedule CAM dissemination */
     if(m_send_cam == true)
     {
-      std::srand(Simulator::Now().GetNanoSeconds ());
-      double desync = ((double)std::rand()/RAND_MAX);
-      m_caService.startCamDissemination(desync);
+        Ptr<UniformRandomVariable> desync_rvar = CreateObject<UniformRandomVariable> ();
+        desync_rvar->SetAttribute ("Min", DoubleValue (0.0));
+        desync_rvar->SetAttribute ("Max", DoubleValue (1.0));
+        double desync = desync_rvar->GetValue ();
+        m_caService.startCamDissemination(desync);
     }
 
     /* Schedule CPM dissemination */
@@ -562,7 +571,7 @@ namespace ns3
    retval.vehicleWidth = asn1cpp::getField(object->objectDimensionY->value,long);
    retval.heading = asn1cpp::getField(object->angles->zAngle.value,double) / DECI;
    retval.xSpeedAbs.setData (asn1cpp::getField(object->velocity->choice.cartesianVelocity.xVelocity.value,long));
-   retval.xSpeedAbs.setData (asn1cpp::getField(object->velocity->choice.cartesianVelocity.yVelocity.value,long));
+   retval.ySpeedAbs.setData (asn1cpp::getField(object->velocity->choice.cartesianVelocity.yVelocity.value,long));
    retval.speed_ms = (sqrt (pow(retval.xSpeedAbs.getData(),2) +
                             pow(retval.ySpeedAbs.getData(),2)))/CENTI;
 
@@ -584,6 +593,8 @@ namespace ns3
    VDP::VDP_position_latlon_t objectPositionGeo;
    objectPosition.x += asn1cpp::getField(object->position.xCoordinate.value,long)/CENTI;
    objectPosition.y += asn1cpp::getField(object->position.yCoordinate.value,long)/CENTI;
+   retval.x = objectPosition.x;
+   retval.y = objectPosition.y;
    if(m_traci_client != nullptr)
      {
        libsumo::TraCIPosition traciPosition = m_traci_client->TraCIAPI::simulation.convertXYtoLonLat (objectPosition.x,objectPosition.y);
@@ -604,6 +615,14 @@ namespace ns3
    retval.timestamp_us = Simulator::Now().GetMicroSeconds () - (asn1cpp::getField(object->measurementDeltaTime,long)*1000);
    retval.stationType = StationType_passengerCar;
    retval.perceivedBy.setData(asn1cpp::getField(cpm->header.stationId,long));
+
+    // FOR DEBUGGING
+    if(m_opencda_client != nullptr)
+      {
+        carla::Vector pos = m_opencda_client->getCartesian (retval.lon, retval.lat);
+        std::cout << "[OBJECT " << retval.stationID << "] -->" << "GeoPostiion" << "[" << retval.lon << ", " << retval.lat << "]" <<
+        "  CartesianPosition: [" << pos.x ()<<", "<< pos.y () << "]" << std::endl;
+      }
 
    return retval;
   }

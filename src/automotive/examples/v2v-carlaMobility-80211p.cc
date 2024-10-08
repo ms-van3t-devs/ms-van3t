@@ -48,11 +48,11 @@ main (int argc, char *argv[])
 
   /*** 0.a Mobility Options ----------------------------------------------------------------------------------*/
   std::string opencda_folder = "Opencda/";
-  std::string opencda_config ="ms_van3t_example";
-  bool opencda_ml = false;
+  //std::string opencda_config ="ms_van3t_example";
+  //bool opencda_ml = false;
   //Same mobility example but with active perception (using ML models for OpenCDA's perception module)
-  //std::string opencda_config ="ms_van3t_example_ml";
-  //bool opencda_ml = true;
+  std::string opencda_config ="ms_van3t_example_ml";
+  bool opencda_ml = true;
 
 
   /*
@@ -92,7 +92,7 @@ main (int argc, char *argv[])
   std::string csv_name;
   std::string csv_name_cumulative;
   int txPower=23;
-  double penetrationRate = 1.0;
+  double penetrationRate = 0.7;
 
   float datarate=12;
   bool vehicle_vis = false;
@@ -326,6 +326,7 @@ main (int argc, char *argv[])
   cooperativePerceptionHelper.SetAttribute ("PrintSummary", BooleanValue (true));
   cooperativePerceptionHelper.SetAttribute ("CSV", StringValue(csv_name));
   cooperativePerceptionHelper.SetAttribute ("Model", StringValue ("80211p"));
+  cooperativePerceptionHelper.SetAttribute("VisualizeSensor", BooleanValue(visualize_sensor));
   /* callback function for node creation */
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {

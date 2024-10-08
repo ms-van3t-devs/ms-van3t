@@ -106,6 +106,7 @@ class cooperativePerception : public Application
     std::ofstream m_csv_ofstream_cam; //!< CSV log stream (CAM), created using m_csv_name
     std::map<int, std::map<int,int>> m_recvCPMmap;  //! Structure mapping, for each CV that we have received a CPM from, the CPM's PO ids with the ego LDM's PO ids
 
+    bool m_vis_sensor = false; //!< To visualize the sensor from ns-3 side
 
     /* Counters */
     int m_cam_received;
