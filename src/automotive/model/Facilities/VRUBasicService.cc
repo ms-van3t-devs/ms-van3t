@@ -67,6 +67,7 @@ VRUBasicService::VRUBasicService(){
   m_lowFreqContainerEnabled = false;
 
   m_VAMReceiveCallback = nullptr;
+  m_VAMReceiveCallbackExtended = nullptr;
 }
 
 VRUBasicService::VRUBasicService(unsigned long fixed_stationid,long fixed_stationtype,VRUdp* VRUdp,bool real_time){
@@ -113,6 +114,7 @@ VRUBasicService::VRUBasicService(unsigned long fixed_stationid,long fixed_statio
   m_lowFreqContainerEnabled = false;
 
   m_VAMReceiveCallback = nullptr;
+  m_VAMReceiveCallbackExtended = nullptr;
 
   m_station_id = (StationID_t) fixed_stationid;
   m_stationtype = (StationType_t) fixed_stationtype;
@@ -212,6 +214,8 @@ void VRUBasicService::receiveVam(BTPDataIndication_t dataIndication, Address fro
 
       if(m_VAMReceiveCallback!=nullptr) {
         m_VAMReceiveCallback(decoded_vam,from);
+      } else if(m_VAMReceiveCallbackExtended!=nullptr){
+        m_VAMReceiveCallbackExtended(decoded_vam,from,m_station_id,m_stationtype);
       }
     }
 }

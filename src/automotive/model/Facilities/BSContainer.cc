@@ -205,8 +205,8 @@ namespace ns3
       // Remember that setStationProperties() must always be called *after* setBTP()
       m_vrubs.setStationProperties (m_station_id, m_stationtype);
 
-      if(m_VAMReceiveCallback!=nullptr) {
-        m_vrubs.addVAMRxCallback (m_VAMReceiveCallback);
+      if(m_VAMReceiveCallbackExtended!=nullptr) {
+        m_vrubs.addVAMRxCallbackExtended (m_VAMReceiveCallbackExtended);
       }
 
       m_VAMs_enabled = true;

@@ -75,6 +75,7 @@ public:
 
     void receiveVam(BTPDataIndication_t dataIndication, Address from);
     void addVAMRxCallback(std::function<void(asn1cpp::Seq<VAM>, Address)> rx_callback) {m_VAMReceiveCallback=rx_callback;}
+    void addVAMRxCallbackExtended(std::function<void(asn1cpp::Seq<VAM>, Address, StationID_t, StationType_t)> rx_callback) {m_VAMReceiveCallbackExtended=rx_callback;}
 
     void startVamDissemination();
     void startVamDissemination(double desync_s);
@@ -114,6 +115,7 @@ private:
     void vLDM_handler(asn1cpp::Seq<VAM> decodedVAM);
 
     std::function<void(asn1cpp::Seq<VAM>, Address)> m_VAMReceiveCallback;
+    std::function<void(asn1cpp::Seq<VAM>, Address, StationID_t, StationType_t)> m_VAMReceiveCallbackExtended;
 
     Ptr<btp> m_btp;
 

@@ -30,7 +30,7 @@ namespace ns3
 
     void addCAMRxCallback(std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CAReceiveCallbackExtended=rx_callback;}
     void addDENMRxCallback(std::function<void(denData,Address,unsigned long,long,SignalInfo)> rx_callback) {m_DENReceiveCallbackExtended=rx_callback;}
-    void addVAMRxCallback(std::function<void(asn1cpp::Seq<VAM>, Address)> rx_callback) {m_VAMReceiveCallback=rx_callback;}
+    void addVAMRxCallback(std::function<void(asn1cpp::Seq<VAM>, Address, StationID_t, StationType_t)> rx_callback) {m_VAMReceiveCallbackExtended=rx_callback;}
     void addCPMRxCallback(std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> rx_callback) {m_CPMReceiveCallbackExtended=rx_callback;}
 
     void setRealTime(bool real_time){m_real_time=real_time;}
@@ -74,7 +74,7 @@ namespace ns3
     // Message reception callbacks
     std::function<void(asn1cpp::Seq<CAM>, Address, StationID_t, StationType_t, SignalInfo)> m_CAReceiveCallbackExtended;
     std::function<void(denData,Address,unsigned long,long,SignalInfo)> m_DENReceiveCallbackExtended;
-    std::function<void(asn1cpp::Seq<VAM>, Address)> m_VAMReceiveCallback;
+    std::function<void(asn1cpp::Seq<VAM>, Address, StationID_t, StationType_t)> m_VAMReceiveCallbackExtended;
     std::function<void(asn1cpp::Seq<CollectivePerceptionMessage>, Address, StationID_t, StationType_t, SignalInfo)> m_CPMReceiveCallbackExtended;
 
     // ETSI Transport and Networking layer pointers

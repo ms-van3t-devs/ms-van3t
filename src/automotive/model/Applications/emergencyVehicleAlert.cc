@@ -358,56 +358,56 @@ namespace ns3
    m_cam_received++;
 
    /* If the CAM is received from an emergency vehicle, and the host vehicle is a "passenger" car, then process the CAM */
-//   if (asn1cpp::getField(cam->cam.camParameters.basicContainer.stationType,StationType_t)==StationType_specialVehicle && m_type!="emergency")
-//   {
-//     libsumo::TraCIPosition pos=m_client->TraCIAPI::vehicle.getPosition(m_id);
-//     pos=m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
-//
-//     /* If the distance between the "passenger" car and the emergency vehicle and the difference in the heading angles
-//      * are below certain thresholds, then actuate the slow-down strategy */
-//     if (appUtil_haversineDist (pos.y,pos.x,
-//                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO,
-//                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO)
-//         < m_distance_threshold
-//         &&
-//         appUtil_angDiff (m_client->TraCIAPI::vehicle.getAngle (m_id),(double)asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,HeadingValue_t)/DECI)<m_heading_threshold)
-//     {
-//       /* Slowdown only if you are not in the takeover lane,
-//        * otherwise the emergency vechicle may get stuck behind */
-//       if (m_client->TraCIAPI::vehicle.getLaneIndex (m_id) == 0)
-//       {
-//         m_client->TraCIAPI::vehicle.changeLane (m_id,0,3);
-//         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, m_max_speed*0.5);
-//         libsumo::TraCIColor orange;
-//         orange.r=232;orange.g=126;orange.b=4;orange.a=255;
-//         m_client->TraCIAPI::vehicle.setColor (m_id,orange);
-//
-//         Simulator::Remove(m_speed_ev);
-//         m_speed_ev = Simulator::Schedule (Seconds (3.0), &emergencyVehicleAlert::SetMaxSpeed, this);
-//       }
-//       else
-//       {
-//         m_client->TraCIAPI::vehicle.changeLane (m_id,0,3);
-//         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, m_max_speed*1.5);
-//         libsumo::TraCIColor green;
-//         green.r=0;green.g=128;green.b=80;green.a=255;
-//         m_client->TraCIAPI::vehicle.setColor (m_id,green);
-//
-//         Simulator::Remove(m_speed_ev);
-//         m_speed_ev = Simulator::Schedule (Seconds (3.0), &emergencyVehicleAlert::SetMaxSpeed, this);
-//       }
-//     }
-//   }
-//
-//   if (!m_csv_name.empty ())
-//     {
-//       // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
-//       m_csv_ofstream_cam << cam->header.messageId << "," << cam->header.stationId << ",";
-//       m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO << ",";
-//       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO << "," ;
-//       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
-//       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value,double)/DECI << std::endl;
-//     }
+   if (asn1cpp::getField(cam->cam.camParameters.basicContainer.stationType,StationType_t)==StationType_specialVehicle && m_type!="emergency")
+   {
+     libsumo::TraCIPosition pos=m_client->TraCIAPI::vehicle.getPosition(m_id);
+     pos=m_client->TraCIAPI::simulation.convertXYtoLonLat (pos.x,pos.y);
+
+     /* If the distance between the "passenger" car and the emergency vehicle and the difference in the heading angles
+      * are below certain thresholds, then actuate the slow-down strategy */
+     if (appUtil_haversineDist (pos.y,pos.x,
+                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO,
+                                asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO)
+         < m_distance_threshold
+         &&
+         appUtil_angDiff (m_client->TraCIAPI::vehicle.getAngle (m_id),(double)asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,HeadingValue_t)/DECI)<m_heading_threshold)
+     {
+       /* Slowdown only if you are not in the takeover lane,
+        * otherwise the emergency vechicle may get stuck behind */
+       if (m_client->TraCIAPI::vehicle.getLaneIndex (m_id) == 0)
+       {
+         m_client->TraCIAPI::vehicle.changeLane (m_id,0,3);
+         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, m_max_speed*0.5);
+         libsumo::TraCIColor orange;
+         orange.r=232;orange.g=126;orange.b=4;orange.a=255;
+         m_client->TraCIAPI::vehicle.setColor (m_id,orange);
+
+         Simulator::Remove(m_speed_ev);
+         m_speed_ev = Simulator::Schedule (Seconds (3.0), &emergencyVehicleAlert::SetMaxSpeed, this);
+       }
+       else
+       {
+         m_client->TraCIAPI::vehicle.changeLane (m_id,0,3);
+         m_client->TraCIAPI::vehicle.setMaxSpeed (m_id, m_max_speed*1.5);
+         libsumo::TraCIColor green;
+         green.r=0;green.g=128;green.b=80;green.a=255;
+         m_client->TraCIAPI::vehicle.setColor (m_id,green);
+
+         Simulator::Remove(m_speed_ev);
+         m_speed_ev = Simulator::Schedule (Seconds (3.0), &emergencyVehicleAlert::SetMaxSpeed, this);
+       }
+     }
+   }
+
+   if (!m_csv_name.empty ())
+     {
+       // messageId,camId,timestamp,latitude,longitude,heading,speed,acceleration
+       m_csv_ofstream_cam << cam->header.messageId << "," << cam->header.stationId << ",";
+       m_csv_ofstream_cam << cam->cam.generationDeltaTime << "," << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/DOT_ONE_MICRO << ",";
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/DOT_ONE_MICRO << "," ;
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.heading.headingValue,double)/DECI << "," << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.speed.speedValue,double)/CENTI << ",";
+       m_csv_ofstream_cam << asn1cpp::getField(cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.longitudinalAcceleration.value,double)/DECI << std::endl;
+     }
 
   }
 
