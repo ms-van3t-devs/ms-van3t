@@ -42,7 +42,7 @@
 
 #include "ns3/StationType.h"
 
-#define STARTUP_FCN std::function<Ptr<Node>(std::string)>
+#define STARTUP_FCN std::function<Ptr<Node>(std::string,TraciClient::StationTypeTraCI_t)>
 #define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>
 
 namespace ns3 {
@@ -50,6 +50,14 @@ namespace ns3 {
 class TraciClient : public TraCIAPI, public Object
 {
 public:
+  typedef enum {
+    StationTypeTraci_vehicle,
+    StationTypeTraci_roadSideUnit,
+    StationTypeTraci_pedestrian,
+    StationTypeTraci_other,
+    StationTypeTraci_unspecified
+  } StationTypeTraCI_t;
+
   // register this type with the TypeId system.
   static TypeId GetTypeId (void);
 

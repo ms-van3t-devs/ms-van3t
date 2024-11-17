@@ -262,7 +262,7 @@ int main (int argc, char *argv[])
   // This kind of "std::function" is called lambda function, and it can access all variables outside its scope, thanks to the [&] capture
   // We setup here the ETSI stack for each vehicle (except the one generating interfering traffic), thanks to the BSContainer object
   // Furthermore, we schedule the transmission of interfering traffic for vehicle 3 only ("veh3")
-  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
     {
       unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
 

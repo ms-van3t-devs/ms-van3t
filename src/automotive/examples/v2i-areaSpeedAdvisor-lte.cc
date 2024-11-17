@@ -322,7 +322,7 @@ main (int argc, char *argv[])
   AreaSpeedAdvisorClientLTEHelper.SetAttribute ("MetricSupervisor", PointerValue (metSup));
 
   /* callback function for node creation */
-  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
     {
       if (nodeCounter >= ueNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");

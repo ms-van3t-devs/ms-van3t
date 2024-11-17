@@ -259,7 +259,7 @@ namespace ns3
   void
   GPSTraceClient::CreateNode()
   {
-      m_vehNode=m_includeNode(m_vehID);
+      m_vehNode=m_includeNode(m_vehID,TraciClient::StationTypeTraci_unspecified);
 
       // First position update
       m_lastvehicledataidx=0;
