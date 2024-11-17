@@ -534,10 +534,29 @@ namespace ns3 {
     VDP::VDP_position_cartesian_t egoPos, geoPos;
     if((m_egoPV.POS_EPV.lat==0)||(m_egoPV.POS_EPV.lon==0))return false;//In case egoPV hasnt updated for the first time yet
 
-    egoPos = m_vdp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat); //Compute cartesian position of the vehicle
+    if(m_vdp!=nullptr) {
+      egoPos = m_vdp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat); //Compute cartesian position of the vehicle
+    } else {
+      VRUdp::VRUDP_position_cartesian_t egoPosPed;
+      egoPosPed = m_vrudp->getXY(m_egoPV.POS_EPV.lon,m_egoPV.POS_EPV.lat);
+
+      egoPos.x = egoPosPed.x;
+      egoPos.y = egoPosPed.y;
+      egoPos.z = egoPosPed.z;
+    }
     geoLon = ((double) geoArea.posLong)/DOT_ONE_MICRO;
     geoLat = ((double)geoArea.posLat)/DOT_ONE_MICRO;
-    geoPos = m_vdp->getXY(geoLon, geoLat); // Compute cartesian position of the geoArea center
+
+    if(m_vdp!=nullptr) {
+      geoPos = m_vdp->getXY(geoLon, geoLat); // Compute cartesian position of the geoArea center
+    } else {
+      VRUdp::VRUDP_position_cartesian_t geoPosPed;
+      geoPosPed = m_vrudp->getXY(geoLon, geoLat);
+
+      geoPos.x = geoPosPed.x;
+      geoPos.y = geoPosPed.y;
+      geoPos.z = geoPosPed.z;
+    }
 
     /*(x,y) is the cartesian position relative to the center of the geoArea shape -> if vehicle is indeed in the center of
      * the shape, (x,y)=(0,0)

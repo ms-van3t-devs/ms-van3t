@@ -64,6 +64,10 @@ namespace ns3
   class VRUdp
   {
   public:
+    typedef struct VRUDP_position_cartesian {
+      double x,y,z;
+    } VRUDP_position_cartesian_t;
+
     VRUdp();
     VRUdp(Ptr<TraciClient> mobility_client, std::string node_id);
 
@@ -79,6 +83,14 @@ namespace ns3
     VRUdpValueConfidence<> getLongAcceleration();
 
     std::vector<distance_t> get_min_distance(Ptr<LDM> LDM);
+
+    /**
+     * @brief This function converts the pedestrian's position in lat/lon coordinates to cartesian coordinates.
+     * @param lon The VRU longitude.
+     * @param lat The VRU latitude.
+     * @return
+     */
+    VRUDP_position_cartesian_t getXY(double lon, double lat);
 
   private:
     int64_t computeTimestampUInt64();

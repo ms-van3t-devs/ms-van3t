@@ -192,4 +192,19 @@ namespace ns3
     return int_tstamp;
   }
 
+  VRUdp::VRUDP_position_cartesian_t
+  VRUdp::getXY(double lon, double lat)
+  {
+    VRUDP_position_cartesian_t vdppos;
+
+    libsumo::TraCIPosition pos;
+    pos=m_traci_client->TraCIAPI::simulation.convertLonLattoXY (lon,lat);
+
+    vdppos.x=pos.x;
+    vdppos.y=pos.y;
+    vdppos.z=pos.z;
+
+    return vdppos;
+  }
+
 }
