@@ -9,6 +9,7 @@ is_anaconda_installed() {
     fi
 }
 
+
 ns_3_dir=$(pwd)
 
 mode_file="src/automotive/aux-files/current-mode.txt" 
@@ -205,22 +206,7 @@ if [ "$mode" = "base" ]; then
 	        esac
 	fi
 
-	# Switch CMakeLists.txt and PRRsup
-	ns_3_dir=$(pwd)
-	cd src/automotive/
-	cp CMakeLists.txt aux-files/CMakeLists-base.txt
-	cp model/Measurements/* aux-files/Measurements-base/
-	cp aux-files/CMakeLists-CARLA.txt CMakeLists.txt
-	cp aux-files/CMakeLists-examples-CARLA.txt examples/CMakeLists.txt
-	cp aux-files/Measurements-CARLA/* model/Measurements/
-
-	rm aux-files/current-mode.txt
-	echo "CARLA" >>  aux-files/current-mode.txt
-	cd "$ns_3_dir"
-	cd src/carla/proto/
-	./buildProto.sh
-	cd "$ns_3_dir"
-	echo "Succesfully switched to ms-van3t-CARLA!"
+	python3.7 adapt_files.py CARLA
 fi 
 
 
@@ -228,17 +214,7 @@ if [ "$mode" = "CARLA" ]; then
 	read -p "Current mode is 'CARLA', do you wish to switch to base ms-van3t? (WARNING: CARLA-OpenCDA capabilities are disabled in this mode)."
 
 	# Switch back to 'base'
-
-	ns_3_dir=$(pwd)
-	cd src/automotive/
-	cp aux-files/CMakeLists-base.txt CMakeLists.txt
-	cp aux-files/CMakeLists-examples-base.txt examples/CMakeLists.txt
-	cp aux-files/Measurements-base/* model/Measurements/
-
-	rm aux-files/current-mode.txt
-	echo "base" >>  aux-files/current-mode.txt
-	cd "$ns_3_dir"
-	echo "Succesfully switched to base ms-van3t!"
+	python3.7 adapt_files.py BASE
 fi
 
 

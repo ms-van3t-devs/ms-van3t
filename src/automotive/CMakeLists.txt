@@ -1,3 +1,7 @@
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_libraries(${OpenCV_LIBS})
+
 Set(source_files
     helper/areaSpeedAdvisorClient80211p-helper.cc
     helper/areaSpeedAdvisorServer80211p-helper.cc
@@ -13,6 +17,10 @@ Set(source_files
     helper/trafficManagerClientLTE-helper.cc
     helper/trafficManagerServerLTE-helper.cc
 
+#     helper/cooperativePerception-helper.cc
+#     model/Applications/cooperativePerception.cc
+#     model/Facilities/vdpopencda.cc
+#     model/utilities/opencda-sensor.cc
 
     model/Applications/areaSpeedAdvisorClient80211p.cc
     model/Applications/areaSpeedAdvisorServer80211p.cc
@@ -1312,6 +1320,7 @@ Set(source_files
     )
 
 set(header_files
+    model/Measurements/MetricSupervisor.h
     helper/areaSpeedAdvisorClientLTE-helper.h
     helper/areaSpeedAdvisorServerLTE-helper.h
     helper/areaSpeedAdvisorClient80211p-helper.h
@@ -1319,6 +1328,12 @@ set(header_files
     helper/emergencyVehicleAlert-helper.h
     helper/v2xEmulator-helper.h
     helper/simpleCAMSender-helper.h
+
+#     helper/cooperativePerception-helper.h
+#     model/utilities/opencda-sensor.h
+#     model/Applications/cooperativePerception.h
+#     model/Facilities/vdpopencda.h
+
 
     model/Applications/areaSpeedAdvisorClient80211p.h
     model/Applications/areaSpeedAdvisorServer80211p.h
@@ -1343,8 +1358,7 @@ set(header_files
     model/Facilities/ldm-utils.h
     model/utilities/sumo-sensor.h
     model/Applications/v2xEmulator.h
-    model/Measurements/MetricSupervisor.h
-        model/utilities/csv-utils.h
+	model/utilities/csv-utils.h
 
     model/Facilities/signalInfoUtils.h
     model/DCC/DCC.h

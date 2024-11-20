@@ -6,7 +6,7 @@ namespace ns3 {
 
   PHpoints::PHpoints()
   {
-    m_max_size = 10;
+    m_max_size = 20;
     m_size = 0;
     m_PHpoints = std::map<uint64_t, PHData_t>();
   }
@@ -22,7 +22,7 @@ namespace ns3 {
   PHpoints::insert(vehicleData_t newData, uint64_t station_id)
   {
     PHData newPoint = {0};
-    if((unsigned int)m_PHpoints.size () == 10)
+    if((unsigned int)m_PHpoints.size () == 20)
     {
       m_PHpoints.erase (m_PHpoints.begin ());
     }

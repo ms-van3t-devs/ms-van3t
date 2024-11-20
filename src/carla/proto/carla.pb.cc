@@ -83,6 +83,25 @@ struct NumberDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NumberDefaultTypeInternal _Number_default_instance_;
 
+inline constexpr DoubleValue::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : value_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR DoubleValue::DoubleValue(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct DoubleValueDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR DoubleValueDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~DoubleValueDefaultTypeInternal() {}
+  union {
+    DoubleValue _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DoubleValueDefaultTypeInternal _DoubleValue_default_instance_;
+
 inline constexpr Boolean::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : value_{false},
@@ -121,6 +140,33 @@ struct ActorIdsDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ActorIdsDefaultTypeInternal _ActorIds_default_instance_;
+
+inline constexpr Waypoint::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        location_{nullptr},
+        rotation_{nullptr},
+        road_id_{0},
+        section_id_{0},
+        is_junction_{false},
+        junction_id_{0},
+        lane_width_{0},
+        lane_id_{0},
+        lane_change_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Waypoint::Waypoint(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct WaypointDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR WaypointDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~WaypointDefaultTypeInternal() {}
+  union {
+    Waypoint _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WaypointDefaultTypeInternal _Waypoint_default_instance_;
 
 inline constexpr Transform::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -193,6 +239,28 @@ struct VehicleDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 VehicleDefaultTypeInternal _Vehicle_default_instance_;
 
+inline constexpr ObjectMinimal::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        transform_{nullptr},
+        length_{0},
+        width_{0},
+        id_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ObjectMinimal::ObjectMinimal(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ObjectMinimalDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ObjectMinimalDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ObjectMinimalDefaultTypeInternal() {}
+  union {
+    ObjectMinimal _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectMinimalDefaultTypeInternal _ObjectMinimal_default_instance_;
+
 inline constexpr Object::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -225,6 +293,27 @@ struct ObjectDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectDefaultTypeInternal _Object_default_instance_;
+
+inline constexpr ObjectsIn::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : cpmobjects_{},
+        egoid_{0},
+        fromid_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ObjectsIn::ObjectsIn(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ObjectsInDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ObjectsInDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ObjectsInDefaultTypeInternal() {}
+  union {
+    ObjectsIn _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectsInDefaultTypeInternal _ObjectsIn_default_instance_;
 
 inline constexpr Objects::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -266,7 +355,7 @@ struct ObjectInDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectInDefaultTypeInternal _ObjectIn_default_instance_;
 }  // namespace carla
-static ::_pb::Metadata file_level_metadata_carla_2eproto[11];
+static ::_pb::Metadata file_level_metadata_carla_2eproto[15];
 static constexpr const ::_pb::EnumDescriptor**
     file_level_enum_descriptors_carla_2eproto = nullptr;
 static constexpr const ::_pb::ServiceDescriptor**
@@ -411,6 +500,17 @@ const ::uint32_t TableStruct_carla_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
     ~0u,  // no _split_
     ~0u,  // no sizeof(Split)
     PROTOBUF_FIELD_OFFSET(::carla::Boolean, _impl_.value_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectsIn, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectsIn, _impl_.cpmobjects_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectsIn, _impl_.egoid_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectsIn, _impl_.fromid_),
     PROTOBUF_FIELD_OFFSET(::carla::ObjectIn, _impl_._has_bits_),
     PROTOBUF_FIELD_OFFSET(::carla::ObjectIn, _internal_metadata_),
     ~0u,  // no _extensions_
@@ -441,6 +541,57 @@ const ::uint32_t TableStruct_carla_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
     0,
     ~0u,
     ~0u,
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.location_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.rotation_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.road_id_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.section_id_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.is_junction_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.junction_id_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.lane_id_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.lane_width_),
+    PROTOBUF_FIELD_OFFSET(::carla::Waypoint, _impl_.lane_change_),
+    0,
+    1,
+    ~0u,
+    ~0u,
+    ~0u,
+    ~0u,
+    ~0u,
+    ~0u,
+    ~0u,
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _impl_.id_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _impl_.transform_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _impl_.length_),
+    PROTOBUF_FIELD_OFFSET(::carla::ObjectMinimal, _impl_.width_),
+    ~0u,
+    0,
+    ~0u,
+    ~0u,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::carla::DoubleValue, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::carla::DoubleValue, _impl_.value_),
 };
 
 static const ::_pbi::MigrationSchema
@@ -454,8 +605,12 @@ static const ::_pbi::MigrationSchema
         {82, 105, -1, sizeof(::carla::Object)},
         {120, -1, -1, sizeof(::carla::Objects)},
         {129, -1, -1, sizeof(::carla::Boolean)},
-        {138, 149, -1, sizeof(::carla::ObjectIn)},
-        {152, 164, -1, sizeof(::carla::Control)},
+        {138, -1, -1, sizeof(::carla::ObjectsIn)},
+        {149, 160, -1, sizeof(::carla::ObjectIn)},
+        {163, 175, -1, sizeof(::carla::Control)},
+        {179, 196, -1, sizeof(::carla::Waypoint)},
+        {205, 217, -1, sizeof(::carla::ObjectMinimal)},
+        {221, -1, -1, sizeof(::carla::DoubleValue)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -468,8 +623,12 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::carla::_Object_default_instance_._instance,
     &::carla::_Objects_default_instance_._instance,
     &::carla::_Boolean_default_instance_._instance,
+    &::carla::_ObjectsIn_default_instance_._instance,
     &::carla::_ObjectIn_default_instance_._instance,
     &::carla::_Control_default_instance_._instance,
+    &::carla::_Waypoint_default_instance_._instance,
+    &::carla::_ObjectMinimal_default_instance_._instance,
+    &::carla::_DoubleValue_default_instance_._instance,
 };
 const char descriptor_table_protodef_carla_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
     "\n\013carla.proto\022\005carla\032\033google/protobuf/em"
@@ -494,29 +653,47 @@ const char descriptor_table_protodef_carla_2eproto[] PROTOBUF_SECTION_VARIABLE(p
     "\003yaw\030\014 \001(\001\022#\n\ttransform\030\r \001(\0132\020.carla.Tr"
     "ansform\022\020\n\010detected\030\016 \001(\010\022\023\n\013perceivedBy"
     "\030\017 \001(\005\")\n\007Objects\022\036\n\007objects\030\001 \003(\0132\r.car"
-    "la.Object\"\030\n\007Boolean\022\r\n\005value\030\001 \001(\010\"H\n\010O"
-    "bjectIn\022\035\n\006object\030\001 \001(\0132\r.carla.Object\022\r"
-    "\n\005egoId\030\002 \001(\005\022\016\n\006fromId\030\003 \001(\005\"[\n\007Control"
-    "\022\n\n\002id\030\001 \001(\005\022\037\n\010waypoint\030\002 \001(\0132\r.carla.V"
-    "ector\022\r\n\005speed\030\003 \001(\001\022\024\n\014acceleration\030\004 \001"
-    "(\0012\276\005\n\014CarlaAdapter\022<\n\022ExecuteOneTimeSte"
-    "p\022\026.google.protobuf.Empty\032\016.carla.Boolea"
-    "n\0228\n\006Finish\022\026.google.protobuf.Empty\032\026.go"
-    "ogle.protobuf.Empty\022>\n\023GetManagedActorsI"
-    "ds\022\026.google.protobuf.Empty\032\017.carla.Actor"
-    "Ids\022<\n\021GetManagedCAVsIds\022\026.google.protob"
-    "uf.Empty\032\017.carla.ActorIds\0224\n\023GetManagedA"
-    "ctorById\022\r.carla.Number\032\016.carla.Vehicle\022"
-    ".\n\rInsertVehicle\022\016.carla.Vehicle\032\r.carla"
-    ".Number\022\?\n\023GetRandomSpawnPoint\022\026.google."
-    "protobuf.Empty\032\020.carla.Transform\022,\n\013GetA"
-    "ctorLDM\022\r.carla.Number\032\016.carla.Objects\022."
-    "\n\014InsertObject\022\017.carla.ObjectIn\032\r.carla."
-    "Number\022,\n\014GetCartesian\022\r.carla.Vector\032\r."
-    "carla.Vector\022&\n\006GetGeo\022\r.carla.Vector\032\r."
-    "carla.Vector\022\'\n\006hasLDM\022\r.carla.Number\032\016."
-    "carla.Boolean\0224\n\nSetControl\022\016.carla.Cont"
-    "rol\032\026.google.protobuf.Emptyb\006proto3"
+    "la.Object\"\030\n\007Boolean\022\r\n\005value\030\001 \001(\010\"M\n\tO"
+    "bjectsIn\022!\n\ncpmObjects\030\001 \003(\0132\r.carla.Obj"
+    "ect\022\r\n\005egoId\030\002 \001(\005\022\016\n\006fromId\030\003 \001(\005\"H\n\010Ob"
+    "jectIn\022\035\n\006object\030\001 \001(\0132\r.carla.Object\022\r\n"
+    "\005egoId\030\002 \001(\005\022\016\n\006fromId\030\003 \001(\005\"[\n\007Control\022"
+    "\n\n\002id\030\001 \001(\005\022\037\n\010waypoint\030\002 \001(\0132\r.carla.Ve"
+    "ctor\022\r\n\005speed\030\003 \001(\001\022\024\n\014acceleration\030\004 \001("
+    "\001\"\327\001\n\010Waypoint\022\037\n\010location\030\002 \001(\0132\r.carla"
+    ".Vector\022!\n\010rotation\030\003 \001(\0132\017.carla.Rotati"
+    "on\022\017\n\007road_id\030\004 \001(\005\022\022\n\nsection_id\030\005 \001(\005\022"
+    "\023\n\013is_junction\030\006 \001(\010\022\023\n\013junction_id\030\007 \001("
+    "\005\022\017\n\007lane_id\030\010 \001(\005\022\022\n\nlane_width\030\t \001(\001\022\023"
+    "\n\013lane_change\030\n \001(\005\"_\n\rObjectMinimal\022\n\n\002"
+    "id\030\001 \001(\005\022#\n\ttransform\030\002 \001(\0132\020.carla.Tran"
+    "sform\022\016\n\006length\030\003 \001(\001\022\r\n\005width\030\004 \001(\001\"\034\n\013"
+    "DoubleValue\022\r\n\005value\030\001 \001(\0012\315\007\n\014CarlaAdap"
+    "ter\022<\n\022ExecuteOneTimeStep\022\026.google.proto"
+    "buf.Empty\032\016.carla.Boolean\0228\n\006Finish\022\026.go"
+    "ogle.protobuf.Empty\032\026.google.protobuf.Em"
+    "pty\022>\n\023GetManagedActorsIds\022\026.google.prot"
+    "obuf.Empty\032\017.carla.ActorIds\022<\n\021GetManage"
+    "dCAVsIds\022\026.google.protobuf.Empty\032\017.carla"
+    ".ActorIds\0224\n\023GetManagedActorById\022\r.carla"
+    ".Number\032\016.carla.Vehicle\022.\n\rInsertVehicle"
+    "\022\016.carla.Vehicle\032\r.carla.Number\022\?\n\023GetRa"
+    "ndomSpawnPoint\022\026.google.protobuf.Empty\032\020"
+    ".carla.Transform\022,\n\013GetActorLDM\022\r.carla."
+    "Number\032\016.carla.Objects\022.\n\014InsertObject\022\017"
+    ".carla.ObjectIn\032\r.carla.Number\0225\n\rInsert"
+    "Objects\022\020.carla.ObjectsIn\032\022.carla.Double"
+    "Value\022/\n\010InsertCV\022\017.carla.ObjectIn\032\022.car"
+    "la.DoubleValue\022,\n\014GetCartesian\022\r.carla.V"
+    "ector\032\r.carla.Vector\022&\n\006GetGeo\022\r.carla.V"
+    "ector\032\r.carla.Vector\022\'\n\006hasLDM\022\r.carla.N"
+    "umber\032\016.carla.Boolean\0224\n\nSetControl\022\016.ca"
+    "rla.Control\032\026.google.protobuf.Empty\0222\n\020G"
+    "etCarlaWaypoint\022\r.carla.Vector\032\017.carla.W"
+    "aypoint\0226\n\024GetNextCarlaWaypoint\022\r.carla."
+    "Vector\032\017.carla.Waypoint\0229\n\rGetGTaccuracy"
+    "\022\024.carla.ObjectMinimal\032\022.carla.DoubleVal"
+    "ueb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_carla_2eproto_deps[1] =
     {
@@ -526,13 +703,13 @@ static ::absl::once_flag descriptor_table_carla_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_carla_2eproto = {
     false,
     false,
-    1795,
+    2490,
     descriptor_table_protodef_carla_2eproto,
     "carla.proto",
     &descriptor_table_carla_2eproto_once,
     descriptor_table_carla_2eproto_deps,
     1,
-    11,
+    15,
     schemas,
     file_default_instances,
     TableStruct_carla_2eproto::offsets,
@@ -3314,6 +3491,256 @@ void Boolean::InternalSwap(Boolean* PROTOBUF_RESTRICT other) {
 }
 // ===================================================================
 
+class ObjectsIn::_Internal {
+ public:
+};
+
+ObjectsIn::ObjectsIn(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:carla.ObjectsIn)
+}
+inline PROTOBUF_NDEBUG_INLINE ObjectsIn::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : cpmobjects_{visibility, arena, from.cpmobjects_},
+        _cached_size_{0} {}
+
+ObjectsIn::ObjectsIn(
+    ::google::protobuf::Arena* arena,
+    const ObjectsIn& from)
+    : ::google::protobuf::Message(arena) {
+  ObjectsIn* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, egoid_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, egoid_),
+           offsetof(Impl_, fromid_) -
+               offsetof(Impl_, egoid_) +
+               sizeof(Impl_::fromid_));
+
+  // @@protoc_insertion_point(copy_constructor:carla.ObjectsIn)
+}
+inline PROTOBUF_NDEBUG_INLINE ObjectsIn::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : cpmobjects_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void ObjectsIn::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, egoid_),
+           0,
+           offsetof(Impl_, fromid_) -
+               offsetof(Impl_, egoid_) +
+               sizeof(Impl_::fromid_));
+}
+ObjectsIn::~ObjectsIn() {
+  // @@protoc_insertion_point(destructor:carla.ObjectsIn)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void ObjectsIn::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void ObjectsIn::Clear() {
+// @@protoc_insertion_point(message_clear_start:carla.ObjectsIn)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.cpmobjects_.Clear();
+  ::memset(&_impl_.egoid_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.fromid_) -
+      reinterpret_cast<char*>(&_impl_.egoid_)) + sizeof(_impl_.fromid_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* ObjectsIn::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 1, 0, 2> ObjectsIn::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_ObjectsIn_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated .carla.Object cpmObjects = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.cpmobjects_)}},
+    // int32 egoId = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ObjectsIn, _impl_.egoid_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.egoid_)}},
+    // int32 fromId = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ObjectsIn, _impl_.fromid_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.fromid_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .carla.Object cpmObjects = 1;
+    {PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.cpmobjects_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 egoId = 2;
+    {PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.egoid_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 fromId = 3;
+    {PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.fromid_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::carla::Object>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* ObjectsIn::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:carla.ObjectsIn)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated .carla.Object cpmObjects = 1;
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_cpmobjects_size()); i < n; i++) {
+    const auto& repfield = this->_internal_cpmobjects().Get(i);
+    target = ::google::protobuf::internal::WireFormatLite::
+        InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
+  }
+
+  // int32 egoId = 2;
+  if (this->_internal_egoid() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_egoid(), target);
+  }
+
+  // int32 fromId = 3;
+  if (this->_internal_fromid() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_fromid(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:carla.ObjectsIn)
+  return target;
+}
+
+::size_t ObjectsIn::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:carla.ObjectsIn)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .carla.Object cpmObjects = 1;
+  total_size += 1UL * this->_internal_cpmobjects_size();
+  for (const auto& msg : this->_internal_cpmobjects()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  // int32 egoId = 2;
+  if (this->_internal_egoid() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_egoid());
+  }
+
+  // int32 fromId = 3;
+  if (this->_internal_fromid() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_fromid());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData ObjectsIn::_class_data_ = {
+    ObjectsIn::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* ObjectsIn::GetClassData() const {
+  return &_class_data_;
+}
+
+void ObjectsIn::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<ObjectsIn*>(&to_msg);
+  auto& from = static_cast<const ObjectsIn&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:carla.ObjectsIn)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_cpmobjects()->MergeFrom(
+      from._internal_cpmobjects());
+  if (from._internal_egoid() != 0) {
+    _this->_internal_set_egoid(from._internal_egoid());
+  }
+  if (from._internal_fromid() != 0) {
+    _this->_internal_set_fromid(from._internal_fromid());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ObjectsIn::CopyFrom(const ObjectsIn& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:carla.ObjectsIn)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool ObjectsIn::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* ObjectsIn::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void ObjectsIn::InternalSwap(ObjectsIn* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.cpmobjects_.InternalSwap(&other->_impl_.cpmobjects_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.fromid_)
+      + sizeof(ObjectsIn::_impl_.fromid_)
+      - PROTOBUF_FIELD_OFFSET(ObjectsIn, _impl_.egoid_)>(
+          reinterpret_cast<char*>(&_impl_.egoid_),
+          reinterpret_cast<char*>(&other->_impl_.egoid_));
+}
+
+::google::protobuf::Metadata ObjectsIn::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
+      file_level_metadata_carla_2eproto[9]);
+}
+// ===================================================================
+
 class ObjectIn::_Internal {
  public:
   using HasBits = decltype(std::declval<ObjectIn>()._impl_._has_bits_);
@@ -3582,7 +4009,7 @@ void ObjectIn::InternalSwap(ObjectIn* PROTOBUF_RESTRICT other) {
 ::google::protobuf::Metadata ObjectIn::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
-      file_level_metadata_carla_2eproto[9]);
+      file_level_metadata_carla_2eproto[10]);
 }
 // ===================================================================
 
@@ -3903,7 +4330,959 @@ void Control::InternalSwap(Control* PROTOBUF_RESTRICT other) {
 ::google::protobuf::Metadata Control::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
-      file_level_metadata_carla_2eproto[10]);
+      file_level_metadata_carla_2eproto[11]);
+}
+// ===================================================================
+
+class Waypoint::_Internal {
+ public:
+  using HasBits = decltype(std::declval<Waypoint>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(Waypoint, _impl_._has_bits_);
+  static const ::carla::Vector& location(const Waypoint* msg);
+  static void set_has_location(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static const ::carla::Rotation& rotation(const Waypoint* msg);
+  static void set_has_rotation(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+};
+
+const ::carla::Vector& Waypoint::_Internal::location(const Waypoint* msg) {
+  return *msg->_impl_.location_;
+}
+const ::carla::Rotation& Waypoint::_Internal::rotation(const Waypoint* msg) {
+  return *msg->_impl_.rotation_;
+}
+Waypoint::Waypoint(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:carla.Waypoint)
+}
+inline PROTOBUF_NDEBUG_INLINE Waypoint::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0} {}
+
+Waypoint::Waypoint(
+    ::google::protobuf::Arena* arena,
+    const Waypoint& from)
+    : ::google::protobuf::Message(arena) {
+  Waypoint* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.location_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::carla::Vector>(arena, *from._impl_.location_)
+                : nullptr;
+  _impl_.rotation_ = (cached_has_bits & 0x00000002u)
+                ? CreateMaybeMessage<::carla::Rotation>(arena, *from._impl_.rotation_)
+                : nullptr;
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, road_id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, road_id_),
+           offsetof(Impl_, lane_change_) -
+               offsetof(Impl_, road_id_) +
+               sizeof(Impl_::lane_change_));
+
+  // @@protoc_insertion_point(copy_constructor:carla.Waypoint)
+}
+inline PROTOBUF_NDEBUG_INLINE Waypoint::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void Waypoint::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, location_),
+           0,
+           offsetof(Impl_, lane_change_) -
+               offsetof(Impl_, location_) +
+               sizeof(Impl_::lane_change_));
+}
+Waypoint::~Waypoint() {
+  // @@protoc_insertion_point(destructor:carla.Waypoint)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void Waypoint::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  delete _impl_.location_;
+  delete _impl_.rotation_;
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void Waypoint::Clear() {
+// @@protoc_insertion_point(message_clear_start:carla.Waypoint)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      ABSL_DCHECK(_impl_.location_ != nullptr);
+      _impl_.location_->Clear();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      ABSL_DCHECK(_impl_.rotation_ != nullptr);
+      _impl_.rotation_->Clear();
+    }
+  }
+  ::memset(&_impl_.road_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.lane_change_) -
+      reinterpret_cast<char*>(&_impl_.road_id_)) + sizeof(_impl_.lane_change_));
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* Waypoint::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<4, 9, 2, 0, 2> Waypoint::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(Waypoint, _impl_._has_bits_),
+    0, // no _extensions_
+    10, 120,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294966273,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    9,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_Waypoint_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    // .carla.Vector location = 2;
+    {::_pbi::TcParser::FastMtS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.location_)}},
+    // .carla.Rotation rotation = 3;
+    {::_pbi::TcParser::FastMtS1,
+     {26, 1, 1, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.rotation_)}},
+    // int32 road_id = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Waypoint, _impl_.road_id_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.road_id_)}},
+    // int32 section_id = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Waypoint, _impl_.section_id_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.section_id_)}},
+    // bool is_junction = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(Waypoint, _impl_.is_junction_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.is_junction_)}},
+    // int32 junction_id = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Waypoint, _impl_.junction_id_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.junction_id_)}},
+    // int32 lane_id = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Waypoint, _impl_.lane_id_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_id_)}},
+    // double lane_width = 9;
+    {::_pbi::TcParser::FastF64S1,
+     {73, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_width_)}},
+    // int32 lane_change = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Waypoint, _impl_.lane_change_), 63>(),
+     {80, 63, 0, PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_change_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .carla.Vector location = 2;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.location_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .carla.Rotation rotation = 3;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.rotation_), _Internal::kHasBitsOffset + 1, 1,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 road_id = 4;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.road_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 section_id = 5;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.section_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool is_junction = 6;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.is_junction_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 junction_id = 7;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.junction_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 lane_id = 8;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // double lane_width = 9;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_width_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kDouble)},
+    // int32 lane_change = 10;
+    {PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_change_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::carla::Vector>()},
+    {::_pbi::TcParser::GetTable<::carla::Rotation>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* Waypoint::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:carla.Waypoint)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // .carla.Vector location = 2;
+  if (cached_has_bits & 0x00000001u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        2, _Internal::location(this),
+        _Internal::location(this).GetCachedSize(), target, stream);
+  }
+
+  // .carla.Rotation rotation = 3;
+  if (cached_has_bits & 0x00000002u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        3, _Internal::rotation(this),
+        _Internal::rotation(this).GetCachedSize(), target, stream);
+  }
+
+  // int32 road_id = 4;
+  if (this->_internal_road_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<4>(
+            stream, this->_internal_road_id(), target);
+  }
+
+  // int32 section_id = 5;
+  if (this->_internal_section_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<5>(
+            stream, this->_internal_section_id(), target);
+  }
+
+  // bool is_junction = 6;
+  if (this->_internal_is_junction() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        6, this->_internal_is_junction(), target);
+  }
+
+  // int32 junction_id = 7;
+  if (this->_internal_junction_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<7>(
+            stream, this->_internal_junction_id(), target);
+  }
+
+  // int32 lane_id = 8;
+  if (this->_internal_lane_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<8>(
+            stream, this->_internal_lane_id(), target);
+  }
+
+  // double lane_width = 9;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_lane_width = this->_internal_lane_width();
+  ::uint64_t raw_lane_width;
+  memcpy(&raw_lane_width, &tmp_lane_width, sizeof(tmp_lane_width));
+  if (raw_lane_width != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+        9, this->_internal_lane_width(), target);
+  }
+
+  // int32 lane_change = 10;
+  if (this->_internal_lane_change() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<10>(
+            stream, this->_internal_lane_change(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:carla.Waypoint)
+  return target;
+}
+
+::size_t Waypoint::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:carla.Waypoint)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // .carla.Vector location = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.location_);
+    }
+
+    // .carla.Rotation rotation = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.rotation_);
+    }
+
+  }
+  // int32 road_id = 4;
+  if (this->_internal_road_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_road_id());
+  }
+
+  // int32 section_id = 5;
+  if (this->_internal_section_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_section_id());
+  }
+
+  // bool is_junction = 6;
+  if (this->_internal_is_junction() != 0) {
+    total_size += 2;
+  }
+
+  // int32 junction_id = 7;
+  if (this->_internal_junction_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_junction_id());
+  }
+
+  // double lane_width = 9;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_lane_width = this->_internal_lane_width();
+  ::uint64_t raw_lane_width;
+  memcpy(&raw_lane_width, &tmp_lane_width, sizeof(tmp_lane_width));
+  if (raw_lane_width != 0) {
+    total_size += 9;
+  }
+
+  // int32 lane_id = 8;
+  if (this->_internal_lane_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_lane_id());
+  }
+
+  // int32 lane_change = 10;
+  if (this->_internal_lane_change() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_lane_change());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData Waypoint::_class_data_ = {
+    Waypoint::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* Waypoint::GetClassData() const {
+  return &_class_data_;
+}
+
+void Waypoint::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<Waypoint*>(&to_msg);
+  auto& from = static_cast<const Waypoint&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:carla.Waypoint)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_mutable_location()->::carla::Vector::MergeFrom(
+          from._internal_location());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_rotation()->::carla::Rotation::MergeFrom(
+          from._internal_rotation());
+    }
+  }
+  if (from._internal_road_id() != 0) {
+    _this->_internal_set_road_id(from._internal_road_id());
+  }
+  if (from._internal_section_id() != 0) {
+    _this->_internal_set_section_id(from._internal_section_id());
+  }
+  if (from._internal_is_junction() != 0) {
+    _this->_internal_set_is_junction(from._internal_is_junction());
+  }
+  if (from._internal_junction_id() != 0) {
+    _this->_internal_set_junction_id(from._internal_junction_id());
+  }
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_lane_width = from._internal_lane_width();
+  ::uint64_t raw_lane_width;
+  memcpy(&raw_lane_width, &tmp_lane_width, sizeof(tmp_lane_width));
+  if (raw_lane_width != 0) {
+    _this->_internal_set_lane_width(from._internal_lane_width());
+  }
+  if (from._internal_lane_id() != 0) {
+    _this->_internal_set_lane_id(from._internal_lane_id());
+  }
+  if (from._internal_lane_change() != 0) {
+    _this->_internal_set_lane_change(from._internal_lane_change());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Waypoint::CopyFrom(const Waypoint& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:carla.Waypoint)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool Waypoint::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* Waypoint::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Waypoint::InternalSwap(Waypoint* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.lane_change_)
+      + sizeof(Waypoint::_impl_.lane_change_)
+      - PROTOBUF_FIELD_OFFSET(Waypoint, _impl_.location_)>(
+          reinterpret_cast<char*>(&_impl_.location_),
+          reinterpret_cast<char*>(&other->_impl_.location_));
+}
+
+::google::protobuf::Metadata Waypoint::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
+      file_level_metadata_carla_2eproto[12]);
+}
+// ===================================================================
+
+class ObjectMinimal::_Internal {
+ public:
+  using HasBits = decltype(std::declval<ObjectMinimal>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_._has_bits_);
+  static const ::carla::Transform& transform(const ObjectMinimal* msg);
+  static void set_has_transform(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+};
+
+const ::carla::Transform& ObjectMinimal::_Internal::transform(const ObjectMinimal* msg) {
+  return *msg->_impl_.transform_;
+}
+ObjectMinimal::ObjectMinimal(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:carla.ObjectMinimal)
+}
+inline PROTOBUF_NDEBUG_INLINE ObjectMinimal::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0} {}
+
+ObjectMinimal::ObjectMinimal(
+    ::google::protobuf::Arena* arena,
+    const ObjectMinimal& from)
+    : ::google::protobuf::Message(arena) {
+  ObjectMinimal* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.transform_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::carla::Transform>(arena, *from._impl_.transform_)
+                : nullptr;
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, length_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, length_),
+           offsetof(Impl_, id_) -
+               offsetof(Impl_, length_) +
+               sizeof(Impl_::id_));
+
+  // @@protoc_insertion_point(copy_constructor:carla.ObjectMinimal)
+}
+inline PROTOBUF_NDEBUG_INLINE ObjectMinimal::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void ObjectMinimal::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, transform_),
+           0,
+           offsetof(Impl_, id_) -
+               offsetof(Impl_, transform_) +
+               sizeof(Impl_::id_));
+}
+ObjectMinimal::~ObjectMinimal() {
+  // @@protoc_insertion_point(destructor:carla.ObjectMinimal)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void ObjectMinimal::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  delete _impl_.transform_;
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void ObjectMinimal::Clear() {
+// @@protoc_insertion_point(message_clear_start:carla.ObjectMinimal)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.transform_ != nullptr);
+    _impl_.transform_->Clear();
+  }
+  ::memset(&_impl_.length_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.id_) -
+      reinterpret_cast<char*>(&_impl_.length_)) + sizeof(_impl_.id_));
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* ObjectMinimal::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 4, 1, 0, 2> ObjectMinimal::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_._has_bits_),
+    0, // no _extensions_
+    4, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_ObjectMinimal_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // double width = 4;
+    {::_pbi::TcParser::FastF64S1,
+     {33, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.width_)}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ObjectMinimal, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.id_)}},
+    // .carla.Transform transform = 2;
+    {::_pbi::TcParser::FastMtS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.transform_)}},
+    // double length = 3;
+    {::_pbi::TcParser::FastF64S1,
+     {25, 63, 0, PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.length_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // .carla.Transform transform = 2;
+    {PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.transform_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // double length = 3;
+    {PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.length_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kDouble)},
+    // double width = 4;
+    {PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.width_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kDouble)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::carla::Transform>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* ObjectMinimal::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:carla.ObjectMinimal)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // .carla.Transform transform = 2;
+  if (cached_has_bits & 0x00000001u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        2, _Internal::transform(this),
+        _Internal::transform(this).GetCachedSize(), target, stream);
+  }
+
+  // double length = 3;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_length = this->_internal_length();
+  ::uint64_t raw_length;
+  memcpy(&raw_length, &tmp_length, sizeof(tmp_length));
+  if (raw_length != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+        3, this->_internal_length(), target);
+  }
+
+  // double width = 4;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_width = this->_internal_width();
+  ::uint64_t raw_width;
+  memcpy(&raw_width, &tmp_width, sizeof(tmp_width));
+  if (raw_width != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+        4, this->_internal_width(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:carla.ObjectMinimal)
+  return target;
+}
+
+::size_t ObjectMinimal::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:carla.ObjectMinimal)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .carla.Transform transform = 2;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size +=
+        1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.transform_);
+  }
+
+  // double length = 3;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_length = this->_internal_length();
+  ::uint64_t raw_length;
+  memcpy(&raw_length, &tmp_length, sizeof(tmp_length));
+  if (raw_length != 0) {
+    total_size += 9;
+  }
+
+  // double width = 4;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_width = this->_internal_width();
+  ::uint64_t raw_width;
+  memcpy(&raw_width, &tmp_width, sizeof(tmp_width));
+  if (raw_width != 0) {
+    total_size += 9;
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData ObjectMinimal::_class_data_ = {
+    ObjectMinimal::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* ObjectMinimal::GetClassData() const {
+  return &_class_data_;
+}
+
+void ObjectMinimal::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<ObjectMinimal*>(&to_msg);
+  auto& from = static_cast<const ObjectMinimal&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:carla.ObjectMinimal)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
+    _this->_internal_mutable_transform()->::carla::Transform::MergeFrom(
+        from._internal_transform());
+  }
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_length = from._internal_length();
+  ::uint64_t raw_length;
+  memcpy(&raw_length, &tmp_length, sizeof(tmp_length));
+  if (raw_length != 0) {
+    _this->_internal_set_length(from._internal_length());
+  }
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_width = from._internal_width();
+  ::uint64_t raw_width;
+  memcpy(&raw_width, &tmp_width, sizeof(tmp_width));
+  if (raw_width != 0) {
+    _this->_internal_set_width(from._internal_width());
+  }
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ObjectMinimal::CopyFrom(const ObjectMinimal& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:carla.ObjectMinimal)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool ObjectMinimal::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* ObjectMinimal::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void ObjectMinimal::InternalSwap(ObjectMinimal* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.id_)
+      + sizeof(ObjectMinimal::_impl_.id_)
+      - PROTOBUF_FIELD_OFFSET(ObjectMinimal, _impl_.transform_)>(
+          reinterpret_cast<char*>(&_impl_.transform_),
+          reinterpret_cast<char*>(&other->_impl_.transform_));
+}
+
+::google::protobuf::Metadata ObjectMinimal::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
+      file_level_metadata_carla_2eproto[13]);
+}
+// ===================================================================
+
+class DoubleValue::_Internal {
+ public:
+};
+
+DoubleValue::DoubleValue(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:carla.DoubleValue)
+}
+DoubleValue::DoubleValue(
+    ::google::protobuf::Arena* arena, const DoubleValue& from)
+    : DoubleValue(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE DoubleValue::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void DoubleValue::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.value_ = {};
+}
+DoubleValue::~DoubleValue() {
+  // @@protoc_insertion_point(destructor:carla.DoubleValue)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void DoubleValue::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void DoubleValue::Clear() {
+// @@protoc_insertion_point(message_clear_start:carla.DoubleValue)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.value_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* DoubleValue::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> DoubleValue::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_DoubleValue_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // double value = 1;
+    {::_pbi::TcParser::FastF64S1,
+     {9, 63, 0, PROTOBUF_FIELD_OFFSET(DoubleValue, _impl_.value_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // double value = 1;
+    {PROTOBUF_FIELD_OFFSET(DoubleValue, _impl_.value_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kDouble)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+::uint8_t* DoubleValue::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:carla.DoubleValue)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // double value = 1;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_value = this->_internal_value();
+  ::uint64_t raw_value;
+  memcpy(&raw_value, &tmp_value, sizeof(tmp_value));
+  if (raw_value != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(
+        1, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:carla.DoubleValue)
+  return target;
+}
+
+::size_t DoubleValue::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:carla.DoubleValue)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // double value = 1;
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_value = this->_internal_value();
+  ::uint64_t raw_value;
+  memcpy(&raw_value, &tmp_value, sizeof(tmp_value));
+  if (raw_value != 0) {
+    total_size += 9;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData DoubleValue::_class_data_ = {
+    DoubleValue::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* DoubleValue::GetClassData() const {
+  return &_class_data_;
+}
+
+void DoubleValue::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<DoubleValue*>(&to_msg);
+  auto& from = static_cast<const DoubleValue&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:carla.DoubleValue)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  static_assert(sizeof(::uint64_t) == sizeof(double),
+                "Code assumes ::uint64_t and double are the same size.");
+  double tmp_value = from._internal_value();
+  ::uint64_t raw_value;
+  memcpy(&raw_value, &tmp_value, sizeof(tmp_value));
+  if (raw_value != 0) {
+    _this->_internal_set_value(from._internal_value());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void DoubleValue::CopyFrom(const DoubleValue& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:carla.DoubleValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool DoubleValue::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* DoubleValue::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void DoubleValue::InternalSwap(DoubleValue* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+        swap(_impl_.value_, other->_impl_.value_);
+}
+
+::google::protobuf::Metadata DoubleValue::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_carla_2eproto_getter, &descriptor_table_carla_2eproto_once,
+      file_level_metadata_carla_2eproto[14]);
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace carla

@@ -200,7 +200,7 @@ void VRUBasicService::receiveVam(BTPDataIndication_t dataIndication, Address fro
       free(buffer);
 
       /** Decoding **/
-      decoded_vam = asn1cpp::uper::decode(packetContent, VAM);
+      decoded_vam = asn1cpp::uper::decodeASN(packetContent, VAM);
 
       if(bool(decoded_vam)==false) {
           NS_LOG_ERROR("Warning: unable to decode a received VAM.");

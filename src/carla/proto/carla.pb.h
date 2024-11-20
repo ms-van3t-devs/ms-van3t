@@ -66,6 +66,9 @@ extern BooleanDefaultTypeInternal _Boolean_default_instance_;
 class Control;
 struct ControlDefaultTypeInternal;
 extern ControlDefaultTypeInternal _Control_default_instance_;
+class DoubleValue;
+struct DoubleValueDefaultTypeInternal;
+extern DoubleValueDefaultTypeInternal _DoubleValue_default_instance_;
 class Number;
 struct NumberDefaultTypeInternal;
 extern NumberDefaultTypeInternal _Number_default_instance_;
@@ -75,9 +78,15 @@ extern ObjectDefaultTypeInternal _Object_default_instance_;
 class ObjectIn;
 struct ObjectInDefaultTypeInternal;
 extern ObjectInDefaultTypeInternal _ObjectIn_default_instance_;
+class ObjectMinimal;
+struct ObjectMinimalDefaultTypeInternal;
+extern ObjectMinimalDefaultTypeInternal _ObjectMinimal_default_instance_;
 class Objects;
 struct ObjectsDefaultTypeInternal;
 extern ObjectsDefaultTypeInternal _Objects_default_instance_;
+class ObjectsIn;
+struct ObjectsInDefaultTypeInternal;
+extern ObjectsInDefaultTypeInternal _ObjectsIn_default_instance_;
 class Rotation;
 struct RotationDefaultTypeInternal;
 extern RotationDefaultTypeInternal _Rotation_default_instance_;
@@ -90,6 +99,9 @@ extern VectorDefaultTypeInternal _Vector_default_instance_;
 class Vehicle;
 struct VehicleDefaultTypeInternal;
 extern VehicleDefaultTypeInternal _Vehicle_default_instance_;
+class Waypoint;
+struct WaypointDefaultTypeInternal;
+extern WaypointDefaultTypeInternal _Waypoint_default_instance_;
 }  // namespace carla
 namespace google {
 namespace protobuf {
@@ -676,6 +688,181 @@ class Number final :
   friend struct ::TableStruct_carla_2eproto;
 };// -------------------------------------------------------------------
 
+class DoubleValue final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.DoubleValue) */ {
+ public:
+  inline DoubleValue() : DoubleValue(nullptr) {}
+  ~DoubleValue() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR DoubleValue(::google::protobuf::internal::ConstantInitialized);
+
+  inline DoubleValue(const DoubleValue& from)
+      : DoubleValue(nullptr, from) {}
+  DoubleValue(DoubleValue&& from) noexcept
+    : DoubleValue() {
+    *this = ::std::move(from);
+  }
+
+  inline DoubleValue& operator=(const DoubleValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DoubleValue& operator=(DoubleValue&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const DoubleValue& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DoubleValue* internal_default_instance() {
+    return reinterpret_cast<const DoubleValue*>(
+               &_DoubleValue_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(DoubleValue& a, DoubleValue& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DoubleValue* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DoubleValue* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  DoubleValue* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<DoubleValue>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const DoubleValue& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const DoubleValue& from) {
+    DoubleValue::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(DoubleValue* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "carla.DoubleValue";
+  }
+  protected:
+  explicit DoubleValue(::google::protobuf::Arena* arena);
+  DoubleValue(::google::protobuf::Arena* arena, const DoubleValue& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kValueFieldNumber = 1,
+  };
+  // double value = 1;
+  void clear_value() ;
+  double value() const;
+  void set_value(double value);
+
+  private:
+  double _internal_value() const;
+  void _internal_set_value(double value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:carla.DoubleValue)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    double value_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_carla_2eproto;
+};// -------------------------------------------------------------------
+
 class Boolean final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.Boolean) */ {
  public:
@@ -1035,6 +1222,288 @@ class ActorIds final :
   friend struct ::TableStruct_carla_2eproto;
 };// -------------------------------------------------------------------
 
+class Waypoint final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.Waypoint) */ {
+ public:
+  inline Waypoint() : Waypoint(nullptr) {}
+  ~Waypoint() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR Waypoint(::google::protobuf::internal::ConstantInitialized);
+
+  inline Waypoint(const Waypoint& from)
+      : Waypoint(nullptr, from) {}
+  Waypoint(Waypoint&& from) noexcept
+    : Waypoint() {
+    *this = ::std::move(from);
+  }
+
+  inline Waypoint& operator=(const Waypoint& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Waypoint& operator=(Waypoint&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Waypoint& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Waypoint* internal_default_instance() {
+    return reinterpret_cast<const Waypoint*>(
+               &_Waypoint_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(Waypoint& a, Waypoint& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Waypoint* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Waypoint* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Waypoint* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Waypoint>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const Waypoint& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const Waypoint& from) {
+    Waypoint::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(Waypoint* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "carla.Waypoint";
+  }
+  protected:
+  explicit Waypoint(::google::protobuf::Arena* arena);
+  Waypoint(::google::protobuf::Arena* arena, const Waypoint& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kLocationFieldNumber = 2,
+    kRotationFieldNumber = 3,
+    kRoadIdFieldNumber = 4,
+    kSectionIdFieldNumber = 5,
+    kIsJunctionFieldNumber = 6,
+    kJunctionIdFieldNumber = 7,
+    kLaneWidthFieldNumber = 9,
+    kLaneIdFieldNumber = 8,
+    kLaneChangeFieldNumber = 10,
+  };
+  // .carla.Vector location = 2;
+  bool has_location() const;
+  void clear_location() ;
+  const ::carla::Vector& location() const;
+  PROTOBUF_NODISCARD ::carla::Vector* release_location();
+  ::carla::Vector* mutable_location();
+  void set_allocated_location(::carla::Vector* value);
+  void unsafe_arena_set_allocated_location(::carla::Vector* value);
+  ::carla::Vector* unsafe_arena_release_location();
+
+  private:
+  const ::carla::Vector& _internal_location() const;
+  ::carla::Vector* _internal_mutable_location();
+
+  public:
+  // .carla.Rotation rotation = 3;
+  bool has_rotation() const;
+  void clear_rotation() ;
+  const ::carla::Rotation& rotation() const;
+  PROTOBUF_NODISCARD ::carla::Rotation* release_rotation();
+  ::carla::Rotation* mutable_rotation();
+  void set_allocated_rotation(::carla::Rotation* value);
+  void unsafe_arena_set_allocated_rotation(::carla::Rotation* value);
+  ::carla::Rotation* unsafe_arena_release_rotation();
+
+  private:
+  const ::carla::Rotation& _internal_rotation() const;
+  ::carla::Rotation* _internal_mutable_rotation();
+
+  public:
+  // int32 road_id = 4;
+  void clear_road_id() ;
+  ::int32_t road_id() const;
+  void set_road_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_road_id() const;
+  void _internal_set_road_id(::int32_t value);
+
+  public:
+  // int32 section_id = 5;
+  void clear_section_id() ;
+  ::int32_t section_id() const;
+  void set_section_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_section_id() const;
+  void _internal_set_section_id(::int32_t value);
+
+  public:
+  // bool is_junction = 6;
+  void clear_is_junction() ;
+  bool is_junction() const;
+  void set_is_junction(bool value);
+
+  private:
+  bool _internal_is_junction() const;
+  void _internal_set_is_junction(bool value);
+
+  public:
+  // int32 junction_id = 7;
+  void clear_junction_id() ;
+  ::int32_t junction_id() const;
+  void set_junction_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_junction_id() const;
+  void _internal_set_junction_id(::int32_t value);
+
+  public:
+  // double lane_width = 9;
+  void clear_lane_width() ;
+  double lane_width() const;
+  void set_lane_width(double value);
+
+  private:
+  double _internal_lane_width() const;
+  void _internal_set_lane_width(double value);
+
+  public:
+  // int32 lane_id = 8;
+  void clear_lane_id() ;
+  ::int32_t lane_id() const;
+  void set_lane_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_lane_id() const;
+  void _internal_set_lane_id(::int32_t value);
+
+  public:
+  // int32 lane_change = 10;
+  void clear_lane_change() ;
+  ::int32_t lane_change() const;
+  void set_lane_change(::int32_t value);
+
+  private:
+  ::int32_t _internal_lane_change() const;
+  void _internal_set_lane_change(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:carla.Waypoint)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      4, 9, 2,
+      0, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::carla::Vector* location_;
+    ::carla::Rotation* rotation_;
+    ::int32_t road_id_;
+    ::int32_t section_id_;
+    bool is_junction_;
+    ::int32_t junction_id_;
+    double lane_width_;
+    ::int32_t lane_id_;
+    ::int32_t lane_change_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_carla_2eproto;
+};// -------------------------------------------------------------------
+
 class Transform final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.Transform) */ {
  public:
@@ -1292,7 +1761,7 @@ class Control final :
                &_Control_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(Control& a, Control& b) {
     a.Swap(&b);
@@ -1766,6 +2235,223 @@ class Vehicle final :
   friend struct ::TableStruct_carla_2eproto;
 };// -------------------------------------------------------------------
 
+class ObjectMinimal final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.ObjectMinimal) */ {
+ public:
+  inline ObjectMinimal() : ObjectMinimal(nullptr) {}
+  ~ObjectMinimal() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR ObjectMinimal(::google::protobuf::internal::ConstantInitialized);
+
+  inline ObjectMinimal(const ObjectMinimal& from)
+      : ObjectMinimal(nullptr, from) {}
+  ObjectMinimal(ObjectMinimal&& from) noexcept
+    : ObjectMinimal() {
+    *this = ::std::move(from);
+  }
+
+  inline ObjectMinimal& operator=(const ObjectMinimal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ObjectMinimal& operator=(ObjectMinimal&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ObjectMinimal& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ObjectMinimal* internal_default_instance() {
+    return reinterpret_cast<const ObjectMinimal*>(
+               &_ObjectMinimal_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(ObjectMinimal& a, ObjectMinimal& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ObjectMinimal* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ObjectMinimal* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ObjectMinimal* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ObjectMinimal>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ObjectMinimal& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const ObjectMinimal& from) {
+    ObjectMinimal::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(ObjectMinimal* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "carla.ObjectMinimal";
+  }
+  protected:
+  explicit ObjectMinimal(::google::protobuf::Arena* arena);
+  ObjectMinimal(::google::protobuf::Arena* arena, const ObjectMinimal& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTransformFieldNumber = 2,
+    kLengthFieldNumber = 3,
+    kWidthFieldNumber = 4,
+    kIdFieldNumber = 1,
+  };
+  // .carla.Transform transform = 2;
+  bool has_transform() const;
+  void clear_transform() ;
+  const ::carla::Transform& transform() const;
+  PROTOBUF_NODISCARD ::carla::Transform* release_transform();
+  ::carla::Transform* mutable_transform();
+  void set_allocated_transform(::carla::Transform* value);
+  void unsafe_arena_set_allocated_transform(::carla::Transform* value);
+  ::carla::Transform* unsafe_arena_release_transform();
+
+  private:
+  const ::carla::Transform& _internal_transform() const;
+  ::carla::Transform* _internal_mutable_transform();
+
+  public:
+  // double length = 3;
+  void clear_length() ;
+  double length() const;
+  void set_length(double value);
+
+  private:
+  double _internal_length() const;
+  void _internal_set_length(double value);
+
+  public:
+  // double width = 4;
+  void clear_width() ;
+  double width() const;
+  void set_width(double value);
+
+  private:
+  double _internal_width() const;
+  void _internal_set_width(double value);
+
+  public:
+  // int32 id = 1;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:carla.ObjectMinimal)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 4, 1,
+      0, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::carla::Transform* transform_;
+    double length_;
+    double width_;
+    ::int32_t id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_carla_2eproto;
+};// -------------------------------------------------------------------
+
 class Object final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.Object) */ {
  public:
@@ -2125,6 +2811,213 @@ class Object final :
   friend struct ::TableStruct_carla_2eproto;
 };// -------------------------------------------------------------------
 
+class ObjectsIn final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.ObjectsIn) */ {
+ public:
+  inline ObjectsIn() : ObjectsIn(nullptr) {}
+  ~ObjectsIn() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR ObjectsIn(::google::protobuf::internal::ConstantInitialized);
+
+  inline ObjectsIn(const ObjectsIn& from)
+      : ObjectsIn(nullptr, from) {}
+  ObjectsIn(ObjectsIn&& from) noexcept
+    : ObjectsIn() {
+    *this = ::std::move(from);
+  }
+
+  inline ObjectsIn& operator=(const ObjectsIn& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ObjectsIn& operator=(ObjectsIn&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ObjectsIn& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ObjectsIn* internal_default_instance() {
+    return reinterpret_cast<const ObjectsIn*>(
+               &_ObjectsIn_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(ObjectsIn& a, ObjectsIn& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ObjectsIn* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ObjectsIn* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ObjectsIn* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ObjectsIn>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ObjectsIn& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const ObjectsIn& from) {
+    ObjectsIn::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(ObjectsIn* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "carla.ObjectsIn";
+  }
+  protected:
+  explicit ObjectsIn(::google::protobuf::Arena* arena);
+  ObjectsIn(::google::protobuf::Arena* arena, const ObjectsIn& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCpmObjectsFieldNumber = 1,
+    kEgoIdFieldNumber = 2,
+    kFromIdFieldNumber = 3,
+  };
+  // repeated .carla.Object cpmObjects = 1;
+  int cpmobjects_size() const;
+  private:
+  int _internal_cpmobjects_size() const;
+
+  public:
+  void clear_cpmobjects() ;
+  ::carla::Object* mutable_cpmobjects(int index);
+  ::google::protobuf::RepeatedPtrField< ::carla::Object >*
+      mutable_cpmobjects();
+  private:
+  const ::google::protobuf::RepeatedPtrField<::carla::Object>& _internal_cpmobjects() const;
+  ::google::protobuf::RepeatedPtrField<::carla::Object>* _internal_mutable_cpmobjects();
+  public:
+  const ::carla::Object& cpmobjects(int index) const;
+  ::carla::Object* add_cpmobjects();
+  const ::google::protobuf::RepeatedPtrField< ::carla::Object >&
+      cpmobjects() const;
+  // int32 egoId = 2;
+  void clear_egoid() ;
+  ::int32_t egoid() const;
+  void set_egoid(::int32_t value);
+
+  private:
+  ::int32_t _internal_egoid() const;
+  void _internal_set_egoid(::int32_t value);
+
+  public:
+  // int32 fromId = 3;
+  void clear_fromid() ;
+  ::int32_t fromid() const;
+  void set_fromid(::int32_t value);
+
+  private:
+  ::int32_t _internal_fromid() const;
+  void _internal_set_fromid(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:carla.ObjectsIn)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 1,
+      0, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::RepeatedPtrField< ::carla::Object > cpmobjects_;
+    ::int32_t egoid_;
+    ::int32_t fromid_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_carla_2eproto;
+};// -------------------------------------------------------------------
+
 class Objects final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:carla.Objects) */ {
  public:
@@ -2367,7 +3260,7 @@ class ObjectIn final :
                &_ObjectIn_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(ObjectIn& a, ObjectIn& b) {
     a.Swap(&b);
@@ -4142,6 +5035,105 @@ inline void Boolean::_internal_set_value(bool value) {
 
 // -------------------------------------------------------------------
 
+// ObjectsIn
+
+// repeated .carla.Object cpmObjects = 1;
+inline int ObjectsIn::_internal_cpmobjects_size() const {
+  return _internal_cpmobjects().size();
+}
+inline int ObjectsIn::cpmobjects_size() const {
+  return _internal_cpmobjects_size();
+}
+inline void ObjectsIn::clear_cpmobjects() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.cpmobjects_.Clear();
+}
+inline ::carla::Object* ObjectsIn::mutable_cpmobjects(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:carla.ObjectsIn.cpmObjects)
+  return _internal_mutable_cpmobjects()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::carla::Object>* ObjectsIn::mutable_cpmobjects()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:carla.ObjectsIn.cpmObjects)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_cpmobjects();
+}
+inline const ::carla::Object& ObjectsIn::cpmobjects(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:carla.ObjectsIn.cpmObjects)
+  return _internal_cpmobjects().Get(index);
+}
+inline ::carla::Object* ObjectsIn::add_cpmobjects() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::carla::Object* _add = _internal_mutable_cpmobjects()->Add();
+  // @@protoc_insertion_point(field_add:carla.ObjectsIn.cpmObjects)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::carla::Object>& ObjectsIn::cpmobjects() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:carla.ObjectsIn.cpmObjects)
+  return _internal_cpmobjects();
+}
+inline const ::google::protobuf::RepeatedPtrField<::carla::Object>&
+ObjectsIn::_internal_cpmobjects() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.cpmobjects_;
+}
+inline ::google::protobuf::RepeatedPtrField<::carla::Object>*
+ObjectsIn::_internal_mutable_cpmobjects() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.cpmobjects_;
+}
+
+// int32 egoId = 2;
+inline void ObjectsIn::clear_egoid() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.egoid_ = 0;
+}
+inline ::int32_t ObjectsIn::egoid() const {
+  // @@protoc_insertion_point(field_get:carla.ObjectsIn.egoId)
+  return _internal_egoid();
+}
+inline void ObjectsIn::set_egoid(::int32_t value) {
+  _internal_set_egoid(value);
+  // @@protoc_insertion_point(field_set:carla.ObjectsIn.egoId)
+}
+inline ::int32_t ObjectsIn::_internal_egoid() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.egoid_;
+}
+inline void ObjectsIn::_internal_set_egoid(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.egoid_ = value;
+}
+
+// int32 fromId = 3;
+inline void ObjectsIn::clear_fromid() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.fromid_ = 0;
+}
+inline ::int32_t ObjectsIn::fromid() const {
+  // @@protoc_insertion_point(field_get:carla.ObjectsIn.fromId)
+  return _internal_fromid();
+}
+inline void ObjectsIn::set_fromid(::int32_t value) {
+  _internal_set_fromid(value);
+  // @@protoc_insertion_point(field_set:carla.ObjectsIn.fromId)
+}
+inline ::int32_t ObjectsIn::_internal_fromid() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.fromid_;
+}
+inline void ObjectsIn::_internal_set_fromid(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.fromid_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ObjectIn
 
 // .carla.Object object = 1;
@@ -4453,6 +5445,559 @@ inline void Control::_internal_set_acceleration(double value) {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   ;
   _impl_.acceleration_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Waypoint
+
+// .carla.Vector location = 2;
+inline bool Waypoint::has_location() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
+  return value;
+}
+inline void Waypoint::clear_location() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (_impl_.location_ != nullptr) _impl_.location_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::carla::Vector& Waypoint::_internal_location() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  const ::carla::Vector* p = _impl_.location_;
+  return p != nullptr ? *p : reinterpret_cast<const ::carla::Vector&>(::carla::_Vector_default_instance_);
+}
+inline const ::carla::Vector& Waypoint::location() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.location)
+  return _internal_location();
+}
+inline void Waypoint::unsafe_arena_set_allocated_location(::carla::Vector* value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.location_);
+  }
+  _impl_.location_ = reinterpret_cast<::carla::Vector*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:carla.Waypoint.location)
+}
+inline ::carla::Vector* Waypoint::release_location() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::carla::Vector* released = _impl_.location_;
+  _impl_.location_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::carla::Vector* Waypoint::unsafe_arena_release_location() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  // @@protoc_insertion_point(field_release:carla.Waypoint.location)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::carla::Vector* temp = _impl_.location_;
+  _impl_.location_ = nullptr;
+  return temp;
+}
+inline ::carla::Vector* Waypoint::_internal_mutable_location() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.location_ == nullptr) {
+    auto* p = CreateMaybeMessage<::carla::Vector>(GetArena());
+    _impl_.location_ = reinterpret_cast<::carla::Vector*>(p);
+  }
+  return _impl_.location_;
+}
+inline ::carla::Vector* Waypoint::mutable_location() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::carla::Vector* _msg = _internal_mutable_location();
+  // @@protoc_insertion_point(field_mutable:carla.Waypoint.location)
+  return _msg;
+}
+inline void Waypoint::set_allocated_location(::carla::Vector* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (message_arena == nullptr) {
+    delete reinterpret_cast<::carla::Vector*>(_impl_.location_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = reinterpret_cast<::carla::Vector*>(value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.location_ = reinterpret_cast<::carla::Vector*>(value);
+  // @@protoc_insertion_point(field_set_allocated:carla.Waypoint.location)
+}
+
+// .carla.Rotation rotation = 3;
+inline bool Waypoint::has_rotation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.rotation_ != nullptr);
+  return value;
+}
+inline void Waypoint::clear_rotation() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (_impl_.rotation_ != nullptr) _impl_.rotation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::carla::Rotation& Waypoint::_internal_rotation() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  const ::carla::Rotation* p = _impl_.rotation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::carla::Rotation&>(::carla::_Rotation_default_instance_);
+}
+inline const ::carla::Rotation& Waypoint::rotation() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.rotation)
+  return _internal_rotation();
+}
+inline void Waypoint::unsafe_arena_set_allocated_rotation(::carla::Rotation* value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.rotation_);
+  }
+  _impl_.rotation_ = reinterpret_cast<::carla::Rotation*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:carla.Waypoint.rotation)
+}
+inline ::carla::Rotation* Waypoint::release_rotation() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::carla::Rotation* released = _impl_.rotation_;
+  _impl_.rotation_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::carla::Rotation* Waypoint::unsafe_arena_release_rotation() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  // @@protoc_insertion_point(field_release:carla.Waypoint.rotation)
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::carla::Rotation* temp = _impl_.rotation_;
+  _impl_.rotation_ = nullptr;
+  return temp;
+}
+inline ::carla::Rotation* Waypoint::_internal_mutable_rotation() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000002u;
+  if (_impl_.rotation_ == nullptr) {
+    auto* p = CreateMaybeMessage<::carla::Rotation>(GetArena());
+    _impl_.rotation_ = reinterpret_cast<::carla::Rotation*>(p);
+  }
+  return _impl_.rotation_;
+}
+inline ::carla::Rotation* Waypoint::mutable_rotation() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::carla::Rotation* _msg = _internal_mutable_rotation();
+  // @@protoc_insertion_point(field_mutable:carla.Waypoint.rotation)
+  return _msg;
+}
+inline void Waypoint::set_allocated_rotation(::carla::Rotation* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (message_arena == nullptr) {
+    delete reinterpret_cast<::carla::Rotation*>(_impl_.rotation_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = reinterpret_cast<::carla::Rotation*>(value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+
+  _impl_.rotation_ = reinterpret_cast<::carla::Rotation*>(value);
+  // @@protoc_insertion_point(field_set_allocated:carla.Waypoint.rotation)
+}
+
+// int32 road_id = 4;
+inline void Waypoint::clear_road_id() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.road_id_ = 0;
+}
+inline ::int32_t Waypoint::road_id() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.road_id)
+  return _internal_road_id();
+}
+inline void Waypoint::set_road_id(::int32_t value) {
+  _internal_set_road_id(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.road_id)
+}
+inline ::int32_t Waypoint::_internal_road_id() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.road_id_;
+}
+inline void Waypoint::_internal_set_road_id(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.road_id_ = value;
+}
+
+// int32 section_id = 5;
+inline void Waypoint::clear_section_id() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.section_id_ = 0;
+}
+inline ::int32_t Waypoint::section_id() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.section_id)
+  return _internal_section_id();
+}
+inline void Waypoint::set_section_id(::int32_t value) {
+  _internal_set_section_id(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.section_id)
+}
+inline ::int32_t Waypoint::_internal_section_id() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.section_id_;
+}
+inline void Waypoint::_internal_set_section_id(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.section_id_ = value;
+}
+
+// bool is_junction = 6;
+inline void Waypoint::clear_is_junction() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.is_junction_ = false;
+}
+inline bool Waypoint::is_junction() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.is_junction)
+  return _internal_is_junction();
+}
+inline void Waypoint::set_is_junction(bool value) {
+  _internal_set_is_junction(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.is_junction)
+}
+inline bool Waypoint::_internal_is_junction() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.is_junction_;
+}
+inline void Waypoint::_internal_set_is_junction(bool value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.is_junction_ = value;
+}
+
+// int32 junction_id = 7;
+inline void Waypoint::clear_junction_id() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.junction_id_ = 0;
+}
+inline ::int32_t Waypoint::junction_id() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.junction_id)
+  return _internal_junction_id();
+}
+inline void Waypoint::set_junction_id(::int32_t value) {
+  _internal_set_junction_id(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.junction_id)
+}
+inline ::int32_t Waypoint::_internal_junction_id() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.junction_id_;
+}
+inline void Waypoint::_internal_set_junction_id(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.junction_id_ = value;
+}
+
+// int32 lane_id = 8;
+inline void Waypoint::clear_lane_id() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.lane_id_ = 0;
+}
+inline ::int32_t Waypoint::lane_id() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.lane_id)
+  return _internal_lane_id();
+}
+inline void Waypoint::set_lane_id(::int32_t value) {
+  _internal_set_lane_id(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.lane_id)
+}
+inline ::int32_t Waypoint::_internal_lane_id() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.lane_id_;
+}
+inline void Waypoint::_internal_set_lane_id(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.lane_id_ = value;
+}
+
+// double lane_width = 9;
+inline void Waypoint::clear_lane_width() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.lane_width_ = 0;
+}
+inline double Waypoint::lane_width() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.lane_width)
+  return _internal_lane_width();
+}
+inline void Waypoint::set_lane_width(double value) {
+  _internal_set_lane_width(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.lane_width)
+}
+inline double Waypoint::_internal_lane_width() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.lane_width_;
+}
+inline void Waypoint::_internal_set_lane_width(double value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.lane_width_ = value;
+}
+
+// int32 lane_change = 10;
+inline void Waypoint::clear_lane_change() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.lane_change_ = 0;
+}
+inline ::int32_t Waypoint::lane_change() const {
+  // @@protoc_insertion_point(field_get:carla.Waypoint.lane_change)
+  return _internal_lane_change();
+}
+inline void Waypoint::set_lane_change(::int32_t value) {
+  _internal_set_lane_change(value);
+  // @@protoc_insertion_point(field_set:carla.Waypoint.lane_change)
+}
+inline ::int32_t Waypoint::_internal_lane_change() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.lane_change_;
+}
+inline void Waypoint::_internal_set_lane_change(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.lane_change_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ObjectMinimal
+
+// int32 id = 1;
+inline void ObjectMinimal::clear_id() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.id_ = 0;
+}
+inline ::int32_t ObjectMinimal::id() const {
+  // @@protoc_insertion_point(field_get:carla.ObjectMinimal.id)
+  return _internal_id();
+}
+inline void ObjectMinimal::set_id(::int32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:carla.ObjectMinimal.id)
+}
+inline ::int32_t ObjectMinimal::_internal_id() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.id_;
+}
+inline void ObjectMinimal::_internal_set_id(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.id_ = value;
+}
+
+// .carla.Transform transform = 2;
+inline bool ObjectMinimal::has_transform() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.transform_ != nullptr);
+  return value;
+}
+inline void ObjectMinimal::clear_transform() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (_impl_.transform_ != nullptr) _impl_.transform_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::carla::Transform& ObjectMinimal::_internal_transform() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  const ::carla::Transform* p = _impl_.transform_;
+  return p != nullptr ? *p : reinterpret_cast<const ::carla::Transform&>(::carla::_Transform_default_instance_);
+}
+inline const ::carla::Transform& ObjectMinimal::transform() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:carla.ObjectMinimal.transform)
+  return _internal_transform();
+}
+inline void ObjectMinimal::unsafe_arena_set_allocated_transform(::carla::Transform* value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.transform_);
+  }
+  _impl_.transform_ = reinterpret_cast<::carla::Transform*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:carla.ObjectMinimal.transform)
+}
+inline ::carla::Transform* ObjectMinimal::release_transform() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::carla::Transform* released = _impl_.transform_;
+  _impl_.transform_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::carla::Transform* ObjectMinimal::unsafe_arena_release_transform() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  // @@protoc_insertion_point(field_release:carla.ObjectMinimal.transform)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::carla::Transform* temp = _impl_.transform_;
+  _impl_.transform_ = nullptr;
+  return temp;
+}
+inline ::carla::Transform* ObjectMinimal::_internal_mutable_transform() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.transform_ == nullptr) {
+    auto* p = CreateMaybeMessage<::carla::Transform>(GetArena());
+    _impl_.transform_ = reinterpret_cast<::carla::Transform*>(p);
+  }
+  return _impl_.transform_;
+}
+inline ::carla::Transform* ObjectMinimal::mutable_transform() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::carla::Transform* _msg = _internal_mutable_transform();
+  // @@protoc_insertion_point(field_mutable:carla.ObjectMinimal.transform)
+  return _msg;
+}
+inline void ObjectMinimal::set_allocated_transform(::carla::Transform* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (message_arena == nullptr) {
+    delete reinterpret_cast<::carla::Transform*>(_impl_.transform_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = reinterpret_cast<::carla::Transform*>(value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.transform_ = reinterpret_cast<::carla::Transform*>(value);
+  // @@protoc_insertion_point(field_set_allocated:carla.ObjectMinimal.transform)
+}
+
+// double length = 3;
+inline void ObjectMinimal::clear_length() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.length_ = 0;
+}
+inline double ObjectMinimal::length() const {
+  // @@protoc_insertion_point(field_get:carla.ObjectMinimal.length)
+  return _internal_length();
+}
+inline void ObjectMinimal::set_length(double value) {
+  _internal_set_length(value);
+  // @@protoc_insertion_point(field_set:carla.ObjectMinimal.length)
+}
+inline double ObjectMinimal::_internal_length() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.length_;
+}
+inline void ObjectMinimal::_internal_set_length(double value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.length_ = value;
+}
+
+// double width = 4;
+inline void ObjectMinimal::clear_width() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.width_ = 0;
+}
+inline double ObjectMinimal::width() const {
+  // @@protoc_insertion_point(field_get:carla.ObjectMinimal.width)
+  return _internal_width();
+}
+inline void ObjectMinimal::set_width(double value) {
+  _internal_set_width(value);
+  // @@protoc_insertion_point(field_set:carla.ObjectMinimal.width)
+}
+inline double ObjectMinimal::_internal_width() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.width_;
+}
+inline void ObjectMinimal::_internal_set_width(double value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.width_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// DoubleValue
+
+// double value = 1;
+inline void DoubleValue::clear_value() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.value_ = 0;
+}
+inline double DoubleValue::value() const {
+  // @@protoc_insertion_point(field_get:carla.DoubleValue.value)
+  return _internal_value();
+}
+inline void DoubleValue::set_value(double value) {
+  _internal_set_value(value);
+  // @@protoc_insertion_point(field_set:carla.DoubleValue.value)
+}
+inline double DoubleValue::_internal_value() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.value_;
+}
+inline void DoubleValue::_internal_set_value(double value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ;
+  _impl_.value_ = value;
 }
 
 #ifdef __GNUC__

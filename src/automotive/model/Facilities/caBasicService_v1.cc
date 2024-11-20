@@ -272,7 +272,7 @@ namespace ns3
     free(buffer);
 
     /** Decoding **/
-    decoded_cam = asn1cpp::uper::decode(packetContent, CAMV1);
+    decoded_cam = asn1cpp::uper::decodeASN(packetContent, CAMV1);
 
     if(bool(decoded_cam)==false) {
         NS_LOG_ERROR("Warning: unable to decode a received CAM.");

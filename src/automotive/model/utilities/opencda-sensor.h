@@ -8,6 +8,8 @@
 #include "ns3/LDM.h"
 #include <unordered_map>
 #include <vector>
+#include <opencv2/opencv.hpp>
+
 
 namespace ns3 {
 
@@ -25,11 +27,20 @@ namespace ns3 {
     void setVDP(VDP* vdp) {m_vdp=vdp;}
 
     void updateDetectedObjects();
+    double insertCV(vehicleData_t vehData);
+    double insertPOs(std::vector<vehicleData_t> POs, uint64_t fromId);
     void setLDM(Ptr<LDM> ldm){m_LDM=ldm;}
+    void enableGUI(bool visualize);
+    void updateGUI();
 
   private:
 
     void insertObject(vehicleData_t vehData);
+    carla::ObjectIn createCARLAObjectIn(vehicleData_t vehData);
+    carla::Object createCARLAObject(vehicleData_t vehData);
+
+    // Function to calculate the intersection area of two polygons
+    double calculateIoU(const cv::RotatedRect& rect1, const cv::RotatedRect& rect2) ;
 
     Ptr<OpenCDAClient> m_opencda_client;
     std::string m_string_id;
@@ -40,6 +51,12 @@ namespace ns3 {
     int m_dwell_count = 0;
     EventId m_event_updateDetectedObjects;
     std::map<uint64_t,uint64_t> m_lastInserted;  //! Auxiliary map to avoid inserting the same perception in OpenCDA's LDM more than once
+    bool m_GUI = false;
+    bool m_pldm = false;
+    bool m_visualize;
+    cv::Mat m_cv_image;
+    uint64_t m_count;
+
   };
 }
 
