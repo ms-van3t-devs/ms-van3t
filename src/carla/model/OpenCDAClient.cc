@@ -18,6 +18,13 @@
 #include "OpenCDAClient.h"
 #include <unistd.h> // For usleep
 #include <fcntl.h>
+#include <libssh/libssh.h>
+#include <cstdlib>
+
+#include "../proto/carla.pb.h"
+#include "../proto/carla.pb.h"
+#include "../proto/carla.pb.h"
+
 namespace ns3
 {
   NS_LOG_COMPONENT_DEFINE("OpenCDAClient");
@@ -37,8 +44,23 @@ namespace ns3
     .AddAttribute ("CARLAHost",
                   "CARLA host",
                   StringValue ("localhost"),
-                  MakeStringAccessor (&OpenCDAClient::m_host),
+                  MakeStringAccessor (&OpenCDAClient::m_carla_host),
                   MakeStringChecker ())
+    .AddAttribute("CARLAPort",
+                  "CARLA port",
+                  UintegerValue(3000),
+                  MakeUintegerAccessor(&OpenCDAClient::m_carla_port),
+                  MakeUintegerChecker<uint32_t>())
+    .AddAttribute ("CARLAUser",
+                  "CARLA ssh user",
+                  StringValue ("carla"),
+                  MakeStringAccessor (&OpenCDAClient::m_carla_user),
+                  MakeStringChecker ())
+    .AddAttribute ("CARLAPassword",
+                    "CARLA ssh password",
+                    StringValue ("password"),
+                    MakeStringAccessor (&OpenCDAClient::m_carla_password),
+                    MakeStringChecker ())
     .AddAttribute ("PenetrationRate",
                   "Rate of vehicles, equipped with wireless communication devices",
                   DoubleValue (1.0),
@@ -49,6 +71,31 @@ namespace ns3
                    StringValue("ms_van3t_example"),
                    MakeStringAccessor (&OpenCDAClient::m_opencda_home),
                    MakeStringChecker ())
+      .AddAttribute("OpenCDACIHost",
+                    "Host of OpenCDAClient",
+                    StringValue("localhost"),
+                    MakeStringAccessor(&OpenCDAClient::m_opencda_host),
+                    MakeStringChecker())
+      .AddAttribute("CARLATMPort",
+                    "CARLA Traffic Manager Port",
+                    UintegerValue(8000),
+                    MakeUintegerAccessor(&OpenCDAClient::m_carla_tm_port),
+                    MakeUintegerChecker<uint32_t>())
+      .AddAttribute("OpenCDACIPort",
+                    "Port of OpenCDAClient",
+                    UintegerValue(1337),
+                    MakeUintegerAccessor(&OpenCDAClient::m_opencda_port),
+                    MakeUintegerChecker<uint32_t>())
+      .AddAttribute("OpenCDACIUser",
+                    "User of OpenCDAClient",
+                    StringValue("opencda"),
+                    MakeStringAccessor(&OpenCDAClient::m_opencda_user),
+                    MakeStringChecker())
+      .AddAttribute("OpenCDACIPassword",
+                    "Password of OpenCDAClient",
+                    StringValue("password"),
+                    MakeStringAccessor(&OpenCDAClient::m_opencda_password),
+                    MakeStringChecker())
     .AddAttribute ("PythonInterpreter",
                    "Python interpreter used to execute OpenCDA",
                    StringValue("python3.7"),
@@ -69,11 +116,31 @@ namespace ns3
                    StringValue("CARLA_0.9.12"),
                    MakeStringAccessor (&OpenCDAClient::m_carla_home),
                    MakeStringChecker ())
-    .AddAttribute ("Port",
-                  "Port for connection.",
-                  UintegerValue (1337),
-                  MakeUintegerAccessor (&OpenCDAClient::m_port),
-                  MakeUintegerChecker<uint32_t> ());
+      .AddAttribute("CARLAGUI",
+                    "CARLA GUI",
+                    BooleanValue(true),
+                    MakeBooleanAccessor(&OpenCDAClient::m_carla_gui),
+                    MakeBooleanChecker())
+      .AddAttribute("CARLAManual",
+                    "CARLA manual execution",
+                    BooleanValue(false),
+                    MakeBooleanAccessor(&OpenCDAClient::m_carla_manual),
+                    MakeBooleanChecker())
+      .AddAttribute("OpenCDAManual",
+              "OpenCDA manual execution",
+              BooleanValue(false),
+              MakeBooleanAccessor(&OpenCDAClient::m_opencda_manual),
+              MakeBooleanChecker())
+      .AddAttribute("CARLAGPU",
+                    "CARLA GPU",
+                    UintegerValue(0),
+                    MakeUintegerAccessor(&OpenCDAClient::m_carla_gpu),
+                    MakeUintegerChecker<uint32_t>())
+      .AddAttribute("OpenCDAGPU",
+                    "OpenCDA GPU",
+                    UintegerValue(0),
+                    MakeUintegerAccessor(&OpenCDAClient::m_openCDA_gpu),
+                    MakeUintegerChecker<uint32_t>());
 
   ;
     return tid;
@@ -83,9 +150,16 @@ namespace ns3
   {
       NS_LOG_FUNCTION(this);
       m_updateInterval = 0.05;
-      m_host = "localhost";
-      m_port = 1338;
+      m_carla_host = "localhost";
+      m_opencda_host = "localhost";
+      m_opencda_port = 1337;
       m_adapter_debug = false;
+      m_carla_port = 2000;
+      m_carla_gui = true;
+      m_carla_gpu = 0;
+      m_openCDA_gpu = 0;
+      m_opencda_manual = false;
+      m_carla_manual = false;
       m_randVar = CreateObject<UniformRandomVariable>();
       m_randVar->SetAttribute("Min", DoubleValue(0.0));
       m_randVar->SetAttribute("Max", DoubleValue(1.0));
@@ -101,8 +175,25 @@ namespace ns3
   void
   OpenCDAClient::stopSimulation ()
   {
-    kill(-m_opencda_pid, SIGKILL);
-    kill(-m_carla_pid, SIGKILL);
+      if (m_opencda_host == "localhost") {
+          kill(-m_opencda_pid, SIGKILL);
+      }
+      else {
+          std::string kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host + " 'kill -9 " +
+              std::to_string(m_opencda_pid) + "'";
+          system(kill_cmd.c_str());
+      }
+      if (m_carla_host == "localhost") {
+          kill(-m_carla_pid, SIGKILL);
+      }
+      else {
+          std::string kill_cmd = "ssh " + m_carla_user + "@" + m_carla_host + " 'kill -9 " +
+              std::to_string(m_carla_pid) + "'";
+          system(kill_cmd.c_str());
+          // ssh user@host 'pids=$(lsof -ti :$1); if [ -n "$pids" ]; then for pid in $pids; do echo "Killing process with PID: $pid using port $1"; kill -9 $pid; echo "Process $pid killed."; done; else echo "No process found using port $1."; fi'
+          std::string kill_port_cmd =  "ssh " + m_carla_user + "@" + m_carla_host + " 'pids=$(lsof -ti :" + std::to_string(m_carla_port) + "); if [ -n \"$pids\" ]; then for pid in $pids; do echo \"Killing process with PID: $pid using port " + std::to_string(m_carla_port) + "\"; kill -9 $pid; echo \"Process $pid killed.\"; done; else echo \"No process found using port " + std::to_string(m_carla_port) + "\"; fi'";
+            system(kill_port_cmd.c_str());
+      }
   }
   void
   OpenCDAClient::startCarlaAdapter(std::function<Ptr<Node>(std::string)> includeNode, std::function<void (Ptr<Node>,std::string)> excludeNode)
@@ -111,106 +202,143 @@ namespace ns3
       m_excludeNode = excludeNode;
       if(!m_adapter_debug)
         {
-          m_carla_pid = fork();
+          if (!m_carla_manual) {
+              m_carla_pid = fork();
 
-          if (m_carla_pid == 0) {
+              if (m_carla_pid == 0) {
 
-              std::string carla_command = "cd "+ m_carla_home +" && ./CarlaUE4.sh -prefernvidia";
+                  std::string carla_command = "cd "+ m_carla_home +" && ./CarlaUE4.sh -prefernvidia -carla-port=" + std::to_string(m_carla_port) ;
+                  if (!m_carla_gui) {
+                      carla_command += " -RenderOffScreen";
+                  }
+                  if(m_carla_gpu != 0 && !m_carla_gui) {
+                      carla_command += " -graphicsadapter=" + std::to_string(m_carla_gpu);
+                  }
+                  setpgid(0, 0); // Create a new process group
 
-              setpgid(0, 0); // Create a new process group
+                  std::ifstream file("/tmp/carla_output.txt");
+                  if (file.good()) {
+                      file.close();
+                      remove("/tmp/carla_output.txt");
+                  }
 
-              std::ifstream file("/tmp/carla_output.txt");
-              if (file.good()) {
-                 file.close();
-                 remove("/tmp/carla_output.txt");
-               }
+                  if(m_carla_host != "localhost" ) {
+                      std::string ssh_command = "ssh -X " + m_carla_user + "@" + m_carla_host + " '" +  carla_command + " & echo $!'";
+                      std::cout <<"Executing: " << (ssh_command).c_str() << std::endl;
 
-              std::cout <<"Executing: " << (carla_command).c_str() << std::endl;
 
-              // Open a temporary file for CARLA output
-              int fd = open("/tmp/carla_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-              if (fd < 0) {
-                  perror("Opening temp file for CARLA output failed");
-                  exit(1);
-                }
-              dup2(fd, STDOUT_FILENO);
-              dup2(fd, STDERR_FILENO);
-              close(fd);
+                      // Open a temporary file for CARLA output
+                      int fd = open("/tmp/carla_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                      if (fd < 0) {
+                          perror("Opening temp file for CARLA output failed");
+                          exit(1);
+                      }
+                      dup2(fd, STDOUT_FILENO);
+                      dup2(fd, STDERR_FILENO);
+                      close(fd);
 
-              int r = execl("/bin/sh", "sh", "-c", (carla_command).c_str(), NULL);
+                      int r = execl("/bin/sh", "sh", "-c", (ssh_command).c_str(), NULL);
 
-              std::cout << "execl returned: " << r << std::endl;
+                      std::cout << "execl returned: " << r << std::endl;
 
-              if (r == -1) {
-                  NS_FATAL_ERROR("Error.system failed");
+                      if (r == -1) {
+                          NS_FATAL_ERROR("Error.system failed");
+                      }
+                      if (WEXITSTATUS(r) != 0) {
+                          NS_FATAL_ERROR("Error.cannot run");
+                      }
+                      NS_FATAL_ERROR("Error.returned from exec");
+                      exit(1);
+                  }
+                  else {
+                      std::cout <<"Executing: " << (carla_command).c_str() << std::endl;
+
+                      // Open a temporary file for CARLA output
+                      int fd = open("/tmp/carla_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                      if (fd < 0) {
+                          perror("Opening temp file for CARLA output failed");
+                          exit(1);
+                      }
+                      dup2(fd, STDOUT_FILENO);
+                      dup2(fd, STDERR_FILENO);
+                      close(fd);
+
+                      int r = execl("/bin/sh", "sh", "-c", (carla_command).c_str(), NULL);
+
+                      std::cout << "execl returned: " << r << std::endl;
+
+                      if (r == -1) {
+                          NS_FATAL_ERROR("Error.system failed");
+                      }
+                      if (WEXITSTATUS(r) != 0) {
+                          NS_FATAL_ERROR("Error.cannot run");
+                      }
+                      NS_FATAL_ERROR("Error.returned from exec");
+                      exit(1);
+                  }
               }
-              if (WEXITSTATUS(r) != 0) {
-                  NS_FATAL_ERROR("Error.cannot run");
-              }
-              NS_FATAL_ERROR("Error.returned from exec");
-              exit(1);
           }
 
           usleep(10000000);
-          bool carla_ready=false;
-          int carla_waits=0;
-          while (!carla_ready && carla_waits < 5) {
-                  std::ifstream file("/tmp/carla_output.txt");
-                  if (file.good()) {
-                      carla_ready = true;
-                      file.close();
-                      std::cout << "CARLA server ready." << std::endl;
-                  } else {
-                      // File does not exist, wait for 1 second before checking again
-                      std::cout << "Waiting for CARLA server to be ready." << std::endl;
-                      usleep(10000000);
-                      carla_waits++;
+
+          if (!m_opencda_manual) {
+              m_opencda_pid = fork();
+
+              if (m_opencda_pid == 0) {
+
+                  std::string opencda_command = "cd " + m_opencda_home +" && " + m_python_interpreter +" -u opencda.py -t " + m_opencda_config + " -v 0.9.12";
+                  opencda_command += " -p "
+                                  + std::to_string(m_carla_port)
+                                  + " -g " + std::to_string(m_openCDA_gpu)
+                                  + " -r " +std::to_string(m_opencda_port)
+                                  + " --tm_port " + std::to_string(m_carla_tm_port);
+                  if (m_apply_ml)
+                  {
+                      opencda_command = opencda_command + " --apply_ml";
                   }
-              }
-          if(!carla_ready)
-            {
-              NS_FATAL_ERROR("Could not start CARLA server.");
-            }
 
-          m_opencda_pid = fork();
+                  if (m_carla_host != m_opencda_host) {
+                      opencda_command += " -s " + m_carla_host;
+                  }
 
-          if (m_opencda_pid == 0) {
-              std::string opencda_command = "cd " + m_opencda_home +" && " + m_python_interpreter +" -u opencda.py -t " + m_opencda_config + " -v 0.9.12";
-              if (m_apply_ml)
-                {
-                  opencda_command = opencda_command + " --apply_ml";
-                }
+                  if(m_opencda_host != "localhost") {
+                      opencda_command = "ssh -X -L "+ std::to_string(m_opencda_port) + ":localhost:" + std::to_string(m_opencda_port) + " "
+                          + m_opencda_user + "@" + m_opencda_host + " 'export SUMO_HOME=usr/bin/sumo; " +  opencda_command + " & echo $!'";
+                  }
 
-              setpgid(0, 0); // Create a new process group
+                  setpgid(0, 0); // Create a new process group
 
-              std::ifstream file("/tmp/opencdaCI_ready");
-              if (file.good()) {
-                 file.close();
-                 remove("/tmp/opencdaCI_ready");
-               }
-              std::cout << "Executing: " << (opencda_command).c_str() << std::endl;
-              // Open a temporary file for CARLA output
-              int fd = open("/tmp/opencda_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-              if (fd < 0) {
-                  perror("Opening temp file for OpenCDA output failed");
+
+                  std::ifstream file("/tmp/opencdaCI_ready");
+                  if (file.good()) {
+                      file.close();
+                      remove("/tmp/opencdaCI_ready");
+                  }
+                  std::cout << "Executing: " << (opencda_command).c_str() << std::endl;
+                  // Open a temporary file for CARLA output
+                  std::string file_name = "/tmp/opencda_output_" + std::to_string(m_opencda_port) + ".txt";
+                  int fd = open(file_name.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                  if (fd < 0) {
+                      perror("Opening temp file for OpenCDA output failed");
+                      exit(1);
+                  }
+                  dup2(fd, STDOUT_FILENO);
+                  dup2(fd, STDERR_FILENO);
+                  close(fd);
+
+                  int r = execl("/bin/sh", "sh", "-c", (opencda_command).c_str(), NULL);
+                  std::cout << "execl returned: " << r << std::endl;
+
+                  if (r == -1) {
+                      NS_FATAL_ERROR("Error.system failed");
+                  }
+                  if (WEXITSTATUS(r) != 0) {
+                      NS_FATAL_ERROR("Error.cannot run");
+                  }
+                  NS_FATAL_ERROR("Error.returned from exec");
+
                   exit(1);
               }
-              dup2(fd, STDOUT_FILENO);
-              dup2(fd, STDERR_FILENO);
-              close(fd);
-
-              int r = execl("/bin/sh", "sh", "-c", (opencda_command).c_str(), NULL);
-              std::cout << "execl returned: " << r << std::endl;
-
-              if (r == -1) {
-                  NS_FATAL_ERROR("Error.system failed");
-              }
-              if (WEXITSTATUS(r) != 0) {
-                  NS_FATAL_ERROR("Error.cannot run");
-              }
-              NS_FATAL_ERROR("Error.returned from exec");
-
-              exit(1);
           }
 
         }
@@ -223,27 +351,91 @@ namespace ns3
       std::cout <<"OpenCDAClient::startSimulation()" << std::endl;
       usleep(10000000);
       bool server_ready = false;
+      if (m_opencda_manual) {
+          server_ready = true;
+      }
       while (!server_ready) {
-              std::ifstream file("/tmp/opencdaCI_ready");
-              if (file.good()) {
-                  server_ready = true;
-                  file.close();
-                  std::cout << "OpenCDA Control Interface ready." << std::endl;
-              } else {
-                  // File does not exist, wait for 1 second before checking again
-                  std::cout << "Waiting for OpenCDA Control Interface to be ready." << std::endl;
-                  usleep(10000000);
-              }
+          // read /tmp/opencda_output.txt to see OpenCDA logs and check if there's a "Server ready" message
+          std::string file_name = "/tmp/opencda_output_" + std::to_string(m_opencda_port) + ".txt";
+          std::ifstream file(file_name.c_str());
+            if (file.good()) {
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (line.find("Server ready") != std::string::npos) {
+                        server_ready = true;
+                        break;
+                    }
+                }
+                file.close();
+            }
+          else {
+              // File does not exist, wait for 1 second before checking again
+              std::cout << "Waiting for OpenCDA Control Interface to be ready." << std::endl;
+              usleep(10000000);
           }
-      std::string hostAndPort = m_host+":" + std::to_string(m_port);
+
+      }
+
+      if(m_opencda_host != "localhost") {
+          std::string kill_cmd;
+          if (m_apply_ml)
+            {
+              kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host
+                                     + " 'nvidia-smi --query-compute-apps=pid,name --format=csv,noheader | grep msvan3t | cut -d , -f1 | sort -n | tail -n 1' > /tmp/opencda_pid.txt";
+            }
+          else
+            {
+              kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host
+                                     + " 'ps -u " + m_opencda_user + " -o pid,cmd --no-header | grep python3 | head -n 1 | cut -d \" \" -f1 ' > /tmp/opencda_pid.txt";
+            }
+
+          system(kill_cmd.c_str());
+          std::ifstream file("/tmp/opencda_pid.txt");
+          std::string line;
+          if (file.good()) {
+              std::getline(file, line);
+              file.close();
+          }
+          m_opencda_pid = std::stoi(line);
+      }
+      if (m_carla_host != "localhost" && !m_carla_manual) {
+          std::string kill_cmd = "ssh " + m_carla_user + "@" + m_carla_host
+          + " 'nvidia-smi --query-compute-apps=pid,name --format=csv,noheader | grep Carla | cut -d , -f1 | sort -n | tail -n 1' > /tmp/carla_pid.txt";
+          system(kill_cmd.c_str());
+          std::ifstream file("/tmp/carla_pid.txt");
+          std::string line;
+          if (file.good()) {
+              std::getline(file, line);
+              file.close();
+          }
+          m_carla_pid = std::stoi(line);
+      }
+
+      std::string hostAndPort = "localhost:" + std::to_string(m_opencda_port);
+
+       // ssh tunneling
       m_channel = CreateChannel(hostAndPort, grpc::InsecureChannelCredentials());
       m_stub = carla::CarlaAdapter::NewStub(m_channel);
       auto state = m_channel->GetState(true);
 
       while (state != GRPC_CHANNEL_READY) {
-          if (!m_channel->WaitForStateChange(state, std::chrono::system_clock::now() + std::chrono::seconds(15))) {
-              kill(-m_opencda_pid, SIGKILL);
-              kill(-m_carla_pid, SIGKILL);
+          if (!m_channel->WaitForStateChange(state, std::chrono::system_clock::now() + std::chrono::seconds(150))) {
+              if (m_opencda_host == "localhost") {
+                  kill(-m_opencda_pid, SIGKILL);
+              }
+              else {
+                  std::string kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host + " 'kill -9 " +
+                      std::to_string(m_opencda_pid) + "'";
+                  system(kill_cmd.c_str());
+              }
+              if (m_carla_host == "localhost") {
+                  kill(-m_carla_pid, SIGKILL);
+              }
+              else {
+                  std::string kill_cmd = "ssh " + m_carla_user + "@" + m_carla_host + " 'kill -9 " +
+                      std::to_string(m_carla_pid) + "'";
+                  system(kill_cmd.c_str());
+              }
               NS_FATAL_ERROR("Could not connect to gRPC");
           }
           state = m_channel->GetState(true);
@@ -294,17 +486,16 @@ namespace ns3
       //this->testInsertVehicle ();
   }
 
-  void
-  OpenCDAClient::testInsertVehicle()
-  {
+    void
+    OpenCDAClient::testInsertVehicle() {
       carla::Vehicle vehicle;
       carla::Transform v = getRandomSpawnPoint();
-      carla::Vector* pos = new carla::Vector();
+      carla::Vector* pos = vehicle.mutable_location();
+
       pos->set_x(v.location().x());
       pos->set_y(v.location().y());
       pos->set_z(v.location().z());
 
-      vehicle.set_allocated_location(pos);
       insertVehicle(vehicle);
   }
 
@@ -467,10 +658,26 @@ namespace ns3
 
       }
       else {
-          kill(-m_opencda_pid, SIGTERM);
-          kill(-m_carla_pid, SIGKILL);
+          if (m_opencda_host == "localhost") {
+              kill(-m_opencda_pid, SIGKILL);
+          }
+          else {
+              std::string kill_cmd = "ssh " + m_opencda_user + "@" + m_opencda_host + " 'kill -9 " +
+                  std::to_string(m_opencda_pid) + "'";
+              system(kill_cmd.c_str());
+          }
+          if (m_carla_host == "localhost") {
+              kill(-m_carla_pid, SIGKILL);
+          }
+          else {
+              std::string kill_cmd = "ssh " + m_carla_user + "@" + m_carla_host + " 'kill -9 " +
+                  std::to_string(m_carla_pid) + "'";
+              system(kill_cmd.c_str());
+          }
           Simulator::Stop ();
-          std::cout << "OpenCDA simulation finished unexpectedly, check /tmp/opencda_output.txt to see OpenCDA logs" << std::endl;
+
+          std::string file_name = "/tmp/opencda_output_" + std::to_string(m_opencda_port) + ".txt";
+          std::cout << "OpenCDA simulation finished unexpectedly, check " << file_name.c_str() <<" to see OpenCDA logs" << std::endl;
         }
   }
 
@@ -564,6 +771,45 @@ namespace ns3
       }
   }
 
+carla::Waypoint
+OpenCDAClient::getWaypoint(Vector location)
+{
+      carla::Waypoint waypoint;
+      grpc::ClientContext client_context;
+      carla::Vector carla_position;
+      carla_position.set_x(location.x);
+      carla_position.set_y(location.y);
+      carla_position.set_z(location.z);
+
+      grpc::Status status = m_stub->GetCarlaWaypoint(&client_context, carla_position, &waypoint);
+
+      if (status.ok()) {
+          return waypoint;
+      }
+      else {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::GetCarlaWaypoint() failed with error: " + std::string(status.error_message())).c_str()));
+      }
+}
+
+carla::Waypoint
+OpenCDAClient::getNextWaypoint(Vector location) {
+      carla::Waypoint waypoint;
+      grpc::ClientContext client_context;
+      carla::Vector carla_position;
+      carla_position.set_x(location.x);
+      carla_position.set_y(location.y);
+      carla_position.set_z(location.z);
+
+      grpc::Status status = m_stub->GetNextCarlaWaypoint(&client_context, carla_position, &waypoint);
+
+      if (status.ok()) {
+          return waypoint;
+      }
+      else {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::GetCarlaWaypointNext() failed with error: " + std::string(status.error_message())).c_str()));
+      }
+}
+
   double
   OpenCDAClient::getSpeed (int id)
   {
@@ -605,6 +851,35 @@ namespace ns3
     return retObjects;
   }
 
+    double
+    OpenCDAClient::getGTaccuracy(double x, double y, double length, double width, double yaw, int id) {
+      carla::ObjectMinimal object;
+      carla::Vector* location = object.mutable_transform()->mutable_location();
+      carla::Rotation* rotation = object.mutable_transform()->mutable_rotation();
+      grpc::ClientContext clientContext;
+      carla::DoubleValue accuracy;
+      double ret_accuracy = 0.0;
+
+      location->set_x(x);
+      location->set_y(y);
+      location->set_z(1.5);
+      rotation->set_pitch(0);
+      rotation->set_yaw(yaw);
+      rotation->set_roll(0);
+      object.set_id(id);
+      object.set_length(length);
+      object.set_width(width);
+
+      grpc::Status status = m_stub->GetGTaccuracy(&clientContext, object, &accuracy);
+
+      if (!status.ok()) {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::getGTaccuracy() failed with error: " + std::string(status.error_message())).c_str()));
+      }
+
+      ret_accuracy = accuracy.value();
+      return ret_accuracy;
+  }
+
   int
   OpenCDAClient::getVehicleID (Ptr<Node> node)
   {
@@ -636,27 +911,54 @@ namespace ns3
     return ret_b;
   }
 
-  void
-  OpenCDAClient::setControl(int id, double speed, Vector position, double acceleration)
+    double
+  OpenCDAClient::InsertCV(carla::ObjectIn object)
   {
-    grpc::ClientContext clientContext;
-    carla::Control control;
-    carla::Vector* pos = new carla::Vector();
-    google::protobuf::Empty responseEmpty;
-    pos->set_x(position.x);
-    pos->set_y(position.y);
-    pos->set_z(position.z);
-    control.set_allocated_waypoint (pos);
-    control.set_id (id);
-    control.set_speed (speed);
-    control.set_acceleration (acceleration);
+      grpc::ClientContext clientContext;
+      carla::DoubleValue ret;
 
-    grpc::Status status = m_stub->SetControl (&clientContext, control, &responseEmpty);
-    if (!status.ok()) {
-        NS_FATAL_ERROR((std::string("OpenCDAClient::setControl() failed with error: " + std::string(status.error_message())).c_str()));
-    }
-
+      grpc::Status status = m_stub->InsertCV (&clientContext, object, &ret);
+      if (!status.ok()) {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::InsertObject () failed with error: " + std::string(status.error_message())).c_str()));
+      }
+      return ret.value ();
   }
+    double
+  OpenCDAClient::InsertObjects (carla::ObjectsIn objects)
+  {
+      grpc::ClientContext clientContext;
+      carla::DoubleValue ret;
+
+      grpc::Status status = m_stub->InsertObjects (&clientContext, objects, &ret);
+      if (!status.ok()) {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::InsertObject () failed with error: " + std::string(status.error_message())).c_str()));
+      }
+
+      return ret.value ();
+  }
+
+    void
+    OpenCDAClient::setControl(int id, double speed, Vector position, double acceleration) {
+      grpc::ClientContext clientContext;
+      carla::Control control;
+      carla::Vector* pos = control.mutable_waypoint();
+
+      pos->set_x(position.x);
+      pos->set_y(position.y);
+      pos->set_z(position.z);
+
+      control.set_id(id);
+      control.set_speed(speed);
+      control.set_acceleration(acceleration);
+
+      google::protobuf::Empty responseEmpty;
+      grpc::Status status = m_stub->SetControl(&clientContext, control, &responseEmpty);
+
+      if (!status.ok()) {
+          NS_FATAL_ERROR((std::string("OpenCDAClient::setControl() failed with error: " + std::string(status.error_message())).c_str()));
+      }
+  }
+
 
   carla::ActorIds
   OpenCDAClient::GetManagedCAVsIds()

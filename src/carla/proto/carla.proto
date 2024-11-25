@@ -44,6 +44,10 @@ service CarlaAdapter{
 
     rpc InsertObject(ObjectIn) returns (Number);
 
+    rpc InsertObjects(ObjectsIn) returns (DoubleValue);
+
+    rpc InsertCV(ObjectIn) returns (DoubleValue);
+
     rpc GetCartesian(Vector) returns (Vector);
 
     rpc GetGeo(Vector) returns (Vector);
@@ -51,6 +55,12 @@ service CarlaAdapter{
     rpc hasLDM (Number) returns (Boolean);
 
     rpc SetControl(Control) returns (google.protobuf.Empty);
+
+    rpc GetCarlaWaypoint (Vector) returns (Waypoint);
+
+    rpc GetNextCarlaWaypoint (Vector) returns (Waypoint);
+
+    rpc GetGTaccuracy (ObjectMinimal) returns (DoubleValue);
         
 }
 
@@ -71,7 +81,7 @@ message Vehicle {
     double longitude = 6;
     double length = 7;
     double width = 8;
-    int32 lane = 9;
+    int32 lane  = 9;
     double heading = 10;
     Transform transform = 11;
 }
@@ -119,6 +129,12 @@ message Boolean {
     bool value = 1;
 }
 
+message ObjectsIn {
+    repeated Object cpmObjects = 1;
+    int32 egoId = 2;
+    int32 fromId = 3;
+}
+
 message ObjectIn {
     Object object = 1;
     int32 egoId = 2;
@@ -130,4 +146,25 @@ message Control {
     Vector waypoint = 2;
     double speed = 3;
     double acceleration = 4;
+}
+message Waypoint {
+    Vector location = 2;
+    Rotation rotation = 3;
+    int32 road_id = 4;
+    int32 section_id = 5;
+    bool is_junction = 6;
+    int32 junction_id = 7;
+    int32 lane_id = 8;
+    double lane_width = 9;
+    int32 lane_change = 10;
+}
+message ObjectMinimal {
+    int32 id = 1;
+    Transform transform = 2;
+    double length = 3;
+    double width = 4;
+}
+
+message DoubleValue {
+    double value = 1;
 }

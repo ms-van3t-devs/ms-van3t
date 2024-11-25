@@ -60,6 +60,16 @@ class CarlaAdapterStub(object):
                 request_serializer=carla__pb2.ObjectIn.SerializeToString,
                 response_deserializer=carla__pb2.Number.FromString,
                 )
+        self.InsertObjects = channel.unary_unary(
+                '/carla.CarlaAdapter/InsertObjects',
+                request_serializer=carla__pb2.ObjectsIn.SerializeToString,
+                response_deserializer=carla__pb2.DoubleValue.FromString,
+                )
+        self.InsertCV = channel.unary_unary(
+                '/carla.CarlaAdapter/InsertCV',
+                request_serializer=carla__pb2.ObjectIn.SerializeToString,
+                response_deserializer=carla__pb2.DoubleValue.FromString,
+                )
         self.GetCartesian = channel.unary_unary(
                 '/carla.CarlaAdapter/GetCartesian',
                 request_serializer=carla__pb2.Vector.SerializeToString,
@@ -79,6 +89,21 @@ class CarlaAdapterStub(object):
                 '/carla.CarlaAdapter/SetControl',
                 request_serializer=carla__pb2.Control.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                )
+        self.GetCarlaWaypoint = channel.unary_unary(
+                '/carla.CarlaAdapter/GetCarlaWaypoint',
+                request_serializer=carla__pb2.Vector.SerializeToString,
+                response_deserializer=carla__pb2.Waypoint.FromString,
+                )
+        self.GetNextCarlaWaypoint = channel.unary_unary(
+                '/carla.CarlaAdapter/GetNextCarlaWaypoint',
+                request_serializer=carla__pb2.Vector.SerializeToString,
+                response_deserializer=carla__pb2.Waypoint.FromString,
+                )
+        self.GetGTaccuracy = channel.unary_unary(
+                '/carla.CarlaAdapter/GetGTaccuracy',
+                request_serializer=carla__pb2.ObjectMinimal.SerializeToString,
+                response_deserializer=carla__pb2.DoubleValue.FromString,
                 )
 
 
@@ -139,6 +164,18 @@ class CarlaAdapterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def InsertObjects(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def InsertCV(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetCartesian(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -158,6 +195,24 @@ class CarlaAdapterServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def SetControl(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetCarlaWaypoint(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetNextCarlaWaypoint(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetGTaccuracy(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -211,6 +266,16 @@ def add_CarlaAdapterServicer_to_server(servicer, server):
                     request_deserializer=carla__pb2.ObjectIn.FromString,
                     response_serializer=carla__pb2.Number.SerializeToString,
             ),
+            'InsertObjects': grpc.unary_unary_rpc_method_handler(
+                    servicer.InsertObjects,
+                    request_deserializer=carla__pb2.ObjectsIn.FromString,
+                    response_serializer=carla__pb2.DoubleValue.SerializeToString,
+            ),
+            'InsertCV': grpc.unary_unary_rpc_method_handler(
+                    servicer.InsertCV,
+                    request_deserializer=carla__pb2.ObjectIn.FromString,
+                    response_serializer=carla__pb2.DoubleValue.SerializeToString,
+            ),
             'GetCartesian': grpc.unary_unary_rpc_method_handler(
                     servicer.GetCartesian,
                     request_deserializer=carla__pb2.Vector.FromString,
@@ -230,6 +295,21 @@ def add_CarlaAdapterServicer_to_server(servicer, server):
                     servicer.SetControl,
                     request_deserializer=carla__pb2.Control.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetCarlaWaypoint': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCarlaWaypoint,
+                    request_deserializer=carla__pb2.Vector.FromString,
+                    response_serializer=carla__pb2.Waypoint.SerializeToString,
+            ),
+            'GetNextCarlaWaypoint': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetNextCarlaWaypoint,
+                    request_deserializer=carla__pb2.Vector.FromString,
+                    response_serializer=carla__pb2.Waypoint.SerializeToString,
+            ),
+            'GetGTaccuracy': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetGTaccuracy,
+                    request_deserializer=carla__pb2.ObjectMinimal.FromString,
+                    response_serializer=carla__pb2.DoubleValue.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -395,6 +475,40 @@ class CarlaAdapter(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def InsertObjects(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/InsertObjects',
+            carla__pb2.ObjectsIn.SerializeToString,
+            carla__pb2.DoubleValue.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def InsertCV(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/InsertCV',
+            carla__pb2.ObjectIn.SerializeToString,
+            carla__pb2.DoubleValue.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def GetCartesian(request,
             target,
             options=(),
@@ -459,5 +573,56 @@ class CarlaAdapter(object):
         return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/SetControl',
             carla__pb2.Control.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetCarlaWaypoint(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/GetCarlaWaypoint',
+            carla__pb2.Vector.SerializeToString,
+            carla__pb2.Waypoint.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetNextCarlaWaypoint(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/GetNextCarlaWaypoint',
+            carla__pb2.Vector.SerializeToString,
+            carla__pb2.Waypoint.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetGTaccuracy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/carla.CarlaAdapter/GetGTaccuracy',
+            carla__pb2.ObjectMinimal.SerializeToString,
+            carla__pb2.DoubleValue.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

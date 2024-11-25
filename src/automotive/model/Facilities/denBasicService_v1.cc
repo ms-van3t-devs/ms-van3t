@@ -945,7 +945,7 @@ namespace ns3 {
 
     /** Decoding **/
     free(buffer);
-    decoded_denm = asn1cpp::uper::decode(packetContent, DENMV1);
+    decoded_denm = asn1cpp::uper::decodeASN(packetContent, DENMV1);
 
     if(bool(decoded_denm)==false) {
         NS_LOG_ERROR("Warning: unable to decode a received DENM.");

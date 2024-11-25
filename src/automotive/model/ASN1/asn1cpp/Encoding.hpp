@@ -150,7 +150,7 @@ namespace asn1cpp {
  * This macro allows specifying the name of the underlying asn1c type, and it
  * will automatically find the appropriate asn1c type descriptor for you.
  */
-#define decode(m, T) \
+#define decodeASN(m, T) \
     decode<T>(&ASN1CPP_ASN1C_DEF(T), m)
 
 #endif

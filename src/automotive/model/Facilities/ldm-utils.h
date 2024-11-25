@@ -53,6 +53,8 @@ namespace ns3 {
           std::string ID;
           double lat;
           double lon;
+          double x;
+          double y;
           double elevation;
           double heading; // Heading between 0 and 360 degrees
           double speed_ms;
@@ -75,6 +77,7 @@ namespace ns3 {
           OptionalDataItem<long> confidence;
           OptionalDataItem<long> angle;
           OptionalDataItem<uint64_t> lastCPMincluded;
+          OptionalDataItem<double> GTaccuracy;
 
           //patch for v2
           OptionalDataItem<long> xDistAbs;

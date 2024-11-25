@@ -59,7 +59,13 @@ namespace ns3
       bool hasCARLALDM(int id);
       carla::Objects getDetectedObjects(int id);
       void setControl(int id, double speed, Vector position, double acceleration);
+      carla::Waypoint getWaypoint(Vector location);
+      carla::Waypoint getNextWaypoint(Vector location);
       carla::ActorIds GetManagedCAVsIds();
+      double InsertObjects (carla::ObjectsIn object);
+      double InsertCV(carla::ObjectIn object);
+
+      double getGTaccuracy(double x, double y, double length, double width, double yaw, int id);
 
       int getVehicleID(Ptr<Node> node);
       bool InsertObject(carla::ObjectIn object);
@@ -82,12 +88,25 @@ namespace ns3
       double m_simTimeLimit;
 
       int m_port;
-      std::string m_host;
+      std::string m_opencda_host; //!< Host of OpenCDA CI
+      int m_opencda_port; //!< Port of OpenCDA CI
+      std::string m_opencda_user; //!< User name for OpenCDA CI ssh connection
+      std::string m_opencda_password; //!< Password for OpenCDA CI ssh connection
+      std::string m_carla_host;  //!< Host for CARLA server
+      int m_carla_port;  //!< Port for CARLA server
+      std::string m_carla_user;  //!< User name for CARLA server ssh connection (to be used only in remote mode)
+      std::string m_carla_password;  //!< Password for CARLA server ssh connection (to be used only in remote mode)
+      bool m_carla_gui; //!< Flag to start CARLA server with GUI
+      int m_carla_gpu; //!< GPU ID to be used by CARLA server
+      int m_openCDA_gpu; //!< GPU ID to be used by OpenCDA
+      int m_carla_tm_port; //!< Port for CARLA Traffic Manager
       std::string m_opencda_config;
       std::string m_carla_home;
       std::string m_opencda_home;
       std::string m_python_interpreter;
       bool m_apply_ml;
+      bool m_carla_manual;
+      bool m_opencda_manual;
 
       std::map<int, Ptr<Node>> m_vehMap;
       std::vector<int> m_nonCVIDs;

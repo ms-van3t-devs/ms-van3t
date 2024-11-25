@@ -125,3 +125,22 @@ build_lib_example(
 #        ${libtraci}
 #)
 
+# build_lib_example(
+# NAME v2v-carla-nrv2x
+# SOURCE_FILES v2v-carlaMobility-nrv2x.cc
+# LIBRARIES_TO_LINK
+# ${libcarla}
+# ${libautomotive}
+# ${libnr}
+# ${libtraci}
+# )
+
+# build_lib_example(
+# NAME v2v-carla-80211p
+# SOURCE_FILES v2v-carlaMobility-80211p.cc
+# LIBRARIES_TO_LINK
+# ${libcarla}
+# ${libautomotive}
+# ${libwave}
+# ${libtraci}
+# )

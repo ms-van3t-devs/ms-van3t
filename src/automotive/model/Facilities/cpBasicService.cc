@@ -515,7 +515,7 @@ namespace ns3 {
 
 
     /** Decoding **/
-    decoded_cpm = asn1cpp::uper::decode(packetContent, CollectivePerceptionMessage);
+    decoded_cpm = asn1cpp::uper::decodeASN(packetContent, CollectivePerceptionMessage);
 
     if(bool(decoded_cpm)==false) {
         NS_LOG_ERROR("Warning: unable to decode a received CPM.");
