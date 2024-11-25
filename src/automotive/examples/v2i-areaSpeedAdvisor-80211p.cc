@@ -207,7 +207,8 @@ main (int argc, char *argv[])
   NetDeviceContainer netRSUs = wifi80211p.Install (wifiPhy, wifi80211pMac, rsuNodes);
   //wifi80211p.EnableLogComponents ();
 
-  //wifiPhy.EnablePcap ("v2v-ASA",netDevices);
+  wifiPhy.EnablePcap ("v2v-ASA",netDevices);
+  wifiPhy.EnablePcap ("v2v-ASA-RSU",netRSUs);
   /* Give packet socket powers to nodes (otherwise, if the app tries to create a PacketSocket, CreateSocket will end up with a segmentation fault */
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);

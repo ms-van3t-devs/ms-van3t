@@ -366,7 +366,7 @@ namespace ns3
             if(it->second.first == StationType_pedestrian)
                pos = this->TraCIAPI::person.getPosition(node_ID);
             else if (it->second.first == StationType_roadSideUnit)
-              return;
+              continue;
             else
                pos = this->TraCIAPI::vehicle.getPosition(node_ID);
 
