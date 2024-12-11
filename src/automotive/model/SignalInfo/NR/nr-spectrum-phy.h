@@ -116,7 +116,9 @@ public:
     CCA_BUSY   //!< BUSY state (channel occupied by another entity)
   };
 
-  State GetState () {return m_state;};
+  State GetState () {return m_state;}
+
+  Ptr<SpectrumValue> GetTxPowerSpectralDensity () {return m_txPsd;}
 
   //callbacks typedefs and setters
   /**

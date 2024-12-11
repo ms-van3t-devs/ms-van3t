@@ -648,7 +648,7 @@ int main (int argc, char *argv[])
 
   std::cout << "Starting simulation... " << std::endl;
 
-  STARTUP_TRACI_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
+  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
     bool wifi;
     unsigned long vehID = std::stol(vehicleID.substr (3));
@@ -723,7 +723,7 @@ int main (int argc, char *argv[])
 
   // Important: what you write here is called every time a node exits the simulation in SUMO
   // You can safely keep this function as it is, and ignore it
-  SHUTDOWN_TRACI_FCN shutdownWifiNode = [] (Ptr<Node> exNode, std::string vehicleID)
+  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode, std::string vehicleID)
   {
     /* Set position outside communication range */
     Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();

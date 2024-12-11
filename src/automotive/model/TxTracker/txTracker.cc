@@ -25,6 +25,16 @@ NS_LOG_COMPONENT_DEFINE ("TxTracker");
 std::unordered_map<std::string, txParameters11p> m_txMap11p;
 std::unordered_map<std::string, txParametersNR> m_txMapNr;
 
+double DbmToW (double dbm)
+{
+  return std::pow(10, (dbm - 30) / 10);
+}
+
+double WToDbm (double w)
+{
+  return 10 * std::log10(w) + 30;
+}
+
 void
 Insert11pNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> nodes)
 {
@@ -63,6 +73,88 @@ InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>>
           rbBand,
       };
     }
+}
+
+std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>>
+AddInterferenceNr (Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay, Ptr<PropagationLossModel> propagationLoss)
+{
+  std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes;
+  for (auto it = m_txMap11p.begin(); it != m_txMap11p.end(); ++it)
+  {
+    Ptr<WifiPhy> wifiPhy = it->second.netDevice->GetPhy();
+    WifiPhyState current_state = wifiPhy->GetState()->GetState();
+    if (current_state == WifiPhyState::TX)
+      {
+        double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
+        Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
+        // Time interferenceDelay = m_propagationDelay->GetDelay (interferenceMobility, receiverMobility);
+        Time interferenceDelay = delay;
+        double finalInterferencePowerDbm = propagationLoss->CalcRxPower(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility);
+        double finalInterferencePowerW = std::pow(10, (finalInterferencePowerDbm - 30) / 10);
+
+        uint8_t j = 1;
+        uint8_t counterRB = 0;
+        for (auto it2 = wifiSignal->ValuesBegin(); it2 != wifiSignal->ValuesEnd(); ++it2)
+          {
+            if (j * rbBandwidth < it->second.bandwidth * 1e6)
+              {
+                counterRB ++;
+              }
+            else
+              {
+                break;
+              }
+          }
+
+        for(uint8_t i = 0; i < counterRB; i++)
+          {
+            (*wifiSignal)[i] = finalInterferencePowerW / rbBandwidth;
+          }
+
+        interferenceNodes.insert({ it->first, std::make_pair (wifiSignal, interferenceDelay)});
+      }
+  }
+  return interferenceNodes;
+}
+
+std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>>
+AddInterference11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility, Ptr<PropagationLossModel> propagationLoss, Ptr<PropagationDelayModel> propagationDelay)
+{
+  std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode;
+  double interferencePower = 0.0;
+  for (auto it = m_txMapNr.begin(); it != m_txMapNr.end(); ++it)
+    {
+      Ptr<NrUePhy> nrPhy = it->second.netDevice->GetPhy(0);
+      NrSpectrumPhy::State current_state = nrPhy->GetSpectrumPhy ()->GetState();
+      if (current_state == NrSpectrumPhy::State::TX)
+        {
+          Ptr<SpectrumValue> spectrum = nrPhy->GetSpectrumPhy ()->GetTxPowerSpectralDensity();
+          double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
+          uint8_t j = 1;
+          for (auto it2 = spectrum->ValuesBegin(); it2 != spectrum->ValuesEnd(); ++it2)
+            {
+              if (j * rbBandwidth > sender->GetChannelWidth() * 1e6)
+                {
+                  break;
+                }
+              if ((*it2) > 0)
+                {
+                  interferencePower += (*it2) * rbBandwidth;
+                }
+              j += 1;
+            }
+          if (interferencePower > 0.0)
+            {
+              Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
+              Time interferenceDelay = propagationDelay->GetDelay (interferenceMobility, receiverMobility);
+              double interferenceRxPowerDbm = propagationLoss->CalcRxPower(WToDbm (interferencePower), interferenceMobility, receiverMobility);
+              RxPowerWattPerChannelBand rxInterference = RxPowerWattPerChannelBand ();
+              rxInterference.insert({std::make_pair (0, 0), DbmToW (interferenceRxPowerDbm)});
+              noisePowerPerNode[it->first] = std::make_pair (rxInterference, interferenceDelay);
+            }
+        }
+    }
+  return noisePowerPerNode;
 }
 
 }

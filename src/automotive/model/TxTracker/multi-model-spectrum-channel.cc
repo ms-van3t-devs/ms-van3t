@@ -359,44 +359,10 @@ MultiModelSpectrumChannel::StartTx (Ptr<SpectrumSignalParameters> txParams)
                     }
                 }
 
-              std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes;
-              for (auto it = m_txMap11p.begin(); it != m_txMap11p.end(); ++it)
-                {
-                  Ptr<WifiPhy> wifiPhy = it->second.netDevice->GetPhy();
-                  WifiPhyState current_state = wifiPhy->GetState()->GetState();
-                  Ptr<SpectrumValue> wifiSignal = Create<SpectrumValue>((this->m_txSpectrumModelInfoMap.begin())->second.m_txSpectrumModel);
-                  if (current_state == WifiPhyState::TX)
-                    {
-                      double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
-                      Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
-                      // Time interferenceDelay = m_propagationDelay->GetDelay (interferenceMobility, receiverMobility);
-                      Time interferenceDelay = delay;
-                      double finalInterferencePowerDbm = m_propagationLoss->CalcRxPower(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility);
-                      double finalInterferencePowerW = std::pow(10, (finalInterferencePowerDbm - 30) / 10);
-
-                      uint8_t j = 1;
-                      uint8_t counterRB = 0;
-                      for (auto it2 = wifiSignal->ValuesBegin(); it2 != wifiSignal->ValuesEnd(); ++it2)
-                        {
-                          if (j * rbBandwidth < it->second.bandwidth * 1e6)
-                            {
-                              counterRB ++;
-                            }
-                          else
-                            {
-                              break;
-                            }
-                        }
-
-                      for(uint8_t i = 0; i < counterRB; i++)
-                        {
-                          (*wifiSignal)[i] = finalInterferencePowerW / rbBandwidth;
-                        }
-
-                      interferenceNodes.insert({ it->first, std::make_pair (wifiSignal, interferenceDelay)});
-                    }
-                }
-
+              
+              Ptr<SpectrumValue> wifiSignal = Create<SpectrumValue>((this->m_txSpectrumModelInfoMap.begin())->second.m_txSpectrumModel);
+              std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes = AddInterferenceNr(wifiSignal, receiverMobility, delay, m_propagationLoss);
+              
               if (rxNetDevice)
                 {
                   // the receiver has a NetDevice, so we expect that it is attached to a Node

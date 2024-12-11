@@ -23,6 +23,8 @@
 #include "ns3/node.h"
 #include "ns3/config.h"
 #include "ns3/sionna_handler.h"
+#include "ns3/constant-position-mobility-model.h"
+#include "ns3/yans-wifi-phy.h"
 
 namespace ns3 {
 
@@ -57,6 +59,8 @@ extern std::unordered_map<std::string, txParametersNR> m_txMapNr;
 
 void Insert11pNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> nodes);
 void InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nodes);
+std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> AddInterferenceNr (Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay, Ptr<PropagationLossModel> propagationLoss);
+std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> AddInterference11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility, Ptr<PropagationLossModel> propagationLoss, Ptr<PropagationDelayModel> propagationDelay);
 
 }
 

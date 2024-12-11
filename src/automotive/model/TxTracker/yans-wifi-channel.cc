@@ -117,40 +117,7 @@ YansWifiChannel::Send (Ptr<YansWifiPhy> sender, Ptr<const WifiPpdu> ppdu, double
               dstNode = dstNetDevice->GetNode ()->GetId ();
             }
 
-          std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode;
-          double interferencePower = 0.0;
-          for (auto it = m_txMapNr.begin(); it != m_txMapNr.end(); ++it)
-            {
-              Ptr<NrUePhy> nrPhy = it->second.netDevice->GetPhy(0);
-              NrSpectrumPhy::State current_state = nrPhy->GetSpectrumPhy ()->GetState();
-              if (current_state == NrSpectrumPhy::State::TX)
-                {
-                  Ptr<SpectrumValue> spectrum = nrPhy->GetSpectrumPhy ()->GetTxPowerSpectralDensity();
-                  double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
-                  uint8_t j = 1;
-                  for (auto it2 = spectrum->ValuesBegin(); it2 != spectrum->ValuesEnd(); ++it2)
-                    {
-                      if (j * rbBandwidth > sender->GetChannelWidth() * 1e6)
-                        {
-                          break;
-                        }
-                      if ((*it2) > 0)
-                        {
-                          interferencePower += (*it2) * rbBandwidth;
-                        }
-                      j += 1;
-                    }
-                  if (interferencePower > 0.0)
-                    {
-                      Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
-                      Time interferenceDelay = m_delay->GetDelay (interferenceMobility, receiverMobility);
-                      double interferenceRxPowerDbm = m_loss->CalcRxPower(WToDbm (interferencePower), interferenceMobility, receiverMobility);
-                      RxPowerWattPerChannelBand rxInterference = RxPowerWattPerChannelBand ();
-                      rxInterference.insert({std::make_pair (0, 0), DbmToW (interferenceRxPowerDbm)});
-                      noisePowerPerNode[it->first] = std::make_pair (rxInterference, interferenceDelay);
-                    }
-                }
-            }
+          std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode = AddInterference11p (sender, receiverMobility, m_loss, m_delay);
 
           Simulator::ScheduleWithContext (dstNode,
                                           delay, &YansWifiChannel::Receive,
