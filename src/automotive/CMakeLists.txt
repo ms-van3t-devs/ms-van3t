@@ -55,6 +55,7 @@ Set(source_files
     model/Facilities/phPoints.cc
     model/utilities/sumo-sensor.cc
     model/DCC/DCC.cc
+    model/TxTracker/txTracker.cc
 
     model/Facilities/caBasicService_v1.cc
     model/Facilities/denBasicService_v1.cc
@@ -1362,6 +1363,7 @@ set(header_files
 
     model/Facilities/signalInfoUtils.h
     model/DCC/DCC.h
+    model/TxTracker/txTracker.h
     
     helper/emergencyVehicleWarningServer80211p-helper.h
     helper/emergencyVehicleWarningClient80211p-helper.h

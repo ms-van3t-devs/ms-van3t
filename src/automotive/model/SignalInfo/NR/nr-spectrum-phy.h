@@ -116,6 +116,8 @@ public:
     CCA_BUSY   //!< BUSY state (channel occupied by another entity)
   };
 
+  State GetState () {return m_state;};
+
   //callbacks typedefs and setters
   /**
    * \brief This callback method type is used to notify that DATA is received
