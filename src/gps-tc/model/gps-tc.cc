@@ -239,7 +239,7 @@ namespace ns3
   }
 
   void
-  GPSTraceClient::GPSTraceClientSetup(STARTUP_FCN create_fcn,SHUTDOWN_FCN destroy_fcn)
+  GPSTraceClient::GPSTraceClientSetup(STARTUP_GPS_FCN create_fcn,SHUTDOWN_GPS_FCN destroy_fcn)
   {
       m_includeNode=create_fcn;
       m_excludeNode=destroy_fcn;
@@ -259,7 +259,7 @@ namespace ns3
   void
   GPSTraceClient::CreateNode()
   {
-      m_vehNode=m_includeNode(m_vehID,TraciClient::StationTypeTraci_unspecified);
+      m_vehNode=m_includeNode(m_vehID);
 
       // First position update
       m_lastvehicledataidx=0;

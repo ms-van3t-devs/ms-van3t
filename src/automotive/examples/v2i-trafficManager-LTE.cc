@@ -19,7 +19,12 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 
-#include "ns3/automotive-module.h"
+//#include "ns3/automotive-module.h"
+#include "ns3/carla-module.h"
+#include "ns3/trafficManagerClientLTE-helper.h"
+#include "ns3/trafficManagerServerLTE-helper.h"
+#include "ns3/trafficManagerServerLTE.h"
+#include "ns3/trafficManagerClientLTE.h"
 #include "ns3/traci-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/lte-module.h"

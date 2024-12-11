@@ -1,4 +1,5 @@
-#include "ns3/automotive-module.h"
+#include "ns3/carla-module.h"
+//#include "ns3/automotive-module.h"
 #include "ns3/traci-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"

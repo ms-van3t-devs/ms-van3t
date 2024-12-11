@@ -17,7 +17,9 @@
  *  Carlos Mateo Risma Carletti, Politecnico di Torino (carlosrisma@gmail.com)
 */
 #include "ns3/carla-module.h"
-#include "ns3/automotive-module.h"
+//#include "ns3/automotive-module.h"
+#include "ns3/cooperativePerception-helper.h"
+#include "ns3/cooperativePerception.h"
 #include "ns3/traci-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"
@@ -328,7 +330,7 @@ main (int argc, char *argv[])
   cooperativePerceptionHelper.SetAttribute ("Model", StringValue ("80211p"));
   cooperativePerceptionHelper.SetAttribute("VisualizeSensor", BooleanValue(visualize_sensor));
   /* callback function for node creation */
-  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
+  STARTUP_OPENCDA_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -346,7 +348,7 @@ main (int argc, char *argv[])
     };
 
   /* Callback function for node shutdown */
-  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_OPENCDA_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
       Ptr<cooperativePerception> appSample_ = exNode->GetApplication(0)->GetObject<cooperativePerception>();
