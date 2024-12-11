@@ -1,6 +1,7 @@
 #ifndef METRICSUPERVISOR_H
 #define METRICSUPERVISOR_H
 
+#include "ns3/OpenCDAClient.h"
 #include <list>
 #include <unordered_map>
 #include <string>
@@ -80,6 +81,12 @@ public:
    * @param traci_ptr
    */
   void setTraCIClient(Ptr<TraciClient> traci_ptr) {m_traci_ptr = traci_ptr;}
+
+  /**
+   * @brief Set the OpenCDA client pointer.
+   * @param traci_ptr
+   */
+  void setOpenCDACLient(Ptr<OpenCDAClient> carla_ptr) {m_carla_ptr = carla_ptr;}
 
   /**
    * @brief This function is called everytime a packet is sent in the simulation by the GeoNet object. It is not expected to be called by the user.
@@ -500,6 +507,7 @@ private:
   std::unordered_map<messageType_e,double> m_avg_nvehbsln_per_messagetype;  //! key: message type, value: average number of road users within the baseline used for the PRR computation for that message type
 
   Ptr<TraciClient> m_traci_ptr = nullptr;
+  Ptr<OpenCDAClient> m_carla_ptr = nullptr;
   double m_baseline_m = 150.0;
 
   bool m_prr_verbose_stdout = false;

@@ -80,7 +80,7 @@ main (int argc, char *argv[])
   uint32_t nodeCounter = 0;
 
   /* callback function for node creation */
-  STARTUP_FCN setupNode = [&] (std::string vehicleID) -> Ptr<Node>
+  STARTUP_GPS_FCN setupNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= obuNodes.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");

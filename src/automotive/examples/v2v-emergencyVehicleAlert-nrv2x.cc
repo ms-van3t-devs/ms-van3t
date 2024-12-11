@@ -17,7 +17,10 @@
  *
  */
 
-#include "ns3/automotive-module.h"
+#include "ns3/carla-module.h"
+//#include "ns3/automotive-module.h"
+#include "ns3/emergencyVehicleAlert-helper.h"
+#include "ns3/emergencyVehicleAlert.h"
 #include "ns3/traci-module.h"
 #include "ns3/config-store.h"
 #include "ns3/network-module.h"

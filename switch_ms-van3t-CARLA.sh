@@ -64,15 +64,16 @@ if [ "$mode" = "base" ]; then
 		sudo apt install -y software-properties-common build-essential cmake debhelper git wget curl xdg-user-dirs xserver-xorg libvulkan1 libsdl2-2.0-0 libsm6 libgl1-mesa-glx libomp5 pip unzip libjpeg8 libtiff5 software-properties-common nano fontconfig
 
 		ns_3_dir=$(pwd)
-		wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.12.tar.gz 
-		wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/AdditionalMaps_0.9.12.tar.gz
+		wget https://tiny.carla.org/carla-0-9-12-linux
+		wget https://tiny.carla.org/additional-maps-0-9-12-linux
 		mkdir CARLA_0.9.12
-		tar -xzf CARLA_0.9.12.tar.gz -C CARLA_0.9.12/
-		cp AdditionalMaps_0.9.12.tar.gz CARLA_0.9.12/Import/
-		rm CARLA_0.9.12.tar.gz
-		rm AdditionalMaps_0.9.12.tar.gz
+		tar -xzf carla-0-9-12-linux -C CARLA_0.9.12/
+		cp additional-maps-0-9-12-linux CARLA_0.9.12/Import/
+		rm carla-0-9-12-linux 
+		rm additional-maps-0-9-12-linux
 		cd CARLA_0.9.12/Import/
-		tar -xzf AdditionalMaps_0.9.12.tar.gz
+		tar -xzf additional-maps-0-9-12-linux
+		mv additional-maps-0-9-12-linux additional-maps-0-9-12-linux.tar.gz
 		cd ..
 		./ImportAssets.sh
 		carla_dir=$(pwd)

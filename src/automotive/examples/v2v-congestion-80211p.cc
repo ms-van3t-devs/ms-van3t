@@ -38,7 +38,7 @@
  * The reported latency of vehicle 3 is expected to be 0 as it transmits interfering traffic (so, no ETSI-compliant
  * message is transmitted), that is not considered by the PRRSupervisor.
  */
-
+#include "ns3/carla-module.h"
 #include "ns3/vector.h"
 #include "ns3/string.h"
 #include "ns3/socket.h"

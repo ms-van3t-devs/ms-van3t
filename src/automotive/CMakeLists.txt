@@ -17,10 +17,10 @@ Set(source_files
     helper/trafficManagerClientLTE-helper.cc
     helper/trafficManagerServerLTE-helper.cc
 
-#     helper/cooperativePerception-helper.cc
-#     model/Applications/cooperativePerception.cc
-#     model/Facilities/vdpopencda.cc
-#     model/utilities/opencda-sensor.cc
+     helper/cooperativePerception-helper.cc
+     model/Applications/cooperativePerception.cc
+     model/Facilities/vdpopencda.cc
+     model/utilities/opencda-sensor.cc
 
     model/Applications/areaSpeedAdvisorClient80211p.cc
     model/Applications/areaSpeedAdvisorServer80211p.cc
@@ -1329,10 +1329,10 @@ set(header_files
     helper/v2xEmulator-helper.h
     helper/simpleCAMSender-helper.h
 
-#     helper/cooperativePerception-helper.h
-#     model/utilities/opencda-sensor.h
-#     model/Applications/cooperativePerception.h
-#     model/Facilities/vdpopencda.h
+     helper/cooperativePerception-helper.h
+     model/utilities/opencda-sensor.h
+     model/Applications/cooperativePerception.h
+     model/Facilities/vdpopencda.h
 
 
     model/Applications/areaSpeedAdvisorClient80211p.h
@@ -3803,5 +3803,6 @@ build_lib(
     ${libinternet}
     ${libvehicle-visualizer}
     ${libtraci}
+    ${libcarla}
   TEST_SOURCES ${test_sources}
 )

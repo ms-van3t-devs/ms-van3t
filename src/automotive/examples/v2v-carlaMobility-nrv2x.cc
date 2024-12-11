@@ -17,8 +17,9 @@
  *
  */
 #include "ns3/carla-module.h"
-#include "ns3/automotive-module.h"
-
+//#include "ns3/automotive-module.h"
+#include "ns3/cooperativePerception-helper.h"
+#include "ns3/cooperativePerception.h"
 #include "ns3/config-store.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
@@ -698,7 +699,7 @@ main (int argc, char *argv[])
 
   /* callback function for node creation */
   int i=0;
-  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
+  STARTUP_OPENCDA_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
       if (nodeCounter >= allSlUesContainer.GetN())
         NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -719,7 +720,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  SHUTDOWN_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_OPENCDA_FCN shutdownWifiNode = [] (Ptr<Node> exNode,std::string vehicleID)
     {
       Ptr<cooperativePerception> appSample_ = exNode->GetApplication(0)->GetObject<cooperativePerception>();
 

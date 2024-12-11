@@ -17,6 +17,11 @@
 
 #include "ns3/vehicle-visualizer.h"
 
+
+#define STARTUP_GPS_FCN std::function<Ptr<Node>(std::string)>
+#define SHUTDOWN_GPS_FCN std::function<void(Ptr<Node>,std::string)>
+
+
 namespace ns3 {
 
   class GPSTraceClient : public Object
@@ -84,7 +89,7 @@ namespace ns3 {
           void playTrace(Time const &delay);
 
           // Set the functions to create/destroy node
-          void GPSTraceClientSetup(STARTUP_FCN create_fcn,SHUTDOWN_FCN destroy_fcn);
+          void GPSTraceClientSetup(STARTUP_GPS_FCN create_fcn,SHUTDOWN_GPS_FCN destroy_fcn);
 
           // Stop "playing" the trace
           void StopUpdates();
@@ -120,8 +125,8 @@ namespace ns3 {
           double m_travelled_distance;
 
           // Function pointers to node include/exclude functions
-          STARTUP_FCN m_includeNode;
-          SHUTDOWN_FCN m_excludeNode;
+          STARTUP_GPS_FCN m_includeNode;
+          SHUTDOWN_GPS_FCN m_excludeNode;
 
           EventId m_event_updatepos;
 

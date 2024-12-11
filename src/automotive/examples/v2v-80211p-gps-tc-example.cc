@@ -19,7 +19,11 @@
 */
 
 
-#include "ns3/automotive-module.h"
+//#include "ns3/automotive-module.h"
+#include "ns3/carla-module.h"
+#include "ns3/OpenCDAClient.h"
+#include "ns3/simpleCAMSender-gps-tc.h"
+#include "ns3/simpleCAMSender-helper.h"
 #include "ns3/gps-tc-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"
@@ -211,7 +215,7 @@ main (int argc, char *argv[])
   }
 
   /* callback function for node creation */
-  STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
+  STARTUP_GPS_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
     {
 
       if (nodeCounter >= obuNodes.GetN())
@@ -234,7 +238,7 @@ main (int argc, char *argv[])
   int remainingNodes = obuNodes.GetN();
 
   /* callback function for node shutdown */
-  SHUTDOWN_FCN shutdownWifiNode = [&] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_GPS_FCN shutdownWifiNode = [&] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
       Ptr<simpleCAMSender> AppSimpleSender_ = exNode->GetApplication(0)->GetObject<simpleCAMSender>();

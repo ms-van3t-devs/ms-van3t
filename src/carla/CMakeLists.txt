@@ -31,7 +31,6 @@ build_lib(
   SOURCE_FILES ${source_files}
   HEADER_FILES ${header_files}
   LIBRARIES_TO_LINK
-#    ${gRPC}
     ${protobuf}
     ${libcore}
     ${libmobility}

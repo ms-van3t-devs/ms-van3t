@@ -31,8 +31,8 @@
 
 #include "ns3/carla.grpc.pb.h"
 
-#define STARTUP_FCN std::function<Ptr<Node>(std::string)>
-#define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>
+#define STARTUP_OPENCDA_FCN std::function<Ptr<Node>(std::string)>
+#define SHUTDOWN_OPENCDA_FCN std::function<void(Ptr<Node>,std::string)>
 
 namespace ns3
 {
@@ -42,7 +42,7 @@ namespace ns3
       static TypeId GetTypeId (void);
       OpenCDAClient (void);
       ~OpenCDAClient (void);
-      void startCarlaAdapter(STARTUP_FCN includeNode, SHUTDOWN_FCN excludeNode);
+      void startCarlaAdapter(STARTUP_OPENCDA_FCN includeNode, SHUTDOWN_OPENCDA_FCN excludeNode);
       void startSimulation();
       void testInsertVehicle();
 
@@ -115,8 +115,8 @@ namespace ns3
       EventId m_executeOneTimestepTrigger;
 
       // function pointers to node include/exclude functions
-      STARTUP_FCN m_includeNode;
-      SHUTDOWN_FCN m_excludeNode;
+      STARTUP_OPENCDA_FCN m_includeNode;
+      SHUTDOWN_OPENCDA_FCN m_excludeNode;
 
       pid_t m_pid;
       pid_t m_carla_pid;
