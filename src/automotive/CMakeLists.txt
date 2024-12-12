@@ -3806,5 +3806,6 @@ build_lib(
     ${libvehicle-visualizer}
     ${libtraci}
     ${libcarla}
+    ${libsionna}
   TEST_SOURCES ${test_sources}
 )
