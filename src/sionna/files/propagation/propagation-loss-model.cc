@@ -29,10 +29,6 @@
 #include "ns3/string.h"
 #include "ns3/pointer.h"
 #include <cmath>
-
-// INCLUDE NVIDIA SIONNA
-#include "ns3/sionna_handler.h"
-#include "ns3/sionna_linker.h"
 #include <fstream>
 #include <iostream>
 

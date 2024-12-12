@@ -38,7 +38,6 @@
 #include <ns3/antenna-model.h>
 #include <ns3/angles.h>
 #include "multi-model-spectrum-channel.h"
-#include "ns3/txTracker.h"
 #include "ns3/constant-position-mobility-model.h"
 
 namespace ns3 {

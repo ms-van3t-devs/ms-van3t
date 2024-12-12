@@ -170,6 +170,12 @@ cp src/sionna/files/propagation/propagation-delay-model.h src/propagation/model/
 cp src/sionna/files/propagation/propagation-loss-model.cc src/propagation/model/
 cp src/sionna/files/propagation/propagation-loss-model.h src/propagation/model/
 
+cp src/automotive/model/TxTracker/channel_files/modified/multi-model-spectrum-channel.cc src/spectrum/model/
+cp src/automotive/model/TxTracker/channel_files/modified/multi-model-spectrum-channel.h src/spectrum/model/
+cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-channel.cc src/wifi/model/
+cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-channel.h src/wifi/model/
+cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-phy.h src/wifi/model/
+
 echo "Extending Signal Info features..."
 sleep 1
 cp src/automotive/model/SignalInfo/rssi-tag.cc src/wifi/model/

@@ -30,6 +30,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include "ns3/txTracker.h"
 
 namespace ns3 {
 

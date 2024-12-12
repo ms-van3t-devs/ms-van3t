@@ -24,6 +24,9 @@
 #include "ns3/object.h"
 #include "ns3/nstime.h"
 #include "ns3/random-variable-stream.h"
+// INCLUDE NVIDIA SIONNA
+#include "ns3/sionna_linker.h"
+#include "ns3/sionna_handler.h"
 
 namespace ns3 {
 

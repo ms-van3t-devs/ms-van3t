@@ -23,6 +23,7 @@
 
 #include "ns3/channel.h"
 #include "ns3/phy-entity.h"
+#include "ns3/txTracker.h"
 
 namespace ns3 {
 

@@ -32,7 +32,6 @@
 #include "wifi-ppdu.h"
 #include "wifi-psdu.h"
 #include "ns3/constant-position-mobility-model.h"
-#include "ns3/txTracker.h"
 
 namespace ns3 {
 
