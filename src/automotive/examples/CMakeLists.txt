@@ -158,9 +158,20 @@ build_lib_example(
  ${libtraci}
  )
 
- build_lib_example(
-        NAME v2v-simple-cam-exchange-80211p-nrv2x
-        SOURCE_FILES v2v-simple-cam-exchange-80211p-nrv2x.cc
+build_lib_example(
+       NAME v2v-cam-exchange-coexistence-80211p-nrv2x
+       SOURCE_FILES v2v-cam-exchange-coexistence-80211p-nrv2x.cc
+       LIBRARIES_TO_LINK
+       ${libcarla}
+       ${libautomotive}
+       ${libwave}
+       ${libnr}
+       ${libtraci}
+)
+
+build_lib_example(
+        NAME v2v-cam-exchange-sionna-80211p.cc
+        SOURCE_FILES v2v-cam-exchange-sionna-80211p.cc
         LIBRARIES_TO_LINK
         ${libcarla}
         ${libautomotive}

@@ -5,9 +5,24 @@ import socket
 from sionna.rt import load_scene, PlanarArray, Transmitter, Receiver, Paths
 from sionna.constants import SPEED_OF_LIGHT
 import os, subprocess, signal
+import argparse
 
-file_name = "scenarios/SionnaCircleScenario/scene.xml"
-local_machine = False
+# Create the parser
+parser = argparse.ArgumentParser(description='Sionna Server Script')
+
+# Add arguments
+parser.add_argument('--filename', type=str, default='scenarios/SionnaCircleScenario/scene.xml', help='Path to the scenario file')
+parser.add_argument('--local-machine', action='store_true', help='Flag to indicate if running on a local machine')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Use the parsed arguments
+file_name = args.filename
+local_machine = args.local_machine
+
+# file_name = "scenarios/SionnaCircleScenario/scene.xml"
+# local_machine = False
 
 def kill_process_using_port(port):
     try:

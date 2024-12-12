@@ -60,6 +60,8 @@ This script will download the proper version of ns-3-dev and install this framew
 
 `src/cv2x/` contains the model for C-V2X in transmission mode 4.
 
+`src/sionna/` contains the integration files for the NVIDIA-SIONNA Ray Tracing module.
+
 The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_map` folders to save there the SUMO-related files for his/her own applications.
 
 **The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_ETSI_version.sh` script. This script relies on the `ns-3-dev/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
@@ -96,6 +98,45 @@ To run the provided examples:
 
  For further description of the modules provided in this extension please refer to our paper [here](https://www.eurecom.fr/publication/7556/download/comsys-publi-7556.pdf).
 
+# ms-van3t NVIDIA-SIONNA extension
+
+To integrate SIONNA with the `ms-van3t` framework, you need to install the SIONNA library. This can be done locally or on a remote server using the following command:
+
+```sh
+pip install sionna
+```
+
+Once SIONNA is installed, you need to configure the `sionna_server_script.py` script. Set the `--file_name` argument to the path of your SIONNA scenario file. Additionally, set the `--local_machine` argument to `True` if SIONNA is installed and running on the local machine, or `False` if it is running on a remote server.
+
+The `sionna_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `ms-van3t` framework, handling various types of messages such as location updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
+
+If you are running SIONNA on a remote server, you need to specify the IP address of the SIONNA server in your simulation files. For example, in the `src/automotive/examples/v2v-cam-exchange-sionna-80211p.cc` example, you would add the necessary configuration to enable communication with the SIONNA server.
+
+Here is an example of how to configure the IP address for a remote SIONNA server in your simulation file
+
+By following these steps, you can successfully integrate SIONNA with the `ms-van3t` framework and run simulations that leverage SIONNA's ray tracing capabilities.
+
+# ms-van3t channel coexistence extension
+
+To use the channel coexistence extension in `ms-van3t`, it is important to build just your example. Follow these steps:
+
+1. Run the `./switch_ms-van3t-interference.sh` script with the `on` argument to configure the environment for interference simulation:
+   ```sh
+   ./switch_ms-van3t-interference.sh on
+   ```
+
+2. **Build just your example** rather than building all examples and tests:
+   ```sh
+   ./ns3 build <specific-file>
+   ```
+
+3. To return to the normal mode of `ms-van3t`, run the `./switch_ms-van3t-interference.sh` script again with the `off` argument:
+   ```sh
+   ./switch_ms-van3t-interference.sh off
+   ```
+    This will allow you to build all files as usual.
+
+For more details on the channel coexistence extension, you can refer to the example `src/automotive/examples/v2v-cam-exchange-coexistence-80211p-nrv2x.cc`.
 
 # Working with an IDE
 
