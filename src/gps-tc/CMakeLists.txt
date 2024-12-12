@@ -26,5 +26,6 @@ build_lib(
 	${libmobility}
 	${libvehicle-visualizer}
   ${libtraci}
+  ${libsionna}
   TEST_SOURCES ${test_sources}
 )
