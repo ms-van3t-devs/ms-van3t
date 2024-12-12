@@ -106,7 +106,10 @@ To integrate SIONNA with the `ms-van3t` framework, you need to install the SIONN
 pip install sionna
 ```
 
-Once SIONNA is installed, you need to configure the `sionna_server_script.py` script. Set the `--file_name` argument to the path of your SIONNA scenario file. Additionally, set the `--local_machine` argument to `True` if SIONNA is installed and running on the local machine, or `False` if it is running on a remote server.
+Once SIONNA is installed, you need to configure the `sionna_server_script.py` script. 
+Set the `--file_name` argument to the path of your SIONNA scenario file. 
+Set the `--local_machine` argument if SIONNA is installed and running on the local machine, or `False` if it is running on a remote server.
+Set the `--verbose` argument if you want to print SIONNA information to the console.
 
 The `sionna_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `ms-van3t` framework, handling various types of messages such as location updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
 

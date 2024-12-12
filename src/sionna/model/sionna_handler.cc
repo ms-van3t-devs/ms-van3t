@@ -11,9 +11,11 @@ struct sockaddr_in sionna_addr = {};
 struct in_addr sionna_destIPaddr;
 bool is_socket_created = false;
 std::unordered_map<std::string, SionnaPosition> vehiclePositions;
+bool sionna_verbose = false;
+bool sionna_local_machine = false;
 
 // THIS ONE WORKS LOCALLY!
-/* void connect_now() {
+void connect_now_local_machine() {
     printf("Avvio connect_now\n");
     sionna_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -26,7 +28,7 @@ std::unordered_map<std::string, SionnaPosition> vehiclePositions;
     sionna_addr.sin_addr = sionna_destIPaddr;
     connect(sionna_socket, (struct sockaddr *)&(sionna_addr), sizeof(sionna_addr));
     is_socket_created = true;
-} */
+}
 
 void
 connect_now() {
@@ -77,7 +79,14 @@ checkConnection ()
 {
   if (!is_socket_created) {
       printf("No socket, creating new one \n");
-      connect_now();
+      if (sionna_local_machine)
+        {
+          connect_now_local_machine();
+        }
+      else
+        {
+          connect_now();
+        }
     }
 }
 
@@ -160,7 +169,10 @@ getRxPowerFromSionna(Vector a_position, Vector b_position) {
           try {
               double value = std::stof(value_str);
               if (found_veh_b_id != "0") {
-                  printf("tx_id: %s, rx_id: %s, ", found_veh_a_id.c_str(), found_veh_b_id.c_str());
+                  if (sionna_verbose)
+                    {
+                      printf("tx_id: %s, rx_id: %s, ", found_veh_a_id.c_str(), found_veh_b_id.c_str());
+                    }
 
                   // To fix missing delays in nr-v2x
                   //std::string log_delays = std::to_string(0) + "," + std::to_string(0);

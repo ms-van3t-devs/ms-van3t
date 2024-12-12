@@ -25,6 +25,7 @@ typedef struct SionnaPosition
 } SionnaPosition;
 
 void connect_now ();
+void connect_now_local_machine();
 void checkConnection ();
 int sendString2sionna_UDP (const std::string &str);
 std::string getFromSionna_UDP ();
@@ -42,6 +43,8 @@ extern struct sockaddr_in sionna_addr;
 extern struct in_addr sionna_destIPaddr;
 extern bool is_socket_created;
 extern std::unordered_map<std::string, SionnaPosition> vehiclePositions;
+extern bool sionna_verbose;
+extern bool sionna_local_machine;
 
 }
 

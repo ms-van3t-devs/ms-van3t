@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description='Sionna Server Script')
 # Add arguments
 parser.add_argument('--filename', type=str, default='scenarios/SionnaCircleScenario/scene.xml', help='Path to the scenario file')
 parser.add_argument('--local-machine', action='store_true', help='Flag to indicate if running on a local machine')
+parser.add_argument('--verbose', action='store_true', help='Flag to indicate if the user desires a verbose output')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -20,9 +21,11 @@ args = parser.parse_args()
 # Use the parsed arguments
 file_name = args.filename
 local_machine = args.local_machine
+verbose = args.verbose
 
 # file_name = "scenarios/SionnaCircleScenario/scene.xml"
 # local_machine = False
+# verbose = False
 
 def kill_process_using_port(port):
     try:
@@ -31,7 +34,8 @@ def kill_process_using_port(port):
             if 'LISTEN' in line:
                 pid = int(line.split()[1])
                 os.kill(pid, signal.SIGKILL)
-                print(f"Killed process {pid} using port {port}")
+                if verbose:
+                    print(f"Killed process {pid} using port {port}")
     except Exception as e:
         print(f"Error killing process using port {port}: {e}")
 
@@ -140,7 +144,8 @@ def ManageLocationMessage(message):
             rays_cache = {}
             #print("Pathloss cache cleared.")
             # Print the updated car's information for logging
-            print(f"car_{car} - Position: [{new_x}, {new_y}, {new_z}] - Angle: {new_angle}")
+            if verbose:
+                print(f"car_{car} - Position: [{new_x}, {new_y}, {new_z}] - Angle: {new_angle}")
             # Apply changes to the scene
             if scene.get(f"car_{car}"):  # Make sure the object exists in the scene
                 from_sionna = scene.get(f"car_{car}")
@@ -149,7 +154,8 @@ def ManageLocationMessage(message):
                 # new_orientation = (new_angle*np.pi/180, 0, 0)
                 # from_sionna.orientation = type(from_sionna.orientation)(new_orientation, device=from_sionna.orientation.device)
 
-                print(f"Updated car_{car} position in the scene.")
+                if verbose:
+                    print(f"Updated car_{car} position in the scene.")
             else:
                 print(f"ERROR: no car_{car} in the scene, use Blender to check")
 
@@ -252,9 +258,11 @@ def matchRaysToCars(paths, Sionna_location_db, tolerance=position_threshold, ant
                         print(f"Error encountered for source {tx_idx}, target {rx_idx}: {e}")
                         continue
                 else:
-                    print(f"Warning - No car within tolerance for target {rx_idx} (for source {tx_idx})")
+                    if verbose:
+                        print(f"Warning - No car within tolerance for target {rx_idx} (for source {tx_idx})")
         else:
-            print(f"Warning - No car within tolerance for source {tx_idx}")
+            if verbose:
+                print(f"Warning - No car within tolerance for source {tx_idx}")
 
     return matched_paths
 
@@ -279,20 +287,24 @@ def computeRays():
         if scene.get(tx_antenna_name) is None:
             scene.add(Transmitter(tx_antenna_name, position=tx_position, orientation=[0, 0, 0]))
             scene.tx_array = scene.tx_array
-            print(f"Added TX antenna for car_{car_id}: {tx_antenna_name}")
+            if verbose:
+                print(f"Added TX antenna for car_{car_id}: {tx_antenna_name}")
 
         if scene.get(rx_antenna_name) is None:
             scene.add(Receiver(rx_antenna_name, position=rx_position, orientation=[0, 0, 0]))
             scene.rx_array = scene.rx_array
-            print(f"Added RX antenna for car_{car_id}: {rx_antenna_name}")
+            if verbose:
+                print(f"Added RX antenna for car_{car_id}: {rx_antenna_name}")
 
     # Compute paths
     paths = scene.compute_paths(max_depth=max_depth, num_samples=num_samples, diffraction=True, scattering=True)
     paths.normalize_delays = False  # Do not normalize delays to the first path
-    print(f"Ray tracing took: {(time.time() - t) * 1000} ms")
+    if verbose:
+        print(f"Ray tracing took: {(time.time() - t) * 1000} ms")
     t = time.time()
     matched_paths = matchRaysToCars(paths, Sionna_location_db)  # matched_paths[source_name][target_name]
-    print(f"Matching rays to cars took: {(time.time() - t) * 1000} ms")
+    if verbose:
+        print(f"Matching rays to cars took: {(time.time() - t) * 1000} ms")
 
     # Iterate over sources in matched_paths
     for src_car_id in Sionna_location_db:
@@ -309,7 +321,8 @@ def computeRays():
                             rays_cache[current_source_car_name] = {}
                         # Cache the matched paths for this source-target pair
                         rays_cache[current_source_car_name][current_target_car_name] = matched_paths_for_source[current_target_car_name]
-                        print(f"Cached paths for source {current_source_car_name} to target {current_target_car_name}")
+                        if verbose:
+                            print(f"Cached paths for source {current_source_car_name} to target {current_target_car_name}")
                     else:
                         # Force an update if the source or target wasn't matched
                         for car_id in Sionna_location_db:
@@ -322,18 +335,21 @@ def computeRays():
                                 Sionna_location_db[car_id] = { "x": new_position[0], "y": new_position[1], "z": new_position[2], "angle": SUMO_live_location_db[car_id]["angle"] }
                                 # Update antenna positions
                                 if scene.get(f"{car_name}_tx_antenna"):
-                                    scene.get(f"{car_name}_tx_antenna").position = [ new_position[0] + antenna_displacement[0], new_position[1] + antenna_displacement[1], new_position[2] + antenna_displacement[2] ]
-                                    print(f"Forced update for {car_name} and its TX antenna in the scene.")
+                                    scene.get(f"{car_name}_tx_antenna").position = [new_position[0] + antenna_displacement[0], new_position[1] + antenna_displacement[1], new_position[2] + antenna_displacement[2]]
+                                    if verbose:
+                                        print(f"Forced update for {car_name} and its TX antenna in the scene.")
                                 if scene.get(f"{car_name}_rx_antenna"):
-                                    scene.get(f"{car_name}_rx_antenna").position = [ new_position[0] + antenna_displacement[0], new_position[1] + antenna_displacement[1], new_position[2] + antenna_displacement[2] ]
-                                    print(f"Forced update for {car_name} and its RX antenna in the scene.")
+                                    scene.get(f"{car_name}_rx_antenna").position = [new_position[0] + antenna_displacement[0], new_position[1] + antenna_displacement[1], new_position[2] + antenna_displacement[2]]
+                                    if verbose:
+                                        print(f"Forced update for {car_name} and its RX antenna in the scene.")
                             else:
                                 print(f"ERROR: no {car_name} in the scene for forced update, use Blender to check")
 
                         # Re-do matching with updated locations
                         t = time.time()
                         matched_paths = matchRaysToCars(paths, Sionna_location_db)
-                        print(f"Matching rays to cars (double exec) took: {(time.time() - t)*1000} ms")
+                        if verbose:
+                            print(f"Matching rays to cars (double exec) took: {(time.time() - t)*1000} ms")
                         if current_source_car_name not in rays_cache:
                             rays_cache[current_source_car_name] = {}
                         if current_target_car_name in matched_paths[current_source_car_name]:
@@ -359,7 +375,8 @@ def GetPathloss(car1_id, car2_id):
         path_loss = -10 * np.log10(total_cir)
     else:
         # Handle the case where path loss calculation is not valid
-        print(f"Pathloss calculation failed for {car1_id}-{car2_id}: got infinite value (not enough rays). Returning 300 dB.")
+        if verbose:
+            print(f"Pathloss calculation failed for {car1_id}-{car2_id}: got infinite value (not enough rays). Returning 300 dB.")
         path_loss = 300  # Assign 300 dB for loss cases
 
     return path_loss

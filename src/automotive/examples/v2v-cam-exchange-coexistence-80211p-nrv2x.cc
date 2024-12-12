@@ -62,6 +62,8 @@
 
 #include "ns3/txTracker.h"
 
+#include "ns3/sionna_handler.h"
+
 #include <chrono>
 
 using namespace ns3;
@@ -218,6 +220,8 @@ int main (int argc, char *argv[])
 
   bool sionna = false;
   std::string server_ip = "";
+  bool local_machine = false;
+  bool verb = false;
 
   bool interference = false;
 
@@ -235,8 +239,9 @@ int main (int argc, char *argv[])
   cmd.AddValue ("tx-power", "OBUs transmission power [dBm]", txPower);
   cmd.AddValue ("sim-time", "Total duration of the simulation [s]", simTime);
   cmd.AddValue ("sionna", "Enable SIONNA usage", sionna);
-  cmd.AddValue ("interference", "Enable interference", interference);
   cmd.AddValue ("sionna-server-ip", "SIONNA server IP address", server_ip);
+  cmd.AddValue ("sionna-local-machine", "SIONNA will be executed on local machine", local_machine);
+  cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
   cmd.Parse (argc, argv);
 
   std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
@@ -249,7 +254,7 @@ int main (int argc, char *argv[])
 
   if (sionna)
     {
-      if (server_ip.empty())
+      if (server_ip.empty() && !local_machine)
         {
           std::cerr << "SIONNA server IP address is empty. Please provide a valid IP address." << std::endl;
           return 1;
@@ -263,6 +268,9 @@ int main (int argc, char *argv[])
       outFile << "0";
       outFile.close();
     }
+
+  sionna_local_machine = local_machine;
+  sionna_verbose = verb;
 
   /* Load the .rou.xml file (SUMO map and scenario) */
   xmlInitParser();

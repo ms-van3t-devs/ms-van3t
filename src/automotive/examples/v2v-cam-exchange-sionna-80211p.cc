@@ -42,23 +42,7 @@
 #include "ns3/packet-socket-helper.h"
 #include "ns3/gn-utils.h"
 #include <fstream>
-
-// NR-V2X
-#include "ns3/traci-module.h"
-#include "ns3/config-store.h"
-#include "ns3/internet-module.h"
-#include "ns3/mobility-module.h"
-#include "ns3/point-to-point-module.h"
-#include "ns3/nr-module.h"
-#include "ns3/lte-module.h"
-#include "ns3/stats-module.h"
-#include "ns3/config-store-module.h"
-#include "ns3/antenna-module.h"
-#include <iomanip>
-#include "ns3/vehicle-visualizer-module.h"
-#include <unistd.h>
-#include "ns3/core-module.h"
-#include "ns3/csv-utils.h"
+#include "ns3/sionna_handler.h"
 
 #include <chrono>
 
@@ -162,6 +146,8 @@ int main (int argc, char *argv[])
 
   bool sionna = false;
   std::string server_ip = "";
+  bool local_machine = false;
+  bool verb = false;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
@@ -178,6 +164,8 @@ int main (int argc, char *argv[])
   cmd.AddValue ("sim-time", "Total duration of the simulation [s]", simTime);
   cmd.AddValue ("sionna", "Enable SIONNA usage", sionna);
   cmd.AddValue ("sionna-server-ip", "SIONNA server IP address", server_ip);
+  cmd.AddValue ("sionna-local-machine", "SIONNA will be executed on local machine", local_machine);
+  cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
   cmd.Parse (argc, argv);
 
   std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
@@ -190,7 +178,7 @@ int main (int argc, char *argv[])
 
   if (sionna)
     {
-      if (server_ip.empty())
+      if (server_ip.empty() && !local_machine)
         {
           std::cerr << "SIONNA server IP address is empty. Please provide a valid IP address." << std::endl;
           return 1;
@@ -204,6 +192,9 @@ int main (int argc, char *argv[])
       outFile << "0";
       outFile.close();
     }
+
+  sionna_local_machine = local_machine;
+  sionna_verbose = verb;
 
   /* Load the .rou.xml file (SUMO map and scenario) */
   xmlInitParser();
