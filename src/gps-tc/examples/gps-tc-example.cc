@@ -23,7 +23,6 @@
 #include "ns3/gps-tc-helper.h"
 #include "ns3/mobility-module.h"
 #include "ns3/vehicle-visualizer-module.h"
-#include "ns3/traci-module.h"
 
 using namespace ns3;
 
