@@ -98,7 +98,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  SHUTDOWN_FCN shutdownNode = [&] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_GPS_FCN shutdownNode = [&] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
 //      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();
@@ -112,7 +112,7 @@ main (int argc, char *argv[])
       /* NOTE: further actions could be required for a safe shut down! */
     };
 
-  GPS_TC_MAP_ITERATOR(GPSTCMap,GPSTCit) {
+      GPS_TC_MAP_ITERATOR(GPSTCMap,GPSTCit) {
       GPS_TC_IT_OBJECT(GPSTCit)->GPSTraceClientSetup(setupNode,shutdownNode);
       GPS_TC_IT_OBJECT(GPSTCit)->playTrace(Seconds(0));
   }
