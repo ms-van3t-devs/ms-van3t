@@ -11,7 +11,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Sionna Server Script')
 
 # Add arguments
-parser.add_argument('--filename', type=str, default='scenarios/SionnaCircleScenario/scene.xml', help='Path to the scenario file')
+parser.add_argument('--filename', type=str, default='scenarios/SionnaCircleScenario/scene.xml', help='Path to the scenario file', required=True)
 parser.add_argument('--local-machine', action='store_true', help='Flag to indicate if running on a local machine')
 parser.add_argument('--verbose', action='store_true', help='Flag to indicate if the user desires a verbose output')
 

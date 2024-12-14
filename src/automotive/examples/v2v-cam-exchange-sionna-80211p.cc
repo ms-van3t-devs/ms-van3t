@@ -108,18 +108,18 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("phy_info_sionna.csv");
+  std::ifstream camFileHeader("phy_info_with_sionna.csv");
   std::ofstream camFile;
-  camFile.open("phy_info_sionna.csv", std::ios::out | std::ios::app);
+  camFile.open("phy_info_with_sionna.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
       {
         camFile << "distance,rssi,snr" << std::endl;
       } 
-      else 
+      else
       {
-        std::cerr << "Unable to create file: phy_info_sionna_coexistence.txt" << std::endl;
+        std::cerr << "Unable to create file: phy_info_sionna.csv" << std::endl;
       }
     }
   
@@ -127,22 +127,32 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   camFile.close();
 }
 
+void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
+{
+  std::ofstream file;
+  file.open("prr_with_sionna.csv", std::ios::out | std::ios::app);
+  for (int i = 1; i <= numberOfNodes; i++)
+    {
+      double prr = metSup->getAveragePRR_vehicle (i);
+      file << i << "," << prr << std::endl;
+    }
+  file.close();
+}
+
 int main (int argc, char *argv[])
 {
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
-  double bandwidth_11p = 10;
   int up = 0;
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
+  double m_baseline_prr = 80.0; // PRR baseline value (default: 150 m)
   int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
-  double snr_threshold = 10; // Default value
-  double sinr_threshold = 10; // Default value
+  double snr_threshold = 4; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 180.0; // Total simulation time (default: 200 seconds)
+  double simTime = 150.0; // Total simulation time (default: 200 seconds)
 
   bool sionna = false;
   std::string server_ip = "";
@@ -151,8 +161,8 @@ int main (int argc, char *argv[])
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_120.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_120.cfg";
+  std::string mob_trace = "cars.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -168,7 +178,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
   cmd.Parse (argc, argv);
 
-  std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
+  std::cout << "Start running v2v-cam-exchange-sionna-80211p simulation" << std::endl;
 
   std::ofstream outFile("src/sionna/setup.txt");
   if (!outFile.is_open())
@@ -352,9 +362,10 @@ int main (int argc, char *argv[])
   std::cout << "\nMetric Supervisor statistics for 802.11p" << std::endl;
   std::cout << "Average PRR: " << metSup_11p->getAveragePRR_overall () << std::endl;
   std::cout << "Average latency (ms): " << metSup_11p->getAverageLatency_overall () << std::endl;
-  std::cout << "Average SINR (dB): " << metSup_11p->getAverageSINR_overall() << std::endl;
   std::cout << "RX packet count (from PRR Supervisor): " << metSup_11p->getNumberRx_overall () << std::endl;
   std::cout << "TX packet count (from PRR Supervisor): " << metSup_11p->getNumberTx_overall () << std::endl;
+
+  savePRRs(metSup_11p, numberOfNodes_11p);
   // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_11p->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
 
   Simulator::Destroy ();

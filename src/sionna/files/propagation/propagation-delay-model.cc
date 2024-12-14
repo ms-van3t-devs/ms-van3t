@@ -140,7 +140,7 @@ ConstantSpeedPropagationDelayModel::GetDelay (Ptr<MobilityModel> a, Ptr<Mobility
       sionna_delay = getPropagationDelayFromSionna(a_position, b_position);
       sionna_delay_ms = sionna_delay * 1000;
 
-      if (sionna_delay != 0) {
+      if (sionna_delay != 0 && sionna_verbose) {
           printf("ns3_ms: %f, sionna_ms: %f, ", ns3_delay_milliseconds, sionna_delay_ms);
 
           std::string log_delays = std::to_string(ns3_delay_milliseconds) + "," + std::to_string(sionna_delay_ms);

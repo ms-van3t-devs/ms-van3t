@@ -106,11 +106,14 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
       if (power_sionna != 23 && power_sionna != 0) {
           std::string los = getLOSStatusFromSionna(a_position, b_position);
 
-          std::cout << "ns3_pathloss: " << power_ns3 << ", sionna_pathloss: "<< power_sionna << ", LOS: " << los << std::endl;
+          if (sionna_verbose)
+            {
+              std::cout << "ns3_pathloss: " << power_ns3 << ", sionna_pathloss: "<< power_sionna << ", LOS: " << los << std::endl;
 
-          // For csv logging
-          std::string log_pl = std::to_string(power_ns3) + "," + std::to_string(power_sionna) + "," + los;
-          LogProgress(2, log_pl);
+              // For csv logging
+              std::string log_pl = std::to_string(power_ns3) + "," + std::to_string(power_sionna) + "," + los;
+              LogProgress(2, log_pl);
+            }
         }
     }
 
