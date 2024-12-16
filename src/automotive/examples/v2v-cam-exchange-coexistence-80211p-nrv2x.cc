@@ -62,7 +62,7 @@
 
 #include "ns3/txTracker.h"
 
-#include "ns3/sionna_handler.h"
+#include "ns3/sionna-helper.h"
 
 #include <chrono>
 
@@ -147,10 +147,13 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   camFile.close();
 }
 
-void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices)
+void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, double centralFrequency11p, double centralFrequencyNR, double bandwidth11p, double bandwidthNr)
 {
   std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> wifiVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
+
+  SetCentralFrequencies(centralFrequency11p, centralFrequencyNR);
+  SetBandwidths(bandwidth11p, bandwidthNr);
 
   uint8_t i = 0;
   for (auto v : wifiVehicles)
@@ -246,31 +249,16 @@ int main (int argc, char *argv[])
 
   std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
 
-  std::ofstream outFile("src/sionna/setup.txt");
-  if (!outFile.is_open())
-    {
-      std::cerr << "Unable to open file";
-    }
+  SionnaHelper sionnaHelper;
 
   if (sionna)
     {
-      if (server_ip.empty() && !local_machine)
-        {
-          std::cerr << "SIONNA server IP address is empty. Please provide a valid IP address." << std::endl;
-          return 1;
-        }
-      std::cout << "SIONNA mode enabled" << std::endl;
-      outFile << "1";
-      outFile.close();
+      sionnaHelper.SetSionna(sionna);
+      sionnaHelper.SetServerIp(server_ip);
+      sionnaHelper.SetLocalMachine(local_machine);
+      sionnaHelper.SetVerbose(verb);
+      sionnaHelper.SetMarkerFile();
     }
-  else
-    {
-      outFile << "0";
-      outFile.close();
-    }
-
-  sionna_local_machine = local_machine;
-  sionna_verbose = verb;
 
   /* Load the .rou.xml file (SUMO map and scenario) */
   xmlInitParser();
@@ -646,7 +634,7 @@ int main (int argc, char *argv[])
   if (interference)
   {
     std::cout << "Interference mode enabled" << std::endl;
-    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer);
+    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10);
   }
 
   uint8_t node11pCounter = 0;

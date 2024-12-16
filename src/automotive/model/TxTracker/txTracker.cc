@@ -22,9 +22,6 @@
 namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("TxTracker");
 
-std::unordered_map<std::string, txParameters11p> m_txMap11p;
-std::unordered_map<std::string, txParametersNR> m_txMapNr;
-
 double DbmToW (double dbm)
 {
   return std::pow(10, (dbm - 30) / 10);
@@ -85,20 +82,33 @@ AddInterferenceNr (Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMob
     WifiPhyState current_state = wifiPhy->GetState()->GetState();
     if (current_state == WifiPhyState::TX)
       {
+        double interferenceCentralFreq = centralFrequency11p;
+        double interferenceBandwidth = bandWidth11p;
+        bool overlap = (interferenceCentralFreq - interferenceBandwidth / 2 <= centralFrequencyNr + bandWidthNr / 2 &&
+                        interferenceCentralFreq + interferenceBandwidth / 2 >= centralFrequencyNr - bandWidthNr / 2);
+        if (!overlap)
+          {
+            continue;
+          }
         double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
         Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
         // Time interferenceDelay = m_propagationDelay->GetDelay (interferenceMobility, receiverMobility);
         Time interferenceDelay = delay;
-        double finalInterferencePowerDbm = propagationLoss->CalcRxPowerSionna(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility, "80211p");
+        double finalInterferencePowerDbm = propagationLoss->CalcRxPower(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility);
         double finalInterferencePowerW = std::pow(10, (finalInterferencePowerDbm - 30) / 10);
 
         uint8_t j = 1;
         uint8_t counterRB = 0;
+        double nrStartFreq = centralFrequencyNr - bandWidthNr / 2;
+        double nrEndFreq = centralFrequencyNr + bandWidthNr / 2;
+        double wifiStartFreq = centralFrequency11p - bandWidth11p / 2;
+        double wifiEndFreq = centralFrequency11p + bandWidth11p / 2;
         for (auto it2 = wifiSignal->ValuesBegin(); it2 != wifiSignal->ValuesEnd(); ++it2)
           {
-            if (j * rbBandwidth < it->second.bandwidth * 1e6)
+            double subBandFreq = wifiStartFreq + j * rbBandwidth;
+            if (subBandFreq >= nrStartFreq && subBandFreq <= nrEndFreq)
               {
-                counterRB ++;
+                counterRB++;
               }
             else
               {
@@ -131,13 +141,14 @@ AddInterference11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility
           Ptr<SpectrumValue> spectrum = nrPhy->GetSpectrumPhy ()->GetTxPowerSpectralDensity();
           double rbBandwidth = m_txMapNr.begin()->second.rbBandwidth;
           uint8_t j = 1;
+          double wifiStartFreq = centralFrequency11p - bandWidth11p / 2;
+          double wifiEndFreq = centralFrequency11p + bandWidth11p / 2;
+          double nrStartFreq = centralFrequencyNr - bandWidthNr / 2;
+          double nrEndFreq = centralFrequencyNr + bandWidthNr / 2;
           for (auto it2 = spectrum->ValuesBegin(); it2 != spectrum->ValuesEnd(); ++it2)
             {
-              if (j * rbBandwidth > sender->GetChannelWidth() * 1e6)
-                {
-                  break;
-                }
-              if ((*it2) > 0)
+              double subBandfreq = nrStartFreq + j * rbBandwidth;
+              if ((*it2) > 0 && subBandfreq >= wifiStartFreq && subBandfreq <= wifiEndFreq)
                 {
                   interferencePower += (*it2) * rbBandwidth;
                 }

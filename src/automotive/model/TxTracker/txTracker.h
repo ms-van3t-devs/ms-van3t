@@ -54,11 +54,17 @@ typedef struct txParametersNR {
   double rbBandwidth;
 } txParametersNR;
 
-extern std::unordered_map<std::string, txParameters11p> m_txMap11p;
-extern std::unordered_map<std::string, txParametersNR> m_txMapNr;
+std::unordered_map<std::string, txParameters11p> m_txMap11p;
+std::unordered_map<std::string, txParametersNR> m_txMapNr;
+double centralFrequency11p;
+double centralFrequencyNr;
+double bandWidth11p;
+double bandWidthNr;
 
 void Insert11pNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> nodes);
 void InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nodes);
+void SetCentralFrequencies(double frequency11p, double frequencyNr) {centralFrequency11p = frequency11p; centralFrequencyNr = frequencyNr;};
+void SetBandwidths(double band11p, double bandNr) {bandWidth11p = band11p * 1e6; bandWidthNr = bandNr * 1e6;};
 std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> AddInterferenceNr (Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay, Ptr<PropagationLossModel> propagationLoss);
 std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> AddInterference11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility, Ptr<PropagationLossModel> propagationLoss, Ptr<PropagationDelayModel> propagationDelay);
 

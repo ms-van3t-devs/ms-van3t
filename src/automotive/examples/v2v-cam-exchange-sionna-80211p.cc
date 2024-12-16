@@ -42,7 +42,7 @@
 #include "ns3/packet-socket-helper.h"
 #include "ns3/gn-utils.h"
 #include <fstream>
-#include "ns3/sionna_handler.h"
+#include "ns3/sionna-helper.h"
 
 #include <chrono>
 
@@ -124,6 +124,7 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
   std::ofstream file;
   file.open("prr_with_sionna.csv", std::ios::out | std::ios::app);
+  file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
     {
       double prr = metSup->getAveragePRR_vehicle (i);
@@ -140,10 +141,10 @@ int main (int argc, char *argv[])
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
-  int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
+  double m_baseline_prr = 100.0; // PRR baseline value (default: 150 m)
+  int txPower = 0.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
-  double snr_threshold = 10; // Default value
+  double snr_threshold = 4; // Default value
   xmlDocPtr rou_xml_file;
   double simTime = 50.0; // Total simulation time (default: 200 seconds)
 
@@ -173,31 +174,16 @@ int main (int argc, char *argv[])
 
   std::cout << "Start running v2v-cam-exchange-sionna-80211p simulation" << std::endl;
 
-  std::ofstream outFile("src/sionna/setup.txt");
-  if (!outFile.is_open())
-    {
-      std::cerr << "Unable to open file";
-    }
+  SionnaHelper sionnaHelper;
 
   if (sionna)
     {
-      if (server_ip.empty() && !local_machine)
-        {
-          std::cerr << "SIONNA server IP address is empty. Please provide a valid IP address." << std::endl;
-          return 1;
-        }
-      std::cout << "SIONNA mode enabled" << std::endl;
-      outFile << "1";
-      outFile.close();
+      sionnaHelper.SetSionna(sionna);
+      sionnaHelper.SetServerIp(server_ip);
+      sionnaHelper.SetLocalMachine(local_machine);
+      sionnaHelper.SetVerbose(verb);
+      sionnaHelper.SetMarkerFile();
     }
-  else
-    {
-      outFile << "0";
-      outFile.close();
-    }
-
-  sionna_local_machine = local_machine;
-  sionna_verbose = verb;
 
   /* Load the .rou.xml file (SUMO map and scenario) */
   xmlInitParser();

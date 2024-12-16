@@ -14,9 +14,11 @@ build_lib(
     LIBNAME sionna
     SOURCE_FILES model/sionna_linker.cc
                  model/sionna_handler.cc
+                 helper/sionna-helper.cc
     HEADER_FILES model/sionna_linker.h
                  model/sionna_handler.h
-    LIBRARIES_TO_LINK 
+                 helper/sionna-helper.h
+    LIBRARIES_TO_LINK
 	             ${libcore}
                  ${libnetwork}
                  ${libmobility}
