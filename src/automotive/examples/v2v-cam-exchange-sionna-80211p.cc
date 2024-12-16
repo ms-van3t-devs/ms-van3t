@@ -108,19 +108,12 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("phy_info_with_sionna.csv");
   std::ofstream camFile;
   camFile.open("phy_info_with_sionna.csv", std::ios::out | std::ios::app);
-  if (!camFileHeader.is_open())
+  camFile.seekp (0, std::ios::end);
+  if (camFile.tellp() == 0)
     {
-      if (camFile.is_open())
-      {
-        camFile << "distance,rssi,snr" << std::endl;
-      } 
-      else
-      {
-        std::cerr << "Unable to create file: phy_info_sionna.csv" << std::endl;
-      }
+      camFile << "distance,rssi,snr" << std::endl;
     }
   
   camFile << distance << "," << rssi << "," << snr << std::endl;
@@ -147,12 +140,12 @@ int main (int argc, char *argv[])
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 80.0; // PRR baseline value (default: 150 m)
+  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
-  double snr_threshold = 4; // Default value
+  double snr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 150.0; // Total simulation time (default: 200 seconds)
+  double simTime = 50.0; // Total simulation time (default: 200 seconds)
 
   bool sionna = false;
   std::string server_ip = "";

@@ -105,6 +105,11 @@ public:
                       Ptr<MobilityModel> a,
                       Ptr<MobilityModel> b) const;
 
+  double CalcRxPowerSionna (double txPowerDbm,
+                            Ptr<MobilityModel> a,
+                            Ptr<MobilityModel> b,
+                            std::string sender_technology) const;
+
   /**
    * If this loss model uses objects of type RandomVariableStream,
    * set the stream numbers to the integers starting with the offset

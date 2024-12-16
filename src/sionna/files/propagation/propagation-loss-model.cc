@@ -93,10 +93,47 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
 
   // 2 - send calc_request to NVIDIA Sionna
   double power_ns3;
+  power_ns3 = DoCalcRxPower (txPowerDbm, a, b);
+
+  // 3 - Return value from Sionna instead of ns3 models
+  double self = power_ns3;
+
+  if (m_next != 0)
+    {
+      self = m_next->CalcRxPower (self, a, b);
+    }
+
+  return self;
+}
+
+double
+PropagationLossModel::CalcRxPowerSionna (double txPowerDbm,
+                                         Ptr<MobilityModel> a,
+                                         Ptr<MobilityModel> b,
+                                         std::string sender_technology) const
+{
+  // 1 - get Positions for a and b
+  Vector a_position = GetPositionFromMobilityModel(a);
+  Vector b_position = GetPositionFromMobilityModel(b);
+
+  // 2 - send calc_request to NVIDIA Sionna
+  double power_ns3;
   double power_sionna;
   if (m_sionna)
     {
-      power_sionna = txPowerDbm - getRxPowerFromSionna(a_position, b_position);
+      NS_ASSERT_MSG (sender_technology != "", "Sionna technology not set.");
+      if (sender_technology == "80211p")
+        {
+          power_sionna = -getRxPowerFromSionna(a_position, b_position);
+        }
+      else if (sender_technology == "nr-v2x" || sender_technology == "lte")
+        {
+          power_sionna = txPowerDbm - getRxPowerFromSionna(a_position, b_position);
+        }
+      else
+        {
+          NS_ABORT_MSG ("Unknown technology for SIONNA.");
+        }
     }
 
   power_ns3 = DoCalcRxPower (txPowerDbm, a, b);
