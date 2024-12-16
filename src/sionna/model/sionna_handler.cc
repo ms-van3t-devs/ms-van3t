@@ -159,7 +159,7 @@ getRxPowerFromSionna(Vector a_position, Vector b_position) {
 
   std::string message_for_Sionna = "calc_request:" + found_veh_a_id + "," + found_veh_b_id;
   sendString2sionna_UDP(message_for_Sionna);
-  //std::cout << message_for_Sionna << std::endl;
+  // std::cout << message_for_Sionna << std::endl;
 
   while (!got_response) {
       std::string server_response = getFromSionna_UDP();

@@ -89,7 +89,7 @@ AddInterferenceNr (Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMob
         Ptr<MobilityModel> interferenceMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
         // Time interferenceDelay = m_propagationDelay->GetDelay (interferenceMobility, receiverMobility);
         Time interferenceDelay = delay;
-        double finalInterferencePowerDbm = propagationLoss->CalcRxPower(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility);
+        double finalInterferencePowerDbm = propagationLoss->CalcRxPowerSionna(10 * log10(it->second.txPower_W) + 30, interferenceMobility, receiverMobility, "80211p");
         double finalInterferencePowerW = std::pow(10, (finalInterferencePowerDbm - 30) / 10);
 
         uint8_t j = 1;

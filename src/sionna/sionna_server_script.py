@@ -68,7 +68,6 @@ scene.synthetic_array = True  # If set to False, ray tracing will be done per an
 # Antenna settings
 antenna_displacement = [0, 0, 1.5]  # location of the antenna wrt the car mesh
 element_spacing = SPEED_OF_LIGHT / scene.frequency / 2
-# array = PlanarArray(1, 2, element_spacing, element_spacing, "tr38901", "V")
 array = PlanarArray(1, 1, element_spacing, element_spacing, "iso", "V")  # 1x1 isotropic antenna
 # SUMO update granularity
 position_threshold = 3  # Update object position every position_threshold [meters]
@@ -367,8 +366,10 @@ def GetPathloss(car1_id, car2_id):
         computeRays()
 
     path_coefficients = rays_cache[car1_id][car2_id]["path_coefficients"]
-    magnitudes = np.abs(path_coefficients)
-    total_cir = np.sum(magnitudes ** 2)
+    sum = np.sum(path_coefficients)
+    abs = np.abs(sum)
+    square = abs ** 2
+    total_cir = square
 
     # Calculate path loss in dB
     if total_cir > 0:
@@ -480,6 +481,8 @@ if __name__ == "__main__":
 
     # Startpoint
     print("Sionna is now ready to handle messages... waiting")
+    freq = scene.frequency / 1e9
+    print(f"Sionna is now ready to handle messages for {freq}GHz... waiting")
 
     while True:
         # Receive data from the socket
@@ -495,7 +498,8 @@ if __name__ == "__main__":
         if message.startswith("calc_request:"):
             pathloss = ManagePathlossRequest(message)
             if pathloss is not None:
-                # Use pathloss + 23 for 80211p calibration
+                # Use pathloss + txPower (dBm) for 80211p
+                # response = "CALC_DONE:" + str(pathloss + 23)
                 response = "CALC_DONE:" + str(pathloss)
                 udp_socket.sendto(response.encode(), address)
 
