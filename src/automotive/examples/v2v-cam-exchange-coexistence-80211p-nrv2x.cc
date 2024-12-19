@@ -149,11 +149,13 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
 
 void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, double centralFrequency11p, double centralFrequencyNR, double bandwidth11p, double bandwidthNr)
 {
+  auto& tracker = TxTracker::GetInstance();
+
   std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> wifiVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
 
-  SetCentralFrequencies(centralFrequency11p, centralFrequencyNR);
-  SetBandwidths(bandwidth11p, bandwidthNr);
+  tracker.SetCentralFrequencies(centralFrequency11p, centralFrequencyNR);
+  tracker.SetBandwidths(bandwidth11p * 1e6, bandwidthNr * 1e6);
 
   uint8_t i = 0;
   for (auto v : wifiVehicles)
@@ -163,7 +165,7 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
       wifiVehiclesList.push_back (std::make_tuple (v, id, netDevice));
       i++;
     }
-  Insert11pNodes (wifiVehiclesList);
+  tracker.Insert11pNodes (wifiVehiclesList);
 
   i = 0;
   for (auto v : nrVehicles)
@@ -173,7 +175,7 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
       nrVehiclesList.push_back (std::make_tuple (v, id, netDevice));
       i++;
     }
-  InsertNrNodes (nrVehiclesList);
+  tracker.InsertNrNodes (nrVehiclesList);
 }
 
 int main (int argc, char *argv[])
@@ -226,7 +228,7 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = false;
+  bool interference = true;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";

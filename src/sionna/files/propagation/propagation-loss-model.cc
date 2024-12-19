@@ -104,12 +104,12 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
 
   if (m_sionna)
     {
-      if (power_sionna != 23 && power_sionna != 0) {
+      if (power_sionna != 0) {
           std::string los = getLOSStatusFromSionna(a_position, b_position);
 
           if (sionna_verbose)
             {
-              std::cout << "ns3_pathloss: " << power_ns3 << ", sionna_pathloss: "<< power_sionna << ", LOS: " << los << std::endl;
+              std::cout << "ns3_pathgain: " << - (txPowerDbm - power_ns3) << ", sionna_pathgain: "<< - (txPowerDbm - power_sionna) << ", LOS: " << los << std::endl;
 
               // For csv logging
               std::string log_pl = std::to_string(power_ns3) + "," + std::to_string(power_sionna) + "," + los;
@@ -525,7 +525,7 @@ LogDistancePropagationLossModel::GetTypeId (void)
                                          MakeDoubleChecker<double> ())
                           .AddAttribute ("ReferenceLoss",
                                          "The reference loss at reference distance (dB). (Default is Friis at 1m with 5.15 GHz)",
-                                         DoubleValue (46.6777),
+                                         DoubleValue (47.84407808),
                                          MakeDoubleAccessor (&LogDistancePropagationLossModel::m_referenceLoss),
                                          MakeDoubleChecker<double> ())
       ;

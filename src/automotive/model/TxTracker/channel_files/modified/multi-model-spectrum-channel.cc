@@ -360,7 +360,8 @@ MultiModelSpectrumChannel::StartTx (Ptr<SpectrumSignalParameters> txParams)
 
               
               Ptr<SpectrumValue> wifiSignal = Create<SpectrumValue>((this->m_txSpectrumModelInfoMap.begin())->second.m_txSpectrumModel);
-              std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes = AddInterferenceNr(wifiSignal, receiverMobility, delay, m_propagationLoss);
+              auto& tracker = TxTracker::GetInstance();
+              std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes = tracker.AddInterferenceToNr(rxParams->psd, wifiSignal, receiverMobility, delay, m_propagationLoss);
               
               if (rxNetDevice)
                 {

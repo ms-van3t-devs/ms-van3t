@@ -116,7 +116,8 @@ YansWifiChannel::Send (Ptr<YansWifiPhy> sender, Ptr<const WifiPpdu> ppdu, double
               dstNode = dstNetDevice->GetNode ()->GetId ();
             }
 
-          std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode = AddInterference11p (sender, receiverMobility, m_loss, m_delay);
+          auto& tracker = TxTracker::GetInstance();
+          std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode = tracker.AddInterferenceTo11p (sender, receiverMobility, m_loss, m_delay);
 
           Simulator::ScheduleWithContext (dstNode,
                                           delay, &YansWifiChannel::Receive,
