@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
   double m_baseline_prr = 100.0; // PRR baseline value (default: 150 m)
-  int txPower = 0.0; // Transmission power in dBm (default: 23 dBm)
+  int txPower = 23.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
   double snr_threshold = 4; // Default value
   xmlDocPtr rou_xml_file;
