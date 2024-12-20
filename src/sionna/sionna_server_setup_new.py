@@ -112,7 +112,7 @@ def match_rays_to_cars(paths, sionna_structure):
     # Iterate over each source (TX)
     for tx_idx, source in enumerate(sources):
         distances = np.linalg.norm(car_positions - source, axis=1)
-        source_within_tolerance = distances <= sionna_structure["tolerance"]
+        source_within_tolerance = distances <= sionna_structure["position_threshold"]
 
         if np.any(source_within_tolerance):
             min_idx = np.argmin(distances[source_within_tolerance])
@@ -127,7 +127,7 @@ def match_rays_to_cars(paths, sionna_structure):
                 if rx_idx >= paths.mask.shape[1]:
                     continue
                 distances = np.linalg.norm(car_positions - target, axis=1)
-                target_within_tolerance = distances <= sionna_structure["tolerance"]
+                target_within_tolerance = distances <= sionna_structure["position_threshold"]
 
                 if np.any(target_within_tolerance):
                     min_idx = np.argmin(distances[target_within_tolerance])
