@@ -221,6 +221,7 @@ cp src/automotive/model/SignalInfo/WiFi/qos-frame-exchange-manager.cc src/wifi/m
 cp src/automotive/model/SignalInfo/WiFi/CMakeLists.txt src/wifi/
 
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.h src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.h src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.cc src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/CMakeLists.txt src/cv2x/

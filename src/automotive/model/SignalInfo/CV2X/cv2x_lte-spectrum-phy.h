@@ -56,8 +56,8 @@ struct cv2x_TbId_t
 {
   uint16_t m_rnti; ///< RNTI
   uint8_t m_layer; ///< layer
-  
-  public:
+
+public:
   cv2x_TbId_t ();
   /**
    * Constructor
@@ -66,12 +66,12 @@ struct cv2x_TbId_t
    * \param b layer
    */
   cv2x_TbId_t (const uint16_t a, const uint8_t b);
-  
+
   friend bool operator == (const cv2x_TbId_t &a, const cv2x_TbId_t &b);
   friend bool operator < (const cv2x_TbId_t &a, const cv2x_TbId_t &b);
 };
 
-  
+
 /// cv2x_tbInfo_t structure
 struct cv2x_tbInfo_t
 {
@@ -94,15 +94,15 @@ struct cv2x_SlTbId_t
 {
   uint16_t m_rnti; //source SL-RNTI
   uint8_t m_l1dst; //layer 1 group Id
-  
-  public:
+
+public:
   cv2x_SlTbId_t ();
   cv2x_SlTbId_t (const uint16_t a, const uint8_t b);
-  
+
   friend bool operator == (const cv2x_SlTbId_t &a, const cv2x_SlTbId_t &b);
   friend bool operator < (const cv2x_SlTbId_t &a, const cv2x_SlTbId_t &b);
 };
- 
+
 struct cv2x_SltbInfo_t
 {
   uint8_t ndi; ///< ndi
@@ -123,11 +123,11 @@ typedef std::map<cv2x_SlTbId_t, cv2x_SltbInfo_t> expectedSlTbs_t;
 struct cv2x_SlV2xTbId_t
 {
   uint16_t m_rnti; //source SL-RNTI
-  
-  public:
+
+public:
   cv2x_SlV2xTbId_t ();
   cv2x_SlV2xTbId_t (const uint16_t a);
-  
+
   friend bool operator == (const cv2x_SlV2xTbId_t &a, const cv2x_SlV2xTbId_t &b);
   friend bool operator < (const cv2x_SlV2xTbId_t &a, const cv2x_SlV2xTbId_t &b);
 };
@@ -142,21 +142,21 @@ struct cv2x_SlV2xTbInfo_t{
   double sinr; ///< mean SINR
 };
 
-typedef std::map<cv2x_SlV2xTbId_t, cv2x_SlV2xTbInfo_t> expectedSlV2xTbs_t; 
+typedef std::map<cv2x_SlV2xTbId_t, cv2x_SlV2xTbInfo_t> expectedSlV2xTbs_t;
 
 
 struct cv2x_DiscTbId_t
 {
   uint16_t m_rnti; //source SL-RNTI
-  uint8_t m_resPsdch; 
-  
-  public:
+  uint8_t m_resPsdch;
+
+public:
   cv2x_DiscTbId_t ();
   cv2x_DiscTbId_t (const uint16_t a, const uint8_t b);
-  
+
   friend bool operator == (const cv2x_DiscTbId_t &a, const cv2x_DiscTbId_t &b);
   friend bool operator < (const cv2x_DiscTbId_t &a, const cv2x_DiscTbId_t &b);
-  
+
 };
 
 struct cv2x_DisctbInfo_t
@@ -217,7 +217,7 @@ typedef Callback< void, Ptr<Packet> > cv2x_LtePhyRxDataEndOkCallback;
 
 /**
 * This method is used by the cv2x_LteSpectrumPhy to notify the PHY that a
-* previously started RX of a control frame attempt has been 
+* previously started RX of a control frame attempt has been
 * successfully completed.
 *
 * @param packet the received Packet
@@ -226,7 +226,7 @@ typedef Callback< void, std::list<Ptr<cv2x_LteControlMessage> > > cv2x_LtePhyRxC
 
 /**
 * This method is used by the cv2x_LteSpectrumPhy to notify the PHY that a
-* previously started RX of a control frame attempt has terminated 
+* previously started RX of a control frame attempt has terminated
 * without success.
 */
 typedef Callback< void > cv2x_LtePhyRxCtrlEndErrorCallback;
@@ -264,7 +264,7 @@ typedef Callback< void, cv2x_UlInfoListElement_s > cv2x_LtePhyUlHarqFeedbackCall
  * The cv2x_LteSpectrumPhy models the physical layer of LTE
  *
  * It supports a single antenna model instance which is
- * used for both transmission and reception.  
+ * used for both transmission and reception.
  */
 class cv2x_LteSpectrumPhy : public SpectrumPhy
 {
@@ -340,12 +340,12 @@ public:
    */
   void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
 
-  /** 
+  /**
    * reset the internal state
-   * 
+   *
    */
   void Reset ();
-  
+
   /**
    * Clear expected SL TBs
    *
@@ -360,18 +360,18 @@ public:
 
   /**
    * set the AntennaModel to be used
-   * 
+   *
    * \param a the Antenna Model
    */
   void SetAntenna (Ptr<AntennaModel> a);
-  
+
   /**
   * Start a transmission of data frame in DL and UL
   *
   *
   * @param pb the burst of packets to be transmitted in PDSCH/PUSCH
   * @param ctrlMsgList the list of cv2x_LteControlMessage to send
-  * @param duration the duration of the data frame 
+  * @param duration the duration of the data frame
   *
   * @return true if an error occurred and the transmission was not
   * started, false otherwise.
@@ -384,7 +384,7 @@ public:
   *
   * @param pb the burst of packets to be transmitted in PDSCH/PUSCH
   * @param ctrlMsgList the list of cv2x_LteControlMessage to send
-  * @param duration the duration of the data frame 
+  * @param duration the duration of the data frame
   *
   * @return true if an error occurred and the transmission was not
   * started, false otherwise.
@@ -402,8 +402,8 @@ public:
   * started, false otherwise.
   */
   bool StartTxDlCtrlFrame (std::list<Ptr<cv2x_LteControlMessage> > ctrlMsgList, bool pss);
-  
-  
+
+
   /**
   * Start a transmission of control frame in UL
   *
@@ -427,17 +427,17 @@ public:
    * @param c the callback
    */
   void SetLtePhyRxDataEndOkCallback (cv2x_LtePhyRxDataEndOkCallback c);
-  
+
   /**
-  * set the callback for the successful end of a RX ctrl frame, as part 
+  * set the callback for the successful end of a RX ctrl frame, as part
   * of the interconnections between the cv2x_LteSpectrumPhy and the PHY
   *
   * @param c the callback
   */
   void SetLtePhyRxCtrlEndOkCallback (cv2x_LtePhyRxCtrlEndOkCallback c);
-  
+
   /**
-  * set the callback for the erroneous end of a RX ctrl frame, as part 
+  * set the callback for the erroneous end of a RX ctrl frame, as part
   * of the interconnections between the cv2x_LteSpectrumPhy and the PHY
   *
   * @param c the callback
@@ -453,7 +453,7 @@ public:
   void SetLtePhyRxPssCallback (cv2x_LtePhyRxPssCallback c);
 
   /**
-  * set the callback for the DL HARQ feedback as part of the 
+  * set the callback for the DL HARQ feedback as part of the
   * interconnections between the cv2x_LteSpectrumPhy and the PHY
   *
   * @param c the callback
@@ -474,9 +474,9 @@ public:
    */
   void SetState (State newState);
 
-  /** 
-   * 
-   * 
+  /**
+   *
+   *
    * \param cellId the Cell Identifier
    */
   void SetCellId (uint16_t cellId);
@@ -487,16 +487,16 @@ public:
    */
   void SetComponentCarrierId (uint8_t componentCarrierId);
 
-  /** 
+  /**
    * \brief Add a new L1 group for filtering
-   * 
+   *
    * \param groupId the L1 Group Identifier
    */
   void AddL1GroupId (uint8_t groupId);
 
-  /** 
+  /**
    * \brief Remove a new L1 group for filtering
-   * 
+   *
    * \param groupId the L1 Group Identifier
    */
   void RemoveL1GroupId (uint8_t groupId);
@@ -508,7 +508,7 @@ public:
   *          processing chain
   */
   void AddRsPowerChunkProcessor (Ptr<cv2x_LteChunkProcessor> p);
-  
+
   /**
   *
   *
@@ -517,9 +517,9 @@ public:
   */
   void AddDataPowerChunkProcessor (Ptr<cv2x_LteChunkProcessor> p);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param p the new cv2x_LteChunkProcessor to be added to the data processing chain
   */
   void AddDataSinrChunkProcessor (Ptr<cv2x_LteChunkProcessor> p);
@@ -539,39 +539,39 @@ public:
   * \param p the new cv2x_LteChunkProcessor to be added to the data processing chain
   */
   void AddInterferenceDataChunkProcessor (Ptr<cv2x_LteChunkProcessor> p);
-  
-  /** 
-  * 
-  * 
+
+  /**
+  *
+  *
   * \param p the new cv2x_LteChunkProcessor to be added to the ctrl processing chain
   */
   void AddCtrlSinrChunkProcessor (Ptr<cv2x_LteChunkProcessor> p);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param p the new cv2x_LteSlChunkProcessor to be added to the sidelink processing chain
   */
   void AddSlSinrChunkProcessor (Ptr<cv2x_LteSlChunkProcessor> p);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param p the new cv2x_LteSlChunkProcessor to be added to the sidelink processing chain
   */
   void AddSlSignalChunkProcessor (Ptr<cv2x_LteSlChunkProcessor> p);
- 
-  /** 
-  * 
-  * 
+
+  /**
+  *
+  *
   * \param p the new cv2x_LteSlChunkProcessor to be added to the sidelink processing chain
   */
   void AddSlInterferenceChunkProcessor (Ptr<cv2x_LteSlChunkProcessor> p);
-   
-  
-  /** 
-  * 
-  * 
+
+
+  /**
+  *
+  *
   * \param rnti the rnti of the source of the TB
   * \param ndi new data indicator flag
   * \param size the size of the TB
@@ -584,9 +584,9 @@ public:
   */
   void AddExpectedTb (uint16_t  rnti, uint8_t ndi, uint16_t size, uint8_t mcs, std::vector<int> map, uint8_t layer, uint8_t harqId, uint8_t rv, bool downlink);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param rnti the rnti of the source of the TB
   * \param l1dst the layer 1 destination id of the TB
   * \param ndi new data indicator flag
@@ -597,8 +597,8 @@ public:
   */
   void AddExpectedTb (uint16_t  rnti, uint8_t l1dst, uint8_t ndi, uint16_t size, uint8_t mcs, std::vector<int> map, uint8_t rv);
 
-  /** 
-  * 
+  /**
+  *
   * for v2x communication
   * \param rnti the rnti of the source of the TB
   * \param l1dst the layer 1 destination id of the TB
@@ -619,57 +619,57 @@ public:
    */
   void AddExpectedTb (uint16_t  rnti, uint8_t resPsdch, uint8_t ndi, std::vector<int> map, uint8_t rv);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param sinr vector of sinr perceived per each RB
   */
   void UpdateSinrPerceived (const SpectrumValue& sinr);
-  
-  /** 
-  * 
-  * 
+
+  /**
+  *
+  *
   * \param sinr vector of sinr perceived per each RB per sidelink packet
   */
   void UpdateSlSinrPerceived (std::vector <SpectrumValue> sinr);
- 
-  /** 
-  * 
-  * 
+
+  /**
+  *
+  *
   * \param sinr vector of signal perceived per each RB per sidelink packet
   */
   void UpdateSlSigPerceived (std::vector <SpectrumValue> signal);
 
   /**
-   * 
-   * 
+   *
+   *
    * \return vector of signal perceived per each RB per sidelink packet
    */
   std::vector <SpectrumValue> GetSlSignalPerceived();
 
   /**
-   * 
-   * 
-   * \return 
+   *
+   *
+   * \return
    */
   std::vector <SpectrumValue> GetSlInterferencePerceived();
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param sinr vector of interference perceived per each RB per sidelink packet
   */
   void UpdateSlIntPerceived (std::vector <SpectrumValue> interference);
 
-  /** 
-  * 
-  * 
+  /**
+  *
+  *
   * \param txMode UE transmission mode (SISO, MIMO tx diversity, ...)
   */
   void SetTransmissionMode (uint8_t txMode);
-  
-  /** 
-   * 
+
+  /**
+   *
    * \return the previously set channel
    */
   Ptr<SpectrumChannel> GetChannel ();
@@ -680,7 +680,7 @@ public:
     */
   void SetSlssid (uint64_t slssid);
 
-   /**
+  /**
     * set the callback for the reception of the SLSS as part
     * of the interconnections between the cv2x_LteSpectrumPhy and the UE PHY
     *
@@ -690,8 +690,8 @@ public:
 
   /// allow cv2x_LteUePhy class friend access
   friend class cv2x_LteUePhy;
-  
- /**
+
+  /**
   * Assign a fixed random variable stream number to the random variables
   * used by this model.  Return the number of streams (possibly zero) that
   * have been assigned.
@@ -703,17 +703,17 @@ public:
   State GetState ();
 
   void SetRxPool (Ptr<SidelinkDiscResourcePool> newpool);
-  void SetRxPool (Ptr<SidelinkCommResourcePoolV2x> newpool); 
+  void SetRxPool (Ptr<SidelinkCommResourcePoolV2x> newpool);
 
   void AddDiscTxApps (std::list<uint32_t> apps);
   void AddDiscRxApps (std::list<uint32_t> apps);
-     
+
   void SetDiscNumRetx (uint8_t retx);
 
 private:
-  /** 
+  /**
   * \brief Change state function
-  * 
+  *
   * \param newState the new state to set
   */
   void ChangeState (State newState);
@@ -731,19 +731,19 @@ private:
   void EndRxUlSrs ();
   /// End reveive SL data function
   void EndRxSlData ();
-  
-  /** 
+
+  /**
   * \brief Set transmit mode gain function
-  * 
+  *
   * \param txMode the transmit mode
   * \param gain the gain to set
   */
   void SetTxModeGain (uint8_t txMode, double gain);
 
   double GetMeanSinr (const SpectrumValue& sinr, const std::vector<int>& map);
-  
+
   bool FilterRxApps (cv2x_SlDiscMsg disc);
-  
+
   Ptr<MobilityModel> m_mobility; ///< the modility model
   Ptr<AntennaModel> m_antenna; ///< the antenna model
   Ptr<NetDevice> m_device; ///< the device
@@ -754,11 +754,11 @@ private:
   Ptr<SpectrumValue> m_txPsd; ///< the transmit PSD
   Ptr<PacketBurst> m_txPacketBurst; ///< the transmit packet burst
   std::list<Ptr<PacketBurst> > m_rxPacketBurstList; ///< the receive burst list
-  
+
   std::list<Ptr<cv2x_LteControlMessage> > m_txControlMessageList; ///< the transmit control message list
   std::list<Ptr<cv2x_LteControlMessage> > m_rxControlMessageList; ///< the receive control message list
-  
-  
+
+
   State m_state; ///< the state
   Time m_firstRxStart; ///< the first receive start
   Time m_firstRxDuration; ///< the first receive duration
@@ -769,9 +769,9 @@ private:
   TracedCallback<Ptr<const Packet> >      m_phyRxEndOkTrace; ///< the phy receive end ok trace callback
   TracedCallback<Ptr<const Packet> >      m_phyRxEndErrorTrace; ///< the phy receive end error trace callback
 
-  cv2x_LtePhyRxDataEndErrorCallback   m_ltePhyRxDataEndErrorCallback; ///< the LTE phy receive data end error callback 
+  cv2x_LtePhyRxDataEndErrorCallback   m_ltePhyRxDataEndErrorCallback; ///< the LTE phy receive data end error callback
   cv2x_LtePhyRxDataEndOkCallback      m_ltePhyRxDataEndOkCallback; ///< the LTE phy receive data end ok callback
-  
+
   cv2x_LtePhyRxCtrlEndOkCallback     m_ltePhyRxCtrlEndOkCallback; ///< the LTE phy receive control end ok callback
   cv2x_LtePhyRxCtrlEndErrorCallback  m_ltePhyRxCtrlEndErrorCallback; ///< the LTE phy receive control end error callback
   cv2x_LtePhyRxPssCallback  m_ltePhyRxPssCallback; ///< the LTE phy receive PSS callback
@@ -780,16 +780,16 @@ private:
   Ptr<cv2x_LteInterference> m_interferenceCtrl; ///< the control interference
 
   uint16_t m_cellId; ///< the cell ID
-  
+
   uint8_t m_componentCarrierId; ///< the component carrier ID
   expectedTbs_t m_expectedTbs; ///< the expected TBS
   expectedDiscTbs_t m_expectedDiscTbs; ///< the expected discovery TBS
-  SpectrumValue m_sinrPerceived; ///< the preceived SINR 
+  SpectrumValue m_sinrPerceived; ///< the preceived SINR
 
   // Information for sidelink communication
   Ptr<cv2x_LteSlInterference> m_interferenceSl;
   std::set<uint8_t> m_l1GroupIds; // identifiers for D2D layer 1 filtering
-  expectedSlTbs_t m_expectedSlTbs;  
+  expectedSlTbs_t m_expectedSlTbs;
   std::vector<SpectrumValue> m_slSinrPerceived; //SINR for each D2D packet received
   std::vector<SpectrumValue> m_slSignalPerceived; //Signal for each D2D packet received
   std::vector<SpectrumValue> m_slInterferencePerceived; //Interference for each D2D packet received
@@ -826,11 +826,11 @@ private:
 
   Ptr<cv2x_LteSpectrumPhy> m_halfDuplexPhy;
   bool m_errorModelHarqD2dDiscoveryEnabled;
-  
+
   std::list< Ptr<SidelinkDiscResourcePool> > m_discRxPools;
 
-  std::list< Ptr<SidelinkCommResourcePoolV2x>> m_slV2xRxPools; 
-  
+  std::list< Ptr<SidelinkCommResourcePoolV2x>> m_slV2xRxPools;
+
   std::list<uint32_t> m_discTxApps;
   std::list<uint32_t> m_discRxApps;
 
