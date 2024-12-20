@@ -28,12 +28,12 @@ def manage_location_message(message, sionna_structure):
         sionna_structure["SUMO_live_location_db"][car] = {"x": new_x, "y": new_y, "z": new_z, "angle": new_angle}
 
         # Check if the vehicle exists in Sionna_location_db
-        if car in sionna_structure["SUMO_live_location_db"]:
+        if car in sionna_structure["sionna_location_db"]:
             # Fetch the old position and angle
-            old_x = sionna_structure["SUMO_live_location_db"][car]["x"]
-            old_y = sionna_structure["SUMO_live_location_db"][car]["y"]
-            old_z = sionna_structure["SUMO_live_location_db"][car]["z"]
-            old_angle = sionna_structure["SUMO_live_location_db"][car]["angle"]
+            old_x = sionna_structure["sionna_location_db"][car]["x"]
+            old_y = sionna_structure["sionna_location_db"][car]["y"]
+            old_z = sionna_structure["sionna_location_db"][car]["z"]
+            old_angle = sionna_structure["sionna_location_db"][car]["angle"]
 
             # Check if the position or angle has changed by more than the thresholds
             position_changed = (
@@ -445,7 +445,7 @@ def main():
     # Argument parser setup
     parser = argparse.ArgumentParser(description='Sionna Server Script')
     parser.add_argument('--filename', type=str, default='scenarios/SionnaCircleScenario/scene.xml',
-                        help='Path to the scenario file', required=True)
+                        help='Path to the scenario file')
     parser.add_argument('--local-machine', action='store_true',
                         help='Flag to indicate if running on a local machine')
     parser.add_argument('--verbose', action='store_true', help='Flag for verbose output')
