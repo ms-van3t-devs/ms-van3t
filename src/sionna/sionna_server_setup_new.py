@@ -290,12 +290,12 @@ def compute_rays(sionna_structure):
     return None
 
 
-def get_path_loss(car1_id, car2_id, array, rays_cache, verbose=False):
+def get_path_loss(car1_id, car2_id, sionna_structure):
     # Was the requested value already calculated?
-    if car1_id not in rays_cache or car2_id not in rays_cache[car1_id]:
-        compute_rays(array, rays_cache, verbose)
+    if car1_id not in sionna_structure["rays_cache"] or car2_id not in sionna_structure["rays_cache"][car1_id]:
+        compute_rays(sionna_structure)
 
-    path_coefficients = rays_cache[car1_id][car2_id]["path_coefficients"]
+    path_coefficients = sionna_structure["rays_cache"][car1_id][car2_id]["path_coefficients"]
     sum = np.sum(path_coefficients)
     abs = np.abs(sum)
     square = abs ** 2
@@ -306,7 +306,7 @@ def get_path_loss(car1_id, car2_id, array, rays_cache, verbose=False):
         path_loss = -10 * np.log10(total_cir)
     else:
         # Handle the case where path loss calculation is not valid
-        if verbose:
+        if sionna_structure["verbose"]:
             print(
                 f"Pathloss calculation failed for {car1_id}-{car2_id}: got infinite value (not enough rays). Returning 300 dB.")
         path_loss = 300  # Assign 300 dB for loss cases
@@ -314,7 +314,7 @@ def get_path_loss(car1_id, car2_id, array, rays_cache, verbose=False):
     return path_loss
 
 
-def manage_path_loss_request(message, array, rays_cache, verbose=False):
+def manage_path_loss_request(message, sionna_structure):
     try:
         data = message[len("calc_request:"):]
         parts = data.split(",")
@@ -330,7 +330,7 @@ def manage_path_loss_request(message, array, rays_cache, verbose=False):
             path_loss_value = 0
         else:
             t = time.time()
-            path_loss_value = get_path_loss(car_a_id, car_b_id, array, rays_cache, verbose)
+            path_loss_value = get_path_loss(car_a_id, car_b_id, sionna_structure)
 
         return path_loss_value
 
@@ -339,12 +339,12 @@ def manage_path_loss_request(message, array, rays_cache, verbose=False):
         return None
 
 
-def get_delay(car1_id, car2_id, sionnna_structure):
+def get_delay(car1_id, car2_id, sionna_structure):
     # Check and compute rays only if necessary
-    if car1_id not in sionnna_structure["rays_cache"] or car2_id not in sionnna_structure["rays_cache"][car1_id]:
-        compute_rays(sionnna_structure)
+    if car1_id not in sionna_structure["rays_cache"] or car2_id not in sionna_structure["rays_cache"][car1_id]:
+        compute_rays(sionna_structure)
 
-    delays = np.abs(sionnna_structure["rays_cache"][car1_id][car2_id]["delays"])
+    delays = np.abs(sionna_structure["rays_cache"][car1_id][car2_id]["delays"])
     delays_flat = delays.flatten()
 
     # Filter positive values
