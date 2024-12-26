@@ -224,9 +224,17 @@ main (int argc, char *argv[])
       Ptr<Node> includedNode = obuNodes.Get(nodeCounter);
 
       /* Install Application */
-      SimpleCAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
-      ApplicationContainer setupAppSimpleSender = SimpleCAMSenderHelper.Install (includedNode);
-
+      ApplicationContainer setupAppSimpleSender;
+      if (v_gps_tc[nodeCounter]->getType() == "car")
+        {
+          SimpleCAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
+          setupAppSimpleSender = SimpleCAMSenderHelper.Install (includedNode);
+        }
+      else if (v_gps_tc[nodeCounter]->getType() == "vru")
+        {
+          //SimpleVAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
+          //setupAppSimpleSender = SimpleVAMSenderHelper.Install (includedNode);
+        }
       setupAppSimpleSender.Start (Seconds (0.0));
       setupAppSimpleSender.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
       ++nodeCounter; // increment counter for next node
