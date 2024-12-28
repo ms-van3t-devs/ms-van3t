@@ -88,7 +88,7 @@ struct cv2x_tbInfo_t
   double sinr; ///< mean SINR
 };
 
-typedef std::map<cv2x_TbId_t, cv2x_tbInfo_t> expectedTbs_t; ///< expectedTbs_t typedef
+typedef std::map<cv2x_TbId_t, cv2x_tbInfo_t> cv2x_expectedTbs_t; ///< expectedTbs_t typedef
 
 struct cv2x_SlTbId_t
 {
@@ -782,7 +782,7 @@ private:
   uint16_t m_cellId; ///< the cell ID
   
   uint8_t m_componentCarrierId; ///< the component carrier ID
-  expectedTbs_t m_expectedTbs; ///< the expected TBS
+  cv2x_expectedTbs_t m_expectedTbs; ///< the expected TBS
   expectedDiscTbs_t m_expectedDiscTbs; ///< the expected discovery TBS
   SpectrumValue m_sinrPerceived; ///< the preceived SINR 
 

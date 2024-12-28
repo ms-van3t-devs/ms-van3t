@@ -88,7 +88,7 @@ public:
   struct SchedDlMacBufferReqParameters
   {
     uint16_t  m_rnti; ///< RNTI
-    enum CeBitmap_e m_ceBitmap; ///< CE bitmap
+    enum cv2x_CeBitmap_e m_ceBitmap; ///< CE bitmap
 
     std::vector <struct cv2x_VendorSpecificListElement_s> m_vendorSpecificList; ///< vendor specific list
   };

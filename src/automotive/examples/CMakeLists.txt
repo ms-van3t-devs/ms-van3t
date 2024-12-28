@@ -167,6 +167,7 @@ build_lib_example(
        ${libwave}
        ${libnr}
        ${libtraci}
+        ${libcv2x}
 )
 
 build_lib_example(

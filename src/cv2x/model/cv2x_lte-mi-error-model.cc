@@ -554,7 +554,7 @@ cv2x_LteMiErrorModel::GetPcfichPdcchError (const SpectrumValue& sinr)
 
 
 cv2x_TbStats_t
-cv2x_LteMiErrorModel::GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint16_t size, uint8_t mcs, HarqProcessInfoList_t miHistory)
+cv2x_LteMiErrorModel::GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint16_t size, uint8_t mcs, cv2x_HarqProcessInfoList_t miHistory)
 {
   NS_LOG_FUNCTION (sinr << &map << (uint32_t) size << (uint32_t) mcs);
 

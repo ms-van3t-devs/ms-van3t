@@ -1062,7 +1062,7 @@ cv2x_LteUePhy::ReceiveLteControlMessageList (std::list<Ptr<cv2x_LteControlMessag
             }
           QueueSubChannelsForTransmission (ulRb);
           // fire trace of UL Tx PHY stats
-          HarqProcessInfoList_t harqInfoList = m_harqPhyModule->GetHarqProcessInfoUl (m_rnti, 0);
+          cv2x_HarqProcessInfoList_t harqInfoList = m_harqPhyModule->GetHarqProcessInfoUl (m_rnti, 0);
           cv2x_PhyTransmissionStatParameters params;
           params.m_cellId = m_cellId;
           params.m_imsi = 0; // it will be set by DlPhyTransmissionCallback in cv2x_LteHelper

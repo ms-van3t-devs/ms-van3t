@@ -109,7 +109,7 @@ public:
    * \param miHistory  MI of past transmissions (in case of retx)
    * \return the TB error rate and MI
    */
-  static cv2x_TbStats_t GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint16_t size, uint8_t mcs, HarqProcessInfoList_t miHistory);
+  static cv2x_TbStats_t GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint16_t size, uint8_t mcs, cv2x_HarqProcessInfoList_t miHistory);
   
   /** 
   * \brief run the error-model algorithm for the specified PCFICH+PDCCH channels

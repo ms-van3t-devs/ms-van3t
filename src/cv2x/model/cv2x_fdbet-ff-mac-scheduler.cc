@@ -151,7 +151,7 @@ cv2x_FdBetFfMacScheduler::DoCschedCellConfigReq (const struct cv2x_FfMacCschedSa
   m_cschedCellConfig = params;
   m_rachAllocationMap.resize (m_cschedCellConfig.m_ulBandwidth, 0);
   cv2x_FfMacCschedSapUser::CschedUeConfigCnfParameters cnf;
-  cnf.m_result = SUCCESS;
+  cnf.m_result = cv2x_SUCCESS;
   m_cschedSapUser->CschedUeConfigCnf (cnf);
   return;
 }

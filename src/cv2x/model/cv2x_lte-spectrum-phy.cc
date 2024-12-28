@@ -1391,7 +1391,7 @@ cv2x_LteSpectrumPhy::AddExpectedTb (uint16_t  rnti, uint8_t ndi, uint16_t size, 
     cv2x_TbId_t tbId;
     tbId.m_rnti = rnti;
     tbId.m_layer = layer;
-    expectedTbs_t::iterator it;
+    cv2x_expectedTbs_t::iterator it;
     it = m_expectedTbs.find (tbId);
     if (it != m_expectedTbs.end ())
     {
@@ -1488,7 +1488,7 @@ cv2x_LteSpectrumPhy::EndRxData ()
     m_interferenceData->EndRx ();
     NS_LOG_DEBUG (this << " No. of burst " << m_rxPacketBurstList.size ());
     NS_LOG_DEBUG (this << " Expected TBs " << m_expectedTbs.size ());
-    expectedTbs_t::iterator itTb = m_expectedTbs.begin ();
+    cv2x_expectedTbs_t::iterator itTb = m_expectedTbs.begin ();
 
     // apply transmission mode gain
     NS_LOG_DEBUG (this << " txMode " << (uint16_t)m_transmissionMode << " gain " << m_txModeGain.at (m_transmissionMode));
@@ -1500,7 +1500,7 @@ cv2x_LteSpectrumPhy::EndRxData ()
         if ((m_dataErrorModelEnabled)&&(m_rxPacketBurstList.size ()>0)) // avoid to check for errors when there is no actual data transmitted
         {
             // retrieve HARQ info
-            HarqProcessInfoList_t harqInfoList;
+            cv2x_HarqProcessInfoList_t harqInfoList;
             if ((*itTb).second.ndi == 0)
             {
                 // TB retxed: retrieve HARQ history
@@ -1832,7 +1832,7 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
         if ((m_dataErrorModelEnabled)&&(m_rxPacketInfo.size ()>0)&&(itSinr != expectedTbToSinrIndex.end())) // avoid to check for errors when there is no actual data transmitted
         {
             // retrieve HARQ info
-            HarqProcessInfoList_t harqInfoList;
+            cv2x_HarqProcessInfoList_t harqInfoList;
             if ((*itTb).second.ndi == 0)
             {
                 harqInfoList = m_harqPhyModule->GetHarqProcessInfoSl ((*itTb).first.m_rnti, (*itTb).first.m_l1dst);
@@ -1929,7 +1929,7 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
         if ((m_dataErrorModelEnabled)&&(m_rxPacketInfo.size ()>0)&&(itSinrV2x != expectedTbToSinrIndexV2x.end())) // avoid to check for errors when there is no actual data transmitted
         {
             // retrieve HARQ info
-            HarqProcessInfoList_t harqInfoList;
+            cv2x_HarqProcessInfoList_t harqInfoList;
 
             NS_LOG_DEBUG(this << "\t" << Simulator::Now ().GetMilliSeconds () << "\tFrom: " << (*itTbV2x).first.m_rnti << "\tCorrupt: " << (*itTbV2x).second.corrupt);
 
@@ -2393,7 +2393,7 @@ cv2x_LteSpectrumPhy::EndRxSlData ()
             if ((m_ctrlErrorModelEnabled)&&(m_rxPacketInfo.size ()>0)&&(itSinrDisc != expectedTbToSinrDiscIndex.end())) // avoid to check for errors when there is no actual discovery transmitted
             {
                 // retrieve HARQ info
-                HarqProcessInfoList_t harqInfoList;
+                cv2x_HarqProcessInfoList_t harqInfoList;
                 if ((*itTbDisc).second.ndi == 0)
                 {
                     harqInfoList = m_harqPhyModule->GetHarqProcessInfoDisc ((*itTbDisc).first.m_rnti,(*itTbDisc).first.m_resPsdch);
