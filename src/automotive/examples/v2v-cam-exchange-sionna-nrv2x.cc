@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// 802.11p
 #include "ns3/vector.h"
 #include "ns3/string.h"
 #include "ns3/socket.h"
@@ -26,45 +25,30 @@
 #include "ns3/config.h"
 #include "ns3/log.h"
 #include "ns3/command-line.h"
-#include "ns3/yans-wifi-helper.h"
-#include "ns3/spectrum-wifi-helper.h"
-#include "ns3/position-allocator.h"
-#include "ns3/mobility-helper.h"
-#include <iostream>
-#include "ns3/MetricSupervisor.h"
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/BSMap.h"
 #include "ns3/caBasicService.h"
-#include "ns3/btp.h"
-#include "ns3/ocb-wifi-mac.h"
-#include "ns3/wifi-80211p-helper.h"
-#include "ns3/wave-mac-helper.h"
-#include "ns3/packet-socket-helper.h"
 #include "ns3/gn-utils.h"
-#include <fstream>
-
-// NR-V2X
 #include "ns3/traci-module.h"
 #include "ns3/config-store.h"
+#include "ns3/network-module.h"
 #include "ns3/internet-module.h"
+#include "ns3/applications-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/nr-module.h"
 #include "ns3/lte-module.h"
 #include "ns3/stats-module.h"
 #include "ns3/config-store-module.h"
+#include "ns3/log.h"
 #include "ns3/antenna-module.h"
 #include <iomanip>
+#include "ns3/sumo_xml_parser.h"
 #include "ns3/vehicle-visualizer-module.h"
+#include "ns3/MetricSupervisor.h"
+#include "ns3/sionna-helper.h"
 #include <unistd.h>
 #include "ns3/core-module.h"
-#include "ns3/csv-utils.h"
-
-#include "ns3/txTracker.h"
-
-#include "ns3/sionna-helper.h"
-
-#include <chrono>
 
 using namespace ns3;
 
@@ -128,59 +112,33 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("phy_info_sionna_coexistence.txt");
   std::ofstream camFile;
-  camFile.open("phy_info_sionna_coexistence.txt", std::ios::out | std::ios::app);
-  if (!camFileHeader.is_open())
+  camFile.open("sionna/phy_info_sionna_nrv2x.csv", std::ios::out | std::ios::app);
+  camFile.seekp (0, std::ios::end);
+  if (camFile.tellp() == 0)
     {
-      if (camFile.is_open())
-      {
-        camFile << "distance,rssi,snr" << std::endl;
-      } 
-      else 
-      {
-        std::cerr << "Unable to create file: phy_info_sionna_coexistence.txt" << std::endl;
-      }
+      camFile << "distance,rssi,snr" << std::endl;
     }
   
   camFile << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
-void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, double centralFrequency11p, double centralFrequencyNR, double bandwidth11p, double bandwidthNr)
+void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
-  auto& tracker = TxTracker::GetInstance();
-
-  std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> wifiVehiclesList;
-  std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
-
-  tracker.SetCentralFrequencies(centralFrequency11p, centralFrequencyNR);
-  tracker.SetBandwidths(bandwidth11p * 1e6, bandwidthNr * 1e6);
-
-  uint8_t i = 0;
-  for (auto v : wifiVehicles)
+  std::ofstream file;
+  file.open("sionna/prr_sionna_nrv2x.csv", std::ios::out | std::ios::app);
+  file << "node_id,prr" << std::endl;
+  for (int i = 1; i <= numberOfNodes; i++)
     {
-      uint8_t id = wifiNodes.Get(i)->GetId();
-      Ptr<WifiNetDevice> netDevice = DynamicCast<WifiNetDevice>(wifiNodes.Get(i)->GetDevice(0));
-      wifiVehiclesList.push_back (std::make_tuple (v, id, netDevice));
-      i++;
+      double prr = metSup->getAveragePRR_vehicle (i);
+      file << i << "," << prr << std::endl;
     }
-  tracker.Insert11pNodes (wifiVehiclesList);
-
-  i = 0;
-  for (auto v : nrVehicles)
-    {
-      Ptr<NrUeNetDevice> netDevice = DynamicCast<NrUeNetDevice>(nrDevices.Get(i));
-      uint8_t id = nrDevices.Get (i)->GetNode()->GetId();
-      nrVehiclesList.push_back (std::make_tuple (v, id, netDevice));
-      i++;
-    }
-  tracker.InsertNrNodes (nrVehiclesList);
+  file.close();
 }
 
 int main (int argc, char *argv[])
 {
-  // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
   double bandwidth_11p = 10;
   int up = 0;
@@ -251,7 +209,7 @@ int main (int argc, char *argv[])
 
   std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
 
-  SionnaHelper sionnaHelper;
+  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
 
   if (sionna)
     {
@@ -259,7 +217,6 @@ int main (int argc, char *argv[])
       sionnaHelper.SetServerIp(server_ip);
       sionnaHelper.SetLocalMachine(local_machine);
       sionnaHelper.SetVerbose(verb);
-      sionnaHelper.SetMarkerFile();
     }
 
   /* Load the .rou.xml file (SUMO map and scenario) */
@@ -293,16 +250,7 @@ int main (int argc, char *argv[])
       sumoClient->SetSionnaUp(server_ip);
     }
 
-  uint64_t numberOfNodes_11p = numberOfNodes / 2;
   uint64_t numberOfNodes_nr = numberOfNodes / 2;
-
-  Ptr<MetricSupervisor> metSup_11p = NULL;
-  // Set a baseline for the PRR computation when creating a new Metricsupervisor object
-  MetricSupervisor metSupObj_11p(m_baseline_prr);
-  metSup_11p = &metSupObj_11p;
-  metSup_11p->setTraCIClient(sumoClient);
-  // This function enables printing the current and average latency and PRR for each received packet
-  // metSup_11p->enablePRRVerboseOnStdout ();
 
   Ptr<MetricSupervisor> metSup_nr = NULL;
   // Set a baseline for the PRR computation when creating a new Metricsupervisor object
@@ -555,57 +503,6 @@ int main (int argc, char *argv[])
   //Set Sidelink bearers
   nrSlHelper->ActivateNrSlBearer (slBearersActivationTime, allSlUesNetDeviceContainer, tft);
 
-  // Create numberOfNodes nodes
-  NodeContainer wifiNodes;
-  wifiNodes.Create (numberOfNodes_11p);
-
-  YansWifiPhyHelper wifiPhy;
-  wifiPhy.Set ("TxPowerStart", DoubleValue (txPower));
-  wifiPhy.Set ("TxPowerEnd", DoubleValue (txPower));
-  wifiPhy.SetPreambleDetectionModel ("ns3::ThresholdPreambleDetectionModel",
-                                     "MinimumRssi", DoubleValue (sensitivity),
-                                      "Threshold", DoubleValue (snr_threshold));
-  YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
-  Ptr<YansWifiChannel> channel = wifiChannel.Create ();
-  wifiPhy.SetChannel (channel);
-
-  /*SpectrumWifiPhyHelper spectrumWiFiPhy = SpectrumWifiPhyHelper();
-  spectrumWiFiPhy.Set ("TxPowerStart", DoubleValue (txPower));
-  spectrumWiFiPhy.Set ("TxPowerEnd", DoubleValue (txPower));
-  spectrumWiFiPhy.SetPreambleDetectionModel ("ns3::ThresholdPreambleDetectionModel",
-                                            "MinimumRssi", DoubleValue (sensitivity),
-                                            "Threshold", DoubleValue (snr_threshold));
-  spectrumWiFiPhy.SetChannel (spectrumChannel);*/
-
-  // ns-3 supports generating a pcap trace, to be later analyzed in Wireshark
-  wifiPhy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11);
-
-  // We need a QosWaveMac, as we need to enable QoS and EDCA
-  QosWaveMacHelper wifi80211pMac = QosWaveMacHelper::Default ();
-  Wifi80211pHelper wifi80211p = Wifi80211pHelper::Default ();
-  if (verbose)
-    {
-      wifi80211p.EnableLogComponents ();      // Turn on all Wifi 802.11p logging, only if verbose is true
-    }
-
-  // Supported "phyMode"s:
-  // OfdmRate3MbpsBW10MHz, OfdmRate6MbpsBW10MHz, OfdmRate9MbpsBW10MHz, OfdmRate12MbpsBW10MHz, OfdmRate18MbpsBW10MHz, OfdmRate24MbpsBW10MHz, OfdmRate27MbpsBW10MHz
-  wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode",StringValue (phyMode),
-                                      "ControlMode",StringValue (phyMode),
-                                      "NonUnicastMode",StringValue (phyMode));
-  NetDeviceContainer devices = wifi80211p.Install (wifiPhy, wifi80211pMac, wifiNodes);
-
-  // Enable saving to Wireshark PCAP traces
-  // wifiPhy.EnablePcap ("v2v-80211p-student-application", devices);
-
-  // Set up the link between SUMO and ns-3, to make each node "mobile" (i.e., linking each ns-3 node to each moving vehicle in ns-3,
-  // which corresponds to installing the network stack to each SUMO vehicle)
-  mobility.Install (wifiNodes);
-
-  PacketSocketHelper packetSocket;
-  packetSocket.Install(wifiNodes);
-
   sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
@@ -618,95 +515,38 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
-  uint8_t nodeCounter = 0;
-  std::vector<std::string> wifiVehicles;
-  std::vector<std::string> nrVehicles;
-  for (uint8_t i = 1; i <= numberOfNodes_11p + numberOfNodes_nr; i++)
-    {
-      if (i % 2 == 0)
-        {
-          wifiVehicles.push_back ("veh" + std::to_string (i));
-        }
-      else
-        {
-          nrVehicles.push_back("veh" + std::to_string (i));
-        }
-    }
-
-  if (interference)
-  {
-    std::cout << "Interference mode enabled" << std::endl;
-    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10);
-  }
-
-  uint8_t node11pCounter = 0;
-  uint8_t nodeNrCounter = 0;
-
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
   std::cout << "Starting simulation... " << std::endl;
 
+  uint8_t nodeCounter = 0;
+
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
-    bool wifi;
     unsigned long vehID = std::stol(vehicleID.substr (3));
     unsigned long nodeID;
 
-    if (std::find(wifiVehicles.begin(), wifiVehicles.end(), vehicleID) != wifiVehicles.end())
-      {
-        wifi = true;
-        nodeID = node11pCounter;
-        node11pCounter++;
-      }
-    else
-      {
-        wifi = false;
-        nodeID = nodeNrCounter;
-        nodeNrCounter++;
-      }
-
-      Ptr<NetDevice> netDevice;
-
+    Ptr<NetDevice> netDevice;
     Ptr<Socket> sock;
-    if (wifi)
+    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    Ptr<Node> includedNode = nrNodes.Get(nodeID);
+    sock = Socket::CreateSocket (includedNode, tid);
+    if (sock->Bind (InetSocketAddress (Ipv4Address::GetAny (), 19)) == -1)
       {
-        sock = GeoNet::createGNPacketSocket(wifiNodes.Get(nodeID));
-        metSup_nr->addExcludedID (vehID);
-
-        netDevice = wifiNodes.Get(nodeID)->GetDevice(0);
-        Ptr<WifiNetDevice> wifiDevice = DynamicCast<WifiNetDevice>(netDevice);
-        wifiDevice->GetPhy()->SetRxSensitivity (sensitivity);
+        NS_FATAL_ERROR ("Failed to bind client socket for NR-V2X");
       }
-    else
-      {
-        TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-        Ptr<Node> includedNode = nrNodes.Get(nodeID);
-        sock = Socket::CreateSocket (includedNode, tid);
-        if (sock->Bind (InetSocketAddress (Ipv4Address::GetAny (), 19)) == -1)
-          {
-            NS_FATAL_ERROR ("Failed to bind client socket for NR-V2X");
-          }
-        Ipv4Address groupAddress4 ("225.0.0.0");
-        sock->Connect (InetSocketAddress (groupAddress4, 19));
-        metSup_11p->addExcludedID (vehID);
+    Ipv4Address groupAddress4 ("225.0.0.0");
+    sock->Connect (InetSocketAddress (groupAddress4, 19));
 
-        netDevice = nrNodes.Get(nodeID)->GetDevice(0);
-        Ptr<NrNetDevice> nrDevice = DynamicCast<NrNetDevice>(netDevice);
-        // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
-      }
+    netDevice = nrNodes.Get(nodeID)->GetDevice(0);
+    Ptr<NrNetDevice> nrDevice = DynamicCast<NrNetDevice>(netDevice);
+    // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
 
     // sock->SetPriority (up);
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
     bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
-    if(wifi)
-      {
-        bs_container->linkMetricSupervisor (metSup_11p);
-      }
-    else
-      {
-        bs_container->linkMetricSupervisor (metSup_nr);
-      }
+    bs_container->linkMetricSupervisor (metSup_nr);
     bs_container->disablePRRSupervisorForGNBeacons();
     bs_container->setupContainer(true,false,false,false);
     basicServices.add(bs_container);
@@ -716,7 +556,7 @@ int main (int argc, char *argv[])
 
     nodeCounter ++;
 
-    return wifi ? wifiNodes.Get(nodeID) : nrNodes.Get(nodeID);
+    return nrNodes.Get(nodeID);
   };
 
   // Important: what you write here is called every time a node exits the simulation in SUMO
@@ -753,14 +593,6 @@ int main (int argc, char *argv[])
 
   outputFile << "\nTotal number of CAMs received: " << packet_count << std::endl;
 
-  outputFile << "\nMetric Supervisor statistics for 802.11p" << std::endl;
-  outputFile << "Average PRR: " << metSup_11p->getAveragePRR_overall () << std::endl;
-  outputFile << "Average latency (ms): " << metSup_11p->getAverageLatency_overall () << std::endl;
-  outputFile << "Average SINR (dB): " << metSup_11p->getAverageSINR_overall() << std::endl;
-  outputFile << "RX packet count (from PRR Supervisor): " << metSup_11p->getNumberRx_overall () << std::endl;
-  outputFile << "TX packet count (from PRR Supervisor): " << metSup_11p->getNumberTx_overall () << std::endl;
-  // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_11p->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
-
   outputFile << "\nMetric Supervisor statistics for NR-V2X" << std::endl;
   outputFile << "Average PRR: " << metSup_nr->getAveragePRR_overall () << std::endl;
   outputFile << "Average latency (ms): " << metSup_nr->getAverageLatency_overall () << std::endl;
@@ -774,18 +606,6 @@ int main (int argc, char *argv[])
   auto end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end_time - start_time;
   outputFile << "\nSimulation time: " << elapsed.count() << " seconds" << std::endl;
-
-
-  // Delete the file at the end of the simulation
-  if (remove("src/sionna/setup.txt") != 0)
-    {
-      std::cerr << "\nError deleting Sionna file";
-    }
-  else
-    {
-      std::cout << "\nSionna file successfully deleted";
-    }
-
 
   return 0;
 }

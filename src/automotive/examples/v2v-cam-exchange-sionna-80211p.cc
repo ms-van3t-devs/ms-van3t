@@ -43,7 +43,6 @@
 #include "ns3/gn-utils.h"
 #include <fstream>
 #include "ns3/sionna-helper.h"
-
 #include <chrono>
 
 using namespace ns3;
@@ -109,7 +108,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("phy_info_with_sionna.csv", std::ios::out | std::ios::app);
+  camFile.open("sionna/phy_info_sionna_11p.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
@@ -123,7 +122,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
 void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
   std::ofstream file;
-  file.open("prr_with_sionna.csv", std::ios::out | std::ios::app);
+  file.open("sionna/prr_sionna_11p.csv", std::ios::out | std::ios::app);
   file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
     {
@@ -174,7 +173,7 @@ int main (int argc, char *argv[])
 
   std::cout << "Start running v2v-cam-exchange-sionna-80211p simulation" << std::endl;
 
-  SionnaHelper sionnaHelper;
+  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
 
   if (sionna)
     {
@@ -182,7 +181,6 @@ int main (int argc, char *argv[])
       sionnaHelper.SetServerIp(server_ip);
       sionnaHelper.SetLocalMachine(local_machine);
       sionnaHelper.SetVerbose(verb);
-      sionnaHelper.SetMarkerFile();
     }
 
   /* Load the .rou.xml file (SUMO map and scenario) */
@@ -352,17 +350,6 @@ int main (int argc, char *argv[])
   auto end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end_time - start_time;
   std::cout << "\nSimulation time: " << elapsed.count() << " seconds" << std::endl;
-
-
-  // Delete the file at the end of the simulation
-  if (remove("src/sionna/setup.txt") != 0)
-    {
-      std::cerr << "\nError deleting Sionna file";
-    }
-  else
-    {
-      std::cout << "\nSionna file successfully deleted";
-    }
 
 
   return 0;

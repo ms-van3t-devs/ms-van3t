@@ -3802,6 +3802,8 @@ build_lib(
     ${libstats}
     ${libgps-tc}
     ${libnr}
+    ${libwave}
+    ${libcv2x}
     ${libinternet}
     ${libvehicle-visualizer}
     ${libtraci}

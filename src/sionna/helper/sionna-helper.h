@@ -9,15 +9,22 @@ namespace ns3 {
 class SionnaHelper
 {
 public:
-  SionnaHelper() = default;
-  ~SionnaHelper() = default;
+  static SionnaHelper& GetInstance()
+  {
+    static SionnaHelper instance;
+    return instance;
+  }
   void SetSionna(bool sionna) {m_sionna = sionna;};
+  bool GetSionna() {return m_sionna;};
   void SetVerbose(bool verbose) {sionna_verbose = verbose;};
   void SetServerIp(std::string serverIp) {sionna_server_ip = serverIp;};
   void SetLocalMachine(bool local_machine) {sionna_local_machine = local_machine;};
-  void SetMarkerFile();
 
 private:
+  SionnaHelper() = default;
+  ~SionnaHelper() = default;
+  SionnaHelper(const SionnaHelper&) = delete;
+  SionnaHelper& operator = (const SionnaHelper&) = delete;
   bool m_sionna = false;
 };
 

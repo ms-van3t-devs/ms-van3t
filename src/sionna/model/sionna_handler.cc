@@ -135,7 +135,7 @@ updateLocationSionna(std::string veh, std::string x, std::string y, std::string 
 }
 
 double
-getRxPowerFromSionna(Vector a_position, Vector b_position) {
+getPathLossFromSionna(Vector a_position, Vector b_position) {
   bool got_response = false;
   std::string found_veh_a_id, found_veh_b_id;
 

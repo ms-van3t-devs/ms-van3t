@@ -53,16 +53,10 @@ PropagationLossModel::GetTypeId (void)
 PropagationLossModel::PropagationLossModel ()
     : m_next (0)
 {
-  std::ifstream inFile("src/sionna/setup.txt");
-  if (inFile.is_open())
+  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
+  if (sionnaHelper.GetSionna())
     {
-      std::string content;
-      std::getline(inFile, content);
-      inFile.close();
-      if (content != "0")
-        {
-          SetSionnaUp();
-        }
+      SetSionnaUp();
     }
 }
 
@@ -96,7 +90,7 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
   double power_sionna;
   if (m_sionna)
     {
-      double path_gain = getRxPowerFromSionna(a_position, b_position);
+      double path_gain = getPathLossFromSionna(a_position, b_position);
       power_sionna = txPowerDbm - path_gain;
     }
 

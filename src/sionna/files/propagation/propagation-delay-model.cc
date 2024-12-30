@@ -107,16 +107,10 @@ ConstantSpeedPropagationDelayModel::GetTypeId (void)
 
 ConstantSpeedPropagationDelayModel::ConstantSpeedPropagationDelayModel ()
 {
-  std::ifstream inFile("src/sionna/setup.txt");
-  if (inFile.is_open())
+  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
+  if (sionnaHelper.GetSionna())
     {
-      std::string content;
-      std::getline(inFile, content);
-      inFile.close();
-      if (content != "0")
-        {
-          SetSionnaUp();
-        }
+      SetSionnaUp();
     }
 }
 

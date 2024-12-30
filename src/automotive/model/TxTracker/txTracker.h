@@ -101,7 +101,7 @@ namespace ns3 {
   
     // Method to add interference for NR signals
     std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>>
-    AddInterferenceToCV2X (Ptr<SpectrumValue> nrSignal, Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay,
+    AddInterferenceToCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue> signal, Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay,
                        Ptr<PropagationLossModel> propagationLoss);
   
     // Method to add interference for 11p signals

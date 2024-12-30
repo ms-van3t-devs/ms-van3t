@@ -31,6 +31,7 @@
 // INCLUDE NVIDIA SIONNA
 #include "ns3/sionna_handler.h"
 #include "ns3/sionna_linker.h"
+#include "ns3/sionna-helper.h"
 
 namespace ns3 {
 
