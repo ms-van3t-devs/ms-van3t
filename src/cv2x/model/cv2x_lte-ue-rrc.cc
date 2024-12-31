@@ -553,7 +553,7 @@ cv2x_LteUeRrc::cv2x_LteUeRrc ()
   m_rrcSapProvider = new cv2x_MemberLteUeRrcSapProvider<cv2x_LteUeRrc> (this);
   m_drbPdcpSapUser = new cv2x_LtePdcpSpecificLtePdcpSapUser<cv2x_LteUeRrc> (this);
   m_asSapProvider = new cv2x_MemberLteAsSapProvider<cv2x_LteUeRrc> (this);
-  m_ccmRrcSapUser = new MemberLteUeCcmRrcSapUser<cv2x_LteUeRrc> (this);
+  m_ccmRrcSapUser = new cv2x_MemberLteUeCcmRrcSapUser<cv2x_LteUeRrc> (this);
 }
 
 cv2x_LteUeRrc::~cv2x_LteUeRrc ()
@@ -3595,7 +3595,7 @@ cv2x_LteUeRrc::VarMeasReportListAdd (uint8_t measId, ConcernedCells_t enteringCe
   NS_ASSERT (!measReportIt->second.cellsTriggeredList.empty ());
   measReportIt->second.numberOfReportsSent = 0;
   measReportIt->second.periodicReportTimer
-    = Simulator::Schedule (UE_MEASUREMENT_REPORT_DELAY,
+    = Simulator::Schedule (cv2x_UE_MEASUREMENT_REPORT_DELAY,
                            &cv2x_LteUeRrc::SendMeasurementReport,
                            this, measId);
 
@@ -3650,7 +3650,7 @@ cv2x_LteUeRrc::VarMeasReportListErase (uint8_t measId, ConcernedCells_t leavingC
 
   if (reportOnLeave)
     {
-      // runs immediately without UE_MEASUREMENT_REPORT_DELAY
+      // runs immediately without cv2x_UE_MEASUREMENT_REPORT_DELAY
       SendMeasurementReport (measId);
     }
 

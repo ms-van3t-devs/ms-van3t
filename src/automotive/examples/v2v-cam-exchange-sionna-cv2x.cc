@@ -36,7 +36,6 @@
 #include "ns3/applications-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/point-to-point-module.h"
-#include "ns3/lte-module.h"
 #include "ns3/stats-module.h"
 #include "ns3/config-store-module.h"
 #include "ns3/antenna-module.h"
@@ -49,7 +48,6 @@
 #include "ns3/internet-module.h"
 #include "ns3/cv2x-module.h"
 #include <ns3/node-list.h>
-#include "ns3/vehicle-visualizer-module.h"
 #include <unistd.h>
 #include "ns3/core-module.h"
 

@@ -159,7 +159,7 @@ build_lib_example(
  )
 
 build_lib_example(
-       NAME v2v-coexistence-80211p-nrv2x-cv2x.cc
+       NAME v2v-coexistence-80211p-nrv2x-cv2x
        SOURCE_FILES v2v-coexistence-80211p-nrv2x-cv2x.cc
        LIBRARIES_TO_LINK
        ${libautomotive}

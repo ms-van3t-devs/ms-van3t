@@ -174,7 +174,7 @@ public:
 
   /// MemberLteUeCcmRrcSapUser class
   template <class C>
-  class MemberLteUeCcmRrcSapUser : public cv2x_LteUeCcmRrcSapUser
+  class cv2x_MemberLteUeCcmRrcSapUser : public cv2x_LteUeCcmRrcSapUser
   {
   public:
     /**
@@ -182,7 +182,7 @@ public:
      *
      * \param owner the owner class
      */
-    MemberLteUeCcmRrcSapUser (C* owner);
+    cv2x_MemberLteUeCcmRrcSapUser (C* owner);
     //inherited from cv2x_LteUeCcmRrcSapUser
     virtual void cv2x_ComponentCarrierEnabling (std::vector<uint8_t> componentCarrierList);
 
@@ -191,13 +191,13 @@ public:
 };
 
 template <class C>
-MemberLteUeCcmRrcSapUser<C>::MemberLteUeCcmRrcSapUser (C* owner)
+cv2x_MemberLteUeCcmRrcSapUser<C>::cv2x_MemberLteUeCcmRrcSapUser (C* owner)
   : m_owner (owner)
 {
 }
   
 template <class C>
-void MemberLteUeCcmRrcSapUser<C>::cv2x_ComponentCarrierEnabling (std::vector<uint8_t> componentCarrierList)
+void cv2x_MemberLteUeCcmRrcSapUser<C>::cv2x_ComponentCarrierEnabling (std::vector<uint8_t> componentCarrierList)
 {
   m_owner->DoComponentCarrierEnabling (componentCarrierList);
 }

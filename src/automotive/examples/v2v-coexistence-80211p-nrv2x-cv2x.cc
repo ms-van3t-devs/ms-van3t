@@ -39,8 +39,6 @@
 #include "ns3/ocb-wifi-mac.h"
 #include "ns3/wifi-80211p-helper.h"
 #include "ns3/wave-mac-helper.h"
-#include "ns3/packet-socket-helper.h"
-#include "ns3/gn-utils.h"
 #include <fstream>
 
 // NR-V2X
@@ -58,13 +56,25 @@
 #include "ns3/vehicle-visualizer-module.h"
 #include <unistd.h>
 #include "ns3/core-module.h"
-#include "ns3/csv-utils.h"
 
 #include "ns3/txTracker.h"
 
 #include "ns3/sionna-helper.h"
 
 #include <chrono>
+
+// C-V2X
+#include "ns3/network-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/mobility-module.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/stats-module.h"
+#include "ns3/config-store-module.h"
+#include "ns3/antenna-module.h"
+#include "ns3/cv2x_lte-v2x-helper.h"
+#include "ns3/internet-module.h"
+#include "ns3/cv2x-module.h"
 
 using namespace ns3;
 

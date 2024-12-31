@@ -191,27 +191,27 @@ cv2x_FdTbfqFfMacScheduler::DoCschedUeConfigReq (const struct cv2x_FfMacCschedSap
       m_uesTxMode.insert (std::pair <uint16_t, double> (params.m_rnti, params.m_transmissionMode));
       // generate HARQ buffers
       m_dlHarqCurrentProcessId.insert (std::pair <uint16_t,uint8_t > (params.m_rnti, 0));
-      DlHarqProcessesStatus_t dlHarqPrcStatus;
+      cv2x_DlHarqProcessesStatus_t dlHarqPrcStatus;
       dlHarqPrcStatus.resize (8,0);
-      m_dlHarqProcessesStatus.insert (std::pair <uint16_t, DlHarqProcessesStatus_t> (params.m_rnti, dlHarqPrcStatus));
-      DlHarqProcessesTimer_t dlHarqProcessesTimer;
+      m_dlHarqProcessesStatus.insert (std::pair <uint16_t, cv2x_DlHarqProcessesStatus_t> (params.m_rnti, dlHarqPrcStatus));
+      cv2x_DlHarqProcessesTimer_t dlHarqProcessesTimer;
       dlHarqProcessesTimer.resize (8,0);
-      m_dlHarqProcessesTimer.insert (std::pair <uint16_t, DlHarqProcessesTimer_t> (params.m_rnti, dlHarqProcessesTimer));
-      DlHarqProcessesDciBuffer_t dlHarqdci;
+      m_dlHarqProcessesTimer.insert (std::pair <uint16_t, cv2x_DlHarqProcessesTimer_t> (params.m_rnti, dlHarqProcessesTimer));
+      cv2x_DlHarqProcessesDciBuffer_t dlHarqdci;
       dlHarqdci.resize (8);
-      m_dlHarqProcessesDciBuffer.insert (std::pair <uint16_t, DlHarqProcessesDciBuffer_t> (params.m_rnti, dlHarqdci));
-      DlHarqRlcPduListBuffer_t dlHarqRlcPdu;
+      m_dlHarqProcessesDciBuffer.insert (std::pair <uint16_t, cv2x_DlHarqProcessesDciBuffer_t> (params.m_rnti, dlHarqdci));
+      cv2x_DlHarqRlcPduListBuffer_t dlHarqRlcPdu;
       dlHarqRlcPdu.resize (2);
       dlHarqRlcPdu.at (0).resize (8);
       dlHarqRlcPdu.at (1).resize (8);
-      m_dlHarqProcessesRlcPduListBuffer.insert (std::pair <uint16_t, DlHarqRlcPduListBuffer_t> (params.m_rnti, dlHarqRlcPdu));
+      m_dlHarqProcessesRlcPduListBuffer.insert (std::pair <uint16_t, cv2x_DlHarqRlcPduListBuffer_t> (params.m_rnti, dlHarqRlcPdu));
       m_ulHarqCurrentProcessId.insert (std::pair <uint16_t,uint8_t > (params.m_rnti, 0));
-      UlHarqProcessesStatus_t ulHarqPrcStatus;
+      cv2x_UlHarqProcessesStatus_t ulHarqPrcStatus;
       ulHarqPrcStatus.resize (8,0);
-      m_ulHarqProcessesStatus.insert (std::pair <uint16_t, UlHarqProcessesStatus_t> (params.m_rnti, ulHarqPrcStatus));
-      UlHarqProcessesDciBuffer_t ulHarqdci;
+      m_ulHarqProcessesStatus.insert (std::pair <uint16_t, cv2x_UlHarqProcessesStatus_t> (params.m_rnti, ulHarqPrcStatus));
+      cv2x_UlHarqProcessesDciBuffer_t ulHarqdci;
       ulHarqdci.resize (8);
-      m_ulHarqProcessesDciBuffer.insert (std::pair <uint16_t, UlHarqProcessesDciBuffer_t> (params.m_rnti, ulHarqdci));
+      m_ulHarqProcessesDciBuffer.insert (std::pair <uint16_t, cv2x_UlHarqProcessesDciBuffer_t> (params.m_rnti, ulHarqdci));
     }
   else
     {
@@ -426,7 +426,7 @@ cv2x_FdTbfqFfMacScheduler::HarqProcessAvailability (uint16_t rnti)
     {
       NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
     }
-  std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
+  std::map <uint16_t, cv2x_DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
   if (itStat == m_dlHarqProcessesStatus.end ())
     {
       NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
@@ -465,7 +465,7 @@ cv2x_FdTbfqFfMacScheduler::UpdateHarqProcessId (uint16_t rnti)
     {
       NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
     }
-  std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
+  std::map <uint16_t, cv2x_DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
   if (itStat == m_dlHarqProcessesStatus.end ())
     {
       NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
@@ -495,7 +495,7 @@ cv2x_FdTbfqFfMacScheduler::RefreshHarqProcesses ()
 {
   NS_LOG_FUNCTION (this);
 
-  std::map <uint16_t, DlHarqProcessesTimer_t>::iterator itTimers;
+  std::map <uint16_t, cv2x_DlHarqProcessesTimer_t>::iterator itTimers;
   for (itTimers = m_dlHarqProcessesTimer.begin (); itTimers != m_dlHarqProcessesTimer.end (); itTimers ++)
     {
       for (uint16_t i = 0; i < HARQ_PROC_NUM; i++)
@@ -505,7 +505,7 @@ cv2x_FdTbfqFfMacScheduler::RefreshHarqProcesses ()
               // reset HARQ process
               
               NS_LOG_DEBUG (this << " Reset HARQ proc " << i << " for RNTI " << (*itTimers).first);
-              std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find ((*itTimers).first);
+              std::map <uint16_t, cv2x_DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find ((*itTimers).first);
               if (itStat == m_dlHarqProcessesStatus.end ())
                 {
                   NS_FATAL_ERROR ("No Process Id Status found for this RNTI " << (*itTimers).first);
@@ -672,7 +672,7 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
               NS_FATAL_ERROR ("No info find in HARQ buffer for UE " << uldci.m_rnti);
             }
           harqId = (*itProcId).second;
-          std::map <uint16_t, UlHarqProcessesDciBuffer_t>::iterator itDci = m_ulHarqProcessesDciBuffer.find (uldci.m_rnti);
+          std::map <uint16_t, cv2x_UlHarqProcessesDciBuffer_t>::iterator itDci = m_ulHarqProcessesDciBuffer.find (uldci.m_rnti);
           if (itDci == m_ulHarqProcessesDciBuffer.end ())
             {
               NS_FATAL_ERROR ("Unable to find RNTI entry in UL DCI HARQ buffer for RNTI " << uldci.m_rnti);
@@ -737,7 +737,7 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
           uint16_t rnti = m_dlInfoListBuffered.at (i).m_rnti;
           uint8_t harqId = m_dlInfoListBuffered.at (i).m_harqProcessId;
           NS_LOG_INFO (this << " HARQ retx RNTI " << rnti << " harqId " << (uint16_t)harqId);
-          std::map <uint16_t, DlHarqProcessesDciBuffer_t>::iterator itHarq = m_dlHarqProcessesDciBuffer.find (rnti);
+          std::map <uint16_t, cv2x_DlHarqProcessesDciBuffer_t>::iterator itHarq = m_dlHarqProcessesDciBuffer.find (rnti);
           if (itHarq == m_dlHarqProcessesDciBuffer.end ())
             {
               NS_FATAL_ERROR ("No info find in HARQ buffer for UE " << rnti);
@@ -758,13 +758,13 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
             {
               // maximum number of retx reached -> drop process
               NS_LOG_INFO ("Maximum number of retransmissions reached -> drop process");
-              std::map <uint16_t, DlHarqProcessesStatus_t>::iterator it = m_dlHarqProcessesStatus.find (rnti);
+              std::map <uint16_t, cv2x_DlHarqProcessesStatus_t>::iterator it = m_dlHarqProcessesStatus.find (rnti);
               if (it == m_dlHarqProcessesStatus.end ())
                 {
                   NS_LOG_ERROR ("No info find in HARQ buffer for UE (might change eNB) " << m_dlInfoListBuffered.at (i).m_rnti);
                 }
               (*it).second.at (harqId) = 0;
-              std::map <uint16_t, DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (rnti);
+              std::map <uint16_t, cv2x_DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (rnti);
               if (itRlcPdu == m_dlHarqProcessesRlcPduListBuffer.end ())
                 {
                   NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << m_dlInfoListBuffered.at (i).m_rnti);
@@ -850,7 +850,7 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
             }
           // retrieve RLC PDU list for retx TBsize and update DCI
           cv2x_BuildDataListElement_s newEl;
-          std::map <uint16_t, DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (rnti);
+          std::map <uint16_t, cv2x_DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (rnti);
           if (itRlcPdu == m_dlHarqProcessesRlcPduListBuffer.end ())
             {
               NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << rnti);
@@ -918,7 +918,7 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
           newEl.m_dci = dci;
           (*itHarq).second.at (harqId).m_rv = dci.m_rv;
           // refresh timer
-          std::map <uint16_t, DlHarqProcessesTimer_t>::iterator itHarqTimer = m_dlHarqProcessesTimer.find (rnti);
+          std::map <uint16_t, cv2x_DlHarqProcessesTimer_t>::iterator itHarqTimer = m_dlHarqProcessesTimer.find (rnti);
           if (itHarqTimer== m_dlHarqProcessesTimer.end ())
             {
               NS_FATAL_ERROR ("Unable to find HARQ timer for RNTI " << (uint16_t)rnti);
@@ -931,13 +931,13 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
         {
           // update HARQ process status
           NS_LOG_INFO (this << " HARQ received ACK for UE " << m_dlInfoListBuffered.at (i).m_rnti);
-          std::map <uint16_t, DlHarqProcessesStatus_t>::iterator it = m_dlHarqProcessesStatus.find (m_dlInfoListBuffered.at (i).m_rnti);
+          std::map <uint16_t, cv2x_DlHarqProcessesStatus_t>::iterator it = m_dlHarqProcessesStatus.find (m_dlInfoListBuffered.at (i).m_rnti);
           if (it == m_dlHarqProcessesStatus.end ())
             {
               NS_FATAL_ERROR ("No info find in HARQ buffer for UE " << m_dlInfoListBuffered.at (i).m_rnti);
             }
           (*it).second.at (m_dlInfoListBuffered.at (i).m_harqProcessId) = 0;
-          std::map <uint16_t, DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (m_dlInfoListBuffered.at (i).m_rnti);
+          std::map <uint16_t, cv2x_DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find (m_dlInfoListBuffered.at (i).m_rnti);
           if (itRlcPdu == m_dlHarqProcessesRlcPduListBuffer.end ())
             {
               NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << m_dlInfoListBuffered.at (i).m_rnti);
@@ -1420,7 +1420,7 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
                   if (m_harqOn == true)
                     {
                       // store RLC PDU list for HARQ
-                      std::map <uint16_t, DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find ((*itMap).first);
+                      std::map <uint16_t, cv2x_DlHarqRlcPduListBuffer_t>::iterator itRlcPdu =  m_dlHarqProcessesRlcPduListBuffer.find ((*itMap).first);
                       if (itRlcPdu == m_dlHarqProcessesRlcPduListBuffer.end ())
                         {
                           NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << (*itMap).first);
@@ -1448,14 +1448,14 @@ cv2x_FdTbfqFfMacScheduler::DoSchedDlTriggerReq (const struct cv2x_FfMacSchedSapP
       if (m_harqOn == true)
         {
           // store DCI for HARQ
-          std::map <uint16_t, DlHarqProcessesDciBuffer_t>::iterator itDci = m_dlHarqProcessesDciBuffer.find (newEl.m_rnti);
+          std::map <uint16_t, cv2x_DlHarqProcessesDciBuffer_t>::iterator itDci = m_dlHarqProcessesDciBuffer.find (newEl.m_rnti);
           if (itDci == m_dlHarqProcessesDciBuffer.end ())
             {
               NS_FATAL_ERROR ("Unable to find RNTI entry in DCI HARQ buffer for RNTI " << newEl.m_rnti);
             }
           (*itDci).second.at (newDci.m_harqProcess) = newDci;
           // refresh timer
-          std::map <uint16_t, DlHarqProcessesTimer_t>::iterator itHarqTimer =  m_dlHarqProcessesTimer.find (newEl.m_rnti);
+          std::map <uint16_t, cv2x_DlHarqProcessesTimer_t>::iterator itHarqTimer =  m_dlHarqProcessesTimer.find (newEl.m_rnti);
           if (itHarqTimer== m_dlHarqProcessesTimer.end ())
             {
               NS_FATAL_ERROR ("Unable to find HARQ timer for RNTI " << (uint16_t)newEl.m_rnti);
@@ -1642,14 +1642,14 @@ cv2x_FdTbfqFfMacScheduler::DoSchedUlTriggerReq (const struct cv2x_FfMacSchedSapP
                 }
               uint8_t harqId = (uint8_t)((*itProcId).second - HARQ_PERIOD) % HARQ_PROC_NUM;
               NS_LOG_INFO (this << " UL-HARQ retx RNTI " << rnti << " harqId " << (uint16_t)harqId << " i " << i << " size "  << params.m_ulInfoList.size ());
-              std::map <uint16_t, UlHarqProcessesDciBuffer_t>::iterator itHarq = m_ulHarqProcessesDciBuffer.find (rnti);
+              std::map <uint16_t, cv2x_UlHarqProcessesDciBuffer_t>::iterator itHarq = m_ulHarqProcessesDciBuffer.find (rnti);
               if (itHarq == m_ulHarqProcessesDciBuffer.end ())
                 {
                   NS_LOG_ERROR ("No info find in HARQ buffer for UE (might change eNB) " << rnti);
                   continue;
                 }
               cv2x_UlDciListElement_s dci = (*itHarq).second.at (harqId);
-              std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
+              std::map <uint16_t, cv2x_UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
               if (itStat == m_ulHarqProcessesStatus.end ())
                 {
                   NS_LOG_ERROR ("No info find in HARQ buffer for UE (might change eNB) " << rnti);
@@ -1926,14 +1926,14 @@ cv2x_FdTbfqFfMacScheduler::DoSchedUlTriggerReq (const struct cv2x_FfMacSchedSapP
               NS_FATAL_ERROR ("No info find in HARQ buffer for UE " << uldci.m_rnti);
             }
           harqId = (*itProcId).second;
-          std::map <uint16_t, UlHarqProcessesDciBuffer_t>::iterator itDci = m_ulHarqProcessesDciBuffer.find (uldci.m_rnti);
+          std::map <uint16_t, cv2x_UlHarqProcessesDciBuffer_t>::iterator itDci = m_ulHarqProcessesDciBuffer.find (uldci.m_rnti);
           if (itDci == m_ulHarqProcessesDciBuffer.end ())
             {
               NS_FATAL_ERROR ("Unable to find RNTI entry in UL DCI HARQ buffer for RNTI " << uldci.m_rnti);
             }
           (*itDci).second.at (harqId) = uldci;
           // Update HARQ process status (RV 0)
-          std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (uldci.m_rnti);
+          std::map <uint16_t, cv2x_UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (uldci.m_rnti);
           if (itStat == m_ulHarqProcessesStatus.end ())
             {
               NS_LOG_ERROR ("No info find in HARQ buffer for UE (might change eNB) " << uldci.m_rnti);
