@@ -108,7 +108,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_info_sionna_11p.csv", std::ios::out | std::ios::app);
+  camFile.open("sionna/phy_sionna_11p.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
 
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID,TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
-    unsigned long nodeID = std::stol(vehicleID.substr (3))-1;
+    unsigned long nodeID = std::stol(vehicleID.substr (3)) - 1;
     
     // Create a new ETSI GeoNetworking socket, thanks to the GeoNet::createGNPacketSocket() function, accepting as argument a pointer to the current node
     Ptr<Socket> sock;

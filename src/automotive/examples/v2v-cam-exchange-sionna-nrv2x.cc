@@ -113,7 +113,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_info_sionna_nrv2x.csv", std::ios::out | std::ios::app);
+  camFile.open("sionna/phy_sionna_nrv2x.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
@@ -190,8 +190,8 @@ int main (int argc, char *argv[])
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_120.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_120.cfg";
+  std::string mob_trace = "cars.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -519,12 +519,10 @@ int main (int argc, char *argv[])
 
   std::cout << "Starting simulation... " << std::endl;
 
-  uint8_t nodeCounter = 0;
-
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
     unsigned long vehID = std::stol(vehicleID.substr (3));
-    unsigned long nodeID;
+    unsigned long nodeID = vehID - 1;
 
     Ptr<NetDevice> netDevice;
     Ptr<Socket> sock;
@@ -553,8 +551,6 @@ int main (int argc, char *argv[])
     std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
     double desync = ((double)std::rand()/RAND_MAX);
     bs_container->getCABasicService ()->startCamDissemination (desync);
-
-    nodeCounter ++;
 
     return nrNodes.Get(nodeID);
   };

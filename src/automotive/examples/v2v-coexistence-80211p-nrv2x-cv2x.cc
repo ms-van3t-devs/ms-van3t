@@ -140,7 +140,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
 
   std::ifstream camFileHeader("phy_info_sionna_coexistence.txt");
   std::ofstream camFile;
-  camFile.open("phy_info_sionna_coexistence.txt", std::ios::out | std::ios::app);
+  camFile.open("sionna/phy_sionna_coexistence.txt", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -155,6 +155,30 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   
   camFile << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
+}
+
+void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes, std::string type)
+{
+  std::ofstream file;
+  if (type == "nr")
+    {
+      file.open("sionna/prr_sionna_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
+    }
+  else if (type == "11p")
+    {
+      file.open("sionna/prr_sionna_coexistence_11p.csv", std::ios::out | std::ios::app);
+    }
+  else
+    {
+      file.open("sionna/prr_sionna_coexistence_cv2x.csv", std::ios::out | std::ios::app);
+    }
+  file << "node_id,prr" << std::endl;
+  for (int i = 1; i <= numberOfNodes; i++)
+    {
+      double prr = metSup->getAveragePRR_vehicle (i);
+      file << i << "," << prr << std::endl;
+    }
+  file.close();
 }
 
 void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, double centralFrequency11p, double centralFrequencyNR, double bandwidth11p, double bandwidthNr)
@@ -627,7 +651,6 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
-  uint8_t nodeCounter = 0;
   std::vector<std::string> wifiVehicles;
   std::vector<std::string> nrVehicles;
   for (uint8_t i = 1; i <= numberOfNodes_11p + numberOfNodes_nr; i++)
@@ -723,8 +746,6 @@ int main (int argc, char *argv[])
     double desync = ((double)std::rand()/RAND_MAX);
     bs_container->getCABasicService ()->startCamDissemination (desync);
 
-    nodeCounter ++;
-
     return wifi ? wifiNodes.Get(nodeID) : nrNodes.Get(nodeID);
   };
 
@@ -779,6 +800,9 @@ int main (int argc, char *argv[])
   // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_nr->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
 
   Simulator::Destroy ();
+
+  savePRRs(metSup_11p, numberOfNodes_11p, "11p");
+  savePRRs(metSup_nr, numberOfNodes_nr, "nr");
 
   auto end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end_time - start_time;

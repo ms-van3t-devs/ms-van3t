@@ -114,7 +114,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_info_sionna_cv2x.csv", std::ios::out | std::ios::app);
+  camFile.open("sionna/phy_sionna_cv2x.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
   uint16_t t1 = 4;                        // T1 value of selection window
   uint16_t t2 = 100;                      // T2 value of selection window
   uint16_t slBandwidth;                   // Sidelink bandwidth
-  bool m_metric_sup = false;
+  bool m_metric_sup = true;
 
   // (T2-T1+1) x (1/(2^numerology)) < reservation period
   // (81-2+1) x (1/2^2) < 20
@@ -182,8 +182,8 @@ int main (int argc, char *argv[])
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_120.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_120.cfg";
+  std::string mob_trace = "cars.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -299,7 +299,7 @@ int main (int argc, char *argv[])
   lteHelper->SetEnbAntennaModelType ("ns3::cv2x_NistParabolic3dAntennaModel");
   lteHelper->SetAttribute ("UseSameUlDlPropagationCondition", BooleanValue(true));
   Config::SetDefault ("ns3::cv2x_LteEnbNetDevice::UlEarfcn", StringValue ("54990")); // EARFCN 54990 -> 5855-5890-5925 MHz
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
   NS_LOG_INFO("Antenna parameters set. Current EARFCN: 54990, current frequency: 5.89 GHz");
 
   /*** 2. Create Internet and ipv4 helpers ***/
@@ -386,31 +386,13 @@ int main (int argc, char *argv[])
       groupsPerUe [mIt->second]++;
     }
 
-  std::vector<uint32_t> groupL2Addresses;
-  uint32_t groupL2Address = 0x00;
+  uint32_t groupL2Address = 255;
   std::vector<Ipv4Address> ipAddresses;
-  Ipv4AddressGenerator::Init(Ipv4Address ("225.0.0.0"), Ipv4Mask ("255.0.0.0"));
-  Ipv4Address clientRespondersAddress = Ipv4AddressGenerator::NextAddress (Ipv4Mask ("255.0.0.0"));
-  NetDeviceContainer activeTxUes;
+  Ipv4Address groupAddress4 ("225.0.0.0");
 
-
-  for(gIt=txGroups.begin(); gIt != txGroups.end(); gIt++)
-    {
-      /* Create Sidelink bearers */
-      NetDeviceContainer txUe ((*gIt).Get(0));
-      activeTxUes.Add(txUe);
-      NetDeviceContainer rxUes = lteV2xHelper->RemoveNetDevice ((*gIt), txUe.Get (0));
-      Ptr<cv2x_LteSlTft> tft = Create<cv2x_LteSlTft> (cv2x_LteSlTft::TRANSMIT, clientRespondersAddress, groupL2Address);
-      lteV2xHelper->ActivateSidelinkBearer (Seconds(0.0), txUe, tft);
-      tft = Create<cv2x_LteSlTft> (cv2x_LteSlTft::RECEIVE, clientRespondersAddress, groupL2Address);
-      lteV2xHelper->ActivateSidelinkBearer (Seconds(0.0), rxUes, tft);
-
-      /* store and increment addresses */
-      groupL2Addresses.push_back (groupL2Address);
-      ipAddresses.push_back (clientRespondersAddress);
-      groupL2Address++;
-      clientRespondersAddress = Ipv4AddressGenerator::NextAddress (Ipv4Mask ("255.0.0.0"));
-    }
+  /* Create Sidelink bearers */
+  Ptr<cv2x_LteSlTft> tft = Create<cv2x_LteSlTft> (cv2x_LteSlTft::BIDIRECTIONAL, groupAddress4, groupL2Address);
+  lteV2xHelper->ActivateSidelinkBearer (Seconds(0.0), ueLteDevs, tft);
 
   /* Creating sidelink configuration */
   Ptr<cv2x_LteUeRrcSl> ueSidelinkConfiguration = CreateObject<cv2x_LteUeRrcSl>();
@@ -454,7 +436,6 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoStepLog", BooleanValue (false));
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   std::string sumo_additional_options = "--verbose true";
-
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue (sumo_additional_options));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
@@ -466,29 +447,14 @@ int main (int argc, char *argv[])
       metSup->setTraCIClient(sumoClient);
     }
 
-  sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
-  sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
-  sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
-  sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
-  sumoClient->SetAttribute ("SumoGUI", BooleanValue (true));
-  sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
-  sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
-  sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
-  sumoClient->SetAttribute ("SumoStepLog", BooleanValue (false));
-  sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
-  sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
-
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
   std::cout << "Starting simulation... " << std::endl;
 
-  uint8_t nodeCounter = 0;
-
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
-    bool wifi;
     unsigned long vehID = std::stol(vehicleID.substr (3));
-    unsigned long nodeID;
+    unsigned long nodeID = vehID - 1;
 
     Ptr<NetDevice> netDevice;
     Ptr<Socket> sock;
@@ -497,16 +463,14 @@ int main (int argc, char *argv[])
     sock = Socket::CreateSocket (includedNode, tid);
     if (sock->Bind (InetSocketAddress (Ipv4Address::GetAny (), 19)) == -1)
       {
-        NS_FATAL_ERROR ("Failed to bind client socket for NR-V2X");
+        NS_FATAL_ERROR ("Failed to bind client socket for C-V2X");
       }
     Ipv4Address groupAddress4 ("225.0.0.0");
     sock->Connect (InetSocketAddress (groupAddress4, 19));
 
-    netDevice = ueNodes.Get(nodeID)->GetDevice(0);
+    netDevice = includedNode->GetDevice(0);
     Ptr<cv2x_LteNetDevice> nrDevice = DynamicCast<cv2x_LteNetDevice>(netDevice);
     // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
-
-    // sock->SetPriority (up);
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
     bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
@@ -517,8 +481,6 @@ int main (int argc, char *argv[])
     std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
     double desync = ((double)std::rand()/RAND_MAX);
     bs_container->getCABasicService ()->startCamDissemination (desync);
-
-    nodeCounter ++;
 
     return ueNodes.Get(nodeID);
   };
