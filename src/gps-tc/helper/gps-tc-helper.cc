@@ -255,11 +255,12 @@ namespace ns3 {
           // Check if the element is present in the map m_GPSTraceClient
           if ( m_GPSTraceClient.find(currentVehId) == m_GPSTraceClient.end() ) {
             // Not found - need to create the entry for such a vector
-            if (result[m_idx_type] != "car" || result[m_idx_type] != "vru")
+            std::string type = result[m_idx_type];
+            if (type != "car" && type != "vru")
               {
                 NS_FATAL_ERROR ("Only car and vru types are supported. Please check the file format.");
               }
-            GPSTraceClient* gpsclient = new GPSTraceClient(currentVehId, result[m_idx_type]);
+            GPSTraceClient* gpsclient = new GPSTraceClient(currentVehId, type);
             gpsclient->setLat0 (lat0);
             gpsclient->setLon0 (lon0);
             if(m_vehicle_vis_ptr!=nullptr && m_vehicle_vis_ptr->isConnected())
