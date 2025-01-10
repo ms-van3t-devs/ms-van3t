@@ -61,6 +61,7 @@ namespace ns3 {
 
         // Default column names in the CSV file
         m_col_name_vehid = "agent_id";
+        m_col_type_agent = "agent_type";
         m_col_name_tstamp = "timeStamp_posix";
         m_col_name_lat = "latitude_deg";
         m_col_name_lon = "longitude_deg";
@@ -153,6 +154,7 @@ namespace ns3 {
 
       // Field indeces
       int m_idx_vehid = -1;
+      int m_idx_type = -1;
       int m_idx_tstamp = -1;
       int m_idx_lat = -1;
       int m_idx_lon = -1;
@@ -185,6 +187,10 @@ namespace ns3 {
           {
               m_idx_vehid = i;
           }
+          else if (result[i] == m_col_type_agent)
+            {
+              m_idx_type = i;
+            }
           else if(result[i] == m_col_name_tstamp)
           {
               m_idx_tstamp = i;
@@ -219,6 +225,7 @@ namespace ns3 {
       // If one or more columns with needed data are not found inside the CSV file,
       // print an error and terminate the program (i.e. trigger a NS_FATAL_ERROR())
       if(m_idx_vehid == -1 ||
+          m_idx_type == -1 ||
          m_idx_tstamp == -1 ||
          m_idx_lat == -1 ||
          m_idx_lon == -1 ||
@@ -248,7 +255,12 @@ namespace ns3 {
           // Check if the element is present in the map m_GPSTraceClient
           if ( m_GPSTraceClient.find(currentVehId) == m_GPSTraceClient.end() ) {
             // Not found - need to create the entry for such a vector
-            GPSTraceClient* gpsclient = new GPSTraceClient(currentVehId);
+            std::string type = result[m_idx_type];
+            if (type != "car" && type != "vru")
+              {
+                NS_FATAL_ERROR ("Only car and vru types are supported. Please check the file format.");
+              }
+            GPSTraceClient* gpsclient = new GPSTraceClient(currentVehId, type);
             gpsclient->setLat0 (lat0);
             gpsclient->setLon0 (lon0);
             if(m_vehicle_vis_ptr!=nullptr && m_vehicle_vis_ptr->isConnected())

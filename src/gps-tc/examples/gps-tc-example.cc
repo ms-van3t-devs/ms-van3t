@@ -98,7 +98,7 @@ main (int argc, char *argv[])
     };
 
   /* callback function for node shutdown */
-  SHUTDOWN_FCN shutdownNode = [&] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_GPS_FCN shutdownNode = [&] (Ptr<Node> exNode,std::string vehicleID)
     {
       /* stop all applications */
 //      Ptr<appClient> appClient_ = exNode->GetApplication(0)->GetObject<appClient>();

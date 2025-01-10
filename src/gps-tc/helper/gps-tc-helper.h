@@ -91,6 +91,7 @@ class GPSTraceClientHelper
       Ptr<vehicleVisualizer> m_vehicle_vis_ptr;
 
       std::string m_col_name_vehid;
+      std::string m_col_type_agent;
       std::string m_col_name_tstamp;
       std::string m_col_name_lat;
       std::string m_col_name_lon;

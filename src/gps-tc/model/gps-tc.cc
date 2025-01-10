@@ -32,7 +32,7 @@ namespace ns3
 {
   NS_LOG_COMPONENT_DEFINE("GPSTraceClient");
 
-  GPSTraceClient::GPSTraceClient(std::string vehID)
+  GPSTraceClient::GPSTraceClient(std::string vehID, std::string vehType)
   {
       //ctor
       m_lastvehicledataidx=0;
@@ -44,6 +44,7 @@ namespace ns3
       m_travelled_distance=0;
       m_vehicle_visualizer=nullptr;
       m_accelerationset=false;
+      m_vehType=vehType;
   }
 
   GPSTraceClient::~GPSTraceClient()
