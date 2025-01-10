@@ -10,6 +10,7 @@ Set(source_files
     helper/emergencyVehicleAlert-helper.cc
     helper/v2xEmulator-helper.cc
     helper/simpleCAMSender-helper.cc
+    helper/simpleVAMSender-helper.cc
     helper/emergencyVehicleWarningServer80211p-helper.cc
     helper/emergencyVehicleWarningClient80211p-helper.cc
     helper/trafficManagerClient80211p-helper.cc
@@ -27,6 +28,7 @@ Set(source_files
     model/Applications/areaSpeedAdvisorClientLTE.cc
     model/Applications/areaSpeedAdvisorServerLTE.cc
     model/Applications/simpleCAMSender-gps-tc.cc
+    model/Applications/simpleVAMSender-gps-tc.cc
     model/Applications/trafficManagerClient80211p.cc
     model/Applications/trafficManagerServer80211p.cc
     model/Applications/trafficManagerClientLTE.cc
@@ -42,6 +44,7 @@ Set(source_files
     model/Facilities/asn_utils.cc
     model/Facilities/vdpTraci.cc
     model/Facilities/vdpGPSTraceClient.cc
+    model/Facilities/vrudpGPSTraceClient.cc
     model/Facilities/caBasicService.cc
     model/utilities/sumo_xml_parser.cc
     model/Applications/v2xEmulator.cc
@@ -1329,6 +1332,7 @@ set(header_files
     helper/emergencyVehicleAlert-helper.h
     helper/v2xEmulator-helper.h
     helper/simpleCAMSender-helper.h
+    helper/simpleVAMSender-helper.h
 
      helper/cooperativePerception-helper.h
      model/utilities/opencda-sensor.h
@@ -1342,6 +1346,7 @@ set(header_files
     model/Applications/areaSpeedAdvisorServerLTE.h
     model/Applications/emergencyVehicleAlert.h
     model/Applications/simpleCAMSender-gps-tc.h
+    model/Applications/simpleVAMSender-gps-tc.h
 
     model/Facilities/denBasicService.h
     model/Facilities/denData.h
@@ -1350,6 +1355,7 @@ set(header_files
     model/Facilities/ITSSReceivingTableEntry.h
     model/Facilities/vdpTraci.h
     model/Facilities/vdpGPSTraceClient.h
+    model/Facilities/vrudpGPSTraceClient.h
     model/Facilities/vdp.h
     model/Facilities/caBasicService.h
     model/utilities/sumo_xml_parser.h

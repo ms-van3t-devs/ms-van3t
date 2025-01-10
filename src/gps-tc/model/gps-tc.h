@@ -28,7 +28,7 @@ namespace ns3 {
   class GPSTraceClient : public Object
   {
       public:
-          GPSTraceClient(std::string vehID);
+          GPSTraceClient(std::string vehID, std::string vehType);
           virtual ~GPSTraceClient();
           void sortVehiclesdata();
           void shiftOrigin(double,double);
@@ -72,6 +72,8 @@ namespace ns3 {
           void setLon0(double);
 
           // Getter
+          std::string getVehId() {return m_vehID;};
+          std::string getType() {return m_vehType;};
           long int getTimestamp();
           double getLat();
           double getLon();
@@ -123,6 +125,7 @@ namespace ns3 {
           bool m_updatefirstiter;
           bool m_accelerationset;
           std::string m_vehID;
+          std::string m_vehType;
           double m_travelled_distance;
 
           // Function pointers to node include/exclude functions

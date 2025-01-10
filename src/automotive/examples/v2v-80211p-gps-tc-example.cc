@@ -23,7 +23,9 @@
 #include "ns3/carla-module.h"
 #include "ns3/OpenCDAClient.h"
 #include "ns3/simpleCAMSender-gps-tc.h"
+#include "ns3/simpleVAMSender-gps-tc.h"
 #include "ns3/simpleCAMSender-helper.h"
+#include "ns3/simpleVAMSender-helper.h"
 #include "ns3/gps-tc-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wave-module.h"
@@ -208,6 +210,9 @@ main (int argc, char *argv[])
   simpleCAMSenderHelper SimpleCAMSenderHelper;
   SimpleCAMSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
 
+  simpleVAMSenderHelper SimpleVAMSenderHelper;
+  SimpleVAMSenderHelper.SetAttribute ("RealTime", BooleanValue(realtime));
+
   // Create vector with the GPS Trace Client map values
   std::vector<GPSTraceClient*> v_gps_tc;
   GPS_TC_MAP_ITERATOR(GPSTCMap,GPSTCit) {
@@ -224,9 +229,17 @@ main (int argc, char *argv[])
       Ptr<Node> includedNode = obuNodes.Get(nodeCounter);
 
       /* Install Application */
-      SimpleCAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
-      ApplicationContainer setupAppSimpleSender = SimpleCAMSenderHelper.Install (includedNode);
-
+      ApplicationContainer setupAppSimpleSender;
+      if (v_gps_tc[nodeCounter]->getType() == "car")
+        {
+          SimpleCAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
+          setupAppSimpleSender = SimpleCAMSenderHelper.Install (includedNode);
+        }
+      else if (v_gps_tc[nodeCounter]->getType() == "vru")
+        {
+          SimpleVAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
+          setupAppSimpleSender = SimpleVAMSenderHelper.Install (includedNode);
+        }
       setupAppSimpleSender.Start (Seconds (0.0));
       setupAppSimpleSender.Stop (simulationTime - Simulator::Now () - Seconds (0.1));
       ++nodeCounter; // increment counter for next node
