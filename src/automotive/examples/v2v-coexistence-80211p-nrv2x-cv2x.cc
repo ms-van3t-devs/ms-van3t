@@ -78,7 +78,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2x");
+NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2xCv2x");
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -140,7 +140,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
 
   std::ifstream camFileHeader("phy_info_sionna_coexistence.txt");
   std::ofstream camFile;
-  camFile.open("sionna/phy_sionna_coexistence.txt", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/phy_sionna_coexistence.txt", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -162,15 +162,15 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes, std::string 
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("sionna/prr_sionna_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/prr_sionna_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("sionna/prr_sionna_coexistence_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/prr_sionna_coexistence_11p.csv", std::ios::out | std::ios::app);
     }
   else
     {
-      file.open("sionna/prr_sionna_coexistence_cv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/prr_sionna_coexistence_cv2x.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
@@ -181,15 +181,16 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes, std::string 
   file.close();
 }
 
-void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, double centralFrequency11p, double centralFrequencyNR, double bandwidth11p, double bandwidthNr)
+void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, std::vector<std::string> lteVehicles, NetDeviceContainer lteDevices, double centralFrequency11p, double centralFrequencyNR, double centralFrequencyLTE, double bandwidth11p, double bandwidthNr, double bandwidthLTE)
 {
   auto& tracker = TxTracker::GetInstance();
 
   std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> wifiVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
+  std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> lteVehiclesList;
 
-  tracker.SetCentralFrequencies(centralFrequency11p, centralFrequencyNR);
-  tracker.SetBandwidths(bandwidth11p * 1e6, bandwidthNr * 1e6);
+  tracker.SetCentralFrequencies(centralFrequency11p, centralFrequencyNR, centralFrequencyLTE);
+  tracker.SetBandwidths(bandwidth11p * 1e6, bandwidthNr * 1e6, bandwidthLTE * 1e6);
 
   uint8_t i = 0;
   for (auto v : wifiVehicles)
@@ -210,6 +211,16 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
       i++;
     }
   tracker.InsertNrNodes (nrVehiclesList);
+
+  i = 0;
+  for (auto v : lteVehicles)
+    {
+      Ptr<cv2x_LteUeNetDevice> netDevice = DynamicCast<cv2x_LteUeNetDevice>(lteDevices.Get(i));
+      uint8_t id = lteDevices.Get (i)->GetNode()->GetId();
+      lteVehiclesList.push_back (std::make_tuple (v, id, netDevice));
+      i++;
+    }
+  tracker.InsertLteNodes (lteVehiclesList);
 }
 
 int main (int argc, char *argv[])
@@ -257,6 +268,25 @@ int main (int argc, char *argv[])
   // (T2-T1+1) x (1/(2^numerology)) < reservation period
   // (81-2+1) x (1/2^2) < 20
 
+  double ueTxPower = 30.0;                // Transmission power in dBm
+  double probResourceKeep = 0.0;          // Probability to select the previous resource again [0.0-0.8]
+  uint32_t cv2x_mcs = 20;                      // Modulation and Coding Scheme
+  bool harqEnabled = false;               // Retransmission enabled (harq not available yet)
+  bool adjacencyPscchPssch = true;        // Subchannelization scheme
+  bool partialSensing = false;            // Partial sensing enabled (actual only partialSensing is false supported)
+  uint16_t sizeSubchannel = 10;           // Number of RBs per subchannel
+  // uint16_t numSubchannel = 3;             // Number of subchannels per subframe
+  uint16_t numSubchannel = 1;             // Number of subchannels per subframe
+  uint16_t startRbSubchannel = 0;         // Index of first RB corresponding to subchannelization
+  uint16_t pRsvp = 20;                    // Resource reservation interval
+  // uint16_t t1 = 4;                        // T1 value of selection window
+  uint16_t cv2x_t1 = 2;                        // T1 value of selection window
+  // uint16_t t2 = 100;                      // T2 value of selection window
+  uint16_t cv2x_t2 = 81;                      // T2 value of selection window
+  uint16_t slBandwidth = 10;                   // Sidelink bandwidth
+  bool hardcoded_bw = true;
+  bool m_metric_sup = true;
+
   bool sionna = false;
   std::string server_ip = "";
   bool local_machine = false;
@@ -266,8 +296,8 @@ int main (int argc, char *argv[])
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_120.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_120.cfg";
+  std::string mob_trace = "cars_60.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_60.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -326,8 +356,9 @@ int main (int argc, char *argv[])
       sumoClient->SetSionnaUp(server_ip);
     }
 
-  uint64_t numberOfNodes_11p = numberOfNodes / 2;
-  uint64_t numberOfNodes_nr = numberOfNodes / 2;
+  uint64_t numberOfNodes_11p = numberOfNodes / 3;
+  uint64_t numberOfNodes_nr = numberOfNodes / 3;
+  uint64_t numberOfNodes_lte = numberOfNodes / 3;
 
   Ptr<MetricSupervisor> metSup_11p = NULL;
   // Set a baseline for the PRR computation when creating a new Metricsupervisor object
@@ -344,9 +375,196 @@ int main (int argc, char *argv[])
   metSup_nr->setTraCIClient(sumoClient);
   // metSup_nr->enablePRRVerboseOnStdout ();
 
-  // Ptr<MultiModelSpectrumChannel> spectrumChannel = nullptr;
+  Ptr<MetricSupervisor> metSup_lte = NULL;
+  // Set a baseline for the PRR computation when creating a new Metricsupervisor object
+  MetricSupervisor metSupObj_lte(m_baseline_prr);
+  metSup_lte = &metSupObj_lte;
+  metSup_lte->setTraCIClient(sumoClient);
+  // metSup_nr->enablePRRVerboseOnStdout ();
 
   MobilityHelper mobility;
+
+  NS_LOG_INFO("Configuring C-V2X channel...");
+  /*** 0.c V2X Configurations ***/
+  /* Set the UEs power in dBm */
+  Config::SetDefault ("ns3::cv2x_LteUePhy::TxPower", DoubleValue (ueTxPower));
+  Config::SetDefault ("ns3::cv2x_LteUePhy::RsrpUeMeasThreshold", DoubleValue (-10.0));
+  /* Enable V2X communication on PHY layer */
+  Config::SetDefault ("ns3::cv2x_LteUePhy::EnableV2x", BooleanValue (true));
+
+  /* Set power */
+  Config::SetDefault ("ns3::cv2x_LteUePowerControl::Pcmax", DoubleValue (ueTxPower));
+  Config::SetDefault ("ns3::cv2x_LteUePowerControl::PsschTxPower", DoubleValue (ueTxPower));
+  Config::SetDefault ("ns3::cv2x_LteUePowerControl::PscchTxPower", DoubleValue (ueTxPower));
+
+  if (!hardcoded_bw)
+    {
+      if (adjacencyPscchPssch)
+        {
+          slBandwidth = sizeSubchannel * numSubchannel;
+        }
+      else
+        {
+          slBandwidth = (sizeSubchannel+2) * numSubchannel;
+        }
+    }
+
+
+  /* Configure for UE selected */
+  Config::SetDefault ("ns3::cv2x_LteUeMac::UlBandwidth", UintegerValue (slBandwidth));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::EnableV2xHarq", BooleanValue (harqEnabled));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::EnableAdjacencyPscchPssch", BooleanValue (adjacencyPscchPssch));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::EnablePartialSensing", BooleanValue (partialSensing));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlGrantMcs", UintegerValue (cv2x_mcs));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlSubchannelSize", UintegerValue (sizeSubchannel));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlSubchannelNum", UintegerValue (numSubchannel));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlStartRbSubchannel", UintegerValue (startRbSubchannel));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlPrsvp", UintegerValue (pRsvp));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SlProbResourceKeep", DoubleValue (probResourceKeep));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SelectionWindowT1", UintegerValue (cv2x_t1));
+  Config::SetDefault ("ns3::cv2x_LteUeMac::SelectionWindowT2", UintegerValue (cv2x_t2));
+
+  ConfigStore inputConfig;
+  inputConfig.ConfigureDefaults();
+
+  Ptr<cv2x_PointToPointEpcHelper>  cv2x_epcHelper = CreateObject<cv2x_PointToPointEpcHelper> ();
+  Ptr<cv2x_LteHelper> lteHelper = CreateObject<cv2x_LteHelper> ();
+  lteHelper->SetEpcHelper (cv2x_epcHelper);
+
+  // Disable eNBs for out-of-coverage modelling
+  lteHelper->DisableNewEnbPhy();
+
+  /* V2X */
+  Ptr<cv2x_LteV2xHelper> lteV2xHelper = CreateObject<cv2x_LteV2xHelper> ();
+  lteV2xHelper->SetLteHelper (lteHelper);
+
+  /* Configure eNBs' antenna parameters before deploying them. */
+  lteHelper->SetEnbAntennaModelType ("ns3::cv2x_NistParabolic3dAntennaModel");
+  lteHelper->SetAttribute ("UseSameUlDlPropagationCondition", BooleanValue(true));
+  Config::SetDefault ("ns3::cv2x_LteEnbNetDevice::UlEarfcn", StringValue ("54990")); // EARFCN 54990 -> 5855-5890-5925 MHz
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  NS_LOG_INFO("Antenna parameters set. Current EARFCN: 54990, current frequency: 5.89 GHz");
+
+  /*** 2. Create Internet and ipv4 helpers ***/
+  InternetStackHelper cv2x_internet;
+  Ipv4StaticRoutingHelper cv2x_ipv4RoutingHelper;
+
+  /*** 3. Create containers for UEs and eNB ***/
+  NodeContainer enbNodes;
+  NodeContainer ueNodes;
+  enbNodes.Create(1);
+  ueNodes.Create(numberOfNodes_lte);
+
+  /*** 4. Create and install mobility (SUMO will be attached later) ***/
+  mobility.Install(enbNodes);
+  mobility.Install(ueNodes);
+  /* Set the eNB to a fixed position */
+  Ptr<MobilityModel> mobilityeNBn = enbNodes.Get (0)->GetObject<MobilityModel> ();
+  mobilityeNBn->SetPosition (Vector (0, 0, 20.0)); // set eNB to fixed position - it is still disabled
+
+  /*** 5. Install LTE Devices to the nodes + assign IP to UEs + manage buildings ***/
+  lteHelper->InstallEnbDevice (enbNodes); // If you don't do it, the simulation crashes
+
+  /* Required to use NIST 3GPP model */
+  BuildingsHelper::Install (ueNodes);
+  BuildingsHelper::Install (enbNodes);
+  // BuildingsHelper::MakeMobilityModelConsistent (); Removed because DEPRECATED from 3.31
+  for (NodeList::Iterator nit = NodeList::Begin (); nit != NodeList::End (); ++nit)
+    {
+      Ptr<MobilityModel> mm = (*nit)->GetObject<MobilityModel> ();
+      if (mm != 0)
+        {
+          Ptr<MobilityBuildingInfo> bmm = mm->GetObject<MobilityBuildingInfo> ();
+          NS_ABORT_MSG_UNLESS (0 != bmm, "node " << (*nit)->GetId () << " has a MobilityModel that does not have a MobilityBuildingInfo");
+          bmm->MakeConsistent (mm);
+        }
+    }
+
+  lteHelper->SetAttribute("UseSidelink", BooleanValue (true));
+  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
+
+  /* Install the IP stack on the UEs */
+  cv2x_internet.Install (ueNodes);
+  Ipv4InterfaceContainer cv2x_ueIpIface;
+
+  /* Assign IP address to UEs */
+  cv2x_ueIpIface = cv2x_epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+      Ptr<Node> ueNode = ueNodes.Get (u);
+      /* Set the default gateway for the UE */
+      Ptr<Ipv4StaticRouting> ueStaticRouting = cv2x_ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+      ueStaticRouting->SetDefaultRoute (cv2x_epcHelper->GetUeDefaultGatewayAddress (), 1);
+
+      NS_LOG_INFO("Node "<< ueNode->GetId () << " has been assigned an IP address: " << ueNode->GetObject<Ipv4> ()->GetAddress(1,0).GetLocal());
+    }
+
+  NS_LOG_INFO("Configuring sidelink...");
+
+  /* Create sidelink groups */
+  std::vector<NetDeviceContainer> txGroups;
+  txGroups = lteV2xHelper->AssociateForV2xBroadcast(ueLteDevs, numberOfNodes_lte);
+
+  /* Compute average number of receivers associated per transmitter and vice versa */
+  std::map<uint32_t, uint32_t> txPerUeMap;
+  std::map<uint32_t, uint32_t> groupsPerUe;
+  std::vector<NetDeviceContainer>::iterator gIt;
+  for(gIt=txGroups.begin(); gIt != txGroups.end(); gIt++)
+    {
+      uint32_t numDevs = gIt->GetN();
+
+      uint32_t nId;
+
+      for(uint32_t i=1; i< numDevs; i++)
+        {
+          nId = gIt->Get(i)->GetNode()->GetId();
+          txPerUeMap[nId]++;
+        }
+    }
+
+  std::map<uint32_t, uint32_t>::iterator mIt;
+  for(mIt=txPerUeMap.begin(); mIt != txPerUeMap.end(); mIt++)
+    {
+      groupsPerUe [mIt->second]++;
+    }
+
+  uint32_t groupL2Address = 255;
+  std::vector<Ipv4Address> ipAddresses;
+  Ipv4Address cv2x_groupAddress4 ("225.0.0.0");
+
+  /* Create Sidelink bearers */
+  Ptr<cv2x_LteSlTft> cv2x_tft = Create<cv2x_LteSlTft> (cv2x_LteSlTft::BIDIRECTIONAL, cv2x_groupAddress4, groupL2Address);
+  lteV2xHelper->ActivateSidelinkBearer (Seconds(0.0), ueLteDevs, cv2x_tft);
+
+  /* Creating sidelink configuration */
+  Ptr<cv2x_LteUeRrcSl> ueSidelinkConfiguration = CreateObject<cv2x_LteUeRrcSl>();
+  ueSidelinkConfiguration->SetSlEnabled(true);
+  ueSidelinkConfiguration->SetV2xEnabled(true);
+
+  cv2x_LteRrcSap::SlV2xPreconfiguration preconfiguration;
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommPreconfigGeneral.carrierFreq = 54890;
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommPreconfigGeneral.slBandwidth = slBandwidth;
+
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommTxPoolList.nbPools = 1;
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommRxPoolList.nbPools = 1;
+
+  cv2x_SlV2xPreconfigPoolFactory pFactory;
+  pFactory.SetHaveUeSelectedResourceConfig (true);
+  pFactory.SetSlSubframe (std::bitset<20> (0xFFFFF));
+  pFactory.SetAdjacencyPscchPssch (adjacencyPscchPssch);
+  pFactory.SetSizeSubchannel (sizeSubchannel);
+  pFactory.SetNumSubchannel (numSubchannel);
+  pFactory.SetStartRbSubchannel (startRbSubchannel);
+  pFactory.SetStartRbPscchPool (0);
+  pFactory.SetDataTxP0 (-4);
+  pFactory.SetDataTxAlpha (0.9);
+
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommTxPoolList.pools[0] = pFactory.CreatePool ();
+  preconfiguration.v2xPreconfigFreqList.freq[0].v2xCommRxPoolList.pools[0] = pFactory.CreatePool ();
+  ueSidelinkConfiguration->SetSlV2xPreconfiguration (preconfiguration);
+
+  lteHelper->InstallSidelinkV2xConfiguration (ueLteDevs, ueSidelinkConfiguration);
+
 
   Time slBearersActivationTime = Seconds (2.0);
 
@@ -653,22 +871,27 @@ int main (int argc, char *argv[])
 
   std::vector<std::string> wifiVehicles;
   std::vector<std::string> nrVehicles;
-  for (uint8_t i = 1; i <= numberOfNodes_11p + numberOfNodes_nr; i++)
+  std::vector<std::string> lteVehicles;
+  for (uint8_t i = 1; i <= numberOfNodes_11p + numberOfNodes_nr + numberOfNodes_lte; i++)
     {
       if (i % 2 == 0)
         {
           wifiVehicles.push_back ("veh" + std::to_string (i));
         }
-      else
+      else if (i % 3 == 0)
         {
           nrVehicles.push_back("veh" + std::to_string (i));
+        }
+      else
+        {
+          lteVehicles.push_back ("veh" + std::to_string (i));
         }
     }
 
   if (interference)
   {
     std::cout << "Interference mode enabled" << std::endl;
-    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10);
+    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs, centralFrequencyBandSl, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10, slBandwidth);
   }
 
   uint8_t node11pCounter = 0;

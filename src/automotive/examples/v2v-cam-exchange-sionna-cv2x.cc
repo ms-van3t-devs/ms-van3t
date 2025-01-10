@@ -28,7 +28,6 @@
 #include "ns3/sumo_xml_parser.h"
 #include "ns3/BSMap.h"
 #include "ns3/caBasicService.h"
-#include "ns3/gn-utils.h"
 #include "ns3/traci-module.h"
 #include "ns3/config-store.h"
 #include "ns3/network-module.h"
@@ -53,7 +52,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2x");
+NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchangeCv2x");
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -114,21 +113,21 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_sionna_cv2x.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/phy_with_sionna_cv2x.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
-      camFile << "distance,rssi,snr" << std::endl;
+      camFile << "tx_id,rx_id,distance,rssi,snr" << std::endl;
     }
 
-  camFile << distance << "," << rssi << "," << snr << std::endl;
+  camFile << cam->header.stationId << "," << my_stationID << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
 void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
   std::ofstream file;
-  file.open("siona/prr_sionna_cv2x.csv", std::ios::out | std::ios::app);
+  file.open("src/sionna/prr_with_sionna_cv2x.csv", std::ios::out | std::ios::app);
   file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
     {
@@ -141,33 +140,36 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 int main (int argc, char *argv[])
 {
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
-  double bandwidth_11p = 10;
   int up = 0;
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
   double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
-  double sensitivity = -93.0;
-  double snr_threshold = 10; // Default value
-  double sinr_threshold = 10; // Default value
+  // double sensitivity = -93.0;
+  // double snr_threshold = 10; // Default value
+  // double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 180.0; // Total simulation time (default: 200 seconds)
+  double simTime = 100.0; // Total simulation time (default: 200 seconds)
 
   /*** 0.b LENA + V2X Options ***/
-  double ueTxPower = 23.0;                // Transmission power in dBm
+  double ueTxPower = 30.0;                // Transmission power in dBm
   double probResourceKeep = 0.0;          // Probability to select the previous resource again [0.0-0.8]
   uint32_t mcs = 20;                      // Modulation and Coding Scheme
   bool harqEnabled = false;               // Retransmission enabled (harq not available yet)
   bool adjacencyPscchPssch = true;        // Subchannelization scheme
   bool partialSensing = false;            // Partial sensing enabled (actual only partialSensing is false supported)
   uint16_t sizeSubchannel = 10;           // Number of RBs per subchannel
-  uint16_t numSubchannel = 3;             // Number of subchannels per subframe
+  // uint16_t numSubchannel = 3;             // Number of subchannels per subframe
+  uint16_t numSubchannel = 1;             // Number of subchannels per subframe
   uint16_t startRbSubchannel = 0;         // Index of first RB corresponding to subchannelization
   uint16_t pRsvp = 20;                    // Resource reservation interval
-  uint16_t t1 = 4;                        // T1 value of selection window
-  uint16_t t2 = 100;                      // T2 value of selection window
-  uint16_t slBandwidth;                   // Sidelink bandwidth
+  // uint16_t t1 = 4;                        // T1 value of selection window
+  uint16_t t1 = 2;                        // T1 value of selection window
+  // uint16_t t2 = 100;                      // T2 value of selection window
+  uint16_t t2 = 81;                      // T2 value of selection window
+  uint16_t slBandwidth = 10;                   // Sidelink bandwidth
+  bool hardcoded_bw = true;
   bool m_metric_sup = true;
 
   // (T2-T1+1) x (1/(2^numerology)) < reservation period
@@ -177,8 +179,6 @@ int main (int argc, char *argv[])
   std::string server_ip = "";
   bool local_machine = false;
   bool verb = false;
-
-  bool interference = true;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
@@ -199,7 +199,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
   cmd.Parse (argc, argv);
 
-  std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
+  std::cout << "Start running v2v-cam-exchange-sionna-cv2x.cc simulation" << std::endl;
 
   SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
 
@@ -224,14 +224,18 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::cv2x_LteUePowerControl::PsschTxPower", DoubleValue (ueTxPower));
   Config::SetDefault ("ns3::cv2x_LteUePowerControl::PscchTxPower", DoubleValue (ueTxPower));
 
-  if (adjacencyPscchPssch)
+  if (!hardcoded_bw)
     {
-      slBandwidth = sizeSubchannel * numSubchannel;
+      if (adjacencyPscchPssch)
+        {
+          slBandwidth = sizeSubchannel * numSubchannel;
+        }
+      else
+        {
+          slBandwidth = (sizeSubchannel+2) * numSubchannel;
+        }
     }
-  else
-    {
-      slBandwidth = (sizeSubchannel+2) * numSubchannel;
-    }
+
 
   /* Configure for UE selected */
   Config::SetDefault ("ns3::cv2x_LteUeMac::UlBandwidth", UintegerValue (slBandwidth));
@@ -299,7 +303,7 @@ int main (int argc, char *argv[])
   lteHelper->SetEnbAntennaModelType ("ns3::cv2x_NistParabolic3dAntennaModel");
   lteHelper->SetAttribute ("UseSameUlDlPropagationCondition", BooleanValue(true));
   Config::SetDefault ("ns3::cv2x_LteEnbNetDevice::UlEarfcn", StringValue ("54990")); // EARFCN 54990 -> 5855-5890-5925 MHz
-  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
   NS_LOG_INFO("Antenna parameters set. Current EARFCN: 54990, current frequency: 5.89 GHz");
 
   /*** 2. Create Internet and ipv4 helpers ***/
@@ -425,6 +429,10 @@ int main (int argc, char *argv[])
 
   /*** 6. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
+  if (sionna)
+    {
+      sumoClient->SetSionnaUp(server_ip);
+    }
   sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
@@ -469,8 +477,8 @@ int main (int argc, char *argv[])
     sock->Connect (InetSocketAddress (groupAddress4, 19));
 
     netDevice = includedNode->GetDevice(0);
-    Ptr<cv2x_LteNetDevice> nrDevice = DynamicCast<cv2x_LteNetDevice>(netDevice);
-    // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
+    Ptr<cv2x_LteUeNetDevice> cv2x_device = DynamicCast<cv2x_LteUeNetDevice>(netDevice);
+    cv2x_device->GetPhy()->GetSlSpectrumPhy()->GetChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
     bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
@@ -519,13 +527,15 @@ int main (int argc, char *argv[])
 
   outputFile << "\nTotal number of CAMs received: " << packet_count << std::endl;
 
-  outputFile << "\nMetric Supervisor statistics for NR-V2X" << std::endl;
+  outputFile << "\nMetric Supervisor statistics for C-V2X" << std::endl;
   outputFile << "Average PRR: " << metSup->getAveragePRR_overall () << std::endl;
   outputFile << "Average latency (ms): " << metSup->getAverageLatency_overall () << std::endl;
   outputFile << "Average SINR (dB): " << metSup->getAverageSINR_overall() << std::endl;
   outputFile << "RX packet count (from PRR Supervisor): " << metSup->getNumberRx_overall () << std::endl;
   outputFile << "TX packet count (from PRR Supervisor): " << metSup->getNumberTx_overall () << std::endl;
   // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_nr->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
+
+  savePRRs(metSup, numberOfNodes);
 
   Simulator::Destroy ();
 

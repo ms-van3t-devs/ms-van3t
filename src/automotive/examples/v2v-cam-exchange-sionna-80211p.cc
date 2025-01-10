@@ -47,7 +47,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2x");
+NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211p");
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -108,21 +108,21 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_sionna_11p.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/phy_without_sionna_11p.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
-      camFile << "distance,rssi,snr" << std::endl;
+      camFile << "tx_id,rx_id,distance,rssi,snr" << std::endl;
     }
   
-  camFile << distance << "," << rssi << "," << snr << std::endl;
+  camFile << cam->header.stationId << "," << my_stationID << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
 void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
   std::ofstream file;
-  file.open("sionna/prr_sionna_11p.csv", std::ios::out | std::ios::app);
+  file.open("src/sionna/prr_without_sionna_11p.csv", std::ios::out | std::ios::app);
   file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
     {
@@ -140,12 +140,12 @@ int main (int argc, char *argv[])
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 100.0; // PRR baseline value (default: 150 m)
-  int txPower = 23.0; // Transmission power in dBm (default: 23 dBm)
+  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
+  int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
   double snr_threshold = 4; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 50.0; // Total simulation time (default: 200 seconds)
+  double simTime = 100.0; // Total simulation time (default: 200 seconds)
 
   bool sionna = false;
   std::string server_ip = "";

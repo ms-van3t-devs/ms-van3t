@@ -52,7 +52,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2x");
+NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchangeNrv2x");
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -113,21 +113,21 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
   std::ofstream camFile;
-  camFile.open("sionna/phy_sionna_nrv2x.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/phy_with_sionna_nrv2x.csv", std::ios::out | std::ios::app);
   camFile.seekp (0, std::ios::end);
   if (camFile.tellp() == 0)
     {
-      camFile << "distance,rssi,snr" << std::endl;
+      camFile << "tx_id,rx_id,distance,rssi,snr" << std::endl;
     }
   
-  camFile << distance << "," << rssi << "," << snr << std::endl;
+  camFile << cam->header.stationId << "," << my_stationID << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
 void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 {
   std::ofstream file;
-  file.open("sionna/prr_sionna_nrv2x.csv", std::ios::out | std::ios::app);
+  file.open("src/sionna/prr_with_sionna_nrv2x.csv", std::ios::out | std::ios::app);
   file << "node_id,prr" << std::endl;
   for (int i = 1; i <= numberOfNodes; i++)
     {
@@ -140,7 +140,6 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes)
 int main (int argc, char *argv[])
 {
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
-  double bandwidth_11p = 10;
   int up = 0;
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
@@ -151,13 +150,13 @@ int main (int argc, char *argv[])
   double snr_threshold = 10; // Default value
   double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 180.0; // Total simulation time (default: 200 seconds)
+  double simTime = 100.0; // Total simulation time (default: 200 seconds)
 
   // NR parameters. We will take the input from the command line, and then we
   // will pass them inside the NR module.
   double centralFrequencyBandSl = 5.89e9; // band n47  TDD //Here band is analogous to channel
   // uint16_t bandwidthBandSl = 400;
-  uint16_t bandwidthBandSl = 100;
+  uint16_t bandwidthBandSl = 100; // 10 MHz
   std::string tddPattern = "UL|UL|UL|UL|UL|UL|UL|UL|UL|UL|";
   std::string slBitMap = "1|1|1|1|1|1|1|1|1|1";
   uint16_t numerologyBwpSl = 2;
@@ -185,8 +184,6 @@ int main (int argc, char *argv[])
   std::string server_ip = "";
   bool local_machine = false;
   bool verb = false;
-
-  bool interference = true;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
@@ -250,7 +247,7 @@ int main (int argc, char *argv[])
       sumoClient->SetSionnaUp(server_ip);
     }
 
-  uint64_t numberOfNodes_nr = numberOfNodes / 2;
+  uint64_t numberOfNodes_nr = numberOfNodes;
 
   Ptr<MetricSupervisor> metSup_nr = NULL;
   // Set a baseline for the PRR computation when creating a new Metricsupervisor object
@@ -537,10 +534,10 @@ int main (int argc, char *argv[])
     sock->Connect (InetSocketAddress (groupAddress4, 19));
 
     netDevice = nrNodes.Get(nodeID)->GetDevice(0);
-    Ptr<NrNetDevice> nrDevice = DynamicCast<NrNetDevice>(netDevice);
-    // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
-
-    // sock->SetPriority (up);
+    Ptr<NrUeNetDevice> nrDevice = DynamicCast<NrUeNetDevice>(netDevice);
+    nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr_threshold);
+    nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold2 (sinr_threshold);
+    nrDevice->GetPhy(0)->GetSpectrumPhy ()->GetSpectrumChannel()->SetAttribute ("MaxLossDb", DoubleValue(128.0));
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
     bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
@@ -596,6 +593,8 @@ int main (int argc, char *argv[])
   outputFile << "RX packet count (from PRR Supervisor): " << metSup_nr->getNumberRx_overall () << std::endl;
   outputFile << "TX packet count (from PRR Supervisor): " << metSup_nr->getNumberTx_overall () << std::endl;
   // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_nr->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
+
+  savePRRs (metSup_nr, numberOfNodes);
 
   Simulator::Destroy ();
 

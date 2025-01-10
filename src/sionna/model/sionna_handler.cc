@@ -14,6 +14,8 @@ std::unordered_map<std::string, SionnaPosition> vehiclePositions;
 bool sionna_verbose = false;
 bool sionna_local_machine = false;
 
+std::vector<bool> sionna_los_status = {false, false, false};
+
 // THIS ONE WORKS LOCALLY!
 void connect_now_local_machine() {
     printf("Avvio connect_now\n");
@@ -288,35 +290,43 @@ void
 LogProgress(int piece, std::string chunk) {
 
   bool first_row_of_log = true;
-  std::ofstream csv_file("log.csv");
+  std::ofstream csv_file("src/sionna/sionna_log.csv", std::ios::out | std::ios::app);
 
-  // Piece 0 = vehicles names from above
-  // Piece 1 = delays
-  // Piece 2 = pathlosses & LOS
+  csv_file.seekp (0, std::ios::end);
+  if (csv_file.tellp() == 0)
+    {
+      csv_file << "delay_ns3_ms,sionna_delay_ms,tx_id,rx_id,pathloss_ns3,pathloss_sionna,LOS" << std::endl;
+    }
+
+  // Piece 0 = delays
+  // Piece 1 = tx_id & rx_id
+  // Piece 2 = pathloss & LOS
 
   static std::string row = "";
 
-  if (first_row_of_log == true) {
-      // Write the header row to the CSV file
-      std::string header = "delay_ns3_ms,sionna_delay_ms,tx_id,rx_id,pathloss_ns3,pathloss_sionna,LOS";
-
-      csv_file << header << std::endl;
-      first_row_of_log = false;
-    }
-
   // Process the current piece
-  if (piece == 0) {
+  if (piece == 0)
+    {
       // Start a new row with the initial data
       row = chunk + ",";
+      sionna_los_status[0] = true;
     }
-  else if (piece == 1) {
+  else if (piece == 1)
+    {
       // Append the second piece of data to the row
       row += chunk + ",";
+      sionna_los_status[1] = true;
     }
-  else if (piece == 2) {
+  else if (piece == 2)
+    {
       // Append the final piece of data and write the row to the CSV file
       row += chunk;
-      csv_file << row << std::endl;
+      sionna_los_status[2] = true;
+      if (sionna_los_status[1] && sionna_los_status[2])
+        {
+          csv_file << row << std::endl;
+        }
+      sionna_los_status = {false, false, false};
       row = "";  // Clear the row for the next set of data
     }
 }

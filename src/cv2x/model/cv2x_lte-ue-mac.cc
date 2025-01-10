@@ -4348,10 +4348,6 @@ cv2x_LteUeMac::DoPassSensingData(uint32_t frameNo, uint32_t subframeNo, uint16_t
   sensingData.m_slRsrp = slRsrp;
   sensingData.m_slRssi = slRssi;
 
-  if (slRssi != 0.0) {
-      std::cout << "Here";
-    }
-
   if (frameNo == 1 && subframeNo == 1)
     {
       sensingData.m_rxInfo.subframe.frameNo = 1024;
