@@ -114,7 +114,7 @@ private:
    * \param ppdu the PPDU being sent
    * \param txPowerDbm the TX power associated to the packet being sent (dBm)
    */
-  static void Receive (Ptr<YansWifiPhy> receiver, Ptr<WifiPpdu> ppdu, double txPowerDbm, std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> &noisePowerPerNode);
+  static void Receive (Ptr<YansWifiPhy> receiver, Ptr<WifiPpdu> ppdu, double txPowerDbm);
 
   PhyList m_phyList;                   //!< List of YansWifiPhys connected to this YansWifiChannel
   Ptr<PropagationLossModel> m_loss;    //!< Propagation loss model

@@ -80,6 +80,13 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2xCv2x");
 
+enum class NodeType
+{
+  DSRC,
+  NR,
+  LTE,
+};
+
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
 {
@@ -252,7 +259,7 @@ int main (int argc, char *argv[])
   uint16_t slSensingWindow = 100; // T0 in ms
   uint16_t slSelectionWindow = 5; // T2min
   uint16_t slSubchannelSize = 10;
-  uint16_t slMaxNumPerReserve = 3;
+  uint16_t slMaxNumPerReserve = 1;
   double slProbResourceKeep = 0.0;
   uint16_t slMaxTxTransNumPssch = 5;
   uint16_t reservationPeriod = 20; // in ms
@@ -427,7 +434,7 @@ int main (int argc, char *argv[])
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
 
-  Ptr<cv2x_PointToPointEpcHelper>  cv2x_epcHelper = CreateObject<cv2x_PointToPointEpcHelper> ();
+  Ptr<cv2x_PointToPointEpcHelper> cv2x_epcHelper = CreateObject<cv2x_PointToPointEpcHelper> ();
   Ptr<cv2x_LteHelper> lteHelper = CreateObject<cv2x_LteHelper> ();
   lteHelper->SetEpcHelper (cv2x_epcHelper);
 
@@ -872,30 +879,35 @@ int main (int argc, char *argv[])
   std::vector<std::string> wifiVehicles;
   std::vector<std::string> nrVehicles;
   std::vector<std::string> lteVehicles;
+  uint8_t j = 0;
   for (uint8_t i = 1; i <= numberOfNodes_11p + numberOfNodes_nr + numberOfNodes_lte; i++)
     {
-      if (i % 2 == 0)
+      if (j == 0)
         {
           wifiVehicles.push_back ("veh" + std::to_string (i));
+          j++;
         }
-      else if (i % 3 == 0)
+      else if (j == 1)
         {
           nrVehicles.push_back("veh" + std::to_string (i));
+          j++;
         }
       else
         {
           lteVehicles.push_back ("veh" + std::to_string (i));
+          j = 0;
         }
     }
 
   if (interference)
   {
     std::cout << "Interference mode enabled" << std::endl;
-    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs, centralFrequencyBandSl, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10, slBandwidth);
+    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs, centralFrequencyBandSl, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10, slBandwidth /*rbNr, rbLte*/);
   }
 
   uint8_t node11pCounter = 0;
   uint8_t nodeNrCounter = 0;
+  uint8_t nodeLteCounter = 0;
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
@@ -903,64 +915,81 @@ int main (int argc, char *argv[])
 
   STARTUP_FCN setupNewWifiNode = [&] (std::string vehicleID, TraciClient::StationTypeTraCI_t stationType) -> Ptr<Node>
   {
-    bool wifi;
+    NodeType type;
     unsigned long vehID = std::stol(vehicleID.substr (3));
     unsigned long nodeID;
 
     if (std::find(wifiVehicles.begin(), wifiVehicles.end(), vehicleID) != wifiVehicles.end())
       {
-        wifi = true;
+        type = NodeType::DSRC;
         nodeID = node11pCounter;
         node11pCounter++;
       }
-    else
+    else if (std::find(nrVehicles.begin(), nrVehicles.end(), vehicleID) != nrVehicles.end())
       {
-        wifi = false;
+        type = NodeType::NR;
         nodeID = nodeNrCounter;
         nodeNrCounter++;
       }
-
-      Ptr<NetDevice> netDevice;
-
-    Ptr<Socket> sock;
-    if (wifi)
-      {
-        sock = GeoNet::createGNPacketSocket(wifiNodes.Get(nodeID));
-        metSup_nr->addExcludedID (vehID);
-
-        netDevice = wifiNodes.Get(nodeID)->GetDevice(0);
-        Ptr<WifiNetDevice> wifiDevice = DynamicCast<WifiNetDevice>(netDevice);
-        wifiDevice->GetPhy()->SetRxSensitivity (sensitivity);
-      }
     else
       {
-        TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-        Ptr<Node> includedNode = nrNodes.Get(nodeID);
+        type = NodeType::LTE;
+        nodeID = nodeLteCounter;
+        nodeLteCounter++;
+      }
+
+    Ptr<NetDevice> netDevice;
+    Ptr<Socket> sock;
+    Ptr<WifiNetDevice> wifiDevice;
+    Ptr<Node> includedNode;
+    Ipv4Address groupAddress4 ("225.0.0.0");
+    Ptr<NrNetDevice> nrDevice;
+    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    Ptr<cv2x_LteUeNetDevice> cv2x_device;
+    switch (type)
+      {
+      case NodeType::DSRC:
+        sock = GeoNet::createGNPacketSocket (wifiNodes.Get (nodeID));
+        metSup_nr->addExcludedID (vehID);
+        netDevice = wifiNodes.Get (nodeID)->GetDevice (0);
+        wifiDevice = DynamicCast<WifiNetDevice> (netDevice);
+        wifiDevice->GetPhy ()->SetRxSensitivity (sensitivity);
+        break;
+      case NodeType::NR:
+        includedNode = nrNodes.Get (nodeID);
         sock = Socket::CreateSocket (includedNode, tid);
         if (sock->Bind (InetSocketAddress (Ipv4Address::GetAny (), 19)) == -1)
           {
             NS_FATAL_ERROR ("Failed to bind client socket for NR-V2X");
           }
-        Ipv4Address groupAddress4 ("225.0.0.0");
         sock->Connect (InetSocketAddress (groupAddress4, 19));
         metSup_11p->addExcludedID (vehID);
 
-        netDevice = nrNodes.Get(nodeID)->GetDevice(0);
-        Ptr<NrNetDevice> nrDevice = DynamicCast<NrNetDevice>(netDevice);
+        netDevice = nrNodes.Get (nodeID)->GetDevice (0);
+        nrDevice = DynamicCast<NrNetDevice> (netDevice);
         // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
+        break;
+      case NodeType::LTE:
+        includedNode = ueNodes.Get(nodeID);
+        sock = Socket::CreateSocket (includedNode, tid);
+        sock->Connect (InetSocketAddress (groupAddress4, 19));
+        netDevice = includedNode->GetDevice(0);
+        cv2x_device = DynamicCast<cv2x_LteUeNetDevice>(netDevice);
+        cv2x_device->GetPhy()->GetSlSpectrumPhy()->GetChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
       }
-
-    // sock->SetPriority (up);
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
     bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
-    if(wifi)
+    switch (type)
       {
+      case NodeType::DSRC:
         bs_container->linkMetricSupervisor (metSup_11p);
-      }
-    else
-      {
+        break;
+      case NodeType::NR:
         bs_container->linkMetricSupervisor (metSup_nr);
+        break;
+      case NodeType::LTE:
+        bs_container->linkMetricSupervisor (metSup_lte);
       }
     bs_container->disablePRRSupervisorForGNBeacons();
     bs_container->setupContainer(true,false,false,false);
@@ -969,7 +998,15 @@ int main (int argc, char *argv[])
     double desync = ((double)std::rand()/RAND_MAX);
     bs_container->getCABasicService ()->startCamDissemination (desync);
 
-    return wifi ? wifiNodes.Get(nodeID) : nrNodes.Get(nodeID);
+    switch (type)
+      {
+      case NodeType::DSRC:
+        return wifiNodes.Get(nodeID);
+      case NodeType::NR:
+        return nrNodes.Get(nodeID);
+      case NodeType::LTE:
+        return ueNodes.Get(nodeID);
+      }
   };
 
   // Important: what you write here is called every time a node exits the simulation in SUMO

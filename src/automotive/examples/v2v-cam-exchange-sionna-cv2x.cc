@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
   ns3::Time simulationTime (ns3::Seconds(simTime));
 
   /*** 1. Create LTE objects   ***/
-  Ptr<cv2x_PointToPointEpcHelper>  epcHelper = CreateObject<cv2x_PointToPointEpcHelper> ();
+  Ptr<cv2x_PointToPointEpcHelper> epcHelper = CreateObject<cv2x_PointToPointEpcHelper> ();
   Ptr<cv2x_LteHelper> lteHelper = CreateObject<cv2x_LteHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
 

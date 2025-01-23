@@ -361,20 +361,20 @@ MultiModelSpectrumChannel::StartTx (Ptr<SpectrumSignalParameters> txParams)
               
               Ptr<SpectrumValue> wifiSignal = Create<SpectrumValue>((this->m_txSpectrumModelInfoMap.begin())->second.m_txSpectrumModel);
               auto& tracker = TxTracker::GetInstance();
-              std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes = tracker.AddInterferenceToCV2X(txParams->txPhy->GetDevice(), rxParams->psd, wifiSignal, receiverMobility, delay, m_propagationLoss);
-              
+              tracker.AddInterferenceFromCV2X(txParams->txPhy->GetDevice(), rxParams->psd, m_propagationLoss, rxParams->duration);
+
               if (rxNetDevice)
                 {
                   // the receiver has a NetDevice, so we expect that it is attached to a Node
                   uint32_t dstNode = rxNetDevice->GetNode ()->GetId ();
                   Simulator::ScheduleWithContext (dstNode, delay, &MultiModelSpectrumChannel::StartRx, this,
-                                                  rxParams, *rxPhyIterator, interferenceNodes);
+                                                  rxParams, *rxPhyIterator);
                 }
               else
                 {
                   // the receiver is not attached to a NetDevice, so we cannot assume that it is attached to a node
                   Simulator::Schedule (delay, &MultiModelSpectrumChannel::StartRx, this,
-                                       rxParams, *rxPhyIterator, interferenceNodes);
+                                       rxParams, *rxPhyIterator);
                 }
             }
         }
@@ -383,17 +383,9 @@ MultiModelSpectrumChannel::StartTx (Ptr<SpectrumSignalParameters> txParams)
 }
 
 void
-MultiModelSpectrumChannel::StartRx (Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver, std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes)
+MultiModelSpectrumChannel::StartRx (Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver)
 {
   NS_LOG_FUNCTION (this);
-  if (!interferenceNodes.empty())
-    {
-      Ptr<NrSpectrumPhy> nrReceiver = DynamicCast<NrSpectrumPhy>(receiver);
-      for (auto it = interferenceNodes.begin(); it != interferenceNodes.end(); ++it)
-        {
-          nrReceiver->GetNrInterference()->AddSignal (it->second.first, it->second.second);
-        }
-    }
   receiver->StartRx (params);
 }
 

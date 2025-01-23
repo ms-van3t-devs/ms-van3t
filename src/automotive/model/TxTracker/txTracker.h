@@ -24,6 +24,7 @@
 #include "ns3/sionna_handler.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/yans-wifi-phy.h"
+#include "ns3/wifi-mac.h"
 
 namespace ns3 {
 
@@ -85,28 +86,27 @@ namespace ns3 {
     void
     SetCentralFrequencies (double frequency11p_Hz = 0.0, double frequencyNr_Hz = 0.0, double frequencyLte_Hz = 0.0)
     {
-      centralFrequency11p = frequency11p_Hz;
-      centralFrequencyNr = frequencyNr_Hz;
-      centralFrequencyLte = frequencyLte_Hz;
+      m_centralFrequency11p = frequency11p_Hz;
+      m_centralFrequencyNr = frequencyNr_Hz;
+      m_centralFrequencyLte = frequencyLte_Hz;
     };
   
     // Method to set the bandwidths for 11p, NR, and LTE
     void
     SetBandwidths (double band11p_Hz = 0.0, double bandNr_Hz = 0.0, double bandLte_Hz = 0.0)
     {
-      bandWidth11p = band11p_Hz;
-      bandWidthNr = bandNr_Hz;
-      bandWidthLte = bandLte_Hz;
+      m_bandWidth11p = band11p_Hz;
+      m_bandWidthNr = bandNr_Hz;
+      m_bandWidthLte = bandLte_Hz;
     };
   
     // Method to add interference for NR signals
-    std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>>
-    AddInterferenceToCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue> signal, Ptr<SpectrumValue> wifiSignal, Ptr<MobilityModel> receiverMobility, Time delay,
-                       Ptr<PropagationLossModel> propagationLoss);
+    void
+    AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue> signal, Ptr<PropagationLossModel> propagationLoss, Time duration);
   
     // Method to add interference for 11p signals
-    std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>>
-    AddInterferenceTo11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility,
+    void
+    AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility,
                         Ptr<PropagationLossModel> propagationLoss,
                         Ptr<PropagationDelayModel> propagationDelay);
 
@@ -121,7 +121,7 @@ namespace ns3 {
     TxTracker(const TxTracker&) = delete;
   
     // Delete assignment operator
-    TxTracker& operator=(const TxTracker&) = delete;
+    TxTracker& operator = (const TxTracker&) = delete;
 
     // Map to store 11p transmission parameters
     std::unordered_map<std::string, txParameters11p> m_txMap11p;
@@ -133,22 +133,24 @@ namespace ns3 {
     std::unordered_map<std::string, txParametersLTE> m_txMapLte;
   
     // Central frequency for 11p
-    double centralFrequency11p;
+    double m_centralFrequency11p;
   
     // Central frequency for NR
-    double centralFrequencyNr;
+    double m_centralFrequencyNr;
 
     // Central frequency for Lte
-    double centralFrequencyLte;
+    double m_centralFrequencyLte;
   
     // Bandwidth for 11p
-    double bandWidth11p;
+    double m_bandWidth11p;
   
     // Bandwidth for NR
-    double bandWidthNr;
+    double m_bandWidthNr;
 
     // Bandwidth for LTE
-    double bandWidthLte;
+    double m_bandWidthLte;
+
+    double m_noisePowerThreshold = 120;
   };
 }
 

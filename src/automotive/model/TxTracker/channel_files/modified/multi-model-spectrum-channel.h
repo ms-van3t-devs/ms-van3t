@@ -150,7 +150,7 @@ private:
    * \param params The signal parameters.
    * \param receiver A pointer to the receiver SpectrumPhy.
    */
-  virtual void StartRx (Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver, std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes);
+  virtual void StartRx (Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver);
 
   /**
    * Data structure holding, for each TX SpectrumModel,  all the

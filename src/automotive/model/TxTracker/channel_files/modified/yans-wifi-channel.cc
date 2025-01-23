@@ -117,17 +117,16 @@ YansWifiChannel::Send (Ptr<YansWifiPhy> sender, Ptr<const WifiPpdu> ppdu, double
             }
 
           auto& tracker = TxTracker::GetInstance();
-          std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> noisePowerPerNode = tracker.AddInterferenceTo11p (sender, receiverMobility, m_loss, m_delay);
-
+          tracker.AddInterferenceFrom11p (sender, receiverMobility, m_loss, m_delay);
           Simulator::ScheduleWithContext (dstNode,
                                           delay, &YansWifiChannel::Receive,
-                                          (*i), copy, rxPowerDbm, noisePowerPerNode);
+                                          (*i), copy, rxPowerDbm);
         }
     }
 }
 
 void
-YansWifiChannel::Receive (Ptr<YansWifiPhy> phy, Ptr<WifiPpdu> ppdu, double rxPowerDbm, std::unordered_map<std::string, std::pair<RxPowerWattPerChannelBand, Time>> &noisePowerPerNode)
+YansWifiChannel::Receive (Ptr<YansWifiPhy> phy, Ptr<WifiPpdu> ppdu, double rxPowerDbm)
 {
   NS_LOG_FUNCTION (phy << ppdu << rxPowerDbm);
   // Do no further processing if signal is too weak
@@ -136,13 +135,6 @@ YansWifiChannel::Receive (Ptr<YansWifiPhy> phy, Ptr<WifiPpdu> ppdu, double rxPow
     {
       NS_LOG_INFO ("Received signal too weak to process: " << rxPowerDbm << " dBm");
       return;
-    }
-  if (!noisePowerPerNode.empty())
-    {
-      for (auto it = noisePowerPerNode.begin(); it != noisePowerPerNode.end(); ++it)
-        {
-          phy->GetInterferenceHelper()->AddForeignSignal (it->second.second, it->second.first);
-        }
     }
   RxPowerWattPerChannelBand rxPowerW;
   rxPowerW.insert ({std::make_pair (0, 0), (DbmToW (rxPowerDbm + phy->GetRxGain ()))}); //dummy band for YANS
