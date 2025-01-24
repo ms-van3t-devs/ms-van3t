@@ -361,7 +361,7 @@ MultiModelSpectrumChannel::StartTx (Ptr<SpectrumSignalParameters> txParams)
               
               Ptr<SpectrumValue> wifiSignal = Create<SpectrumValue>((this->m_txSpectrumModelInfoMap.begin())->second.m_txSpectrumModel);
               auto& tracker = TxTracker::GetInstance();
-              tracker.AddInterferenceFromCV2X(txParams->txPhy->GetDevice(), rxParams->psd, m_propagationLoss, rxParams->duration);
+              tracker.AddInterferenceFromCV2X(txParams->txPhy->GetDevice(), txParams->psd, m_propagationLoss, txParams->duration);
 
               if (rxNetDevice)
                 {

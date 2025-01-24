@@ -87,6 +87,10 @@ enum class NodeType
   LTE,
 };
 
+std::vector<uint8_t> dsrcVehicles;
+std::vector<uint8_t > cv2xVehicles;
+std::vector<uint8_t > nrv2xVehicles;
+
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
 {
@@ -145,22 +149,36 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("phy_info_sionna_coexistence.txt");
+  std::ifstream camFileHeader("src/sionna/phy_sionna_coexistence.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/phy_sionna_coexistence.txt", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/phy_sionna_coexistence.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
       {
-        camFile << "distance,rssi,snr" << std::endl;
+        camFile << "technology,distance,rssi,snr" << std::endl;
       } 
       else 
       {
-        std::cerr << "Unable to create file: phy_info_sionna_coexistence.txt" << std::endl;
+        std::cerr << "Unable to create file: phy_info_sionna_coexistence.csv" << std::endl;
       }
     }
+
+  std::string technology;
+  if (std::find(dsrcVehicles.begin(), dsrcVehicles.end(), my_stationID) != dsrcVehicles.end())
+    {
+      technology = "DSRC";
+    }
+  else if (std::find(cv2xVehicles.begin(), cv2xVehicles.end(), my_stationID) != cv2xVehicles.end())
+    {
+      technology = "C-V2X";
+    }
+  else
+    {
+      technology = "NR-V2X";
+    }
   
-  camFile << distance << "," << rssi << "," << snr << std::endl;
+  camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
@@ -188,16 +206,13 @@ void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes, std::string 
   file.close();
 }
 
-void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, std::vector<std::string> lteVehicles, NetDeviceContainer lteDevices, double centralFrequency11p, double centralFrequencyNR, double centralFrequencyLTE, double bandwidth11p, double bandwidthNr, double bandwidthLTE)
+void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, std::vector<std::string> lteVehicles, NetDeviceContainer lteDevices)
 {
   auto& tracker = TxTracker::GetInstance();
 
   std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> wifiVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> lteVehiclesList;
-
-  tracker.SetCentralFrequencies(centralFrequency11p, centralFrequencyNR, centralFrequencyLTE);
-  tracker.SetBandwidths(bandwidth11p * 1e6, bandwidthNr * 1e6, bandwidthLTE * 1e6);
 
   uint8_t i = 0;
   for (auto v : wifiVehicles)
@@ -885,16 +900,19 @@ int main (int argc, char *argv[])
       if (j == 0)
         {
           wifiVehicles.push_back ("veh" + std::to_string (i));
+          dsrcVehicles.push_back (i);
           j++;
         }
       else if (j == 1)
         {
           nrVehicles.push_back("veh" + std::to_string (i));
+          nrv2xVehicles.push_back (i);
           j++;
         }
       else
         {
           lteVehicles.push_back ("veh" + std::to_string (i));
+          cv2xVehicles.push_back (i);
           j = 0;
         }
     }
@@ -902,7 +920,10 @@ int main (int argc, char *argv[])
   if (interference)
   {
     std::cout << "Interference mode enabled" << std::endl;
-    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs, centralFrequencyBandSl, centralFrequencyBandSl, centralFrequencyBandSl, bandwidth_11p, bandwidthBandSl/10, slBandwidth /*rbNr, rbLte*/);
+    auto& tracker = TxTracker::GetInstance();
+    tracker.SetCentralFrequencies(centralFrequencyBandSl, centralFrequencyBandSl, centralFrequencyBandSl);
+    tracker.SetBandwidths(bandwidth_11p * 1e6, bandwidthBandSl/10 * 1e6, slBandwidth * 1e6);
+    txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs /*rbNr, rbLte*/);
   }
 
   uint8_t node11pCounter = 0;
@@ -943,7 +964,7 @@ int main (int argc, char *argv[])
     Ptr<WifiNetDevice> wifiDevice;
     Ptr<Node> includedNode;
     Ipv4Address groupAddress4 ("225.0.0.0");
-    Ptr<NrNetDevice> nrDevice;
+    Ptr<NrUeNetDevice> nrDevice;
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     Ptr<cv2x_LteUeNetDevice> cv2x_device;
     switch (type)
@@ -966,7 +987,8 @@ int main (int argc, char *argv[])
         metSup_11p->addExcludedID (vehID);
 
         netDevice = nrNodes.Get (nodeID)->GetDevice (0);
-        nrDevice = DynamicCast<NrNetDevice> (netDevice);
+        nrDevice = DynamicCast<NrUeNetDevice> (netDevice);
+        nrDevice->GetPhy(0)->GetSpectrumPhy ()->GetSpectrumChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
         // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
         break;
       case NodeType::LTE:

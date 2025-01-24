@@ -31,7 +31,7 @@ int sendString2sionna_UDP (const std::string &str);
 std::string getFromSionna_UDP ();
 void updateLocationSionna (std::string veh, std::string x, std::string y, std::string z,
                            std::string angle);
-double getPathLossFromSionna (Vector a_position, Vector b_position);
+double getPathGainFromSionna (Vector a_position, Vector b_position);
 double getPropagationDelayFromSionna (Vector a_position, Vector b_position);
 std::string getLOSStatusFromSionna (Vector a_position, Vector b_position);
 void LogProgress (int piece, std::string chunk);

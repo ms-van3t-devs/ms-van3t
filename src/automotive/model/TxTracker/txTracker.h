@@ -80,7 +80,7 @@ namespace ns3 {
     void InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nodes);
 
     // Method to insert LTE nodes into the tracker
-    void InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes);
+    void InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes, double rbOh = 0.04, uint32_t numerology = 2);
   
     // Method to set the central frequencies for 11p, NR, and LTE
     void

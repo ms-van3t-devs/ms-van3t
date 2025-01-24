@@ -20,7 +20,7 @@
 
 #include "txTracker.h" // Include the header file defining the TxTracker class and related methods
 
-// TODO check for the overlap conditions and do the method for 11p
+// TODO check for the necessity to do antenna rx operation coming from multi-model-spectrum-channel --> the antenna gain seems to be always 0
 
 namespace ns3 {
 
@@ -37,6 +37,14 @@ double DbmToW (double dbm)
 double WToDbm (double w)
 {
   return 10 * std::log10(w) + 30;
+}
+
+uint8_t calculateNumRb (double lteBandwidthHz, double rbOh, uint8_t numerology)
+{
+  double realBw = lteBandwidthHz * (1 - rbOh);
+  uint32_t subcarrierSpacing = 15000 * static_cast<uint32_t> (std::pow (2, numerology));
+  uint32_t rbWidth = subcarrierSpacing * NrSpectrumValueHelper::SUBCARRIERS_PER_RB;
+  return static_cast<uint32_t> (realBw / rbWidth);
 }
 
 // Insert 802.11p nodes into the tracker
@@ -94,7 +102,7 @@ TxTracker::InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeN
 
 // Insert LTE nodes into the tracker
 void
-TxTracker::InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes)
+TxTracker::InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes, double rbOh, uint32_t numerology)
 {
   for (auto n : nodes)
     {
@@ -107,8 +115,8 @@ TxTracker::InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x
       NS_ASSERT_MSG (netDevice != nullptr, "Node is nullptr");
 
       // Get the physical layer (PHY) of the NR device and calculate RB (Resource Block) bandwidth
-      uint8_t size = netDevice->GetPhy()->GetUlSpectrumPhy()->GetTxPowerSpectralDensity()->GetSpectrumModel()->GetNumBands();
-      double rbBand = m_bandWidthLte / size;
+      uint8_t numRb = calculateNumRb(m_bandWidthLte, rbOh, numerology);
+      double rbBand = m_bandWidthLte / numRb;
 
       // Store the node's transmission parameters in the tracker
       m_txMapLte[vehID] = txParametersLTE {
@@ -161,10 +169,16 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           // Check for frequency overlap between NR and Wi-Fi signals
           double wifiCentralFreq = m_centralFrequency11p;
           double wifiBandwidth = m_bandWidth11p;
-          double c_frequency = technologyType == "Nr" ? m_centralFrequencyNr : m_centralFrequencyLte;
-          double c_bandwidth = technologyType == "Nr" ? m_bandWidthNr : m_bandWidthLte;
-          bool overlap = (wifiCentralFreq - wifiBandwidth / 2 <= c_frequency + c_bandwidth / 2 &&
-                          wifiCentralFreq + wifiBandwidth / 2 >= c_frequency - c_bandwidth / 2);
+          double cCentralFrequency = technologyType == "Nr" ? m_centralFrequencyNr : m_centralFrequencyLte;
+          double cBandwidth = technologyType == "Nr" ? m_bandWidthNr : m_bandWidthLte;
+
+          double cLowerFreq = cCentralFrequency - cBandwidth / 2;
+          double cUpperFreq = cCentralFrequency + cBandwidth / 2;
+          double wifiLowerFreq = wifiCentralFreq - wifiBandwidth / 2;
+          double wifiUpperFreq = wifiCentralFreq + wifiBandwidth / 2;
+
+          bool overlap = std::max(cLowerFreq, wifiLowerFreq) <= std::min(cUpperFreq, wifiUpperFreq);
+
           if (!overlap)
             {
               continue;
@@ -178,7 +192,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           double powerW = 0.0;
           double wifiStartFreq = m_centralFrequency11p - m_bandWidth11p / 2;
           double wifiEndFreq = m_centralFrequency11p + m_bandWidth11p / 2;
-          double cStartFreq = c_frequency - c_bandwidth / 2;
+          double cStartFreq = cCentralFrequency - cBandwidth / 2;
           for (auto it2 = signal->ValuesBegin(); it2 != signal->ValuesEnd(); ++it2)
              {
                if ((*it2) > 0)
@@ -212,7 +226,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
             }
         }
     }
-
+  // The interference comes from a NR signal
   if (technologyType == "Nr" && !m_txMapLte.empty())
     {
       // The transmission is from NR, so we need to add interference from LTE signals
@@ -220,67 +234,92 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
         {
           Ptr<cv2x_LteSpectrumPhy> ltePhy = it->second.netDevice->GetPhy ()->GetSlSpectrumPhy ();
           Ptr<cv2x_LteUeNetDevice> nd = DynamicCast<cv2x_LteUeNetDevice>(netDevice);
-          Ptr<SpectrumValue> spectrum = ltePhy->GetTxPowerSpectralDensity ();
-          Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (spectrum->GetSpectrumModel());
-          double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
-          uint8_t j = 1;
-          double nrStartFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
-          double nrEndFreq = m_centralFrequencyNr + m_bandWidthNr / 2;
-          double lteStartFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
-          double lteCentralFreq = m_centralFrequencyLte;
-          double lteBandwidth = m_bandWidthLte;
 
-          bool overlap = (lteCentralFreq - lteBandwidth / 2 <= nrEndFreq &&
-                          lteCentralFreq + lteBandwidth / 2 >= nrStartFreq);
+          // Create an interference signal compatible with the Lte Phy
+          Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (ltePhy->GetRxSpectrumModel());
+
+          // Take the bandwidth of the interfering signal (NR in this case)
+          double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
+
+          double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
+          double nrUpperFreq = m_centralFrequencyNr + m_bandWidthNr / 2;
+          double lteLowerFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
+          double lteUpperFreq = m_centralFrequencyLte + m_bandWidthLte / 2;
+
+          bool overlap = std::max(nrLowerFreq, lteLowerFreq) <= std::min(nrUpperFreq, lteUpperFreq);
+
           if (!overlap)
             {
               continue;
             }
+
           Ptr<MobilityModel> c1Mobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
           Ptr<MobilityModel> c2Mobility = netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
-          double pathGain = propagationLoss->CalcRxPower (0, c1Mobility, c2Mobility);
-          if (pathGain > m_noisePowerThreshold)
+          double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, c2Mobility);
+          if (std::abs(pathLoss) > m_noisePowerThreshold)
             {
               continue;
             }
+
+          uint8_t j = 0;
           for (auto it2 = signal->ValuesBegin (); it2 != signal->ValuesEnd (); ++it2)
             {
-              double subBandfreq = lteStartFreq + j * rbBandwidth;
+              double subBandFreq = nrLowerFreq + (j+1) * rbBandwidth;
               if ((*it2) > 0)
                 {
-                  if (subBandfreq >= nrStartFreq && subBandfreq <= nrEndFreq)
+                  if (subBandFreq >= lteLowerFreq && subBandFreq <= lteUpperFreq)
                     {
-                      (*interferenceSignal)[j - 1] = (*it2);
+                      (*interferenceSignal)[j] = (*it2);
+                      j += 1;
                     }
                 }
-              j += 1;
             }
 
-          double pathGainLinear = std::pow (10.0, (-pathGain) / 10.0);
+          // Check if the channel of the LTE signal is lower than the NR one
+          // In this case we need to shift the values of the interfering signal
+          if (lteLowerFreq < nrLowerFreq)
+            {
+              j -= 1;
+              uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
+              for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
+                {
+                  double tmp = (*interferenceSignal)[t];
+                  (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
+                  (*interferenceSignal)[t+shift] = tmp;
+                }
+            }
+
+          double pathGainLinear = std::pow (10.0, pathLoss / 10.0);
           *(interferenceSignal) *= pathGainLinear;
 
           std::vector<SpectrumValue> interferenceSignals = { *interferenceSignal };
+
+          // No possibility to add the duration of the signal, with the next call of the method, the old signal will be deleted
+          // We suppose that the NR transmission always happens one device at a time, so that the interference signal at a certain time is only one
           ltePhy->UpdateSlIntPerceived (interferenceSignals);
         }
     }
+  // The interference comes from a LTE signal
   else if (technologyType == "Lte" && !m_txMapNr.empty())
     {
       // The transmission is from LTE, so we need to add interference from NR signals
       for (auto it = m_txMapNr.begin(); it != m_txMapNr.end(); ++it)
         {
           Ptr<NrSpectrumPhy> nrPhy = it->second.netDevice->GetPhy (0)->GetSpectrumPhy ();
-          Ptr<SpectrumValue> spectrum = nrPhy->GetTxPowerSpectralDensity ();
-          Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (spectrum->GetSpectrumModel());
-          double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
-          uint8_t j = 1;
-          double lteStartFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
-          double lteEndFreq = m_centralFrequencyLte + m_bandWidthLte / 2;
-          double nrStartFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
-          double nrCentralFreq = m_centralFrequencyNr;
-          double nrBandwidth = m_bandWidthNr;
 
-          bool overlap = (nrCentralFreq - nrBandwidth / 2 <= lteEndFreq &&
-                          nrCentralFreq + nrBandwidth / 2 >= lteStartFreq);
+          // Create an interference signal compatible with the Nr Phy
+          Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (nrPhy->GetRxSpectrumModel());
+
+          // Take the bandwidth of the interfering signal (LTE in this case)
+          double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
+
+          double lteLowerFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
+          double lteUpperFreq = m_centralFrequencyLte + m_bandWidthLte / 2;
+          double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
+          double nrUpperFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
+
+          bool overlap = std::max(lteLowerFreq, nrLowerFreq) <= std::min(lteUpperFreq, nrUpperFreq);
+
           if (!overlap)
             {
               continue;
@@ -288,25 +327,41 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
 
           Ptr<MobilityModel> c1Mobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
           Ptr<MobilityModel> c2Mobility = netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
-          double pathGain = propagationLoss->CalcRxPower (0, c1Mobility, c2Mobility);
-          if (pathGain > m_noisePowerThreshold)
+          double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, c2Mobility);
+          if (std::abs(pathLoss) > m_noisePowerThreshold)
             {
               continue;
             }
+
+          uint8_t j = 0;
           for (auto it2 = signal->ValuesBegin (); it2 != signal->ValuesEnd (); ++it2)
             {
-              double subBandfreq = lteStartFreq + j * rbBandwidth;
+              double subBandFreq = lteLowerFreq + (j+1) * rbBandwidth;
               if ((*it2) > 0)
                 {
-                  if (subBandfreq >= nrStartFreq && subBandfreq <= lteEndFreq)
+                  if (subBandFreq >= nrLowerFreq && subBandFreq <= nrUpperFreq)
                     {
-                      (*interferenceSignal)[j - 1] = (*it2);
+                      (*interferenceSignal)[j] = (*it2);
+                      j += 1;
                     }
                 }
-              j += 1;
             }
 
-          double pathGainLinear = std::pow (10.0, (-pathGain) / 10.0);
+          // Check if the channel of the NR signal is lower than the LTE one
+          // In this case we need to shift the values of the interfering signal
+          if (nrLowerFreq < lteLowerFreq)
+            {
+              j -= 1;
+              uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
+              for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
+                {
+                  double tmp = (*interferenceSignal)[t];
+                  (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
+                  (*interferenceSignal)[t+shift] = tmp;
+                }
+            }
+
+          double pathGainLinear = std::pow (10.0, pathLoss / 10.0);
           *(interferenceSignal) *= pathGainLinear;
 
           nrPhy->GetNrInterference()->AddSignal (interferenceSignal, duration);
@@ -324,122 +379,137 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
       for (auto it = m_txMapNr.begin (); it != m_txMapNr.end (); ++it)
         {
           double interferencePower = 0.0;
-          Ptr<NrUePhy> nrPhy = it->second.netDevice->GetPhy (0);
-          NrSpectrumPhy::State current_state = nrPhy->GetSpectrumPhy ()->GetState ();
+          Ptr<NrSpectrumPhy> nrPhy = it->second.netDevice->GetPhy (0)->GetSpectrumPhy ();
 
-          // Process only if the NR PHY is transmitting
-          if (current_state == NrSpectrumPhy::State::TX)
+          // Create an interference signal compatible with the Nr Phy
+          Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (nrPhy->GetRxSpectrumModel());
+
+          double wifiLowerFreq = m_centralFrequency11p - m_bandWidth11p / 2;
+          double wifiUpperFreq = m_centralFrequency11p + m_bandWidth11p / 2;
+          double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
+          double nrUpperFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
+
+          bool overlap = std::max(wifiLowerFreq, nrLowerFreq) <= std::min(wifiUpperFreq, nrUpperFreq);
+
+          if (!overlap)
             {
-              Ptr<SpectrumValue> spectrum = nrPhy->GetSpectrumPhy ()->GetTxPowerSpectralDensity ();
-              double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
-              uint8_t j = 1;
-              double wifiStartFreq = centralFrequency11p - bandWidth11p / 2;
-              double wifiEndFreq = centralFrequency11p + bandWidth11p / 2;
-              double nrStartFreq = centralFrequencyNr - bandWidthNr / 2;
-              double interferenceCentralFreq = centralFrequencyNr;
-              double interferenceBandwidth = bandWidthNr;
+              continue;
+            }
 
-              bool overlap = (interferenceCentralFreq - interferenceBandwidth / 2 <= wifiEndFreq &&
-                              interferenceCentralFreq + interferenceBandwidth / 2 >= wifiStartFreq);
-              if (!overlap)
-                {
-                  continue;
-                }
+          // Calculate interference for overlapping frequency bands
+          Ptr<MobilityModel> c1Mobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
+          Ptr<MobilityModel> wifiMobility = sender->GetMobility();
+          double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, wifiMobility);
+          if (std::abs(pathLoss) > m_noisePowerThreshold)
+            {
+              continue;
+            }
 
-              // Calculate interference for overlapping frequency bands
-              for (auto it2 = spectrum->ValuesBegin (); it2 != spectrum->ValuesEnd (); ++it2)
+          Time duration = propagationDelay->GetDelay (c1Mobility, wifiMobility);
+
+          uint8_t j = 0;
+          double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
+          double noisePowerDbm = WToDbm (m_txMap11p.begin()->second.txPower_W) - std::abs(pathLoss);
+          double noisePowerW = DbmToW (noisePowerDbm);
+          double noisePowerPerRb = noisePowerW / rbBandwidth;
+          for (uint8_t i = 0; i < interferenceSignal->GetValuesN(); ++i)
+            {
+              double subBandFreq = nrLowerFreq + (i+1) * rbBandwidth;
+              if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                 {
-                  double subBandfreq = nrStartFreq + j * rbBandwidth;
-                  if ((*it2) > 0 && subBandfreq >= wifiStartFreq && subBandfreq <= wifiEndFreq)
-                    {
-                      interferencePower += (*it2) * rbBandwidth;
-                    }
+                  (*interferenceSignal)[j] = noisePowerPerRb;
                   j += 1;
                 }
+            }
 
-              if (interferencePower > 0.0)
+          // Check if the channel of the NR signal is lower than the LTE one
+          // In this case we need to shift the values of the interfering signal
+          if (nrLowerFreq < wifiLowerFreq)
+            {
+              j -= 1;
+              uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
+              for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
                 {
-                  Ptr<MobilityModel> interferenceMobility =
-                      it->second.netDevice->GetNode ()->GetObject<ConstantPositionMobilityModel> ();
-                  Time interferenceDelay =
-                      propagationDelay->GetDelay (interferenceMobility, receiverMobility);
-
-                  // Calculate received interference power and store it in the map
-                  double interferenceRxPowerDbm = propagationLoss->CalcRxPower (
-                      WToDbm (interferencePower), interferenceMobility, receiverMobility);
-                  RxPowerWattPerChannelBand rxInterference = RxPowerWattPerChannelBand ();
-                  rxInterference.insert ({std::make_pair (0, 0), DbmToW (interferenceRxPowerDbm)});
-                  noisePowerPerNode[std::to_string (nodeId)] = std::make_pair (rxInterference, interferenceDelay);
-                  nodeId++;
+                  double tmp = (*interferenceSignal)[t];
+                  (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
+                  (*interferenceSignal)[t+shift] = tmp;
                 }
             }
-          else if (current_state == NrSpectrumPhy::State::RX_DATA)
-            {
-              nrPhy->GetSpectrumPhy ()->GetNrInterference()->AddSignal (it->second.first, it->second.second);
-            }
+
+          nrPhy->GetNrInterference()->AddSignal (interferenceSignal, duration);
+
         }
     }
 
   if (!m_txMapLte.empty())
     {
-      for (auto it = m_txMapLte.begin(); it != m_txMapLte.end(); ++it)
+      for (auto it = m_txMapLte.begin (); it != m_txMapLte.end (); ++it)
         {
-          double interferencePower = 0.0;
           Ptr<cv2x_LteSpectrumPhy> ltePhy = it->second.netDevice->GetPhy ()->GetSlSpectrumPhy ();
-          cv2x_LteSpectrumPhy::State current_state = ltePhy->GetState ();
 
-          // Process only if the LTE PHY is transmitting
-          if (current_state == cv2x_LteSpectrumPhy::State::TX_DL_CTRL ||
-              current_state == cv2x_LteSpectrumPhy::State::TX_DATA ||
-              current_state == cv2x_LteSpectrumPhy::State::TX_UL_V2X_SCI ||
-              current_state == cv2x_LteSpectrumPhy::State::TX_UL_SRS)
+          // Create an interference signal compatible with the Nr Phy
+          Ptr<SpectrumValue> interferenceSignal =
+              Create<SpectrumValue> (ltePhy->GetRxSpectrumModel());
+
+          double wifiLowerFreq = m_centralFrequency11p - m_bandWidth11p / 2;
+          double wifiUpperFreq = m_centralFrequency11p + m_bandWidth11p / 2;
+          double lteLowerFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
+          double lteUpperFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
+
+          bool overlap =
+              std::max (wifiLowerFreq, lteLowerFreq) <= std::min (wifiUpperFreq, lteUpperFreq);
+
+          if (!overlap)
             {
-              std::cout << current_state << std::endl;
-              Ptr<SpectrumValue> spectrum = ltePhy->GetTxPowerSpectralDensity ();
-              double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
-              uint8_t j = 1;
-              double wifiStartFreq = centralFrequency11p - bandWidth11p / 2;
-              double wifiEndFreq = centralFrequency11p + bandWidth11p / 2;
-              double lteStartFreq = centralFrequencyLte - bandWidthLte / 2;
-              double interferenceCentralFreq = centralFrequencyLte;
-              double interferenceBandwidth = bandWidthLte;
+              continue;
+            }
 
-              bool overlap = (interferenceCentralFreq - interferenceBandwidth / 2 <= wifiEndFreq &&
-                              interferenceCentralFreq + interferenceBandwidth / 2 >= wifiStartFreq);
-              if (!overlap)
-                {
-                  continue;
-                }
+          // Calculate interference for overlapping frequency bands
+          Ptr<MobilityModel> c1Mobility =
+              it->second.netDevice->GetNode ()->GetObject<ConstantPositionMobilityModel> ();
+          Ptr<MobilityModel> wifiMobility = sender->GetMobility ();
+          double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, wifiMobility);
+          if (std::abs (pathLoss) > m_noisePowerThreshold)
+            {
+              continue;
+            }
 
-              // Calculate interference for overlapping frequency bands
-              for (auto it2 = spectrum->ValuesBegin (); it2 != spectrum->ValuesEnd (); ++it2)
+          Time duration = propagationDelay->GetDelay (c1Mobility, wifiMobility);
+
+          uint8_t j = 0;
+          double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
+          double noisePowerDbm = WToDbm (m_txMap11p.begin ()->second.txPower_W) - std::abs(pathLoss);
+          double noisePowerW = DbmToW (noisePowerDbm);
+          double noisePowerPerRb = noisePowerW / rbBandwidth;
+          for (uint8_t i = 0; i < interferenceSignal->GetValuesN(); ++i)
+            {
+              double subBandFreq = lteLowerFreq + (i + 1) * rbBandwidth;
+              if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                 {
-                  double subBandfreq = lteStartFreq + j * rbBandwidth;
-                  if ((*it2) > 0 && subBandfreq >= wifiStartFreq && subBandfreq <= wifiEndFreq)
-                    {
-                      interferencePower += (*it2) * rbBandwidth;
-                    }
+                  (*interferenceSignal)[j] = noisePowerPerRb;
                   j += 1;
                 }
+            }
 
-              if (interferencePower > 0.0)
+          // Check if the channel of the NR signal is lower than the LTE one
+          // In this case we need to shift the values of the interfering signal
+          if (lteLowerFreq < wifiLowerFreq)
+            {
+              j -= 1;
+              uint8_t shift = interferenceSignal->GetValuesN () - 1 - j;
+              for (uint8_t t = 0; t != interferenceSignal->GetValuesN (); ++t)
                 {
-                  Ptr<MobilityModel> interferenceMobility =
-                      it->second.netDevice->GetNode () ->GetObject<ConstantPositionMobilityModel> ();
-                  Time interferenceDelay = propagationDelay->GetDelay (interferenceMobility, receiverMobility);
-
-                  // Calculate received interference power and store it in the map
-                  double interferenceRxPowerDbm = propagationLoss->CalcRxPower (WToDbm (interferencePower), interferenceMobility, receiverMobility);
-                  RxPowerWattPerChannelBand rxInterference = RxPowerWattPerChannelBand ();
-                  rxInterference.insert ({std::make_pair (0, 0), DbmToW (interferenceRxPowerDbm)});
-                  noisePowerPerNode[std::to_string (nodeId)] = std::make_pair (rxInterference, interferenceDelay);
-                  nodeId++;
+                  double tmp = (*interferenceSignal)[t];
+                  (*interferenceSignal)[t] = (*interferenceSignal)[t + shift];
+                  (*interferenceSignal)[t + shift] = tmp;
                 }
             }
-          else if (current_state == cv2x_LteSpectrumPhy::State::RX_DATA)
-            {
-              std::cout << current_state << std::endl;
-            }
+
+          std::vector<SpectrumValue> interferenceSignals = {*interferenceSignal};
+
+          // No possibility to add the duration of the signal, with the next call of the method, the old signal will be deleted
+          // We suppose that the NR transmission always happens one device at a time, so that the interference signal at a certain time is only one
+          ltePhy->UpdateSlIntPerceived (interferenceSignals);
         }
     }
 }
