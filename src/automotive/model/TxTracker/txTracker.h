@@ -108,7 +108,8 @@ namespace ns3 {
     void
     AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility,
                         Ptr<PropagationLossModel> propagationLoss,
-                        Ptr<PropagationDelayModel> propagationDelay);
+                        Ptr<PropagationDelayModel> propagationDelay,
+                        Time duration);
 
   private:
     // Private constructor for singleton pattern

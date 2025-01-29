@@ -111,15 +111,23 @@ MetricSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint
               stationID = m_stationId_baseline + id;
             }
           else
-            stationID = std::stol (it->first.substr (3));
+            {
+              stationID = std::stol (it->first.substr (3));
+            }
 
           libsumo::TraCIPosition pos;
           if (station_type == StationType_pedestrian)
-            pos = m_traci_ptr->TraCIAPI::person.getPosition (it->first);
+            {
+              pos = m_traci_ptr->TraCIAPI::person.getPosition (it->first);
+            }
           else if (station_type == StationType_roadSideUnit)
-            pos = m_traci_ptr->TraCIAPI::poi.getPosition (it->first);
+            {
+              pos = m_traci_ptr->TraCIAPI::poi.getPosition (it->first);
+            }
           else
-            pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (it->first);
+            {
+              pos = m_traci_ptr->TraCIAPI::vehicle.getPosition (it->first);
+            }
           pos = m_traci_ptr->TraCIAPI::simulation.convertXYtoLonLat (pos.x, pos.y);
 
           if (stationID == nodeID)

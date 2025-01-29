@@ -156,7 +156,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
         }
     }
 
-  NS_ASSERT_MSG (found, "NetDevice not found in TxTracker.");
+  // NS_ASSERT_MSG (found, "NetDevice not found in TxTracker.");
 
   std::unordered_map<std::string, std::pair<Ptr<SpectrumValue>, Time>> interferenceNodes;
 
@@ -292,11 +292,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           double pathGainLinear = std::pow (10.0, pathLoss / 10.0);
           *(interferenceSignal) *= pathGainLinear;
 
-          std::vector<SpectrumValue> interferenceSignals = { *interferenceSignal };
-
-          // No possibility to add the duration of the signal, with the next call of the method, the old signal will be deleted
-          // We suppose that the NR transmission always happens one device at a time, so that the interference signal at a certain time is only one
-          ltePhy->UpdateSlIntPerceived (interferenceSignals);
+          ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
+          ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
         }
     }
   // The interference comes from a LTE signal
@@ -371,7 +368,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
 
 // Add interference from NR signals to 80211p signals
 void
-TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility, Ptr<PropagationLossModel> propagationLoss, Ptr<PropagationDelayModel> propagationDelay)
+TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> receiverMobility, Ptr<PropagationLossModel> propagationLoss, Ptr<PropagationDelayModel> propagationDelay, Time duration)
 {
   uint8_t nodeId = 0;
   if(!m_txMapNr.empty())
@@ -405,7 +402,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
               continue;
             }
 
-          Time duration = propagationDelay->GetDelay (c1Mobility, wifiMobility);
+          Time interfDuration = duration + propagationDelay->GetDelay (c1Mobility, wifiMobility);
 
           uint8_t j = 0;
           double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
@@ -436,7 +433,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                 }
             }
 
-          nrPhy->GetNrInterference()->AddSignal (interferenceSignal, duration);
+          nrPhy->GetNrInterference()->AddSignal (interferenceSignal, interfDuration);
 
         }
     }
@@ -474,7 +471,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
               continue;
             }
 
-          Time duration = propagationDelay->GetDelay (c1Mobility, wifiMobility);
+          Time interfDuration = duration + propagationDelay->GetDelay (c1Mobility, wifiMobility);
 
           uint8_t j = 0;
           double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
@@ -505,11 +502,8 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                 }
             }
 
-          std::vector<SpectrumValue> interferenceSignals = {*interferenceSignal};
-
-          // No possibility to add the duration of the signal, with the next call of the method, the old signal will be deleted
-          // We suppose that the NR transmission always happens one device at a time, so that the interference signal at a certain time is only one
-          ltePhy->UpdateSlIntPerceived (interferenceSignals);
+          ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
+          ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
         }
     }
 }

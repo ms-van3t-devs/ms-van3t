@@ -88,7 +88,7 @@ struct cv2x_tbInfo_t
   double sinr; ///< mean SINR
 };
 
-typedef std::map<cv2x_TbId_t, cv2x_tbInfo_t> expectedTbs_t; ///< expectedTbs_t typedef
+typedef std::map<cv2x_TbId_t, cv2x_tbInfo_t> cv2x_expectedTbs_t; ///< expectedTbs_t typedef
 
 struct cv2x_SlTbId_t
 {
@@ -661,6 +661,8 @@ public:
   */
   void UpdateSlIntPerceived (std::vector <SpectrumValue> interference);
 
+  //void UpdateSlIntPerceived (SpectrumValue interference, Time duration);
+
   /**
   *
   *
@@ -709,6 +711,10 @@ public:
   void AddDiscRxApps (std::list<uint32_t> apps);
 
   void SetDiscNumRetx (uint8_t retx);
+
+  Ptr<cv2x_LteInterference> GetDataInterferencePointer() {return m_interferenceData;}
+
+  Ptr<cv2x_LteSlInterference> GetSlInterferencePointer() {return m_interferenceSl;}
 
 private:
   /**
@@ -782,7 +788,7 @@ private:
   uint16_t m_cellId; ///< the cell ID
 
   uint8_t m_componentCarrierId; ///< the component carrier ID
-  expectedTbs_t m_expectedTbs; ///< the expected TBS
+  cv2x_expectedTbs_t m_expectedTbs; ///< the expected TBS
   expectedDiscTbs_t m_expectedDiscTbs; ///< the expected discovery TBS
   SpectrumValue m_sinrPerceived; ///< the preceived SINR
 

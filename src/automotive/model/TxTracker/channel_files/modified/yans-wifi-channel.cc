@@ -117,7 +117,7 @@ YansWifiChannel::Send (Ptr<YansWifiPhy> sender, Ptr<const WifiPpdu> ppdu, double
             }
 
           auto& tracker = TxTracker::GetInstance();
-          tracker.AddInterferenceFrom11p (sender, receiverMobility, m_loss, m_delay);
+          tracker.AddInterferenceFrom11p (sender, receiverMobility, m_loss, m_delay, copy->GetTxDuration());
           Simulator::ScheduleWithContext (dstNode,
                                           delay, &YansWifiChannel::Receive,
                                           (*i), copy, rxPowerDbm);

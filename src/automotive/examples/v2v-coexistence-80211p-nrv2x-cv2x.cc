@@ -136,7 +136,8 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
     }
   if (std::isnan(rssi) && !std::isnan(rsrp))
     {
-      rssi = rsrp;
+      // RSSI = RSRP + 6 --> this is the heuristic formula to convert RSSI to RSRP
+      rssi = rsrp + 6;
     }
 
   libsumo::TraCIPosition pos = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(my_stationID));
@@ -149,9 +150,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("src/sionna/phy_sionna_coexistence.csv");
+  std::ifstream camFileHeader("src/sionna/coexistence/phy_ns3_no_coexistence.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/phy_sionna_coexistence.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/coexistence/phy_ns3_no_coexistence.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -178,29 +179,29 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
       technology = "NR-V2X";
     }
   
-  camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
+  // camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
-void savePRRs(Ptr<MetricSupervisor> metSup, uint64_t numberOfNodes, std::string type)
+void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std::string type)
 {
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/prr_sionna_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_ns3_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/prr_sionna_coexistence_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_ns3_coexistence_11p.csv", std::ios::out | std::ios::app);
     }
   else
     {
-      file.open("src/sionna/prr_sionna_coexistence_cv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_ns3_coexistence_cv2x.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr" << std::endl;
-  for (int i = 1; i <= numberOfNodes; i++)
+  for (int i = 0; i < nodes.size(); i++)
     {
-      double prr = metSup->getAveragePRR_vehicle (i);
+      double prr = metSup->getAveragePRR_vehicle (std::stol(nodes[i].substr (3)));
       file << i << "," << prr << std::endl;
     }
   file.close();
@@ -254,13 +255,13 @@ int main (int argc, char *argv[])
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
+  double m_baseline_prr = 500.0; // PRR baseline value (default: 150 m)
   int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
   double snr_threshold = 10; // Default value
   double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 180.0; // Total simulation time (default: 200 seconds)
+  double simTime = 300.0; // Total simulation time (default: 200 seconds)
 
   // NR parameters. We will take the input from the command line, and then we
   // will pass them inside the NR module.
@@ -314,12 +315,12 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = true;
+  bool interference = false;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_60.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo_60.cfg";
+  std::string mob_trace = "cars_6.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map_6.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -335,7 +336,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
   cmd.Parse (argc, argv);
 
-  std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
+  std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x-cv2x simulation" << std::endl;
 
   SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
 
@@ -971,10 +972,11 @@ int main (int argc, char *argv[])
       {
       case NodeType::DSRC:
         sock = GeoNet::createGNPacketSocket (wifiNodes.Get (nodeID));
-        metSup_nr->addExcludedID (vehID);
         netDevice = wifiNodes.Get (nodeID)->GetDevice (0);
         wifiDevice = DynamicCast<WifiNetDevice> (netDevice);
         wifiDevice->GetPhy ()->SetRxSensitivity (sensitivity);
+        metSup_nr->addExcludedID (vehID);
+        metSup_lte->addExcludedID (vehID);
         break;
       case NodeType::NR:
         includedNode = nrNodes.Get (nodeID);
@@ -984,20 +986,29 @@ int main (int argc, char *argv[])
             NS_FATAL_ERROR ("Failed to bind client socket for NR-V2X");
           }
         sock->Connect (InetSocketAddress (groupAddress4, 19));
-        metSup_11p->addExcludedID (vehID);
-
         netDevice = nrNodes.Get (nodeID)->GetDevice (0);
         nrDevice = DynamicCast<NrUeNetDevice> (netDevice);
         nrDevice->GetPhy(0)->GetSpectrumPhy ()->GetSpectrumChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
         // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
+        metSup_11p->addExcludedID (vehID);
+        metSup_lte->addExcludedID (vehID);
         break;
       case NodeType::LTE:
         includedNode = ueNodes.Get(nodeID);
         sock = Socket::CreateSocket (includedNode, tid);
+        if (sock->Bind (InetSocketAddress (Ipv4Address::GetAny (), 19)) == -1)
+          {
+            NS_FATAL_ERROR ("Failed to bind client socket for C-V2X");
+          }
         sock->Connect (InetSocketAddress (groupAddress4, 19));
         netDevice = includedNode->GetDevice(0);
         cv2x_device = DynamicCast<cv2x_LteUeNetDevice>(netDevice);
         cv2x_device->GetPhy()->GetSlSpectrumPhy()->GetChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
+        metSup_11p->addExcludedID (vehID);
+        metSup_nr->addExcludedID (vehID);
+        break;
+      default:
+        NS_FATAL_ERROR ("No technology recognized.");
       }
 
     Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
@@ -1012,13 +1023,13 @@ int main (int argc, char *argv[])
         break;
       case NodeType::LTE:
         bs_container->linkMetricSupervisor (metSup_lte);
+        break;
       }
     bs_container->disablePRRSupervisorForGNBeacons();
     bs_container->setupContainer(true,false,false,false);
     basicServices.add(bs_container);
     std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
-    double desync = ((double)std::rand()/RAND_MAX);
-    bs_container->getCABasicService ()->startCamDissemination (desync);
+    bs_container->getCABasicService ()->startCamDissemination ();
 
     switch (type)
       {
@@ -1081,10 +1092,18 @@ int main (int argc, char *argv[])
   outputFile << "TX packet count (from PRR Supervisor): " << metSup_nr->getNumberTx_overall () << std::endl;
   // std::cout << "Average number of vehicle within the " << m_baseline_prr << " m baseline: " << metSup_nr->getAverageNumberOfVehiclesInBaseline_overall () << std::endl;
 
+  outputFile << "\nMetric Supervisor statistics for C-V2X" << std::endl;
+  outputFile << "Average PRR: " << metSup_lte->getAveragePRR_overall () << std::endl;
+  outputFile << "Average latency (ms): " << metSup_lte->getAverageLatency_overall () << std::endl;
+  outputFile << "Average SINR (dB): " << metSup_lte->getAverageSINR_overall() << std::endl;
+  outputFile << "RX packet count (from PRR Supervisor): " << metSup_lte->getNumberRx_overall () << std::endl;
+  outputFile << "TX packet count (from PRR Supervisor): " << metSup_lte->getNumberTx_overall () << std::endl;
+
   Simulator::Destroy ();
 
-  savePRRs(metSup_11p, numberOfNodes_11p, "11p");
-  savePRRs(metSup_nr, numberOfNodes_nr, "nr");
+  //savePRRs(metSup_11p, wifiVehicles, "11p");
+  //savePRRs(metSup_nr, nrVehicles, "nr");
+  //savePRRs(metSup_lte, lteVehicles, "cv2x");
 
   auto end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end_time - start_time;
