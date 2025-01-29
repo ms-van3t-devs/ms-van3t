@@ -670,7 +670,7 @@ main (int argc, char *argv[])
   Ptr<OpenCDAClient> opencda_client = CreateObject<OpenCDAClient> ();
   opencda_client->SetAttribute ("CARLAHost", StringValue ("localhost"));
   opencda_client->SetAttribute ("UpdateInterval", DoubleValue (0.05));
-  opencda_client->SetAttribute ("Port", UintegerValue (1337));
+  opencda_client->SetAttribute ("OpenCDACIPort", UintegerValue (1337));
   opencda_client->SetAttribute ("PenetrationRate",DoubleValue(0.5));
   opencda_client->SetAttribute ("OpenCDA_config", StringValue(opencda_config));
   opencda_client->SetAttribute ("OpenCDA_HOME", StringValue(OpenCDA_HOME));
