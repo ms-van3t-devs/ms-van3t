@@ -661,6 +661,8 @@ public:
   */
   void UpdateSlIntPerceived (std::vector <SpectrumValue> interference);
 
+  //void UpdateSlIntPerceived (SpectrumValue interference, Time duration);
+
   /** 
   * 
   * 
@@ -709,6 +711,10 @@ public:
   void AddDiscRxApps (std::list<uint32_t> apps);
      
   void SetDiscNumRetx (uint8_t retx);
+
+  Ptr<cv2x_LteInterference> GetDataInterferencePointer() {return m_interferenceData;}
+
+  Ptr<cv2x_LteSlInterference> GetSlInterferencePointer() {return m_interferenceSl;}
 
 private:
   /** 

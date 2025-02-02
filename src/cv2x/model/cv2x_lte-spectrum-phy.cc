@@ -1370,6 +1370,12 @@ cv2x_LteSpectrumPhy::UpdateSlIntPerceived (std::vector <SpectrumValue> interfere
     m_slInterferencePerceived = interference;
 }
 
+void
+UpdateSlIntPerceived (SpectrumValue interference, Time duration)
+{
+
+}
+
 std::vector <SpectrumValue>
 cv2x_LteSpectrumPhy::GetSlSignalPerceived ()
 {
