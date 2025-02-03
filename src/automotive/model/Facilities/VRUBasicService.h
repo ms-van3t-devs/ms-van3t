@@ -104,7 +104,11 @@ public:
      * @param delta new delta value calculated through DCC adaptive approach
      */
     void toffUpdateAfterTransmission();
-    
+
+    void SetLogTriggering(bool log, std::string log_filename) {m_log_triggering = log; m_log_filename = log_filename;};
+
+    void write_log_triggering(bool condition_verified, bool vamredmit_verified, float head_diff, float pos_diff, float speed_diff, long time_difference);
+
 private:
     void initDissemination();
     void checkVamConditions();
@@ -183,6 +187,16 @@ private:
     double m_last_transmission = 0;
     double m_Ton_pp = 0;
     double m_last_delta = 0;
+
+    bool m_log_triggering = false;
+    std::string m_log_filename;
+
+    // Statistics: number of VAMs sent per triggering conditions
+    uint64_t m_pos_sent = 0;
+    uint64_t m_speed_sent = 0;
+    uint64_t m_head_sent = 0;
+    uint64_t m_safedist_sent = 0;
+    uint64_t m_time_sent = 0;
 };
 
 }
