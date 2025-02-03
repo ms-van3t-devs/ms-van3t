@@ -467,7 +467,7 @@ void VRUBasicService::checkVamConditions(){
    * and t is the maximum time interval between the generation of two consecutive VAMs, the lateral
    * distance smaller than 2 m and the vertical distance smaller than 5 m, a VAM must be transmitted
   */
-  if (!condition_verified && m_min_dist[1].longitudinal < m_long_safe_d && m_min_dist[1].lateral < m_lat_safe_d && m_min_dist[1].vertical < m_vert_safe_d)
+  if (!m_min_dist.empty() && !condition_verified && m_min_dist[1].longitudinal < m_long_safe_d && m_min_dist[1].lateral < m_lat_safe_d && m_min_dist[1].vertical < m_vert_safe_d)
     {
       m_N_GenVam_red = 0;
 
@@ -482,7 +482,7 @@ void VRUBasicService::checkVamConditions(){
           NS_LOG_ERROR("Cannot generate VAM. Error code: "<<vam_error);
         }
     } else{
-      if(!condition_verified && m_min_dist[0].longitudinal < m_long_safe_d && m_min_dist[0].lateral < m_lat_safe_d && m_min_dist[0].vertical < m_vert_safe_d)
+      if(!m_min_dist.empty() && !condition_verified && m_min_dist[0].longitudinal < m_long_safe_d && m_min_dist[0].lateral < m_lat_safe_d && m_min_dist[0].vertical < m_vert_safe_d)
         {
           if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
               m_N_GenVam_red = 0;
@@ -547,7 +547,10 @@ bool VRUBasicService::checkVamRedundancyMitigation(){
   ped_heading += (ped_heading>180.0) ? -360.0 : (ped_heading<-180.0) ? 360.0 : 0.0;
 
   if(now-lastVamGen < m_N_GenVam_max_red*5000){
-      m_LDM->rangeSelect (4,ped_pos.lat,ped_pos.lon,selectedStations);
+      if (m_LDM != nullptr)
+        {
+          m_LDM->rangeSelect (4,ped_pos.lat,ped_pos.lon,selectedStations);
+        }
 
       for(std::vector<LDM::returnedVehicleData_t>::iterator it = selectedStations.begin (); it!=selectedStations.end () && !redundancy_mitigation; ++it){
           if(it->vehData.stationType == StationType_pedestrian){
@@ -601,7 +604,6 @@ VRUBasicService_error_t VRUBasicService::generateAndEncodeVam(){
 
   /* Fill the basicContainer's station type */
   asn1cpp::setField(vam->vam.vamParameters.basicContainer.stationType, m_stationtype);
-
   vam_mandatory_data = m_VRUdp->getVAMMandatoryData();
 
   /* Fill the basicContainer */
