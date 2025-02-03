@@ -220,6 +220,11 @@ namespace ns3
     long T_GenCamMin_ms = 100;
     long T_GenCamMax_ms = 1000;
 
+    void SetLogTriggering(bool log, std::string log_filename) {m_log_triggering = log; m_log_filename = log_filename;};
+
+    void write_log_triggering(bool condition_verified, float head_diff, float pos_diff, float speed_diff, long time_difference, std::string data_head, std::string data_pos, std::string data_speed, std::string data_time);
+
+
   private:
     const size_t m_MaxPHLength = 23;
 
@@ -292,6 +297,8 @@ namespace ns3
 
     double m_prev_speed; //! Previous speed
 
+    VDP::VDP_position_latlon_t m_prev_position;
+
     uint64_t m_cam_sent;//! Number of CAMs successfully sent since the CA Basic Service has been started. The CA Basic Service can count up to 18446744073709551615 (UINT64_MAX) CAMs
 
     // ns-3 event IDs used to properly stop the simulation with terminateDissemination()
@@ -317,6 +324,15 @@ namespace ns3
     double m_last_transmission = 0;
     double m_Ton_pp = 0;
     double m_last_delta = 0;
+
+    bool m_log_triggering = false;
+    std::string m_log_filename;
+
+    // Statistics: number of CAMs sent per triggering conditions
+    uint64_t m_pos_sent = 0;
+    uint64_t m_speed_sent = 0;
+    uint64_t m_head_sent = 0;
+    uint64_t m_time_sent = 0;
   };
 }
 

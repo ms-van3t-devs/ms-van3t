@@ -68,7 +68,7 @@ main (int argc, char *argv[])
   // If you want to use a sample GPS trace obtained using a high-end expensive device (with
   // high update rate and inertial sensors - 3 vehicles), uncomment this line (and comment
   // the "BiellaTrace.csv" one)
-  std::string gps_trace = "union_short.csv";
+  std::string gps_trace = "union_long.csv";
   // If you want to use a sample GPS trace obtained using a normal smartphone, with the
   // Ultra GPS Logger app (update rate: 1 Hz, no acceleration, 2 vehicles), uncomment this
   // line (and comment the "sampletrace.csv" one)
@@ -80,7 +80,7 @@ main (int argc, char *argv[])
   float datarate=12;
   bool vehicle_vis = false;
 
-  double simTime = 100;
+  double simTime = 500;
 
   uint32_t nodeCounter = 0;
 
@@ -166,6 +166,9 @@ main (int argc, char *argv[])
 
   GPSTCHelper.setVerbose (false);
 
+  // Important to set the input time in microseconds if the trace has timestamps in microseconds (to avoid the conversion)
+  GPSTCHelper.SetInputMicroseconds(true);
+
   GPSTCMap=GPSTCHelper.createTraceClientsFromCSV(path);
 
   int numberOfNodes=GPSTCMap.size ();
@@ -198,7 +201,7 @@ main (int argc, char *argv[])
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
-  wifiPhy.EnablePcap ("v2v-tracenx-short", netDevices);
+  wifiPhy.EnablePcap ("v2v-tracenx-long", netDevices);
   /*** 4. Create Internet and ipv4 helpers ***/
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);

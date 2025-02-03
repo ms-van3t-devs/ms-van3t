@@ -270,6 +270,11 @@ namespace ns3 {
             m_GPSTraceClient.insert(std::make_pair(currentVehId, gpsclient));
           }
 
+          for (auto it = m_GPSTraceClient.begin(); it != m_GPSTraceClient.end(); ++it)
+            {
+              it->second->SetInputMicroseconds(m_use_microseconds);
+            }
+
           double lat=std::stod(result[m_idx_lat]);
           double lon=std::stod(result[m_idx_lon]);
           double tm_x,tm_y,tm_gamma,tm_kappa;

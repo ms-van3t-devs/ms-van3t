@@ -123,7 +123,7 @@ VRUBasicService::VRUBasicService(unsigned long fixed_stationid,long fixed_statio
   m_VRUdp = VRUdp;
 }
 
-void VRUBasicService::write_log_triggering(bool condition_verified, bool vamredmit_verified, float head_diff, float pos_diff, float speed_diff, long time_difference)
+void VRUBasicService::write_log_triggering(bool condition_verified, bool vamredmit_verified, float head_diff, float pos_diff, float speed_diff, long time_difference, std::string data_head, std::string data_pos, std::string data_speed, std::string data_safed, std::string data_time, std::string data_vamredmit)
 {
   if (m_log_triggering && m_log_filename != "")
     {
@@ -169,11 +169,14 @@ void VRUBasicService::write_log_triggering(bool condition_verified, bool vamredm
               numConditions++;
             }
 
-          if((m_min_dist[1].longitudinal < m_long_safe_d && m_min_dist[1].lateral < m_lat_safe_d && m_min_dist[1].vertical < m_vert_safe_d) || (m_min_dist[0].longitudinal < m_long_safe_d && m_min_dist[0].lateral < m_lat_safe_d && m_min_dist[0].vertical < m_vert_safe_d)){
-              motivation="safe_distances";
-              joint=joint+"D";
-              num_VAMs_sent=std::to_string(m_safedist_sent);
-              numConditions++;
+          if (m_min_dist.size() != 0)
+            {
+              if((m_min_dist[1].longitudinal < m_long_safe_d && m_min_dist[1].lateral < m_lat_safe_d && m_min_dist[1].vertical < m_vert_safe_d) || (m_min_dist[0].longitudinal < m_long_safe_d && m_min_dist[0].lateral < m_lat_safe_d && m_min_dist[0].vertical < m_vert_safe_d)){
+                  motivation="safe_distances";
+                  joint=joint+"D";
+                  num_VAMs_sent=std::to_string(m_safedist_sent);
+                  numConditions++;
+                }
             }
 
           if(abs(time_difference - m_T_GenVam_ms) <= 10 || (m_T_GenVam_ms - time_difference) <= 0 ) {
@@ -208,6 +211,7 @@ void VRUBasicService::write_log_triggering(bool condition_verified, bool vamredm
       // Create the data for the log print
       data+="[LOG] Timestamp="+std::to_string(time)+" VAMSent="+sent+" Motivation="+motivation+" NUMVAMsSent="+num_VAMs_sent+" HeadDiff="+std::to_string(head_diff)+" PosDiff="+std::to_string(pos_diff)+" SpeedDiff="+std::to_string(speed_diff)+" TimeDiff="+std::to_string(time_difference)+"\n";
       data=data+data_head+data_pos+data_speed+data_safed+data_time+data_vamredmit+"\n";
+
       std::ofstream file (m_log_filename, std::ios::app);
       file << data;
     }
@@ -361,7 +365,9 @@ void VRUBasicService::checkVamConditions(){
 
   // Check if redundancy mitigation has to be applied
   if(m_N_GenVam_red == 0)
-    redundancy_mitigation = checkVamRedundancyMitigation ();
+    {
+      redundancy_mitigation = checkVamRedundancyMitigation ();
+    }
 
   /*
    * ETSI TS 103 300-3 V2.2.1 chap. 8 table 17 (no DCC)
@@ -376,14 +382,13 @@ void VRUBasicService::checkVamConditions(){
 
   double head_diff = m_VRUdp->getPedHeadingValue () - m_prev_heading;
   head_diff += (head_diff>180.0) ? -360.0 : (head_diff<-180.0) ? 360.0 : 0.0;
-  data_head="[HEADING] HeadingUnavailable="+std::to_string((float)HeadingValue_unavailable/10)+" PrevHead="+std::to_string(m_prev_heading)+" CurrHead="+std::to_string(currHead)+" HeadDiff="+std::to_string(head_diff)+"\n";
+  data_head="[HEADING] HeadingUnavailable="+std::to_string((float)HeadingValue_unavailable/10)+" PrevHead="+std::to_string(m_prev_heading)+" CurrHead="+std::to_string(m_VRUdp->getPedHeadingValue ())+" HeadDiff="+std::to_string(head_diff)+"\n";
   if (head_diff > 4.0 || head_diff < -4.0)
     {
       if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
           m_N_GenVam_red = 0;
 
           m_trigg_cond = HEADING_CHANGE;
-          write_log_triggering();
           vam_error = generateAndEncodeVam ();
           if(vam_error==VAM_NO_ERROR)
             {
@@ -395,7 +400,7 @@ void VRUBasicService::checkVamConditions(){
         } else{
           m_N_GenVam_red++;
           vamredmit_verified = true;
-          condition_verified = true;
+          // condition_verified = true;
         }
     }
 
@@ -413,7 +418,6 @@ void VRUBasicService::checkVamConditions(){
           m_N_GenVam_red = 0;
 
           m_trigg_cond = POSITION_CHANGE;
-          write_log_triggering();
           vam_error = generateAndEncodeVam ();
           if(vam_error==VAM_NO_ERROR)
             {
@@ -425,7 +429,7 @@ void VRUBasicService::checkVamConditions(){
         } else{
           m_N_GenVam_red++;
           vamredmit_verified = true;
-          condition_verified = true;
+          // condition_verified = true;
         }
     }
 
@@ -435,23 +439,25 @@ void VRUBasicService::checkVamConditions(){
    * ITS-S exceeds 0,5 m/s.
   */
   double speed_diff = m_VRUdp->getPedSpeedValue () - m_prev_speed;
+  data_speed="[SPEED] SpeedUnavailable="+std::to_string((float)SpeedValue_unavailable)+" PrevSpeed="+std::to_string(m_prev_speed)+" CurrSpeed="+std::to_string(m_VRUdp->getPedSpeedValue ())+" SpeedDiff="+std::to_string(speed_diff)+"\n";
   if (!condition_verified && (speed_diff > 0.5 || speed_diff < -0.5))
     {
       if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
           m_N_GenVam_red = 0;
 
           m_trigg_cond = SPEED_CHANGE;
-          write_log_triggering();
           vam_error = generateAndEncodeVam ();
           if(vam_error==VAM_NO_ERROR)
             {
               condition_verified = true;
+              m_speed_sent++;
             } else {
               NS_LOG_ERROR("Cannot generate VAM. Error code: "<<vam_error);
             }
         } else{
           m_N_GenVam_red++;
-          condition_verified = true;
+          vamredmit_verified = true;
+          // condition_verified = true;
         }
     }
 
@@ -467,17 +473,26 @@ void VRUBasicService::checkVamConditions(){
    * and t is the maximum time interval between the generation of two consecutive VAMs, the lateral
    * distance smaller than 2 m and the vertical distance smaller than 5 m, a VAM must be transmitted
   */
+
+  if (m_min_dist.size() != 0)
+    {
+      data_safed = "[SAFE DISTANCES] LongSafeDist="+std::to_string(m_long_safe_d)+" LatSafeDist="+std::to_string(m_lat_safe_d)+" VertSafeDist="+std::to_string(m_vert_safe_d)+" MinLongDistVeh="+printMinDist(m_min_dist[1].longitudinal)+" MinLatDistVeh="+printMinDist(m_min_dist[1].lateral)+" MinVertDistVeh="+printMinDist(m_min_dist[1].vertical)+" MinLongDistPed="+printMinDist(m_min_dist[0].longitudinal)+" MinLatDistPed="+printMinDist(m_min_dist[0].lateral)+" MinVertDistPed="+printMinDist(m_min_dist[0].vertical)+"\n";
+    }
+  else
+    {
+      data_safed = "[SAFE DISTANCES] LongSafeDist="+std::to_string(m_long_safe_d)+" LatSafeDist="+std::to_string(m_lat_safe_d)+" VertSafeDist="+std::to_string(m_vert_safe_d)+" MinLongDistVeh="+printMinDist(0.0)+" MinLatDistVeh="+printMinDist(0.0)+" MinVertDistVeh="+printMinDist(0.0)+" MinLongDistPed="+printMinDist(0.0)+" MinLatDistPed="+printMinDist(0.0)+" MinVertDistPed="+printMinDist(0.0)+"\n";
+    }
   if (!m_min_dist.empty() && !condition_verified && m_min_dist[1].longitudinal < m_long_safe_d && m_min_dist[1].lateral < m_lat_safe_d && m_min_dist[1].vertical < m_vert_safe_d)
     {
       m_N_GenVam_red = 0;
 
       m_trigg_cond = SAFE_DISTANCES;
       m_min_dist[1].safe_dist = true;
-      write_log_triggering();
       vam_error = generateAndEncodeVam ();
       if(vam_error==VAM_NO_ERROR)
         {
           condition_verified = true;
+          m_safedist_sent++;
         } else {
           NS_LOG_ERROR("Cannot generate VAM. Error code: "<<vam_error);
         }
@@ -498,7 +513,8 @@ void VRUBasicService::checkVamConditions(){
                 }
             } else{
               m_N_GenVam_red++;
-              condition_verified = true;
+              vamredmit_verified = true;
+              // condition_verified = true;
             }
         }
     }
@@ -506,25 +522,32 @@ void VRUBasicService::checkVamConditions(){
   /* 2)
    * The time elapsed since the last VAM generation is equal to or greater than T_GenVam
   */
+  long time_difference = now - lastVamGen;
+  data_time="[TIME] Timestamp="+std::to_string(now)+" LastVAMSent="+std::to_string(lastVamGen)+" TimeThreshold="+std::to_string(m_T_GenVam_ms)+" TimeDiff="+std::to_string(time_difference)+" TimeNextVAM="+std::to_string(m_T_GenVam_ms - time_difference)+"\n";
   if(!condition_verified && (now-lastVamGen>=m_T_GenVam_ms))
     {
       if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
           m_N_GenVam_red = 0;
 
           m_trigg_cond = MAX_TIME_ELAPSED;
-          write_log_triggering();
           vam_error = generateAndEncodeVam ();
           if(vam_error==VAM_NO_ERROR)
             {
               condition_verified = true;
+              m_time_sent++;
             } else {
               NS_LOG_ERROR("Cannot generate VAM. Error code: "<<vam_error);
             }
         } else{
           m_N_GenVam_red++;
-          condition_verified = true;
+          vamredmit_verified = true;
+          // condition_verified = true;
         }
     }
+
+  data_vamredmit = "[REDUNDANCY MITIGATION] numSkipVAMsForRedMitMax="+std::to_string(m_N_GenVam_max_red)+" numSkipVAMsForRedMit="+std::to_string(m_N_GenVam_red)+" TimestampLastVAMGen="+std::to_string(lastVamGen)+" TimeIntervalSinceLastVAMGen="+std::to_string(time_difference)+"\n";
+
+  write_log_triggering (condition_verified, vamredmit_verified, head_diff, pos_diff, speed_diff, time_difference, data_head, data_pos, data_speed, data_safed, data_time, data_vamredmit);
 
   if((m_VRU_clust_state==VRU_IDLE || m_VRU_clust_state==VRU_ACTIVE_STANDALONE || m_VRU_clust_state==VRU_ACTIVE_CLUSTER_LEADER) && m_VRU_role==VRU_ROLE_ON)
     m_event_vamCheckConditions = Simulator::Schedule (MilliSeconds(m_T_CheckVamGen_ms), &VRUBasicService::checkVamConditions, this);
