@@ -139,6 +139,7 @@ namespace ns3
     m_caService.setVDP(gpstc_vdp);
     m_denService.setVDP(gpstc_vdp);
 
+    m_caService.SetLogTriggering(true, "cam-log.csv");
 
     /* Schedule CAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());

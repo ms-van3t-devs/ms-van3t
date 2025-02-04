@@ -84,6 +84,8 @@ class GPSTraceClientHelper
       // Client objects of the vehicles
       void setVehicleVisualizer(Ptr<vehicleVisualizer> vehVis) {m_vehicle_vis_ptr=vehVis;}
 
+      void SetInputMicroseconds(bool use_microseconds) {m_use_microseconds = use_microseconds;};
+
     private:
       std::tuple<double,double> getAverageLatLon(std::ifstream &inFileStream);
       bool m_verbose;
@@ -104,6 +106,8 @@ class GPSTraceClientHelper
       dateyear_t m_start_date;
 
       bool m_interpolate;
+
+      bool m_use_microseconds = false;
 
 };
 
