@@ -75,7 +75,14 @@ namespace ns3
       // Add the struct to the vector
       vehiclesdata.push_back(data_t);
       // Convert from sec to us
-      utc_time_d = std::stod(utc_time) * 1000000;
+      if (!m_input_microseconds)
+        {
+          utc_time_d = std::stod(utc_time) * 1000000;
+        }
+      else
+        {
+          utc_time_d = std::stod(utc_time);
+        }
 
       // Set the timestamp
       vehiclesdata[lastcell].utc_time = utc_time_d;

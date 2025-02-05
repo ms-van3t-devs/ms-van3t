@@ -126,6 +126,7 @@ namespace ns3
     VRUdp* gpstc_vdp = new VRUDPGPSTraceClient(m_gps_tc_client, m_id);
     m_vruService.setVRUdp(gpstc_vdp);
 
+    m_vruService.SetLogTriggering(true, "vam-log.csv");
 
     /* Schedule VAM dissemination */
     std::srand(Simulator::Now().GetNanoSeconds ());

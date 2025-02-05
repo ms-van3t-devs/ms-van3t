@@ -98,6 +98,8 @@ namespace ns3 {
           void StopUpdates();
           void setVehicleVisualizer(Ptr<vehicleVisualizer> vehicleVis) {m_vehicle_visualizer = vehicleVis;}
 
+          void SetInputMicroseconds(bool use_microseconds) {m_input_microseconds = use_microseconds;};
+
       private:
           typedef struct _positioning_data {
               double lat;
@@ -141,7 +143,7 @@ namespace ns3 {
 
           Ptr<vehicleVisualizer> m_vehicle_visualizer;
 
-
+          bool m_input_microseconds = false;
   };
 
 

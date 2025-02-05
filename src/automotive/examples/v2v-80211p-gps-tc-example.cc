@@ -80,7 +80,7 @@ main (int argc, char *argv[])
   float datarate=12;
   bool vehicle_vis = false;
 
-  double simTime = 100;
+  double simTime = 500;
 
   uint32_t nodeCounter = 0;
 
@@ -166,6 +166,9 @@ main (int argc, char *argv[])
 
   GPSTCHelper.setVerbose (false);
 
+  // Important to set the input time in microseconds (pass true to the function) if the trace has timestamps in microseconds (to avoid the conversion)
+  GPSTCHelper.SetInputMicroseconds(false);
+
   GPSTCMap=GPSTCHelper.createTraceClientsFromCSV(path);
 
   int numberOfNodes=GPSTCMap.size ();
@@ -198,6 +201,7 @@ main (int argc, char *argv[])
   wifi80211p.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue (datarate_config), "ControlMode", StringValue (datarate_config));
   NetDeviceContainer netDevices = wifi80211p.Install (wifiPhy, wifi80211pMac, obuNodes);
 
+  wifiPhy.EnablePcap ("v2v-tracenx-long", netDevices);
   /*** 4. Create Internet and ipv4 helpers ***/
   PacketSocketHelper packetSocket;
   packetSocket.Install (obuNodes);
