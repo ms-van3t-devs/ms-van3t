@@ -716,6 +716,8 @@ public:
 
   Ptr<cv2x_LteSlInterference> GetSlInterferencePointer() {return m_interferenceSl;}
 
+  Ptr<cv2x_LteInterference> GetCtrlInterferencePointer() {return m_interferenceCtrl;}
+
 private:
   /**
   * \brief Change state function

@@ -118,6 +118,12 @@ public:
 
   State GetState () {return m_state;}
 
+  Ptr<NrInterference> GetDataInterferencePointer() {return m_interferenceData;};
+
+  Ptr<NrSlInterference> GetSlInterferencePointer() {return m_slInterference;};
+
+  Ptr<NrInterference> GetCtrlInterferencePointer() {return m_interferenceCtrl;};
+
   Ptr<SpectrumValue> GetTxPowerSpectralDensity () {return m_txPsd;}
 
   //callbacks typedefs and setters

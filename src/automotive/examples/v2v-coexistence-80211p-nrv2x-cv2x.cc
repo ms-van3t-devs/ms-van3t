@@ -215,7 +215,7 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
   std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nrVehiclesList;
   std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> lteVehiclesList;
 
-  uint8_t i = 0;
+  uint8_t i = 1; // Start from 1 because the first node is the interfering one
   for (auto v : wifiVehicles)
     {
       uint8_t id = wifiNodes.Get(i)->GetId();
@@ -246,6 +246,27 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
   tracker.InsertLteNodes (lteVehiclesList);
 }
 
+static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
+                             uint32_t pktCount, Time pktInterval)
+{
+  // Generate interfering traffic by sending pktCount packets (filled in with zeros), every pktInterval
+  if (pktCount > 0)
+    {
+      // "Create<Packet> (pktSize)" creates a new packet of size pktSize bytes, composed by default by all zeros
+      if (socket->Send (Create<Packet> (pktSize)) != -1 && pktCount%100==0)
+        {
+          // std::cout << "Interfering packet sent" << std::endl;
+        }
+      // Schedule again the same function (to send the next packet), and decrease by one the packet count
+      Simulator::Schedule (pktInterval, &GenerateTraffic_interfering,
+                           socket, pktSize, pktCount, pktInterval);
+    }
+  else
+    {
+      socket->Close ();
+    }
+}
+
 int main (int argc, char *argv[])
 {
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
@@ -255,13 +276,13 @@ int main (int argc, char *argv[])
   bool realtime = false;
   bool verbose = false; // Set to true to get a lot of verbose output from the PHY model (leave this to false)
   int numberOfNodes; // Total number of vehicles, automatically filled in by reading the XML file
-  double m_baseline_prr = 500.0; // PRR baseline value (default: 150 m)
+  double m_baseline_prr = 150.0; // PRR baseline value (default: 150 m)
   int txPower = 30.0; // Transmission power in dBm (default: 23 dBm)
   double sensitivity = -93.0;
   double snr_threshold = 10; // Default value
   double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 300.0; // Total simulation time (default: 200 seconds)
+  double simTime = 150.0; // Total simulation time (default: 200 seconds)
 
   // NR parameters. We will take the input from the command line, and then we
   // will pass them inside the NR module.
@@ -315,7 +336,7 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = false;
+  bool interference = true;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
@@ -831,7 +852,7 @@ int main (int argc, char *argv[])
 
   // Create numberOfNodes nodes
   NodeContainer wifiNodes;
-  wifiNodes.Create (numberOfNodes_11p);
+  wifiNodes.Create (numberOfNodes_11p + 1);
 
   YansWifiPhyHelper wifiPhy;
   wifiPhy.Set ("TxPowerStart", DoubleValue (txPower));
@@ -927,7 +948,31 @@ int main (int argc, char *argv[])
     txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs /*rbNr, rbLte*/);
   }
 
-  uint8_t node11pCounter = 0;
+  bool dsrc_interference = true;
+
+  if (dsrc_interference)
+    {
+      Ptr<Socket> socket = Socket::CreateSocket (wifiNodes.Get (0), TypeId::LookupByName ("ns3::PacketSocketFactory"));
+      PacketSocketAddress local_source_interfering;
+      local_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex ());
+      local_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetAddress());
+      local_source_interfering.SetProtocol (0x88B5);
+      if (socket->Bind (local_source_interfering) == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
+        }
+      PacketSocketAddress remote_source_interfering;
+      remote_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex());
+      remote_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetBroadcast());
+      remote_source_interfering.SetProtocol (0x88B5);
+      socket->Connect (remote_source_interfering);
+      socket->SetPriority (0);
+      Simulator::ScheduleWithContext (0,
+                                      Seconds (1.0), &GenerateTraffic_interfering,
+                                      socket, 1000, simTime*2000, MilliSeconds (5));
+    }
+
+  uint8_t node11pCounter = 1; // Start from 1 because 0 is the interfering node
   uint8_t nodeNrCounter = 0;
   uint8_t nodeLteCounter = 0;
 
@@ -1101,9 +1146,9 @@ int main (int argc, char *argv[])
 
   Simulator::Destroy ();
 
-  //savePRRs(metSup_11p, wifiVehicles, "11p");
-  //savePRRs(metSup_nr, nrVehicles, "nr");
-  //savePRRs(metSup_lte, lteVehicles, "cv2x");
+  savePRRs(metSup_11p, wifiVehicles, "11p");
+  savePRRs(metSup_nr, nrVehicles, "nr");
+  savePRRs(metSup_lte, lteVehicles, "cv2x");
 
   auto end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end_time - start_time;

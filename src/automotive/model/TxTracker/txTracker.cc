@@ -294,6 +294,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
 
           ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
           ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
+          ltePhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, duration);
         }
     }
   // The interference comes from a LTE signal
@@ -361,7 +362,10 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           double pathGainLinear = std::pow (10.0, pathLoss / 10.0);
           *(interferenceSignal) *= pathGainLinear;
 
-          nrPhy->GetNrInterference()->AddSignal (interferenceSignal, duration);
+          // nrPhy->GetNrInterference()->AddSignal (interferenceSignal, duration);
+          nrPhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
+          nrPhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
+          nrPhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, duration);
         }
     }
 }
@@ -433,7 +437,10 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                 }
             }
 
-          nrPhy->GetNrInterference()->AddSignal (interferenceSignal, interfDuration);
+          // nrPhy->GetNrInterference()->AddSignal (interferenceSignal, interfDuration);
+          nrPhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
+          nrPhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
+          nrPhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
 
         }
     }
@@ -504,6 +511,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
 
           ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
           ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
+          ltePhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, duration);
         }
     }
 }

@@ -90,7 +90,7 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
   double power_sionna;
   if (m_sionna)
     {
-      double path_gain = getPathLossFromSionna(a_position, b_position);
+      double path_gain = getPathGainFromSionna(a_position, b_position);
       power_sionna = txPowerDbm - path_gain;
     }
 
