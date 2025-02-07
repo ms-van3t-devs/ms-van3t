@@ -148,7 +148,9 @@ void VRUBasicService::write_log_triggering(bool condition_verified, bool vamredm
           data="[VAM] VAM sent\n";
           sent="true";
 
-          if(head_diff > 4.0 || head_diff < -4.0) {
+          if(head_diff > 10.0 || head_diff < -10.0)
+          // if(head_diff > 4.0 || head_diff < -4.0)
+            {
               motivation="heading";
               joint=joint+"H";
               num_VAMs_sent=std::to_string(m_head_sent);
@@ -383,7 +385,8 @@ void VRUBasicService::checkVamConditions(){
   double head_diff = m_VRUdp->getPedHeadingValue () - m_prev_heading;
   head_diff += (head_diff>180.0) ? -360.0 : (head_diff<-180.0) ? 360.0 : 0.0;
   data_head="[HEADING] HeadingUnavailable="+std::to_string((float)HeadingValue_unavailable/10)+" PrevHead="+std::to_string(m_prev_heading)+" CurrHead="+std::to_string(m_VRUdp->getPedHeadingValue ())+" HeadDiff="+std::to_string(head_diff)+"\n";
-  if (head_diff > 4.0 || head_diff < -4.0)
+  if (head_diff > 10.0 || head_diff < -10.0)
+  //if (head_diff > 4.0 || head_diff < -4.0)
     {
       if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
           m_N_GenVam_red = 0;

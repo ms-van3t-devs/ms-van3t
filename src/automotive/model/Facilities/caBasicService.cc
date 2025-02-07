@@ -535,6 +535,7 @@ namespace ns3
          cam_error=generateAndEncodeCam ();
          if(cam_error==CAM_NO_ERROR)
            {
+             condition_verified = true;
              if(dyn_cond_verified==true)
                {
                  m_N_GenCam++;
