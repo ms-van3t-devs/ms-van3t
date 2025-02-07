@@ -520,12 +520,16 @@ def main():
             if pathloss is not None:
                 # Use pathloss + txPower (dBm) for 80211p
                 # response = "CALC_DONE:" + str(pathloss + 23)
+                if sionna_structure["verbose"]:
+                    print("PathLoss calculated")
                 response = "CALC_DONE:" + str(pathloss)
                 udp_socket.sendto(response.encode(), address)
 
         if message.startswith("get_delay:"):
             delay = manage_delay_request(message, sionna_structure)
             if delay is not None:
+                if sionna_structure["verbose"]:
+                    print("Delay calculated")
                 response = "DELAY:" + str(delay)
                 udp_socket.sendto(response.encode(), address)
 
