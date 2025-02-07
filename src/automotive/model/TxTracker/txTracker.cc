@@ -20,8 +20,6 @@
 
 #include "txTracker.h" // Include the header file defining the TxTracker class and related methods
 
-// TODO check for the necessity to do antenna rx operation coming from multi-model-spectrum-channel --> the antenna gain seems to be always 0
-
 namespace ns3 {
 
 // Define the logging component for this module

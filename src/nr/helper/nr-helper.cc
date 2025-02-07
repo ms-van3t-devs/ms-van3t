@@ -301,7 +301,6 @@ NrHelper::InitializeOperationBand (OperationBandInfo *band, uint8_t flags)
 
           if (bwp->m_propagation == nullptr && flags & INIT_PROPAGATION)
             {
-
               bwp->m_propagation = m_pathlossModelFactory.Create <ThreeGppPropagationLossModel> ();
               bwp->m_propagation->SetAttributeFailSafe ("Frequency", DoubleValue (bwp->m_centralFrequency));
               DynamicCast<ThreeGppPropagationLossModel> (bwp->m_propagation)->SetChannelConditionModel (channelConditionModel);

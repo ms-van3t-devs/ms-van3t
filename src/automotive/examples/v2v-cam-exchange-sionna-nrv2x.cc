@@ -235,11 +235,6 @@ int main (int argc, char *argv[])
       NS_FATAL_ERROR("Fatal error: cannot gather the number of vehicles from the specified XML file: "<<path<<". Please check if it is a correct SUMO file.");
     }
 
-  if(numberOfNodes<3)
-    {
-      NS_FATAL_ERROR("Fatal error: at least three vehicles are required.");
-    }
-
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
 
   if (sionna)

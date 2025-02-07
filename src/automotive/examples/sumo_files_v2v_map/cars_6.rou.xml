@@ -17,14 +17,14 @@
 
       <vehicle id="veh1" type="Car1" depart="0.0" route="0">
     </vehicle>
-      <vehicle id="veh2" type="Car2" depart="0.1" route="0">
+      <vehicle id="veh2" type="Car1" depart="0.1" route="0">
     </vehicle>
-    <vehicle id="veh3" type="Car3" depart="0.2" route="0">
+    <vehicle id="veh3" type="Car1" depart="0.2" route="0">
     </vehicle>
-      <vehicle id="veh4" type="Car4" depart="0.3" route="0">
+      <vehicle id="veh4" type="Car1" depart="0.3" route="0">
     </vehicle>
-      <vehicle id="veh5" type="Car5" depart="0.4" route="0">
+      <vehicle id="veh5" type="Car1" depart="0.4" route="0">
     </vehicle>
-      <vehicle id="veh6" type="Car6" depart="0.5" route="0">
+      <vehicle id="veh6" type="Car1" depart="0.5" route="0">
     </vehicle>
 </routes>

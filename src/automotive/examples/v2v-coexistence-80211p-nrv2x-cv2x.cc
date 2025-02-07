@@ -150,9 +150,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("src/sionna/coexistence/phy_ns3_no_coexistence.csv");
+  std::ifstream camFileHeader("src/sionna/coexistence/phy_sionna_coexistence_no_dummy.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/coexistence/phy_ns3_no_coexistence.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/coexistence/phy_sionna_coexistence_no_dummy.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -161,7 +161,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
       } 
       else 
       {
-        std::cerr << "Unable to create file: phy_info_sionna_coexistence.csv" << std::endl;
+        std::cerr << "Unable to create file .csv" << std::endl;
       }
     }
 
@@ -179,7 +179,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
       technology = "NR-V2X";
     }
   
-  // camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
+  camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
   camFile.close();
 }
 
@@ -188,15 +188,15 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/coexistence/prr_ns3_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/coexistence/prr_ns3_coexistence_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_11p.csv", std::ios::out | std::ios::app);
     }
   else
     {
-      file.open("src/sionna/coexistence/prr_ns3_coexistence_cv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_cv2x.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr" << std::endl;
   for (int i = 0; i < nodes.size(); i++)
@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
   double snr_threshold = 10; // Default value
   double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 150.0; // Total simulation time (default: 200 seconds)
+  double simTime = 100.0; // Total simulation time (default: 200 seconds)
 
   // NR parameters. We will take the input from the command line, and then we
   // will pass them inside the NR module.
@@ -486,7 +486,8 @@ int main (int argc, char *argv[])
   lteHelper->SetEnbAntennaModelType ("ns3::cv2x_NistParabolic3dAntennaModel");
   lteHelper->SetAttribute ("UseSameUlDlPropagationCondition", BooleanValue(true));
   Config::SetDefault ("ns3::cv2x_LteEnbNetDevice::UlEarfcn", StringValue ("54990")); // EARFCN 54990 -> 5855-5890-5925 MHz
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   NS_LOG_INFO("Antenna parameters set. Current EARFCN: 54990, current frequency: 5.89 GHz");
 
   /*** 2. Create Internet and ipv4 helpers ***/
@@ -862,6 +863,7 @@ int main (int argc, char *argv[])
                                       "Threshold", DoubleValue (snr_threshold));
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
+  channel->SetAttribute ("PropagationLossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   wifiPhy.SetChannel (channel);
 
   /*SpectrumWifiPhyHelper spectrumWiFiPhy = SpectrumWifiPhyHelper();
@@ -905,7 +907,7 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
-  sumoClient->SetAttribute ("SumoGUI", BooleanValue (true));
+  sumoClient->SetAttribute ("SumoGUI", BooleanValue (false));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
   sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
@@ -948,10 +950,11 @@ int main (int argc, char *argv[])
     txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs /*rbNr, rbLte*/);
   }
 
-  bool dsrc_interference = true;
+  bool dsrc_interference = false;
 
   if (dsrc_interference)
     {
+      wifiNodes.Get (0)->GetObject<MobilityModel>()->SetPosition(Vector(0, 0, 0));
       Ptr<Socket> socket = Socket::CreateSocket (wifiNodes.Get (0), TypeId::LookupByName ("ns3::PacketSocketFactory"));
       PacketSocketAddress local_source_interfering;
       local_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex ());
@@ -1034,7 +1037,8 @@ int main (int argc, char *argv[])
         netDevice = nrNodes.Get (nodeID)->GetDevice (0);
         nrDevice = DynamicCast<NrUeNetDevice> (netDevice);
         nrDevice->GetPhy(0)->GetSpectrumPhy ()->GetSpectrumChannel()->SetAttribute ("MaxLossDb", DoubleValue(120.0));
-        // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (sinr);
+        // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold1 (snr_threshold);
+        // nrHelper->GetUePhy (netDevice, 0)->SetRiSinrThreshold2 (snr_threshold);
         metSup_11p->addExcludedID (vehID);
         metSup_lte->addExcludedID (vehID);
         break;
