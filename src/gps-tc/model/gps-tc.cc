@@ -314,6 +314,7 @@ namespace ns3
             NS_FATAL_ERROR("Error: cannot send the object update to the vehicle visualizer for vehicle: "<<m_vehID);
         }
     }
+
     if(m_lastvehicledataidx+1==vehiclesdata.size())
       {
         m_excludeNode(m_vehNode,m_vehID);
@@ -323,7 +324,6 @@ namespace ns3
 
         return;
       }
-
     m_event_updatepos=Simulator::Schedule(MicroSeconds (vehiclesdata[m_lastvehicledataidx+1].utc_time-vehiclesdata[m_lastvehicledataidx].utc_time), &GPSTraceClient::UpdatePositions, this);
   }
 
