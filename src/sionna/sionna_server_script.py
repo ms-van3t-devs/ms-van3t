@@ -327,6 +327,11 @@ def manage_path_loss_request(message, sionna_structure):
 
         if car_a_id == "origin" or car_b_id == "origin":
             # If any, ignoring path_loss requests from the origin, used for statistical calibration
+            if sionna_structure["verbose"]:
+                if car_a_id == "origin":
+                    print(f"Ignoring pathloss because {car_a_str} is in the origin")
+                else:
+                    print(f"Ignoring pathloss because {car_b_str} is in the origin")
             path_loss_value = 0
         else:
             t = time.time()
@@ -520,16 +525,12 @@ def main():
             if pathloss is not None:
                 # Use pathloss + txPower (dBm) for 80211p
                 # response = "CALC_DONE:" + str(pathloss + 23)
-                if sionna_structure["verbose"]:
-                    print("PathLoss calculated")
                 response = "CALC_DONE:" + str(pathloss)
                 udp_socket.sendto(response.encode(), address)
 
         if message.startswith("get_delay:"):
             delay = manage_delay_request(message, sionna_structure)
             if delay is not None:
-                if sionna_structure["verbose"]:
-                    print("Delay calculated")
                 response = "DELAY:" + str(delay)
                 udp_socket.sendto(response.encode(), address)
 

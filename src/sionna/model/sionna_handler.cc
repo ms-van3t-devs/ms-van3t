@@ -18,7 +18,7 @@ std::vector<bool> sionna_los_status = {false, false, false};
 
 // THIS ONE WORKS LOCALLY!
 void connect_now_local_machine() {
-    printf("Avvio connect_now\n");
+    printf("Starting connect_now\n");
     sionna_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     sionna_addr.sin_family = AF_INET;

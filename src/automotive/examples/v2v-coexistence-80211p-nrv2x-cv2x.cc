@@ -85,6 +85,7 @@ enum class NodeType
   DSRC,
   NR,
   LTE,
+  INTERFERING
 };
 
 std::vector<uint8_t> dsrcVehicles;
@@ -123,6 +124,11 @@ static int packet_count=0;
 
 BSMap basicServices; // Container for all ETSI Basic Services, installed on all vehicles
 
+void startSendingCAM(Ptr<BSContainer> bs)
+{
+  bs->getCABasicService ()->startCamDissemination ();
+}
+
 void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, StationType_t my_StationType, SignalInfo phy_info)
 {
   packet_count++;
@@ -150,9 +156,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("src/sionna/coexistence/phy_sionna_coexistence_no_dummy.csv");
+  std::ifstream camFileHeader("src/sionna/coexistence/phy_sionna_coexistence_with_dummy.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/coexistence/phy_sionna_coexistence_no_dummy.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/coexistence/phy_sionna_coexistence_with_dummy.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -188,15 +194,15 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_11p.csv", std::ios::out | std::ios::app);
     }
   else
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_no_dummy_cv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_cv2x.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr" << std::endl;
   for (int i = 0; i < nodes.size(); i++)
@@ -377,7 +383,7 @@ int main (int argc, char *argv[])
     {
       NS_FATAL_ERROR("Error: unable to parse the specified XML file: "<<path);
     }
-  numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
+  numberOfNodes = XML_rou_count_vehicles(rou_xml_file) - 1;
   xmlFreeDoc(rou_xml_file);
   xmlCleanupParser();
 
@@ -386,11 +392,6 @@ int main (int argc, char *argv[])
   if(numberOfNodes==-1)
     {
       NS_FATAL_ERROR("Fatal error: cannot gather the number of vehicles from the specified XML file: "<<path<<". Please check if it is a correct SUMO file.");
-    }
-
-  if(numberOfNodes<3)
-    {
-      NS_FATAL_ERROR("Fatal error: at least three vehicles are required.");
     }
 
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
@@ -907,7 +908,7 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
-  sumoClient->SetAttribute ("SumoGUI", BooleanValue (false));
+  sumoClient->SetAttribute ("SumoGUI", BooleanValue (true));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
   sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
@@ -950,30 +951,7 @@ int main (int argc, char *argv[])
     txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs /*rbNr, rbLte*/);
   }
 
-  bool dsrc_interference = false;
-
-  if (dsrc_interference)
-    {
-      wifiNodes.Get (0)->GetObject<MobilityModel>()->SetPosition(Vector(0, 0, 0));
-      Ptr<Socket> socket = Socket::CreateSocket (wifiNodes.Get (0), TypeId::LookupByName ("ns3::PacketSocketFactory"));
-      PacketSocketAddress local_source_interfering;
-      local_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex ());
-      local_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetAddress());
-      local_source_interfering.SetProtocol (0x88B5);
-      if (socket->Bind (local_source_interfering) == -1)
-        {
-          NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
-        }
-      PacketSocketAddress remote_source_interfering;
-      remote_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex());
-      remote_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetBroadcast());
-      remote_source_interfering.SetProtocol (0x88B5);
-      socket->Connect (remote_source_interfering);
-      socket->SetPriority (0);
-      Simulator::ScheduleWithContext (0,
-                                      Seconds (1.0), &GenerateTraffic_interfering,
-                                      socket, 1000, simTime*2000, MilliSeconds (5));
-    }
+  bool dsrc_interference = true;
 
   uint8_t node11pCounter = 1; // Start from 1 because 0 is the interfering node
   uint8_t nodeNrCounter = 0;
@@ -1001,11 +979,15 @@ int main (int argc, char *argv[])
         nodeID = nodeNrCounter;
         nodeNrCounter++;
       }
-    else
+    else if (std::find(lteVehicles.begin(), lteVehicles.end(), vehicleID) != lteVehicles.end())
       {
         type = NodeType::LTE;
         nodeID = nodeLteCounter;
         nodeLteCounter++;
+      }
+    else
+      {
+        type = NodeType::INTERFERING;
       }
 
     Ptr<NetDevice> netDevice;
@@ -1056,6 +1038,29 @@ int main (int argc, char *argv[])
         metSup_11p->addExcludedID (vehID);
         metSup_nr->addExcludedID (vehID);
         break;
+      case NodeType::INTERFERING:
+        if (dsrc_interference)
+          {
+            Ptr<Socket> socket = Socket::CreateSocket (wifiNodes.Get (0), TypeId::LookupByName ("ns3::PacketSocketFactory"));
+            PacketSocketAddress local_source_interfering;
+            local_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex ());
+            local_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetAddress());
+            local_source_interfering.SetProtocol (0x88B5);
+            if (socket->Bind (local_source_interfering) == -1)
+              {
+                NS_FATAL_ERROR ("Failed to bind client socket for BTP + GeoNetworking (802.11p)");
+              }
+            PacketSocketAddress remote_source_interfering;
+            remote_source_interfering.SetSingleDevice (wifiNodes.Get (0)->GetDevice(0)->GetIfIndex());
+            remote_source_interfering.SetPhysicalAddress (wifiNodes.Get (0)->GetDevice(0)->GetBroadcast());
+            remote_source_interfering.SetProtocol (0x88B5);
+            socket->Connect (remote_source_interfering);
+            socket->SetPriority (0);
+            Simulator::ScheduleWithContext (0,
+                                            Seconds (1.0), &GenerateTraffic_interfering,
+                                            socket, 1000, simTime*2000, MilliSeconds (5));
+          }
+        break;
       default:
         NS_FATAL_ERROR ("No technology recognized.");
       }
@@ -1078,6 +1083,7 @@ int main (int argc, char *argv[])
     bs_container->setupContainer(true,false,false,false);
     basicServices.add(bs_container);
     std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
+    // Simulator::Schedule (Seconds(7), &startSendingCAM, bs_container);
     bs_container->getCABasicService ()->startCamDissemination ();
 
     switch (type)
@@ -1088,6 +1094,8 @@ int main (int argc, char *argv[])
         return nrNodes.Get(nodeID);
       case NodeType::LTE:
         return ueNodes.Get(nodeID);
+      case NodeType::INTERFERING:
+        return wifiNodes.Get(0);
       }
   };
 
