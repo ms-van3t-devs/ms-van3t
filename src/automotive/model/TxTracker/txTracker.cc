@@ -182,7 +182,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
               continue;
             }
 
-          double rbBandwidth = technologyType == "Nr" ? m_txMapNr.begin()->second.rbBandwidth : m_txMapLte.begin()->second.rbBandwidth;
+          double freqPerRb = technologyType == "Nr" ? m_bandWidthNr / signal->GetValuesN() : m_bandWidthLte / signal->GetValuesN();
           Ptr<MobilityModel> wifiMobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
           Ptr<MobilityModel> cMobility = netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
           uint8_t j = 1;
@@ -195,10 +195,10 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
              {
                if ((*it2) > 0)
                  {
-                    double subBandFreq = cStartFreq + j * rbBandwidth;
+                    double subBandFreq = cStartFreq + j * freqPerRb;
                     if (subBandFreq >= wifiStartFreq && subBandFreq <= wifiEndFreq)
                       {
-                        powerW += (*it2) * rbBandwidth;
+                        powerW += (*it2) * freqPerRb;
                       }
                  }
              }
@@ -209,7 +209,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
                continue;
             }
           double powerDbm = WToDbm(powerW);
-          double finalInterferencePowerDbm = propagationLoss->CalcRxPower(powerDbm, wifiMobility, cMobility);
+          double pathloss = propagationLoss->CalcRxPower(0, wifiMobility, cMobility);
+          double finalInterferencePowerDbm = powerDbm - std::abs(pathloss);
           double finalInterferencePowerW = DbmToW(finalInterferencePowerDbm);
 
           if ((finalInterferencePowerDbm + wifiPhy->GetRxGain ()) < wifiPhy->GetRxSensitivity ())
@@ -236,9 +237,6 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           // Create an interference signal compatible with the Lte Phy
           Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (ltePhy->GetRxSpectrumModel());
 
-          // Take the bandwidth of the interfering signal (NR in this case)
-          double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
-
           double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
           double nrUpperFreq = m_centralFrequencyNr + m_bandWidthNr / 2;
           double lteLowerFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
@@ -259,10 +257,11 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
               continue;
             }
 
+          double freqPerRb = m_bandWidthNr / signal->GetValuesN();
           uint8_t j = 0;
           for (auto it2 = signal->ValuesBegin (); it2 != signal->ValuesEnd (); ++it2)
             {
-              double subBandFreq = nrLowerFreq + (j+1) * rbBandwidth;
+              double subBandFreq = nrLowerFreq + (j+1) * freqPerRb;
               if ((*it2) > 0)
                 {
                   if (subBandFreq >= lteLowerFreq && subBandFreq <= lteUpperFreq)
@@ -306,9 +305,6 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           // Create an interference signal compatible with the Nr Phy
           Ptr<SpectrumValue> interferenceSignal = Create<SpectrumValue> (nrPhy->GetRxSpectrumModel());
 
-          // Take the bandwidth of the interfering signal (LTE in this case)
-          double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
-
           double lteLowerFreq = m_centralFrequencyLte - m_bandWidthLte / 2;
           double lteUpperFreq = m_centralFrequencyLte + m_bandWidthLte / 2;
           double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
@@ -329,10 +325,11 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
               continue;
             }
 
+          double freqPerRb = m_bandWidthLte / signal->GetValuesN();
           uint8_t j = 0;
           for (auto it2 = signal->ValuesBegin (); it2 != signal->ValuesEnd (); ++it2)
             {
-              double subBandFreq = lteLowerFreq + (j+1) * rbBandwidth;
+              double subBandFreq = lteLowerFreq + (j+1) * freqPerRb;
               if ((*it2) > 0)
                 {
                   if (subBandFreq >= nrLowerFreq && subBandFreq <= nrUpperFreq)
@@ -407,21 +404,21 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
           Time interfDuration = duration + propagationDelay->GetDelay (c1Mobility, wifiMobility);
 
           uint8_t j = 0;
-          double rbBandwidth = m_txMapNr.begin ()->second.rbBandwidth;
-          double noisePowerDbm = WToDbm (m_txMap11p.begin()->second.txPower_W) - std::abs(pathLoss);
+          double noisePowerDbm = sender->GetTxPowerStart() - std::abs(pathLoss);
           double noisePowerW = DbmToW (noisePowerDbm);
-          double noisePowerPerRb = noisePowerW / rbBandwidth;
+          double noisePowerPerHz = noisePowerW / m_bandWidthNr;
+          double freqPerRb = m_bandWidthNr / interferenceSignal->GetValuesN();
           for (uint8_t i = 0; i < interferenceSignal->GetValuesN(); ++i)
             {
-              double subBandFreq = nrLowerFreq + (i+1) * rbBandwidth;
+              double subBandFreq = nrLowerFreq + (i+1) * freqPerRb;
               if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                 {
-                  (*interferenceSignal)[j] = noisePowerPerRb;
+                  (*interferenceSignal)[j] = noisePowerPerHz * freqPerRb;
                   j += 1;
                 }
             }
 
-          // Check if the channel of the NR signal is lower than the LTE one
+          // Check if the channel of the NR signal is lower than the 11p one
           // In this case we need to shift the values of the interfering signal
           if (nrLowerFreq < wifiLowerFreq)
             {
@@ -467,8 +464,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
             }
 
           // Calculate interference for overlapping frequency bands
-          Ptr<MobilityModel> c1Mobility =
-              it->second.netDevice->GetNode ()->GetObject<ConstantPositionMobilityModel> ();
+          Ptr<MobilityModel> c1Mobility = it->second.netDevice->GetNode ()->GetObject<ConstantPositionMobilityModel> ();
           Ptr<MobilityModel> wifiMobility = sender->GetMobility ();
           double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, wifiMobility);
           if (std::abs (pathLoss) > m_noisePowerThreshold)
@@ -479,16 +475,16 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
           Time interfDuration = duration + propagationDelay->GetDelay (c1Mobility, wifiMobility);
 
           uint8_t j = 0;
-          double rbBandwidth = m_txMapLte.begin ()->second.rbBandwidth;
-          double noisePowerDbm = WToDbm (m_txMap11p.begin ()->second.txPower_W) - std::abs(pathLoss);
+          double noisePowerDbm = WToDbm (sender->GetTxPowerStart()) - std::abs(pathLoss);
           double noisePowerW = DbmToW (noisePowerDbm);
-          double noisePowerPerRb = noisePowerW / rbBandwidth;
+          double noisePowerPerHz = noisePowerW / m_bandWidthLte;
+          double freqPerRb = m_bandWidthLte / interferenceSignal->GetValuesN();
           for (uint8_t i = 0; i < interferenceSignal->GetValuesN(); ++i)
             {
-              double subBandFreq = lteLowerFreq + (i + 1) * rbBandwidth;
+              double subBandFreq = lteLowerFreq + (i + 1) * freqPerRb;
               if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                 {
-                  (*interferenceSignal)[j] = noisePowerPerRb;
+                  (*interferenceSignal)[j] = noisePowerPerHz * freqPerRb;
                   j += 1;
                 }
             }

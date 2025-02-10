@@ -61,6 +61,7 @@
 #include "ns3/wave-mac-helper.h"
 #include "ns3/packet-socket-helper.h"
 #include "ns3/gn-utils.h"
+#include "ns3/csv-utils.h"
 
 using namespace ns3;
 
@@ -85,6 +86,16 @@ BSMap basicServices; // Container for all ETSI Basic Services, installed on all 
 void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, StationType_t my_StationType, SignalInfo phy_info)
 {
   packet_count++;
+  // Logging the distance with respect to the RSSI
+  double lat_sender=asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/1e7;
+  double lon_sender=asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/1e7;
+  //
+  libsumo::TraCIPosition pos=basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(my_stationID));
+  pos=basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::simulation.convertXYtoLonLat(pos.x,pos.y);
+  //
+  double distance=haversineDist (lat_sender, lon_sender, pos.y, pos.x);
+  //
+  writeDataToCSV("distance_rssi_int_extra.csv","distance_m,rssi",distance,phy_info.rssi);
 }
 
 static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
@@ -208,7 +219,7 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
-  sumoClient->SetAttribute ("SumoGUI", BooleanValue (true));
+  sumoClient->SetAttribute ("SumoGUI", BooleanValue (false));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
   sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));

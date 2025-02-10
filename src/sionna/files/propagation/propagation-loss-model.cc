@@ -112,7 +112,7 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
     }
 
   // 3 - Return value from Sionna instead of ns3 models
-  double self = m_sionna ? power_sionna : power_ns3;
+  double self = m_sionna && power_sionna != txPowerDbm ? power_sionna : power_ns3;
 
   if (m_next != 0)
     {

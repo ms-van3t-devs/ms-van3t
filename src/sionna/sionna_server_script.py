@@ -327,11 +327,6 @@ def manage_path_loss_request(message, sionna_structure):
 
         if car_a_id == "origin" or car_b_id == "origin":
             # If any, ignoring path_loss requests from the origin, used for statistical calibration
-            if sionna_structure["verbose"]:
-                if car_a_id == "origin":
-                    print(f"Ignoring pathloss because {car_a_str} is in the origin")
-                else:
-                    print(f"Ignoring pathloss because {car_b_str} is in the origin")
             path_loss_value = 0
         else:
             t = time.time()

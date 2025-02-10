@@ -156,9 +156,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationID_t my_stationID, S
   // Compute the distance between the sender and the receiver
   double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
 
-  std::ifstream camFileHeader("src/sionna/coexistence/phy_sionna_coexistence_with_dummy.csv");
+  std::ifstream camFileHeader("src/sionna/coexistence2/phy_ns3_with_coexistence_with_dummy.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/coexistence/phy_sionna_coexistence_with_dummy.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/coexistence2/phy_ns3_with_coexistence_with_dummy.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -194,15 +194,15 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence2/prr_ns3_with_coexistence_with_dummy_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence2/prr_ns3_with_coexistence_with_dummy_11p.csv", std::ios::out | std::ios::app);
     }
   else
     {
-      file.open("src/sionna/coexistence/prr_sionna_coexistence_with_dummy_cv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence2/prr_ns3_with_coexistence_with_dummy_cv2x.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr" << std::endl;
   for (int i = 0; i < nodes.size(); i++)
@@ -343,6 +343,7 @@ int main (int argc, char *argv[])
   bool verb = false;
 
   bool interference = true;
+  bool dsrc_interference = true;
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
@@ -487,8 +488,9 @@ int main (int argc, char *argv[])
   lteHelper->SetEnbAntennaModelType ("ns3::cv2x_NistParabolic3dAntennaModel");
   lteHelper->SetAttribute ("UseSameUlDlPropagationCondition", BooleanValue(true));
   Config::SetDefault ("ns3::cv2x_LteEnbNetDevice::UlEarfcn", StringValue ("54990")); // EARFCN 54990 -> 5855-5890-5925 MHz
-  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
+  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  // lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::ThreeGppPropagationLossModel"));
   NS_LOG_INFO("Antenna parameters set. Current EARFCN: 54990, current frequency: 5.89 GHz");
 
   /*** 2. Create Internet and ipv4 helpers ***/
@@ -660,8 +662,6 @@ int main (int argc, char *argv[])
   nrHelper->InitializeOperationBand (&bandSl);
   allBwps = CcBwpCreator::GetAllBwps ({bandSl});
 
-  // IMPORTANT: Get the SpectrumChannel for NR-V2X, to be used as SpectrumChannel for WiFi 80211.p
-  // spectrumChannel = DynamicCast<MultiModelSpectrumChannel>(bandSl.GetBwpAt (0, 0)->m_channel);
 
   nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (1));  //following parameter has no impact at the moment because:
   nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (2));
@@ -864,7 +864,7 @@ int main (int argc, char *argv[])
                                       "Threshold", DoubleValue (snr_threshold));
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
-  channel->SetAttribute ("PropagationLossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  // channel->SetAttribute ("PropagationLossModel", StringValue ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel"));
   wifiPhy.SetChannel (channel);
 
   /*SpectrumWifiPhyHelper spectrumWiFiPhy = SpectrumWifiPhyHelper();
@@ -908,7 +908,7 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.01)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
-  sumoClient->SetAttribute ("SumoGUI", BooleanValue (true));
+  sumoClient->SetAttribute ("SumoGUI", BooleanValue (false));
   sumoClient->SetAttribute ("SumoPort", UintegerValue (3400));
   sumoClient->SetAttribute ("PenetrationRate", DoubleValue (1.0));
   sumoClient->SetAttribute ("SumoLogFile", BooleanValue (false));
@@ -951,8 +951,6 @@ int main (int argc, char *argv[])
     txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, lteVehicles, ueLteDevs /*rbNr, rbLte*/);
   }
 
-  bool dsrc_interference = true;
-
   uint8_t node11pCounter = 1; // Start from 1 because 0 is the interfering node
   uint8_t nodeNrCounter = 0;
   uint8_t nodeLteCounter = 0;
@@ -966,6 +964,8 @@ int main (int argc, char *argv[])
     NodeType type;
     unsigned long vehID = std::stol(vehicleID.substr (3));
     unsigned long nodeID;
+
+    std::cout << "Vehicle entering in the simulation: " << vehicleID << std::endl;
 
     if (std::find(wifiVehicles.begin(), wifiVehicles.end(), vehicleID) != wifiVehicles.end())
       {
@@ -1039,6 +1039,9 @@ int main (int argc, char *argv[])
         metSup_nr->addExcludedID (vehID);
         break;
       case NodeType::INTERFERING:
+        metSup_11p->addExcludedID (vehID);
+        metSup_lte->addExcludedID (vehID);
+        metSup_nr->addExcludedID (vehID);
         if (dsrc_interference)
           {
             Ptr<Socket> socket = Socket::CreateSocket (wifiNodes.Get (0), TypeId::LookupByName ("ns3::PacketSocketFactory"));
@@ -1065,26 +1068,29 @@ int main (int argc, char *argv[])
         NS_FATAL_ERROR ("No technology recognized.");
       }
 
-    Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
-    bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
-    switch (type)
+    if (type != NodeType::INTERFERING)
       {
-      case NodeType::DSRC:
-        bs_container->linkMetricSupervisor (metSup_11p);
-        break;
-      case NodeType::NR:
-        bs_container->linkMetricSupervisor (metSup_nr);
-        break;
-      case NodeType::LTE:
-        bs_container->linkMetricSupervisor (metSup_lte);
-        break;
+        Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
+        bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
+        switch (type)
+          {
+          case NodeType::DSRC:
+            bs_container->linkMetricSupervisor (metSup_11p);
+            break;
+          case NodeType::NR:
+            bs_container->linkMetricSupervisor (metSup_nr);
+            break;
+          case NodeType::LTE:
+            bs_container->linkMetricSupervisor (metSup_lte);
+            break;
+          }
+        bs_container->disablePRRSupervisorForGNBeacons();
+        bs_container->setupContainer(true,false,false,false);
+        basicServices.add(bs_container);
+        std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
+        // Simulator::Schedule (Seconds(7), &startSendingCAM, bs_container);
+        bs_container->getCABasicService ()->startCamDissemination ();
       }
-    bs_container->disablePRRSupervisorForGNBeacons();
-    bs_container->setupContainer(true,false,false,false);
-    basicServices.add(bs_container);
-    std::srand(Simulator::Now().GetNanoSeconds ()*2); // Seed based on the simulation time to give each vehicle a different random seed
-    // Simulator::Schedule (Seconds(7), &startSendingCAM, bs_container);
-    bs_container->getCABasicService ()->startCamDissemination ();
 
     switch (type)
       {
