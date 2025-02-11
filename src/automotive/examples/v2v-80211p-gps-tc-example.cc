@@ -68,7 +68,7 @@ main (int argc, char *argv[])
   // If you want to use a sample GPS trace obtained using a high-end expensive device (with
   // high update rate and inertial sensors - 3 vehicles), uncomment this line (and comment
   // the "BiellaTrace.csv" one)
-  std::string gps_trace = "union_long.csv";
+  std::string gps_trace = "union_short.csv";
   // If you want to use a sample GPS trace obtained using a normal smartphone, with the
   // Ultra GPS Logger app (update rate: 1 Hz, no acceleration, 2 vehicles), uncomment this
   // line (and comment the "sampletrace.csv" one)
@@ -230,7 +230,7 @@ main (int argc, char *argv[])
   }
 
   /* callback function for node creation */
-  STARTUP_GPS_FCN setupNewWifiNode = [&] (std::string vehicleID) -> Ptr<Node>
+  STARTUP_GPS_FCN setupNewWifiNode = [&] (std::string ID) -> Ptr<Node>
     {
 
       if (nodeCounter >= obuNodes.GetN())
@@ -240,12 +240,25 @@ main (int argc, char *argv[])
 
       /* Install Application */
       ApplicationContainer setupAppSimpleSender;
-      if (v_gps_tc[nodeCounter]->getType() == "car")
+      Ptr<GPSTraceClient> gps_tc = nullptr;
+
+      for (auto it = v_gps_tc.begin(); it != v_gps_tc.end(); ++it)
+        {
+          if ((*it)->getID() == ID)
+            {
+              gps_tc = *it;
+              break;
+            }
+        }
+
+      NS_ASSERT_MSG (gps_tc != nullptr, "GPS Trace Client not found.");
+
+      if (gps_tc->getType() == "car")
         {
           SimpleCAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
           setupAppSimpleSender = SimpleCAMSenderHelper.Install (includedNode);
         }
-      else if (v_gps_tc[nodeCounter]->getType() == "vru")
+      else if (gps_tc->getType() == "vru")
         {
           SimpleVAMSenderHelper.SetAttribute ("GPSClient", PointerValue(v_gps_tc[nodeCounter]));
           setupAppSimpleSender = SimpleVAMSenderHelper.Install (includedNode);
@@ -261,19 +274,50 @@ main (int argc, char *argv[])
   int remainingNodes = obuNodes.GetN();
 
   /* callback function for node shutdown */
-  SHUTDOWN_GPS_FCN shutdownWifiNode = [&] (Ptr<Node> exNode,std::string vehicleID)
+  SHUTDOWN_GPS_FCN shutdownWifiNode = [&] (Ptr<Node> exNode, std::string ID)
     {
       /* stop all applications */
-      Ptr<simpleCAMSender> AppSimpleSender_ = exNode->GetApplication(0)->GetObject<simpleCAMSender>();
 
-      if(AppSimpleSender_) {
-          AppSimpleSender_->StopApplicationNow();
+      Ptr<simpleCAMSender> AppSimpleCAMSender_ = nullptr;
+      Ptr<simpleVAMSender> AppSimpleVAMSender_ = nullptr;
+      Ptr<GPSTraceClient> gps_tc = nullptr;
+
+      for (auto it = v_gps_tc.begin(); it != v_gps_tc.end(); ++it)
+        {
+          if ((*it)->getID() == ID)
+            {
+              gps_tc = *it;
+              break;
+            }
+        }
+
+      NS_ASSERT_MSG (gps_tc != nullptr, "GPS Trace Client not found.");
+
+      if (gps_tc->getType() == "car")
+        {
+          AppSimpleCAMSender_ = exNode->GetApplication(0)->GetObject<simpleCAMSender>();
+        }
+      else if (gps_tc->getType() == "vru")
+        {
+          AppSimpleVAMSender_ = exNode->GetApplication(0)->GetObject<simpleVAMSender>();
+        }
+
+      if(AppSimpleCAMSender_ != nullptr)
+        {
+          AppSimpleCAMSender_->StopApplicationNow();
           remainingNodes--;
-      }
+        }
 
-      if(remainingNodes==0) {
+      if (AppSimpleVAMSender_ != nullptr)
+        {
+          AppSimpleVAMSender_->StopApplicationNow();
+          remainingNodes--;
+        }
+
+      if(remainingNodes==0)
+        {
           Simulator::Stop();
-      }
+        }
 
        /* set position outside communication range */
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();
