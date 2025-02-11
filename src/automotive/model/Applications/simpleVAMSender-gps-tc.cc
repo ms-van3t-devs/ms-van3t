@@ -139,14 +139,14 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
 
-    uint64_t cam_sent;
+    uint64_t vam_sent;
 
     m_gps_tc_client->StopUpdates();
 
-    cam_sent = m_vruService.terminateDissemination ();
+    vam_sent = m_vruService.terminateDissemination ();
 
     std::cout << "VRU " << m_id
-              << " has sent " << cam_sent
+              << " has sent " << vam_sent
               << " VAMs" << std::endl;
   }
 
