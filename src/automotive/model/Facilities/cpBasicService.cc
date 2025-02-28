@@ -298,14 +298,14 @@ namespace ns3 {
     asn1cpp::setField (cpm->header.stationId, m_station_id);
 
     /*
-     * Compute the generationDeltaTime, "computed as the time corresponding to the
-     * time of the reference position in the CPM, considered as time of the CPM generation.
-     * The value of the generationDeltaTime shall be wrapped to 65 536. This value shall be set as the
-     * remainder of the corresponding value of TimestampIts divided by 65 536 as below:
-     * generationDeltaTime = TimestampIts mod 65 536"
+     * Compute the referenceTime. According to the ETSI-ITS-CDD .asn file, the referenceTime is defined as TimestampIts.
+     * The TimestampIts is defined represents the number of elapsed (TAI) milliseconds since the ITS Epoch.
+     * The ITS epoch, in turn, is `00:00:00.000 UTC, 1 January 2004`.
+     * The referenceTime was equal to generationDeltaTime in CPMs v1, but for CPMs v2, it has changed to a TimestampIts.
+     * As a reference, we align here the referenceTime to the CPM generation time.
     */
-    asn1cpp::setField (cpm->payload.managementContainer.referenceTime,
-                       compute_timestampIts (m_real_time) % 65536);
+    // asn1cpp::setField (cpm->payload.managementContainer.referenceTime, compute_timestampIts () % 65536); // <- this was valid for CPMs v1
+    asn1cpp::setField(cpm->payload.managementContainer.referenceTime, get_timestamp_ms_cpm(m_real_time));
 
     cpm_mandatory_data = m_vdp->getCPMMandatoryData ();
 

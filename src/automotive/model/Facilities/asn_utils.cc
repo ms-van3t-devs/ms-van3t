@@ -41,6 +41,47 @@ namespace ns3 {
 
   }
 
+  uint64_t get_timestamp_ms_cpm(bool real_time) {
+    unsigned long long timestamp;
+
+    // If we are in real-time emulation mode, take the current TAI time as required by the standards
+    if(real_time)
+      {
+        struct timespec now;
+        long seconds;
+        uint64_t microseconds;
+
+        if (clock_gettime (CLOCK_TAI, &now) == -1)
+          {
+            perror ("Cannot get the current microseconds TAI timestamp");
+            return -1;
+          }
+
+        seconds = now.tv_sec;
+        microseconds = round (now.tv_nsec / 1e3);
+
+        // milliseconds, due to the rounding operation, shall not exceed 999999
+        if (microseconds > 999999)
+          {
+              seconds++;
+            microseconds = 0;
+          }
+
+        // Compute the total number of microseconds since the epoch (January 1st 1970 00:00:00 UTC)
+        timestamp = static_cast<unsigned long long>(seconds)*1000000+microseconds;
+        // Subtract the TIME_SHIFT (the multiplication by 1000 is needed as TIME_SHIFT is in ms) to
+        // get the time since January 1st 2004 00:00:00 UTC, as mandated by the standards
+        timestamp -= (TIME_SHIFT*1000);
+      } else {
+        // If we are in normal simulation mode, just take the simulation time in microseconds
+        timestamp = Simulator::Now ().GetMicroSeconds ();
+      }
+
+    // Return the time in milliseconds, modulo 4398046511103 to avoid encoding issues
+    // 4398046511103 is the maximum allowed value for the CPMv2 referenceTime field
+    return (static_cast<uint64_t>(floor(timestamp/1000.0))%4398046511103);
+  }
+
   double haversineDist(double lat_a, double lon_a, double lat_b, double lon_b) {
       // 12742000 is the mean Earth radius (6371 km) * 2 * 1000 (to convert from km to m)
       return 12742000.0*asin(sqrt(sin(DEG_2_RAD(lat_b-lat_a)/2)*sin(DEG_2_RAD(lat_b-lat_a)/2)+cos(DEG_2_RAD(lat_a))*cos(DEG_2_RAD(lat_b))*sin(DEG_2_RAD(lon_b-lon_a)/2)*sin(DEG_2_RAD(lon_b-lon_a)/2)));
