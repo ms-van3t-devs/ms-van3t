@@ -42,6 +42,8 @@ VRUBasicService::VRUBasicService(){
   m_prev_speed = -1;
   m_prev_position.x = -1;
   m_prev_position.y = -1;
+  m_prev_lat = -1;
+  m_prev_lon = -1;
 
   m_long_safe_d = -1;
   m_lat_safe_d = 2;
@@ -412,9 +414,11 @@ void VRUBasicService::checkVamConditions(){
    * the position included in the VAM previously transmitted by the originating
    * ITS-S exceeds 4 m;
   */
-  libsumo::TraCIPosition new_pos = m_VRUdp->getPedPositionValue ();
+  double ped_lat = m_VRUdp->getPedPosition().lat;
+  double ped_lon = m_VRUdp->getPedPosition().lon;
+  libsumo::TraCIPosition new_pos = m_VRUdp->getPedPositionValue();
   double pos_diff = sqrt((new_pos.x-m_prev_position.x)*(new_pos.x-m_prev_position.x)+(new_pos.y-m_prev_position.y)*(new_pos.y-m_prev_position.y));
-  data_pos="[DISTANCE] PrevLat="+std::to_string(m_prev_position.x)+" PrevLon="+std::to_string(m_prev_position.y)+" CurrLat="+std::to_string(new_pos.x)+" CurrLon="+std::to_string(new_pos.y)+" PosDiff="+std::to_string(pos_diff)+"\n";
+  data_pos="[DISTANCE] PrevLat="+std::to_string(m_prev_lat)+" PrevLon="+std::to_string(m_prev_lon)+" CurrLat="+std::to_string(ped_lat)+" CurrLon="+std::to_string(ped_lon)+" PosDiff="+std::to_string(pos_diff)+"\n";
   if (!condition_verified && (pos_diff > 4.0 || pos_diff < -4.0))
     {
       if(!redundancy_mitigation && (m_N_GenVam_red==0 || m_N_GenVam_red==m_N_GenVam_max_red)){
@@ -550,6 +554,7 @@ void VRUBasicService::checkVamConditions(){
 
   data_vamredmit = "[REDUNDANCY MITIGATION] numSkipVAMsForRedMitMax="+std::to_string(m_N_GenVam_max_red)+" numSkipVAMsForRedMit="+std::to_string(m_N_GenVam_red)+" TimestampLastVAMGen="+std::to_string(lastVamGen)+" TimeIntervalSinceLastVAMGen="+std::to_string(time_difference)+"\n";
 
+  int n=0;
   write_log_triggering (condition_verified, vamredmit_verified, head_diff, pos_diff, speed_diff, time_difference, data_head, data_pos, data_speed, data_safed, data_time, data_vamredmit);
 
   if((m_VRU_clust_state==VRU_IDLE || m_VRU_clust_state==VRU_ACTIVE_STANDALONE || m_VRU_clust_state==VRU_ACTIVE_CLUSTER_LEADER) && m_VRU_role==VRU_ROLE_ON)
@@ -660,6 +665,8 @@ VRUBasicService_error_t VRUBasicService::generateAndEncodeVam(){
 
   // Store all the "previous" values used in checkVamConditions()
   m_prev_position = m_VRUdp->getPedPositionValue ();
+  m_prev_lat = m_VRUdp->getPedPosition().lat;
+  m_prev_lon = m_VRUdp->getPedPosition().lon;
   m_prev_speed = m_VRUdp->getPedSpeedValue ();
   m_prev_heading = m_VRUdp->getPedHeadingValue ();
 
