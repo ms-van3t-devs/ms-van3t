@@ -23,7 +23,7 @@
 #define DEG_2_RAD(val) ((val)*M_PI/180.0)
 
 
-//Epoch time at 2004-01-01
+//Epoch time at 2004-01-01 in milliseconds
 #define TIME_SHIFT 1072915200000
 
 /* Maximum length of an asn1c error message (when decoding fails with respect to certain constraints) */
@@ -32,6 +32,8 @@
 namespace ns3
 {
   long compute_timestampIts (bool real_time);
+  // This function returns a TimestampIts (as defined in ETSI-ITS-CDD.asn) for the referenceTime field in CPMs v2
+  uint64_t get_timestamp_ms_cpm(bool real_time);
   double haversineDist(double lat_a, double lon_a, double lat_b, double lon_b);
 
   uint8_t setByteMask(uint8_t mask);
@@ -40,7 +42,6 @@ namespace ns3
   uint8_t getFromMask(uint8_t mask);
   inline uint16_t getFromMasks(uint8_t mask0,uint8_t mask1){return getFromMask(mask0) | (getFromMask(mask1)<<8);}
   inline uint32_t getFromMasks(uint8_t mask0,uint8_t mask1,uint8_t mask2){return getFromMask(mask0) | (getFromMask(mask1)<<8) | (getFromMask(mask2)<<16);}
-
 
   typedef struct _pathHistoryDeltas {
 

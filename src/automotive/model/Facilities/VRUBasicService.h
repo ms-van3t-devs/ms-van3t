@@ -148,6 +148,8 @@ private:
     // Previous VAM relevant values
     double m_prev_heading;
     libsumo::TraCIPosition m_prev_position;
+    double m_prev_lat;
+    double m_prev_lon;
     double m_prev_speed;
 
     // Safe distances
