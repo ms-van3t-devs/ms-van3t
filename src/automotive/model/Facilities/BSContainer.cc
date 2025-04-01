@@ -237,7 +237,7 @@ namespace ns3
         m_cpbs.setRedundancyMitigation (false);
 
         Ptr<SUMOSensor> sumo_sensor = CreateObject<SUMOSensor>();
-        sumo_sensor->setStationID(m_station_id);
+        sumo_sensor->setStationID(m_sumo_vehid_prefix + std::to_string(m_station_id));
         sumo_sensor->setTraCIclient(m_mobility_client);
         sumo_sensor->setVDP(m_vdp_ptr);
         sumo_sensor->setLDM (m_LDM);

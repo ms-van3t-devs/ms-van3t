@@ -66,6 +66,10 @@ namespace ns3
     // Function to pass to the VBS the name of the file where the metrics related to VAMs have to be stored
     void setVAMmetricsfile(std::string file_name, bool collect_metrics);
 
+    void receiveCPM (asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from);
+    vehicleData_t translateCPMdata (asn1cpp::Seq<CollectivePerceptionMessage> cpm,
+                                   asn1cpp::Seq<PerceivedObject> object, int objectIndex, int newID);
+
     // Function to be called when this BSContainer is no longer being used (e.g., when a vehicle exits from the SUMO scenario)
     // This function should be called to automatically perform all the necessary cleanup operations (like stopping the CAM
     // dissemation, if enabled, and the GeoNetworking egoPV updates)
@@ -118,6 +122,8 @@ namespace ns3
     bool m_CAMs_enabled = false;
     bool m_VAMs_enabled = false;
     bool m_CPMs_enabled = false;
+
+    std::map<int, std::map<int,int>> m_recvCPMmap;  //! Structure mapping, for each CV that we have received a CPM from, the CPM's PO ids with the ego LDM's PO ids
   };
 }
 

@@ -805,7 +805,8 @@ int main (int argc, char *argv[])
             socket->SetPriority (0);
             Simulator::ScheduleWithContext (0,
                                             Seconds (1.0), &GenerateTraffic_interfering,
-                                            socket, 1000, simTime*2000, MilliSeconds (5));
+                                            socket, 1000, simTime*2000, MilliSeconds (5),
+                                            numberOfNodes, sumoClient);
           }
         else if (nr_interference)
           {
