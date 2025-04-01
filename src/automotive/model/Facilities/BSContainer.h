@@ -99,7 +99,7 @@ namespace ns3
     Ptr<LDM> m_LDM;
 
     // Vehicle properties
-    StationID_t m_station_id;
+    StationId_t m_station_id;
     StationType_t m_stationtype;
 
     // Prefix for the full SUMO vehicle ID (default: "veh")
