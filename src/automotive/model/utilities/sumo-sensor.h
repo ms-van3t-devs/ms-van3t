@@ -46,7 +46,10 @@ namespace ns3 {
      *
      * @param client The TraCI client.
      */
-    void setTraCIclient(Ptr<TraciClient> client){m_client=client;m_event_updateDetectedObjects = Simulator::Schedule(MilliSeconds (100),&SUMOSensor::updateDetectedObjects,this);}
+    void setTraCIclient(Ptr<TraciClient> client){
+      m_client=client;
+      m_event_updateDetectedObjects = Simulator::Schedule(MilliSeconds (100),&SUMOSensor::updateDetectedObjects,this);
+    }
     /**
      * @brief Set the VDP object.
      *

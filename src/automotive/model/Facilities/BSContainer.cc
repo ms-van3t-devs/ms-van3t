@@ -230,17 +230,18 @@ namespace ns3
         m_cpbs.setSocketRx (m_socket);
 
         m_LDM->setVDP (m_vdp_ptr);
+        // m_LDM->setWriteContents (true);
         m_cpbs.setLDM (m_LDM);
 
         m_cpbs.addCPRxCallback (std::bind(&BSContainer::receiveCPM,this,std::placeholders::_1,std::placeholders::_2));
         m_cpbs.setRealTime (m_real_time);
         m_cpbs.setRedundancyMitigation (false);
 
-        Ptr<SUMOSensor> sumo_sensor = CreateObject<SUMOSensor>();
-        sumo_sensor->setStationID(m_sumo_vehid_prefix + std::to_string(m_station_id));
-        sumo_sensor->setTraCIclient(m_mobility_client);
-        sumo_sensor->setVDP(m_vdp_ptr);
-        sumo_sensor->setLDM (m_LDM);
+        m_sumo_sensor = CreateObject<SUMOSensor>();
+        m_sumo_sensor->setStationID(m_sumo_vehid_prefix + std::to_string(m_station_id));
+        m_sumo_sensor->setTraCIclient(m_mobility_client);
+        m_sumo_sensor->setVDP(m_vdp_ptr);
+        m_sumo_sensor->setLDM (m_LDM);
 
         // Remember that setStationProperties() must always be called *after* setBTP()
         m_cpbs.setStationProperties (m_station_id, m_stationtype);
@@ -302,7 +303,7 @@ namespace ns3
         {
           auto POcontainer = asn1cpp::getSeq(wrappedContainer->containerData.choice.PerceivedObjectContainer,PerceivedObjectContainer);
           int PObjects_size = asn1cpp::sequenceof::getSize(POcontainer->perceivedObjects);
-          std::cout << "["<< Simulator::Now ().GetSeconds ()<<"] " << m_station_id <<" received a new CPMv2 from " << asn1cpp::getField(cpm->header.stationId,long) << " with " << PObjects_size << " perceived objects." << std::endl;
+          // std::cout << "["<< Simulator::Now ().GetSeconds ()<<"] " << m_station_id <<" received a new CPMv2 from " << asn1cpp::getField(cpm->header.stationId,long) << " with " << PObjects_size << " perceived objects." << std::endl;
           for(int j=0; j<PObjects_size;j++)
             {
               LDM::returnedVehicleData_t PO_data;
@@ -312,7 +313,7 @@ namespace ns3
               if(m_recvCPMmap[fromID].find(asn1cpp::getField(PO_seq->objectId,long)) == m_recvCPMmap[fromID].end())
                 {
                   // First time we have received this object from this vehicle
-                  //If PO id is already in local copy of LDM
+                  // If PO id is already in local copy of LDM
                   if(m_LDM->lookup(asn1cpp::getField(PO_seq->objectId,long),PO_data) == LDM::LDM_OK)
                     {
                       // We need a new ID for object

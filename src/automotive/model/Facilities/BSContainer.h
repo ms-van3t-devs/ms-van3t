@@ -8,6 +8,7 @@
 #include "ns3/VRUBasicService.h"
 #include "ns3/cpBasicService.h"
 #include "ns3/cpBasicService_v1.h"
+#include "ns3/sumo-sensor.h"
 
 namespace ns3
 {
@@ -122,6 +123,8 @@ namespace ns3
     bool m_CAMs_enabled = false;
     bool m_VAMs_enabled = false;
     bool m_CPMs_enabled = false;
+
+    Ptr<SUMOSensor> m_sumo_sensor;
 
     std::map<int, std::map<int,int>> m_recvCPMmap;  //! Structure mapping, for each CV that we have received a CPM from, the CPM's PO ids with the ego LDM's PO ids
   };

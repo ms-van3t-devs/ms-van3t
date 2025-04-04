@@ -21,6 +21,7 @@ case "$1" in
         cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-channel.cc src/wifi/model/
         cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-channel.h src/wifi/model/
         cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-phy.h src/wifi/model/
+        cp src/automotive/model/TxTracker/channel_files/modified/three-gpp-spectrum-propagation-loss-model.cc src/spectrum/model/
         ;;
     off)
         echo "Disabling Interference Management..."
@@ -30,6 +31,7 @@ case "$1" in
         cp src/automotive/model/TxTracker/channel_files/normal/yans-wifi-channel.cc src/wifi/model/
         cp src/automotive/model/TxTracker/channel_files/normal/yans-wifi-channel.h src/wifi/model/
         cp src/automotive/model/TxTracker/channel_files/normal/yans-wifi-phy.h src/wifi/model/
+        cp src/automotive/model/TxTracker/channel_files/normal/three-gpp-spectrum-propagation-loss-model.cc src/spectrum/model/
         ;;
     *)
         echo "Invalid argument: $1"

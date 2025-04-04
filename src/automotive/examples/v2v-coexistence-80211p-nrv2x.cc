@@ -64,7 +64,7 @@
 #include <chrono>
 
 // C-V2X
-#include "../../dsr/model/dsr-fs-header.h"
+/*#include "../../dsr/model/dsr-fs-header.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/applications-module.h"
@@ -75,7 +75,7 @@
 #include "ns3/antenna-module.h"
 #include "ns3/cv2x_lte-v2x-helper.h"
 #include "ns3/internet-module.h"
-#include "ns3/cv2x-module.h"
+#include "ns3/cv2x-module.h"*/
 
 using namespace ns3;
 
@@ -93,6 +93,7 @@ std::vector<uint8_t > nrv2xVehicles;
 static int packet_count = 0;
 static int counter = 0;
 BSMap basicServices; // Container for all ETSI Basic Services, installed on all vehicles
+bool phy_collection = false;
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -125,6 +126,10 @@ GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> >
 void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, StationType_t my_StationType, SignalInfo phy_info)
 {
   packet_count++;
+  if (!phy_collection)
+    {
+      return;
+    }
   double snr = phy_info.snr;
   double sinr = phy_info.sinr;
   double rssi = phy_info.rssi;
@@ -183,19 +188,21 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/coexistence2/prr_ns3_with_coexistence_with_dummy_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence2/prr_latency_ns3_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/coexistence2/prr_ns3_with_coexistence_with_dummy_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/coexistence2/prr_latency_ns3_coexistence_11p.csv", std::ios::out | std::ios::app);
     }
-  file << "node_id,prr" << std::endl;
+  file << "node_id,prr,latency(ms)" << std::endl;
   for (int i = 0; i < nodes.size(); i++)
     {
       double prr = metSup->getAveragePRR_vehicle (std::stol(nodes[i].substr (3)));
-      file << i << "," << prr << std::endl;
+      double latency = metSup->getAverageLatency_vehicle (std::stol(nodes[i].substr (3)));
+      file << i << "," << prr << "," << latency << std::endl;
     }
   file.close();
+
 }
 
 void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, bool dsrc_interference, bool nr_interference)
@@ -229,7 +236,7 @@ void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNod
 static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
                              uint32_t pktCount, Time pktInterval, uint8_t vehicles, Ptr<TraciClient> traci)
 {
-  uint8_t present = traci->GetVehicleMapSize() - 1;
+  uint8_t present = traci->GetVehicleMapSize();
   if (present != vehicles)
     {
       Simulator::Schedule(pktInterval, &GenerateTraffic_interfering, socket, pktSize, pktCount, pktInterval, vehicles, traci);
@@ -267,6 +274,8 @@ static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
 
 int main (int argc, char *argv[])
 {
+  phy_collection = false;
+
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
   double bandwidth_11p = 10;
@@ -315,14 +324,14 @@ int main (int argc, char *argv[])
   bool verb = false;
 
   bool interference = true;
-  bool dsrc_interference = true;
-  bool nr_interference = false;
+  bool dsrc_interference = false;
+  bool nr_interference = true;
 
   Time slBearersActivationTime = Seconds (2.0);
 
-  if ((dsrc_interference && nr_interference))
+  if ((dsrc_interference && nr_interference) || (interference && !(dsrc_interference || nr_interference)))
     {
-      NS_FATAL_ERROR ("Only one interference type is allowed.");
+      NS_FATAL_ERROR ("Check the interference setup.");
     }
 
   // Set here the path to the SUMO XML files
@@ -364,7 +373,11 @@ int main (int argc, char *argv[])
     {
       NS_FATAL_ERROR("Error: unable to parse the specified XML file: "<<path);
     }
-  numberOfNodes = XML_rou_count_vehicles(rou_xml_file) - 1;
+  numberOfNodes = XML_rou_count_vehicles(rou_xml_file);
+  /*if (interference)
+    {
+      numberOfNodes --;
+    }*/
   xmlFreeDoc(rou_xml_file);
   xmlCleanupParser();
 
@@ -382,8 +395,46 @@ int main (int argc, char *argv[])
       sumoClient->SetSionnaUp(server_ip);
     }
 
-  uint64_t numberOfNodes_11p = numberOfNodes / 2;
-  uint64_t numberOfNodes_nr = numberOfNodes / 2;
+  bool odd = false;
+  if (numberOfNodes%2 != 0)
+    {
+      odd = true;
+    }
+
+  std::vector<std::string> wifiVehicles;
+  std::vector<std::string> nrVehicles;
+
+  uint8_t i = 1;
+  if (interference)
+    {
+      i = 2;
+    }
+
+  for (; i <= numberOfNodes; i++)
+    {
+      if (i%2 == 0)
+        {
+          wifiVehicles.push_back ("veh" + std::to_string (i));
+          dsrcVehicles.push_back (i);
+        }
+      else
+        {
+          nrVehicles.push_back("veh" + std::to_string (i));
+          nrv2xVehicles.push_back (i);
+        }
+    }
+
+  uint64_t numberOfNodes_11p = wifiVehicles.size();
+  uint64_t numberOfNodes_nr = nrVehicles.size();
+
+  if (dsrc_interference)
+    {
+      numberOfNodes_11p ++;
+    }
+  else if (nr_interference)
+    {
+      numberOfNodes_nr ++;
+    }
 
   Ptr<MetricSupervisor> metSup_11p = NULL;
   // Set a baseline for the PRR computation when creating a new Metricsupervisor object
@@ -638,7 +689,7 @@ int main (int argc, char *argv[])
 
   // Create numberOfNodes nodes
   NodeContainer wifiNodes;
-  wifiNodes.Create (numberOfNodes_11p + 1);
+  wifiNodes.Create (numberOfNodes_11p);
 
   YansWifiPhyHelper wifiPhy;
   wifiPhy.Set ("TxPowerStart", DoubleValue (txPower));
@@ -692,24 +743,6 @@ int main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
 
-  std::vector<std::string> wifiVehicles;
-  std::vector<std::string> nrVehicles;
-
-  uint8_t i = 2 ? interference : 1;
-  for (; i <= numberOfNodes_11p + numberOfNodes_nr; i++)
-    {
-      if (i%2 == 0)
-        {
-          wifiVehicles.push_back ("veh" + std::to_string (i));
-          dsrcVehicles.push_back (i);
-        }
-      else
-        {
-          nrVehicles.push_back("veh" + std::to_string (i));
-          nrv2xVehicles.push_back (i);
-        }
-    }
-
   if (interference)
   {
     std::cout << "Interference mode enabled" << std::endl;
@@ -719,8 +752,17 @@ int main (int argc, char *argv[])
     txTrackerSetup(wifiVehicles, wifiNodes, nrVehicles, allSlUesNetDeviceContainer, dsrc_interference, nr_interference);
   }
 
-  uint8_t node11pCounter = 1 ? dsrc_interference : 0; // Start from 1 because 0 is the interfering node
-  uint8_t nodeNrCounter = 1 ? nr_interference : 0;
+  uint8_t node11pCounter = 0;
+  if (dsrc_interference)
+    {
+      node11pCounter = 1;
+    }
+
+  uint8_t nodeNrCounter = 0;
+  if (nr_interference)
+    {
+      nodeNrCounter = 1;
+    }
 
   std::cout << "A transmission power of " << txPower << " dBm  will be used." << std::endl;
 
@@ -758,7 +800,6 @@ int main (int argc, char *argv[])
     Ipv4Address groupAddress4 ("225.0.0.0");
     Ptr<NrUeNetDevice> nrDevice;
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-    Ptr<cv2x_LteUeNetDevice> cv2x_device;
     switch (type)
       {
       case NodeType::DSRC:

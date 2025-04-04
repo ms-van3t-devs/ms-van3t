@@ -16,6 +16,8 @@
 
 #define DB_CLEANER_INTERVAL_SECONDS 0.5
 #define DB_DELETE_OLDER_THAN_SECONDS 1
+#define LOG_FREQ 100
+
 namespace ns3 {
 
 
@@ -217,6 +219,16 @@ public:
     void drawPolygon(vehicleData_t data);
     void enablePolygons(){m_polygons=true;m_event_updatePolygons = Simulator::Schedule(MilliSeconds (100),&LDM::updatePolygons,this);}
 
+    void setWriteContents(bool write) {
+      if (write)
+        {
+          std::srand(Simulator::Now().GetNanoSeconds ());
+          double desync = ((double)std::rand()/RAND_MAX);
+          m_event_writeContents = Simulator::Schedule(MilliSeconds(LOG_FREQ+(desync*100)),&LDM::writeAllContents,this);
+        }
+
+    }
+
     libsumo::TraCIPosition boost2TraciPos(point_type point_type);
 
 private:
@@ -244,7 +256,6 @@ private:
 	double m_avg_dwell = 0.0;
 	int m_dwell_count = 0;
         StationType_t m_station_type;
-
 
 };
 }
