@@ -176,6 +176,8 @@ cp src/sionna/files/propagation/three-gpp-propagation-loss-model.cc src/propagat
 cp src/sionna/files/propagation/cv2x_cni-urbanmicrocell-propagation-loss-model.cc src/cv2x/model
 cp src/sionna/files/propagation/cv2x_cni-urbanmicrocell-propagation-loss-model.h src/cv2x/model
 
+cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-phy.h src/wifi/model
+
 echo "Extending Signal Info features..."
 sleep 1
 cp src/automotive/model/SignalInfo/rssi-tag.cc src/wifi/model/
