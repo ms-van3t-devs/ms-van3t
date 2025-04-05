@@ -13,6 +13,7 @@ bool is_socket_created = false;
 std::unordered_map<std::string, SionnaPosition> vehiclePositions;
 bool sionna_verbose = false;
 bool sionna_local_machine = false;
+bool sionna_los = false;
 
 std::vector<bool> sionna_los_status = {false, false, false};
 

@@ -20,8 +20,8 @@
  */
 
 
-#ifndef CV2X_Cni_URBANMICROCELL_PROPAGATION_LOSS_MODEL_H
-#define CV2X_Cni_URBANMICROCELL_PROPAGATION_LOSS_MODEL_H
+#ifndef Cni_URBANMICROCELL_PROPAGATION_LOSS_MODEL_H
+#define Cni_URBANMICROCELL_PROPAGATION_LOSS_MODEL_H
 
 #include <ns3/propagation-loss-model.h>
 #include <ns3/propagation-environment.h>
@@ -37,7 +37,7 @@ namespace ns3 {
  * This class implements the outdoor propagation model for 6 GHz based on 3GPP sepcifications:
  * 3GPP TR 36.885 V14.0.0 (2016-06) / Section A.1.4
  */
-class cv2x_CniUrbanmicrocellPropagationLossModel : public PropagationLossModel
+class CniUrbanmicrocellPropagationLossModel : public PropagationLossModel
 {
 
 public:
@@ -73,8 +73,8 @@ public:
 
   // inherited from Object
   static TypeId GetTypeId (void);
-  cv2x_CniUrbanmicrocellPropagationLossModel ();
-  virtual ~cv2x_CniUrbanmicrocellPropagationLossModel ();
+  CniUrbanmicrocellPropagationLossModel ();
+  virtual ~CniUrbanmicrocellPropagationLossModel ();
 
   /** 
    * set the propagation frequency

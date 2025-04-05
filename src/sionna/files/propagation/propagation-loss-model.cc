@@ -88,10 +88,20 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
   // 2 - send calc_request to NVIDIA Sionna
   double power_ns3;
   double power_sionna;
+  std::string los;
   if (m_sionna)
     {
       double path_gain = getPathGainFromSionna(a_position, b_position);
       power_sionna = txPowerDbm - path_gain;
+      los = getLOSStatusFromSionna(a_position, b_position);
+      if (los == "[False]")
+        {
+          sionna_los = false;
+        }
+      else
+        {
+          sionna_los = true;
+        }
     }
 
   power_ns3 = DoCalcRxPower (txPowerDbm, a, b);
@@ -100,8 +110,6 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
     {
       if (power_sionna != 0)
         {
-          std::string los = getLOSStatusFromSionna(a_position, b_position);
-
           if (sionna_verbose)
             {
               std::cout << "ns3_pathgain: " << - (txPowerDbm - power_ns3) << ", sionna_pathgain: "<< - (txPowerDbm - power_sionna) << ", LOS: " << los << std::endl;

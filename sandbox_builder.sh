@@ -169,6 +169,10 @@ cp src/sionna/files/propagation/propagation-delay-model.cc src/propagation/model
 cp src/sionna/files/propagation/propagation-delay-model.h src/propagation/model/
 cp src/sionna/files/propagation/propagation-loss-model.cc src/propagation/model/
 cp src/sionna/files/propagation/propagation-loss-model.h src/propagation/model/
+cp src/sionna/files/propagation/cni-urbanmicrocell-propagation-loss-model.cc src/propagation/model/
+cp src/sionna/files/propagation/cni-urbanmicrocell-propagation-loss-model.h src/propagation/model/
+cp src/sionna/files/propagation/channel-condition-model.h src/propagation/model/
+cp src/sionna/files/propagation/channel-condition-model.cc src/propagation/model/
 
 echo "Extending Signal Info features..."
 sleep 1

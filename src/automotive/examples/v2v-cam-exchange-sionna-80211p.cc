@@ -233,6 +233,7 @@ int main (int argc, char *argv[])
                                       "Threshold", DoubleValue (snr_threshold));
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   Ptr<YansWifiChannel> channel = wifiChannel.Create ();
+  channel->SetAttribute ("PropagationLossModel", StringValue ("ns3::CniUrbanmicrocellPropagationLossModel"));
   wifiPhy.SetChannel (channel);
 
   // ns-3 supports generating a pcap trace, to be later analyzed in Wireshark

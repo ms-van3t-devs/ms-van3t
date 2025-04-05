@@ -46,6 +46,7 @@ extern std::unordered_map<std::string, SionnaPosition> vehiclePositions;
 extern bool sionna_verbose;
 extern bool sionna_local_machine;
 extern std::vector<bool> sionna_los_status;
+extern bool sionna_los;
 
 }
 

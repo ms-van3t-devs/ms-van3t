@@ -24,25 +24,25 @@
 #include "ns3/enum.h"
 #include "ns3/mobility-model.h"
 #include <cmath>
-#include "cv2x_cni-urbanmicrocell-propagation-loss-model.h"
+#include "cni-urbanmicrocell-propagation-loss-model.h"
 #include <ns3/node.h>
 
-NS_LOG_COMPONENT_DEFINE ("cv2x_CniUrbanmicrocellPropagationLossModel");
+NS_LOG_COMPONENT_DEFINE ("CniUrbanmicrocellPropagationLossModel");
 
 namespace ns3 {
 
-NS_OBJECT_ENSURE_REGISTERED (cv2x_CniUrbanmicrocellPropagationLossModel);
+NS_OBJECT_ENSURE_REGISTERED (CniUrbanmicrocellPropagationLossModel);
 
 TypeId
-cv2x_CniUrbanmicrocellPropagationLossModel::GetTypeId (void)
+CniUrbanmicrocellPropagationLossModel::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::cv2x_CniUrbanmicrocellPropagationLossModel")
+  static TypeId tid = TypeId ("ns3::CniUrbanmicrocellPropagationLossModel")
     .SetParent<PropagationLossModel> ()
-    .AddConstructor<cv2x_CniUrbanmicrocellPropagationLossModel> ()
+    .AddConstructor<CniUrbanmicrocellPropagationLossModel> ()
     .AddAttribute ("Frequency",
                     "The propagation frequency in Hz",
                     DoubleValue (5900e6),
-                    MakeDoubleAccessor (&cv2x_CniUrbanmicrocellPropagationLossModel::m_frequency),
+                    MakeDoubleAccessor (&CniUrbanmicrocellPropagationLossModel::m_frequency),
                     MakeDoubleChecker<double> ())
     ;
 
@@ -50,13 +50,13 @@ cv2x_CniUrbanmicrocellPropagationLossModel::GetTypeId (void)
 }
 
 void
-cv2x_CniUrbanmicrocellPropagationLossModel::SetFrequency (double freq)
+CniUrbanmicrocellPropagationLossModel::SetFrequency (double freq)
 {
   m_frequency = freq;
 }
 
 
-cv2x_CniUrbanmicrocellPropagationLossModel::cv2x_CniUrbanmicrocellPropagationLossModel ()
+CniUrbanmicrocellPropagationLossModel::CniUrbanmicrocellPropagationLossModel ()
   : PropagationLossModel ()
 { 
   m_rand = CreateObject<UniformRandomVariable> ();
@@ -67,12 +67,12 @@ cv2x_CniUrbanmicrocellPropagationLossModel::cv2x_CniUrbanmicrocellPropagationLos
     }
 }
 
-cv2x_CniUrbanmicrocellPropagationLossModel::~cv2x_CniUrbanmicrocellPropagationLossModel ()
+CniUrbanmicrocellPropagationLossModel::~CniUrbanmicrocellPropagationLossModel ()
 {
 }
 
 double
-cv2x_CniUrbanmicrocellPropagationLossModel::GetLoss (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
+CniUrbanmicrocellPropagationLossModel::GetLoss (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
   // Pathloss
   double loss = 0.0;
@@ -178,7 +178,7 @@ cv2x_CniUrbanmicrocellPropagationLossModel::GetLoss (Ptr<MobilityModel> a, Ptr<M
 }
 
 double 
-cv2x_CniUrbanmicrocellPropagationLossModel::DoCalcRxPower (double txPowerDbm,
+CniUrbanmicrocellPropagationLossModel::DoCalcRxPower (double txPowerDbm,
                                                       Ptr<MobilityModel> a,
                                                       Ptr<MobilityModel> b) const
 {
@@ -186,7 +186,7 @@ cv2x_CniUrbanmicrocellPropagationLossModel::DoCalcRxPower (double txPowerDbm,
 }
 
 int64_t
-cv2x_CniUrbanmicrocellPropagationLossModel::DoAssignStreams (int64_t stream)
+CniUrbanmicrocellPropagationLossModel::DoAssignStreams (int64_t stream)
 {
   return 0;
 }
