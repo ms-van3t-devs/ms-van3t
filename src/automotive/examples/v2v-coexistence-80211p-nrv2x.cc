@@ -93,7 +93,7 @@ std::vector<uint8_t > nrv2xVehicles;
 static int packet_count = 0;
 static int counter = 0;
 BSMap basicServices; // Container for all ETSI Basic Services, installed on all vehicles
-bool phy_collection = false;
+bool phy_collection = true;
 
 void
 GetSlBitmapFromString (std::string slBitMapString, std::vector <std::bitset<1> > &slBitMapVector)
@@ -130,38 +130,58 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
     {
       return;
     }
+  if (my_stationID != 1 && my_stationID != 3)
+    {
+      return;
+    }
+  if (cam->header.stationId != 1 && cam->header.stationId != 3)
+    {
+      return;
+    }
+
   double snr = phy_info.snr;
   double sinr = phy_info.sinr;
   double rssi = phy_info.rssi;
   double rsrp = phy_info.rsrp;
-  if (std::isnan(snr) && !std::isnan(sinr))
+  if (std::isnan(sinr) && !std::isnan(snr))
     {
-      snr = sinr;
-    }
-  if (std::isnan(rssi) && !std::isnan(rsrp))
-    {
-      // RSSI = RSRP + 6 --> this is the heuristic formula to convert RSSI to RSRP
-      rssi = rsrp + 6;
+      sinr = snr;
     }
 
   libsumo::TraCIPosition pos = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(my_stationID));
-  pos = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::simulation.convertXYtoLonLat(pos.x,pos.y);
+  libsumo::TraCIPosition pos_lat_lon = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::simulation.convertXYtoLonLat(pos.x,pos.y);
 
   // Get the position of the sender
   double lat_sender = asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.latitude,double)/1e7;
   double lon_sender = asn1cpp::getField(cam->cam.camParameters.basicContainer.referencePosition.longitude,double)/1e7;
 
-  // Compute the distance between the sender and the receiver
-  double distance = haversineDist (lat_sender, lon_sender, pos.y, pos.x);
+  libsumo::TraCIPosition pos_sender = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(cam->header.stationId));
 
-  std::ifstream camFileHeader("src/sionna/coexistence2/phy_ns3_with_coexistence_with_dummy.csv");
+  // Compute the distance between the sender and the receiver
+  double distance = haversineDist (lat_sender, lon_sender, pos_lat_lon.y, pos_lat_lon.x);
+
+  ulong time = Simulator::Now().GetMicroSeconds();
+  uint8_t los;
+  Vector a_position = {pos.x, pos.y, pos.z};
+  Vector b_position = {pos_sender.x, pos_sender.y, 0};
+  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  if (los_str == "[False]")
+    {
+      los = 0;
+    }
+  else
+    {
+      los = 1;
+    }
+
+  std::ifstream camFileHeader("src/sionna/sinr_measures_2_stations_sionna.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/coexistence2/phy_ns3_with_coexistence_with_dummy.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/sinr_measures_2_stations_sionna.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
       {
-        camFile << "technology,distance,rssi,snr" << std::endl;
+        camFile << "time,technology,distance,sinr,LOS" << std::endl;
       } 
       else 
       {
@@ -179,8 +199,86 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
       technology = "NR-V2X";
     }
   
-  camFile << technology << "," << distance << "," << rssi << "," << snr << std::endl;
+  camFile << time << "," << technology << "," << distance << "," << sinr << "," << (int) los << std::endl;
   camFile.close();
+}
+
+void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, StationId_t my_stationID, StationType_t my_StationType, SignalInfo phy_info)
+{
+  packet_count++;
+  if (!phy_collection)
+    {
+      return;
+    }
+  if (my_stationID != 1 && my_stationID != 3)
+    {
+      return;
+    }
+  if (cpm->header.stationId != 1 && cpm->header.stationId != 3)
+    {
+      return;
+    }
+  double snr = phy_info.snr;
+  double sinr = phy_info.sinr;
+  double rssi = phy_info.rssi;
+  double rsrp = phy_info.rsrp;
+  if (std::isnan(sinr) && !std::isnan(snr))
+    {
+      sinr = snr;
+    }
+
+  libsumo::TraCIPosition pos = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(my_stationID));
+  libsumo::TraCIPosition pos_lat_lon = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::simulation.convertXYtoLonLat(pos.x,pos.y);
+
+  // Get the position of the sender
+  double lat_sender = asn1cpp::getField(cpm->payload.managementContainer.referencePosition.latitude,double)/1e7;
+  double lon_sender = asn1cpp::getField(cpm->payload.managementContainer.referencePosition.longitude,double)/1e7;
+
+  libsumo::TraCIPosition pos_sender = basicServices.get(my_stationID)->getTraCIclient ()->TraCIAPI::vehicle.getPosition("veh" + std::to_string(cpm->header.stationId));
+
+  // Compute the distance between the sender and the receiver
+  double distance = haversineDist (lat_sender, lon_sender, pos_lat_lon.y, pos_lat_lon.x);
+
+  ulong time = Simulator::Now().GetMicroSeconds();
+  uint8_t los;
+  Vector a_position = {pos.x, pos.y, pos.z};
+  Vector b_position = {pos_sender.x, pos_sender.y, pos_sender.z};
+  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  if (los_str == "[False]")
+    {
+      los = 0;
+    }
+  else
+    {
+      los = 1;
+    }
+  std::ifstream cpmFileHeader("src/sionna/sinr_measures_2_stations_sionna.csv");
+  std::ofstream cpmFile;
+  cpmFile.open("src/sionna/sinr_measures_2_stations_sionna.csv", std::ios::out | std::ios::app);
+  if (!cpmFileHeader.is_open())
+    {
+      if (cpmFile.is_open())
+        {
+          cpmFile << "time,technology,distance,sinr,LOS" << std::endl;
+        }
+      else
+        {
+          std::cerr << "Unable to create file .csv" << std::endl;
+        }
+    }
+
+  std::string technology;
+  if (std::find(dsrcVehicles.begin(), dsrcVehicles.end(), my_stationID) != dsrcVehicles.end())
+    {
+      technology = "DSRC";
+    }
+  else
+    {
+      technology = "NR-V2X";
+    }
+
+  cpmFile << time << "," << technology << "," << distance << "," << sinr << "," << (int) los << std::endl;
+  cpmFile.close();
 }
 
 void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std::string type)
@@ -202,7 +300,6 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
       file << i << "," << prr << "," << latency << std::endl;
     }
   file.close();
-
 }
 
 void txTrackerSetup(std::vector<std::string> wifiVehicles, NodeContainer wifiNodes, std::vector<std::string> nrVehicles, NetDeviceContainer nrDevices, bool dsrc_interference, bool nr_interference)
@@ -274,7 +371,7 @@ static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
 
 int main (int argc, char *argv[])
 {
-  phy_collection = false;
+  phy_collection = true;
 
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
@@ -289,7 +386,7 @@ int main (int argc, char *argv[])
   double snr_threshold = 10; // Default value
   double sinr_threshold = 10; // Default value
   xmlDocPtr rou_xml_file;
-  double simTime = 150.0; // Total simulation time (default: 200 seconds)
+  double simTime = 50.0; // Total simulation time (default: 200 seconds)
 
   // NR parameters. We will take the input from the command line, and then we
   // will pass them inside the NR module.
@@ -325,19 +422,19 @@ int main (int argc, char *argv[])
 
   bool interference = true;
   bool dsrc_interference = false;
-  bool nr_interference = true;
+  bool nr_interference = false;
 
   Time slBearersActivationTime = Seconds (2.0);
 
-  if ((dsrc_interference && nr_interference) || (interference && !(dsrc_interference || nr_interference)))
+  if ((dsrc_interference && nr_interference) /*|| (interference && !(dsrc_interference || nr_interference))*/)
     {
       NS_FATAL_ERROR ("Check the interference setup.");
     }
 
   // Set here the path to the SUMO XML files
   std::string sumo_folder = "src/automotive/examples/sumo_files_v2v_map/";
-  std::string mob_trace = "cars_7.rou.xml";
-  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map_7.sumo.cfg";
+  std::string mob_trace = "cars.rou.xml";
+  std::string sumo_config ="src/automotive/examples/sumo_files_v2v_map/map.sumo.cfg";
 
   // Read the command line options
   CommandLine cmd (__FILE__);
@@ -405,7 +502,7 @@ int main (int argc, char *argv[])
   std::vector<std::string> nrVehicles;
 
   uint8_t i = 1;
-  if (interference)
+  if (dsrc_interference || nr_interference)
     {
       i = 2;
     }
@@ -774,7 +871,7 @@ int main (int argc, char *argv[])
     unsigned long vehID = std::stol(vehicleID.substr (3));
     unsigned long nodeID;
 
-    std::cout << "Vehicle entering in the simulation: " << vehicleID << std::endl;
+    std::cout << "Vehicle entering in the simulation: " << vehicleID << " at time " << Simulator::Now().GetMicroSeconds() << std::endl;
 
     if (std::find(wifiVehicles.begin(), wifiVehicles.end(), vehicleID) != wifiVehicles.end())
       {
@@ -873,6 +970,7 @@ int main (int argc, char *argv[])
       {
         Ptr<BSContainer> bs_container = CreateObject<BSContainer>(vehID,StationType_passengerCar,sumoClient,false,sock);
         bs_container->addCAMRxCallback (std::bind(&receiveCAM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
+        bs_container->addCPMRxCallback (std::bind(&receiveCPM, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
         switch (type)
           {
           case NodeType::DSRC:

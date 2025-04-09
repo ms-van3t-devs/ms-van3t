@@ -286,5 +286,6 @@ build_lib(
   LIBRARIES_TO_LINK
     ${liblte}
     ${libinternet-apps}
+    ${libsionna}
   TEST_SOURCES ${test_sources}
 )

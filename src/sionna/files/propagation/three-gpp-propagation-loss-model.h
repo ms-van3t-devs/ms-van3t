@@ -22,6 +22,7 @@
 
 #include "ns3/propagation-loss-model.h"
 #include "ns3/channel-condition-model.h"
+#include "ns3/los_nlos.h"
 
 namespace ns3 {
 

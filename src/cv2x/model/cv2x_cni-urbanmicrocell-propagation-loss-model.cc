@@ -60,11 +60,6 @@ cv2x_CniUrbanmicrocellPropagationLossModel::cv2x_CniUrbanmicrocellPropagationLos
   : PropagationLossModel ()
 { 
   m_rand = CreateObject<UniformRandomVariable> ();
-  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
-  if (sionnaHelper.GetSionna())
-    {
-      m_isLosEnabled = false;
-    }
 }
 
 cv2x_CniUrbanmicrocellPropagationLossModel::~cv2x_CniUrbanmicrocellPropagationLossModel ()
@@ -99,23 +94,7 @@ cv2x_CniUrbanmicrocellPropagationLossModel::GetLoss (Ptr<MobilityModel> a, Ptr<M
 
   // Calculate the LOS probability based on 3GPP specifications 
   // https://www.cept.org/files/8339/winner2%20-%20final%20report.pdf Table 4-7
-  double plos;
-  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
-  if (sionnaHelper.GetSionna())
-    {
-      if (sionna_los)
-        {
-          plos = 1;
-        }
-      else
-        {
-          plos = 0;
-        }
-    }
-  else
-    {
-      plos = std::min ((18 / dist), 1.0) * (1 - std::exp (-dist / 36)) + std::exp (-dist / 36);
-    }
+  double plos = std::min ((18 / dist), 1.0) * (1 - std::exp (-dist / 36)) + std::exp (-dist / 36);
 
   // Freespace pathloss
   double loss_free  = 20*std::log10 (dist) + 46.4 + 20*std::log10(fc/5.0); 

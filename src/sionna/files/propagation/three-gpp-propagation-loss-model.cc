@@ -42,28 +42,28 @@ TypeId
 ThreeGppPropagationLossModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ThreeGppPropagationLossModel")
-    .SetParent<PropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddAttribute ("Frequency", "The centre frequency in Hz.",
-                   DoubleValue (500.0e6),
-                   MakeDoubleAccessor (&ThreeGppPropagationLossModel::SetFrequency,
-                                       &ThreeGppPropagationLossModel::GetFrequency),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("ShadowingEnabled", "Enable/disable shadowing.",
-                   BooleanValue (true),
-                   MakeBooleanAccessor (&ThreeGppPropagationLossModel::m_shadowingEnabled),
-                   MakeBooleanChecker ())
-    .AddAttribute ("ChannelConditionModel", "Pointer to the channel condition model.",
-                   PointerValue (),
-                   MakePointerAccessor (&ThreeGppPropagationLossModel::SetChannelConditionModel,
-                                        &ThreeGppPropagationLossModel::GetChannelConditionModel),
-                   MakePointerChecker<ChannelConditionModel> ())
-  ;
+                          .SetParent<PropagationLossModel> ()
+                          .SetGroupName ("Propagation")
+                          .AddAttribute ("Frequency", "The centre frequency in Hz.",
+                                         DoubleValue (500.0e6),
+                                         MakeDoubleAccessor (&ThreeGppPropagationLossModel::SetFrequency,
+                                                             &ThreeGppPropagationLossModel::GetFrequency),
+                                         MakeDoubleChecker<double> ())
+                          .AddAttribute ("ShadowingEnabled", "Enable/disable shadowing.",
+                                         BooleanValue (true),
+                                         MakeBooleanAccessor (&ThreeGppPropagationLossModel::m_shadowingEnabled),
+                                         MakeBooleanChecker ())
+                          .AddAttribute ("ChannelConditionModel", "Pointer to the channel condition model.",
+                                         PointerValue (),
+                                         MakePointerAccessor (&ThreeGppPropagationLossModel::SetChannelConditionModel,
+                                                              &ThreeGppPropagationLossModel::GetChannelConditionModel),
+                                         MakePointerChecker<ChannelConditionModel> ())
+      ;
   return tid;
 }
 
 ThreeGppPropagationLossModel::ThreeGppPropagationLossModel ()
-  : PropagationLossModel ()
+    : PropagationLossModel ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -140,6 +140,15 @@ ThreeGppPropagationLossModel::DoCalcRxPower (double txPowerDbm,
         {
           cond->SetLosCondition (ChannelCondition::LosConditionValue::NLOS);
         }
+    }
+
+  LOS_NLOS& los_nlos = LOS_NLOS::GetInstance();
+  if (!los_nlos.CheckBuildings())
+    {
+      std::tuple<float, float> first = std::make_tuple (a->GetPosition().x, a->GetPosition().y);
+      std::tuple<float, float> second = std::make_tuple (b->GetPosition().x, b->GetPosition().y);
+      ChannelCondition c = los_nlos.GetLosNlos(first, second);
+      cond->SetLosCondition(c.GetLosCondition());
     }
 
   // compute the 2D distance between a and b
@@ -314,23 +323,23 @@ TypeId
 ThreeGppRmaPropagationLossModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ThreeGppRmaPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppRmaPropagationLossModel> ()
-    .AddAttribute ("AvgBuildingHeight", "The average building height in meters.",
-                   DoubleValue (5.0),
-                   MakeDoubleAccessor (&ThreeGppRmaPropagationLossModel::m_h),
-                   MakeDoubleChecker<double> (5.0, 50.0))
-    .AddAttribute ("AvgStreetWidth", "The average street width in meters.",
-                   DoubleValue (20.0),
-                   MakeDoubleAccessor (&ThreeGppRmaPropagationLossModel::m_w),
-                   MakeDoubleChecker<double> (5.0, 50.0))
-  ;
+                          .SetParent<ThreeGppPropagationLossModel> ()
+                          .SetGroupName ("Propagation")
+                          .AddConstructor<ThreeGppRmaPropagationLossModel> ()
+                          .AddAttribute ("AvgBuildingHeight", "The average building height in meters.",
+                                         DoubleValue (5.0),
+                                         MakeDoubleAccessor (&ThreeGppRmaPropagationLossModel::m_h),
+                                         MakeDoubleChecker<double> (5.0, 50.0))
+                          .AddAttribute ("AvgStreetWidth", "The average street width in meters.",
+                                         DoubleValue (20.0),
+                                         MakeDoubleAccessor (&ThreeGppRmaPropagationLossModel::m_w),
+                                         MakeDoubleChecker<double> (5.0, 50.0))
+      ;
   return tid;
 }
 
 ThreeGppRmaPropagationLossModel::ThreeGppRmaPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+    : ThreeGppPropagationLossModel ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -514,15 +523,15 @@ TypeId
 ThreeGppUmaPropagationLossModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ThreeGppUmaPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppUmaPropagationLossModel> ()
-  ;
+                          .SetParent<ThreeGppPropagationLossModel> ()
+                          .SetGroupName ("Propagation")
+                          .AddConstructor<ThreeGppUmaPropagationLossModel> ()
+      ;
   return tid;
 }
 
 ThreeGppUmaPropagationLossModel::ThreeGppUmaPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+    : ThreeGppPropagationLossModel ()
 {
   NS_LOG_FUNCTION (this);
   m_uniformVar = CreateObject<UniformRandomVariable> ();
@@ -727,14 +736,14 @@ TypeId
 ThreeGppUmiStreetCanyonPropagationLossModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppUmiStreetCanyonPropagationLossModel> ()
-  ;
+                          .SetParent<ThreeGppPropagationLossModel> ()
+                          .SetGroupName ("Propagation")
+                          .AddConstructor<ThreeGppUmiStreetCanyonPropagationLossModel> ()
+      ;
   return tid;
 }
 ThreeGppUmiStreetCanyonPropagationLossModel::ThreeGppUmiStreetCanyonPropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+    : ThreeGppPropagationLossModel ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -934,14 +943,14 @@ TypeId
 ThreeGppIndoorOfficePropagationLossModel::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ThreeGppIndoorOfficePropagationLossModel")
-    .SetParent<ThreeGppPropagationLossModel> ()
-    .SetGroupName ("Propagation")
-    .AddConstructor<ThreeGppIndoorOfficePropagationLossModel> ()
-  ;
+                          .SetParent<ThreeGppPropagationLossModel> ()
+                          .SetGroupName ("Propagation")
+                          .AddConstructor<ThreeGppIndoorOfficePropagationLossModel> ()
+      ;
   return tid;
 }
 ThreeGppIndoorOfficePropagationLossModel::ThreeGppIndoorOfficePropagationLossModel ()
-  : ThreeGppPropagationLossModel ()
+    : ThreeGppPropagationLossModel ()
 {
   NS_LOG_FUNCTION (this);
 

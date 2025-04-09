@@ -3,6 +3,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 link_libraries(${OpenCV_LIBS})
 
 Set(source_files
+    model/LOS-NLOS/los_nlos.cc
     helper/areaSpeedAdvisorClient80211p-helper.cc
     helper/areaSpeedAdvisorServer80211p-helper.cc
     helper/areaSpeedAdvisorClientLTE-helper.cc
@@ -1324,6 +1325,7 @@ Set(source_files
     )
 
 set(header_files
+    model/LOS-NLOS/los_nlos.h
     model/Measurements/MetricSupervisor.h
     helper/areaSpeedAdvisorClientLTE-helper.h
     helper/areaSpeedAdvisorServerLTE-helper.h
