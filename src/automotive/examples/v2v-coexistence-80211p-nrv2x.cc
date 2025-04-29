@@ -174,9 +174,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
       los = 1;
     }
 
-  std::ifstream camFileHeader("src/sionna/sinr_measures_2_stations_sionna.csv");
+  std::ifstream camFileHeader("src/sionna/sinr_measures_2_stations_ns3_i.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/sinr_measures_2_stations_sionna.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/sinr_measures_2_stations_ns3_i.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -252,9 +252,9 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
     {
       los = 1;
     }
-  std::ifstream cpmFileHeader("src/sionna/sinr_measures_2_stations_sionna.csv");
+  std::ifstream cpmFileHeader("src/sionna/sinr_measures_2_stations_ns3_i.csv");
   std::ofstream cpmFile;
-  cpmFile.open("src/sionna/sinr_measures_2_stations_sionna.csv", std::ios::out | std::ios::app);
+  cpmFile.open("src/sionna/sinr_measures_2_stations_ns3_i.csv", std::ios::out | std::ios::app);
   if (!cpmFileHeader.is_open())
     {
       if (cpmFile.is_open())
@@ -371,7 +371,7 @@ static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
 
 int main (int argc, char *argv[])
 {
-  phy_collection = true;
+  phy_collection = false;
 
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
