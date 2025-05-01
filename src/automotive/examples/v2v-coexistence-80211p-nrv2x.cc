@@ -130,14 +130,6 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
     {
       return;
     }
-  if (my_stationID != 1 && my_stationID != 3)
-    {
-      return;
-    }
-  if (cam->header.stationId != 1 && cam->header.stationId != 3)
-    {
-      return;
-    }
 
   double snr = phy_info.snr;
   double sinr = phy_info.sinr;
@@ -164,7 +156,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
   uint8_t los;
   Vector a_position = {pos.x, pos.y, pos.z};
   Vector b_position = {pos_sender.x, pos_sender.y, 0};
-  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  /*std::string los_str = getLOSStatusFromSionna(a_position, b_position);
   if (los_str == "[False]")
     {
       los = 0;
@@ -172,16 +164,16 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
   else
     {
       los = 1;
-    }
+    }*/
 
-  std::ifstream camFileHeader("src/sionna/sinr_measures_2_stations_ns3_i.csv");
+  std::ifstream camFileHeader("src/sionna/sinr_measures_sionna_i.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/sinr_measures_2_stations_ns3_i.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/sinr_measures_sionna_i.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
       {
-        camFile << "time,technology,distance,sinr,LOS" << std::endl;
+        camFile << "time,rx,tx,technology,distance,sinr" << std::endl;
       } 
       else 
       {
@@ -199,7 +191,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
       technology = "NR-V2X";
     }
   
-  camFile << time << "," << technology << "," << distance << "," << sinr << "," << (int) los << std::endl;
+  camFile << time << "," << my_stationID << "," << std::to_string(cam->header.stationId) << "," << technology << "," << distance << "," << sinr << std::endl;
   camFile.close();
 }
 
@@ -210,14 +202,7 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
     {
       return;
     }
-  if (my_stationID != 1 && my_stationID != 3)
-    {
-      return;
-    }
-  if (cpm->header.stationId != 1 && cpm->header.stationId != 3)
-    {
-      return;
-    }
+
   double snr = phy_info.snr;
   double sinr = phy_info.sinr;
   double rssi = phy_info.rssi;
@@ -243,7 +228,7 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
   uint8_t los;
   Vector a_position = {pos.x, pos.y, pos.z};
   Vector b_position = {pos_sender.x, pos_sender.y, pos_sender.z};
-  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  /*std::string los_str = getLOSStatusFromSionna(a_position, b_position);
   if (los_str == "[False]")
     {
       los = 0;
@@ -251,15 +236,15 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
   else
     {
       los = 1;
-    }
-  std::ifstream cpmFileHeader("src/sionna/sinr_measures_2_stations_ns3_i.csv");
+    }*/
+  std::ifstream cpmFileHeader("src/sionna/sinr_measures_sionna_i.csv");
   std::ofstream cpmFile;
-  cpmFile.open("src/sionna/sinr_measures_2_stations_ns3_i.csv", std::ios::out | std::ios::app);
+  cpmFile.open("src/sionna/sinr_measures_sionna_i.csv", std::ios::out | std::ios::app);
   if (!cpmFileHeader.is_open())
     {
       if (cpmFile.is_open())
         {
-          cpmFile << "time,technology,distance,sinr,LOS" << std::endl;
+          cpmFile << "time,rx,tx,technology,distance,sinr" << std::endl;
         }
       else
         {
@@ -277,7 +262,7 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
       technology = "NR-V2X";
     }
 
-  cpmFile << time << "," << technology << "," << distance << "," << sinr << "," << (int) los << std::endl;
+  cpmFile << time << "," << my_stationID << "," << std::to_string(cpm->header.stationId) << "," << technology << "," << distance << "," << sinr << std::endl;
   cpmFile.close();
 }
 
@@ -420,7 +405,7 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = true;
+  bool interference = false;
   bool dsrc_interference = false;
   bool nr_interference = false;
 
@@ -453,7 +438,6 @@ int main (int argc, char *argv[])
   std::cout << "Start running v2v-simple-cam-exchange-80211p-nrv2x simulation" << std::endl;
 
   SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
-
   if (sionna)
     {
       sionnaHelper.SetSionna(sionna);
@@ -1031,7 +1015,7 @@ int main (int argc, char *argv[])
       std::cerr << "Unable to open file";
     }
 
-  outputFile << "\nTotal number of CAMs received: " << packet_count << std::endl;
+  outputFile << "\nTotal number of packets received: " << packet_count << std::endl;
 
   outputFile << "\nMetric Supervisor statistics for 802.11p" << std::endl;
   outputFile << "Average PRR: " << metSup_11p->getAveragePRR_overall () << std::endl;

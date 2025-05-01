@@ -484,9 +484,9 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                     }
                 }
 
-              ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, duration);
-              ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, duration);
-              ltePhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, duration);
+              ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
+              ltePhy->GetSlInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
+              ltePhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
             }
         }
     }

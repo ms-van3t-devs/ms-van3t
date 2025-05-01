@@ -351,7 +351,7 @@ ThreeGppSpectrumPropagationLossModel::DoCalcRxPowerSpectralDensity (Ptr<const Sp
 
   // retrieve the long term component
   SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
-  if (sionnaHelper.GetSionna())
+  if (!sionnaHelper.GetSionna())
     {
       PhasedArrayModel::ComplexVector longTerm = GetLongTerm (channelMatrix, aPhasedArrayModel, bPhasedArrayModel);
       // apply the beamforming gain
