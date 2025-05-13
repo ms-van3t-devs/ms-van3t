@@ -42,7 +42,7 @@
 
 #include "ns3/StationType.h"
 
-#include "ns3/sionna_handler.h"
+#include "ns3/sionna-connection-handler.h"
 
 #define STARTUP_FCN std::function<Ptr<Node>(std::string,TraciClient::StationTypeTraCI_t)>
 #define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>

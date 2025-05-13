@@ -2,7 +2,7 @@
 #ifndef SIONNA_HELPER_H
 #define SIONNA_HELPER_H
 
-#include "ns3/sionna_handler.h"
+#include "ns3/sionna-connection-handler.h"
 
 namespace ns3 {
 
