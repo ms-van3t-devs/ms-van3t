@@ -42,8 +42,8 @@ enum PhyErrorModelTestCondition  {
 class cv2x_LtePhyErrorModelTestCase : public TestCase
 {
 public:
-  static std::string BuildNameString (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, HarqProcessInfoList_t harqHistory);
-  cv2x_LtePhyErrorModelTestCase (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, HarqProcessInfoList_t harqHistory, double expectedBler, PhyErrorModelTestCondition cond);
+  static std::string BuildNameString (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, cv2x_HarqProcessInfoList_t harqHistory);
+  cv2x_LtePhyErrorModelTestCase (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, cv2x_HarqProcessInfoList_t harqHistory, double expectedBler, PhyErrorModelTestCondition cond);
 
 
 private:
@@ -54,12 +54,12 @@ private:
   cv2x_LtePhyErrorModel::LteTxMode m_txmode;
   uint16_t m_mcs;
   double m_newSinr; 
-  HarqProcessInfoList_t m_harqHistory;
+  cv2x_HarqProcessInfoList_t m_harqHistory;
   double m_expectedBler;
   PhyErrorModelTestCondition m_cond;
 };
 
-std::string cv2x_LtePhyErrorModelTestCase::BuildNameString (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, HarqProcessInfoList_t harqHistory)
+std::string cv2x_LtePhyErrorModelTestCase::BuildNameString (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, cv2x_HarqProcessInfoList_t harqHistory)
 {
   std::ostringstream oss;
   
@@ -105,7 +105,7 @@ std::string cv2x_LtePhyErrorModelTestCase::BuildNameString (cv2x_LtePhyErrorMode
 }
 
 
-cv2x_LtePhyErrorModelTestCase::cv2x_LtePhyErrorModelTestCase (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, HarqProcessInfoList_t harqHistory, double expectedBler, PhyErrorModelTestCondition cond)
+cv2x_LtePhyErrorModelTestCase::cv2x_LtePhyErrorModelTestCase (cv2x_LtePhyErrorModel::cv2x_LtePhyChannel channel, cv2x_LtePhyErrorModel::LteFadingModel fadingChannel, cv2x_LtePhyErrorModel::LteTxMode txmode, uint16_t mcs, double newSinr, cv2x_HarqProcessInfoList_t harqHistory, double expectedBler, PhyErrorModelTestCondition cond)
   : TestCase (BuildNameString (channel, fadingChannel, txmode, mcs, newSinr, harqHistory)),
     m_channel (channel),
     m_fadingChannel (fadingChannel),
@@ -169,7 +169,7 @@ cv2x_LtePhyErrorModelTestSuite::cv2x_LtePhyErrorModelTestSuite ()
   LogComponentEnable("cv2x_LtePhyErrorModel", LOG_LEVEL_ALL);
   LogComponentEnable("TestNistPhyErrorModel", LOG_LEVEL_ALL);
 
-  HarqProcessInfoList_t harqInfoList;
+  cv2x_HarqProcessInfoList_t harqInfoList;
 
   //Tests with no HARQ history
   //tests not requiring interpolation
