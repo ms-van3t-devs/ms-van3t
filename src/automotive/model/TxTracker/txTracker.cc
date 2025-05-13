@@ -99,7 +99,7 @@ TxTracker::InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeN
 }
 
 // Insert LTE nodes into the tracker
-void
+/* void
 TxTracker::InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes, double rbOh, uint32_t numerology)
 {
   for (auto n : nodes)
@@ -123,7 +123,7 @@ TxTracker::InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x
           rbBand,
       };
     }
-}
+} */
 
 // Add interference from CV2X signals
 void
@@ -141,7 +141,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
           break;
         }
     }
-  if (!found)
+  /* if (!found)
     {
       for (auto it = m_txMapLte.begin(); it != m_txMapLte.end(); ++it)
         {
@@ -152,7 +152,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
               break;
             }
         }
-    }
+    } */
 
   // NS_ASSERT_MSG (found, "NetDevice not found in TxTracker.");
 
@@ -160,8 +160,10 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
     {
       double wifiCentralFreq = m_centralFrequency11p;
       double wifiBandwidth = m_bandWidth11p;
-      double cCentralFrequency = technologyType == "Nr" ? m_centralFrequencyNr : m_centralFrequencyLte;
-      double cBandwidth = technologyType == "Nr" ? m_bandWidthNr : m_bandWidthLte;
+      // double cCentralFrequency = technologyType == "Nr" ? m_centralFrequencyNr : m_centralFrequencyLte;
+      double cCentralFrequency = m_centralFrequencyNr;
+      // double cBandwidth = technologyType == "Nr" ? m_bandWidthNr : m_bandWidthLte;
+      double cBandwidth = m_bandWidthNr;
 
       double cLowerFreq = cCentralFrequency - cBandwidth / 2;
       double cUpperFreq = cCentralFrequency + cBandwidth / 2;
@@ -171,7 +173,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
 
       if (overlap)
         {
-          double freqPerRb = technologyType == "Nr" ? m_bandWidthNr / signal->GetValuesN() : m_bandWidthLte / signal->GetValuesN();
+          // double freqPerRb = technologyType == "Nr" ? m_bandWidthNr / signal->GetValuesN() : m_bandWidthLte / signal->GetValuesN();
+          double freqPerRb = m_bandWidthNr / signal->GetValuesN();
           Ptr<MobilityModel> cMobility = netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
 
           for (auto it = m_txMap11p.begin(); it != m_txMap11p.end(); ++it)
@@ -200,8 +203,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
                 }
 
               double powerDbm = WToDbm(powerW);
-              double pathloss = propagationLoss->CalcRxPower(0, wifiMobility, cMobility);
-              double finalInterferencePowerDbm = powerDbm - std::abs(pathloss);
+              double pathLoss = propagationLoss->CalcRxPower(0, wifiMobility, cMobility);
+              double finalInterferencePowerDbm = powerDbm - std::abs(pathLoss);
               double finalInterferencePowerW = DbmToW(finalInterferencePowerDbm);
 
               if ((finalInterferencePowerDbm + wifiPhy->GetRxGain ()) < wifiPhy->GetRxSensitivity ())
@@ -219,7 +222,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
     }
 
   // The interference comes from a NR signal
-  if (technologyType == "Nr" && !m_txMapLte.empty())
+  /* if (technologyType == "Nr" && !m_txMapLte.empty())
     {
       // The transmission is from NR, so we need to add interference from LTE signals
       double nrLowerFreq = m_centralFrequencyNr - m_bandWidthNr / 2;
@@ -350,7 +353,7 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
               nrPhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, duration);
             }
         }
-    }
+    } */
 }
 
 // Add interference from NR signals to 80211p signals
@@ -379,6 +382,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
               // Calculate interference for overlapping frequency bands
               Ptr<MobilityModel> c1Mobility = it->second.netDevice->GetNode()->GetObject<ConstantPositionMobilityModel>();
               double pathLoss = propagationLoss->CalcRxPower (0, c1Mobility, wifiMobility);
+
               if (std::abs(pathLoss) > m_noisePowerThreshold)
                 {
                   continue;
@@ -424,7 +428,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
         }
     }
 
-  if (!m_txMapLte.empty())
+  /* if (!m_txMapLte.empty())
     {
       double wifiLowerFreq = m_centralFrequency11p - m_bandWidth11p / 2;
       double wifiUpperFreq = m_centralFrequency11p + m_bandWidth11p / 2;
@@ -489,7 +493,7 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
               ltePhy->GetCtrlInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
             }
         }
-    }
+    } */
 }
 
 } // namespace ns3

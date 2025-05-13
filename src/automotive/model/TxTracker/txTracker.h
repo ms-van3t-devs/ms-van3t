@@ -16,9 +16,9 @@
 #include "ns3/ptr.h"
 #include "ns3/nr-ue-phy.h"
 #include "ns3/nr-ue-net-device.h"
-#include "ns3/cv2x_lte-ue-net-device.h"
-#include "ns3/cv2x_lte-ue-phy.h"
-#include "ns3/cv2x_lte-spectrum-phy.h"
+//#include "ns3/cv2x_lte-ue-net-device.h"
+//#include "ns3/cv2x_lte-ue-phy.h"
+//#include "ns3/cv2x_lte-spectrum-phy.h"
 #include "ns3/node.h"
 #include "ns3/config.h"
 #include "ns3/sionna_handler.h"
@@ -66,12 +66,12 @@ namespace ns3 {
     } txParametersNR;
 
     // Structure to hold LTE transmission parameters
-    typedef struct txParametersLTE
+    /* typedef struct txParametersLTE
     {
       uint8_t nodeID; // Node ID
       Ptr<cv2x_LteUeNetDevice> netDevice; // Pointer to the NrUeNetDevice
       double rbBandwidth; // Resource block bandwidth
-    } txParametersLTE;
+    } txParametersLTE; */
 
     // Method to insert 11p nodes into the tracker
     void Insert11pNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<WifiNetDevice>>> nodes);
@@ -80,7 +80,7 @@ namespace ns3 {
     void InsertNrNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<NrUeNetDevice>>> nodes);
 
     // Method to insert LTE nodes into the tracker
-    void InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes, double rbOh = 0.04, uint32_t numerology = 2);
+    // void InsertLteNodes (std::vector<std::tuple<std::string, uint8_t, Ptr<cv2x_LteUeNetDevice>>> nodes, double rbOh = 0.04, uint32_t numerology = 2);
   
     // Method to set the central frequencies for 11p, NR, and LTE
     void
@@ -88,7 +88,7 @@ namespace ns3 {
     {
       m_centralFrequency11p = frequency11p_Hz;
       m_centralFrequencyNr = frequencyNr_Hz;
-      m_centralFrequencyLte = frequencyLte_Hz;
+      // m_centralFrequencyLte = frequencyLte_Hz;
     };
   
     // Method to set the bandwidths for 11p, NR, and LTE
@@ -97,7 +97,7 @@ namespace ns3 {
     {
       m_bandWidth11p = band11p_Hz;
       m_bandWidthNr = bandNr_Hz;
-      m_bandWidthLte = bandLte_Hz;
+      // m_bandWidthLte = bandLte_Hz;
     };
   
     // Method to add interference for NR signals
@@ -131,7 +131,7 @@ namespace ns3 {
     std::unordered_map<std::string, txParametersNR> m_txMapNr;
 
     // Map to store LTE transmission parameters
-    std::unordered_map<std::string, txParametersLTE> m_txMapLte;
+    // std::unordered_map<std::string, txParametersLTE> m_txMapLte;
   
     // Central frequency for 11p
     double m_centralFrequency11p;
@@ -140,7 +140,7 @@ namespace ns3 {
     double m_centralFrequencyNr;
 
     // Central frequency for Lte
-    double m_centralFrequencyLte;
+    // double m_centralFrequencyLte;
   
     // Bandwidth for 11p
     double m_bandWidth11p;
@@ -149,7 +149,7 @@ namespace ns3 {
     double m_bandWidthNr;
 
     // Bandwidth for LTE
-    double m_bandWidthLte;
+    // double m_bandWidthLte;
 
     double m_noisePowerThreshold = 120;
   };

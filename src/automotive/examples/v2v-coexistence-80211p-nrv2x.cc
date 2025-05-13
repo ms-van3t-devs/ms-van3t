@@ -79,7 +79,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2xCv2x");
+NS_LOG_COMPONENT_DEFINE ("V2VSimpleCAMExchange80211pNrv2x");
 
 enum class NodeType
 {
@@ -166,9 +166,9 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
       los = 1;
     }*/
 
-  std::ifstream camFileHeader("src/sionna/sinr_measures_sionna_i.csv");
+  std::ifstream camFileHeader("src/sionna/sinr_final_sionna_i.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/sinr_measures_sionna_i.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sionna/sinr_final_sionna_i.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
@@ -237,9 +237,9 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
     {
       los = 1;
     }*/
-  std::ifstream cpmFileHeader("src/sionna/sinr_measures_sionna_i.csv");
+  std::ifstream cpmFileHeader("src/sionna/sinr_final_sionna_i.csv");
   std::ofstream cpmFile;
-  cpmFile.open("src/sionna/sinr_measures_sionna_i.csv", std::ios::out | std::ios::app);
+  cpmFile.open("src/sionna/sinr_final_sionna_i.csv", std::ios::out | std::ios::app);
   if (!cpmFileHeader.is_open())
     {
       if (cpmFile.is_open())
@@ -271,11 +271,11 @@ void savePRRs(Ptr<MetricSupervisor> metSup, std::vector<std::string> nodes, std:
   std::ofstream file;
   if (type == "nr")
     {
-      file.open("src/sionna/coexistence2/prr_latency_ns3_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/prr_latency_ns3_coexistence_nrv2x.csv", std::ios::out | std::ios::app);
     }
   else if (type == "11p")
     {
-      file.open("src/sionna/coexistence2/prr_latency_ns3_coexistence_11p.csv", std::ios::out | std::ios::app);
+      file.open("src/sionna/prr_latency_ns3_coexistence_11p.csv", std::ios::out | std::ios::app);
     }
   file << "node_id,prr,latency(ms)" << std::endl;
   for (int i = 0; i < nodes.size(); i++)
@@ -356,7 +356,7 @@ static void GenerateTraffic_interfering (Ptr<Socket> socket, uint32_t pktSize,
 
 int main (int argc, char *argv[])
 {
-  phy_collection = false;
+  phy_collection = true;
 
   // std::string phyMode ("OfdmRate6MbpsBW10MHz");
   std::string phyMode ("OfdmRate3MbpsBW10MHz");
@@ -405,7 +405,7 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = false;
+  bool interference = true;
   bool dsrc_interference = false;
   bool nr_interference = false;
 
@@ -881,6 +881,7 @@ int main (int argc, char *argv[])
     Ipv4Address groupAddress4 ("225.0.0.0");
     Ptr<NrUeNetDevice> nrDevice;
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    std::ofstream file;
     switch (type)
       {
       case NodeType::DSRC:
