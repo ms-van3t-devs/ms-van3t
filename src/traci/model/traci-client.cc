@@ -375,12 +375,13 @@ namespace ns3
             // set ns3 node position with user defined altitude
             mob->SetPosition(Vector(pos.x, pos.y, m_altitude));
 
-            // send map_update message to NVIDIA Sionna and wait for the change to be applied
-            double angle = this->TraCIAPI::vehicle.getAngle(node_ID);
-
             if (m_sionna == true)
             {
-              updateLocationSionna(node_ID, std::to_string(pos.x), std::to_string(pos.y), std::to_string(pos.z), std::to_string(angle));
+              Vector pos_for_sionna = Vector(pos.x, pos.y, m_altitude);
+              double angle_for_sionna = this->TraCIAPI::vehicle.getAngle(node_ID);
+              double speed = this->TraCIAPI::vehicle.getSpeed(node_ID);
+              Vector vel_for_sionna = Vector(speed * cos(angle_for_sionna), speed * sin(angle_for_sionna), 0.0);
+              updateLocationInSionna(node_ID, pos_for_sionna, angle_for_sionna, vel_for_sionna);
             }
             
             if (m_vehicle_visualizer!=nullptr && m_vehicle_visualizer->isConnected() && it->second.first != StationType_pedestrian)

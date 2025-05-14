@@ -142,14 +142,14 @@ ThreeGppPropagationLossModel::DoCalcRxPower (double txPowerDbm,
         }
     }
 
-  /*LOS_NLOS& los_nlos = LOS_NLOS::GetInstance();
+  LOS_NLOS& los_nlos = LOS_NLOS::GetInstance();
   if (!los_nlos.CheckBuildings())
     {
       std::tuple<float, float> first = std::make_tuple (a->GetPosition().x, a->GetPosition().y);
       std::tuple<float, float> second = std::make_tuple (b->GetPosition().x, b->GetPosition().y);
       ChannelCondition c = los_nlos.GetLosNlos(first, second);
       cond->SetLosCondition(c.GetLosCondition());
-    }*/
+    }
 
   // compute the 2D distance between a and b
   double distance2d = Calculate2dDistance (a->GetPosition (), b->GetPosition ());
