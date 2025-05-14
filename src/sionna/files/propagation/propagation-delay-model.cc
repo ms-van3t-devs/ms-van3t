@@ -117,8 +117,8 @@ ConstantSpeedPropagationDelayModel::ConstantSpeedPropagationDelayModel ()
 Time
 ConstantSpeedPropagationDelayModel::GetDelay (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  Vector a_position = GetPositionFromMobilityModel(a);
-  Vector b_position = GetPositionFromMobilityModel(b);
+  Vector a_position = a->GetPosition();
+  Vector b_position = b->GetPosition();
 
   double distance = a->GetDistanceFrom (b);
 
@@ -142,7 +142,7 @@ ConstantSpeedPropagationDelayModel::GetDelay (Ptr<MobilityModel> a, Ptr<Mobility
             }
 
           std::string log_delays = std::to_string(ns3_delay_milliseconds) + "," + std::to_string(sionna_delay_ms);
-          LogProgress(0, log_delays);
+          logProgress(0, log_delays);
 
         }
     }

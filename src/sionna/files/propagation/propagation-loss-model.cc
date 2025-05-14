@@ -82,8 +82,8 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
                                    Ptr<MobilityModel> b) const
 {
   // 1 - get Positions for a and b
-  Vector a_position = GetPositionFromMobilityModel(a);
-  Vector b_position = GetPositionFromMobilityModel(b);
+  Vector a_position = a->GetPosition();
+  Vector b_position = b->GetPosition();
 
   // 2 - send calc_request to NVIDIA Sionna
   double power_ns3;
