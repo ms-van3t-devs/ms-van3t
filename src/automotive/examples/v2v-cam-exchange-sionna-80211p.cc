@@ -206,7 +206,7 @@ int main (int argc, char *argv[])
 
   if (sionna)
     {
-      sumoClient->SetSionnaUp(server_ip);
+      sumoClient->SetSionnaUp();
     }
 
   uint64_t numberOfNodes_11p = numberOfNodes;

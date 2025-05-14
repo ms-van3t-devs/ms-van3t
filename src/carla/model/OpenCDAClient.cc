@@ -649,9 +649,18 @@ namespace ns3
               location.x = v.location().x();
               location.y = v.location().y();
               location.z = v.location().z();
-              double speed = 0; // speed and angle not considered by current ms-van3t channel models
-              double angle = 0;
+              double speed = std::sqrt (
+                  std::pow(v.speed().x(), 2) + std::pow(v.speed().y(), 2) + std::pow(v.speed().z(), 2)
+                  ); // speed and angle not considered by current ms-van3t channel models
+              double angle = v.heading();
               processVehicleSubscription(v.id(), location, speed, angle);
+              if (m_sionna == true)
+                {
+                  Vector pos_for_sionna = Vector(location.x, location.y, location.z);
+                  double angle_for_sionna = angle;
+                  Vector vel_for_sionna = Vector(speed * cos(angle_for_sionna), speed * sin(angle_for_sionna), 0.0);
+                  updateLocationInSionna(std::to_string (actorId), pos_for_sionna, angle_for_sionna, vel_for_sionna);
+                }
           }
           UpdateVehicleFileMap();
           m_executeOneTimestepTrigger = Simulator::Schedule(Seconds(m_updateInterval), &OpenCDAClient::executeOneTimestep, this);

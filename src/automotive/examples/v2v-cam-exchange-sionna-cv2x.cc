@@ -431,7 +431,7 @@ int main (int argc, char *argv[])
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
   if (sionna)
     {
-      sumoClient->SetSionnaUp(server_ip);
+      sumoClient->SetSionnaUp();
     }
   sumoClient->SetAttribute ("SumoConfigPath", StringValue (sumo_config));
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo

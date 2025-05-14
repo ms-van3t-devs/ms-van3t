@@ -29,6 +29,7 @@
 #include "ns3/vehicle-visualizer-module.h"
 #include "ns3/MetricSupervisor.h"
 #include <unistd.h>
+#include "ns3/sionna-helper.h"
 
 using namespace ns3;
 
@@ -109,6 +110,11 @@ main (int argc, char *argv[])
   int numberOfNodes;
   uint32_t nodeCounter = 0;
 
+  bool sionna = false;
+  std::string server_ip = "";
+  bool local_machine = false;
+  bool verb = false;
+
   CommandLine cmd;
 
   /* Cmd Line option for application */
@@ -143,6 +149,11 @@ main (int argc, char *argv[])
   cmd.AddValue("carla-gpu", "CARLA server GPU ID (Default: 0)", carla_gpu);
   cmd.AddValue("vis-sensor", "Visualize OpenCDA sensor from ns-3 side (i.e., LDM)", visualize_sensor);
 
+  cmd.AddValue ("sionna", "Enable SIONNA usage", sionna);
+  cmd.AddValue ("sionna-server-ip", "SIONNA server IP address", server_ip);
+  cmd.AddValue ("sionna-local-machine", "SIONNA will be executed on local machine", local_machine);
+  cmd.AddValue ("sionna-verbose", "SIONNA server IP address", verb);
+
   cmd.Parse (argc, argv);
 
 
@@ -168,6 +179,16 @@ main (int argc, char *argv[])
       LogComponentEnable ("v2v-80211p", LOG_LEVEL_INFO);
       LogComponentEnable ("CABasicService", LOG_LEVEL_INFO);
       LogComponentEnable ("DENBasicService", LOG_LEVEL_INFO);
+    }
+
+  SionnaHelper& sionnaHelper = SionnaHelper::GetInstance();
+
+  if (sionna)
+    {
+      sionnaHelper.SetSionna(sionna);
+      sionnaHelper.SetServerIp(server_ip);
+      sionnaHelper.SetLocalMachine(local_machine);
+      sionnaHelper.SetVerbose(verb);
     }
 
   /* Use the realtime scheduler of ns3 */
@@ -289,6 +310,10 @@ main (int argc, char *argv[])
 
   /*** 6. Setup OpenCDA client ***/
   Ptr<OpenCDAClient> opencda_client = CreateObject<OpenCDAClient> ();
+  if (sionna)
+    {
+      opencda_client->SetSionnaUp();
+    }
   opencda_client->SetAttribute ("UpdateInterval", DoubleValue (0.05));
   opencda_client->SetAttribute ("PenetrationRate",DoubleValue(penetrationRate));
   opencda_client->SetAttribute ("OpenCDA_config", StringValue(opencda_config));

@@ -473,7 +473,7 @@ int main (int argc, char *argv[])
 
   if (sionna)
     {
-      sumoClient->SetSionnaUp(server_ip);
+      sumoClient->SetSionnaUp();
     }
 
   bool odd = false;

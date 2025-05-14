@@ -85,7 +85,7 @@ public:
 
   std::string GetStationId(Ptr<Node> node);
 
-  void SetSionnaUp(std::string server_ip) {m_sionna = true; sionna_server_ip = server_ip;};
+  void SetSionnaUp() {m_sionna = true;};
 
 
 private:
