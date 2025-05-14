@@ -500,9 +500,7 @@ MetricSupervisor::checkCBR ()
   std::unordered_map<std::string, Time> nextTimeToAddNr;
   if(m_traci_ptr != nullptr)
     {
-      std::map<std::basic_string<char>, std::pair<StationType_t, Ptr<Node>>> nodes =
-          m_traci_ptr->get_NodeMap ();
-
+      std::map<std::basic_string<char>, std::pair<StationType_t, Ptr<Node>>> nodes = m_traci_ptr->get_NodeMap ();
 
       for (auto it = nodes.begin (); it != nodes.end (); ++it)
         {
@@ -556,13 +554,15 @@ MetricSupervisor::checkCBR ()
     }
   else if (m_carla_ptr != nullptr)
     {
-      std::vector<int> ids = m_carla_ptr->getManagedConnectedIds ();
+      // std::vector<int> ids = m_carla_ptr->getManagedConnectedIds ();
+
+      std::vector<std::string> ids = m_carla_ptr->getManagedConnectedNodes();
 
       for (size_t i = 0; i < ids.size(); ++i)
         {
-          int item = ids[i];
+          std::string node_id = ids[i];
 
-          std::string node_id = std::to_string (item);
+          // std::string node_id = std::to_string (item);
 
           if (currentBusyCBR.find (node_id) == currentBusyCBR.end ())
             {
@@ -667,13 +667,26 @@ MetricSupervisor::startCheckCBR ()
   NS_ASSERT_MSG (m_channel_technology != "", "Channel technology must be set, choose between 80211p and Nr");
   NS_ASSERT_MSG (m_simulation_time > 0, "Simulation time must be greater than 0");
 
-  if (m_channel_technology == "80211p")
+  NS_ASSERT_MSG (m_node_container.GetN() != 0, "The Node container must be filled before the CBR checking.");
+  uint8_t i = 0;
+  for(; i < m_node_container.GetN(); i++)
     {
-      Config::Connect ("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback (&storeCBR80211p));
-    } else if (m_channel_technology == "Nr")
-    {
-      Config::Connect("/NodeList/*/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/ChannelOccupied", MakeCallback(&storeCBRNr));
+      Ptr<Node> node = m_node_container.Get (i);
+      std::basic_ostringstream<char> oss;
+      if (m_channel_technology == "80211p")
+        {
+          oss << "/NodeList/" << node->GetId() << "/DeviceList/*/$ns3::WifiNetDevice/Phy/State/State";
+          std::string var = oss.str();
+          Config::Connect(var, MakeCallback(&storeCBR80211p));
+        }
+      else if (m_channel_technology == "Nr")
+        {
+          oss << "/NodeList/" << node->GetId() << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/ChannelOccupied";
+          std::string var = oss.str();
+          Config::Connect(var, MakeCallback(&storeCBRNr));
+        }
     }
+
   Simulator::Schedule (MilliSeconds(m_cbr_window), &MetricSupervisor::checkCBR, this);
   Simulator::Schedule (Seconds (m_simulation_time), &MetricSupervisor::logLastCBRs, this);
 

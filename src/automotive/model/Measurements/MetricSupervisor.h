@@ -473,6 +473,8 @@ public:
     */
     std::vector<double> getBytesPerSecondPerSquareMeter() {return m_bytes_per_second_per_square_meter;};
 
+    void setNodeContainer(NodeContainer nc) {m_node_container = nc;}
+
 private:
   void computePRR(std::string buf);
 
@@ -554,6 +556,7 @@ private:
   float m_cbr_alpha = -1; //!< The alpha parameter for the exponential moving average
   bool m_cbr_write_to_file = false; //!< True if the CBR values are written to a file, false otherwise
   std::string m_channel_technology = ""; //!< The channel technology used
+  NodeContainer m_node_container;
   float m_simulation_time = -1; //!< The simulation time
   std::unordered_map<std::string, std::vector<double>> m_average_cbr; //!< The exponential moving average CBR for each node
 

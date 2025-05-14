@@ -71,6 +71,7 @@ namespace ns3
       bool InsertObject(carla::ObjectIn object);
 
       std::vector<int> getManagedConnectedIds();
+      std::vector<std::string> getManagedConnectedNodes();
 
     private:
       void executeOneTimestep();

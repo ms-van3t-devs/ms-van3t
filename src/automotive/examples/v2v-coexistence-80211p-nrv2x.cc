@@ -524,6 +524,10 @@ int main (int argc, char *argv[])
   metSup_11p->setTraCIClient(sumoClient);
   // This function enables printing the current and average latency and PRR for each received packet
   // metSup_11p->enablePRRVerboseOnStdout ();
+  metSup_11p->setChannelTechnology("80211p");
+  metSup_11p->setCBRWindowValue(200);
+  metSup_11p->setCBRAlphaValue(0.1);
+  metSup_11p->setSimulationTimeValue(simTime);
 
   Ptr<MetricSupervisor> metSup_nr = NULL;
   // Set a baseline for the PRR computation when creating a new Metricsupervisor object
@@ -801,6 +805,9 @@ int main (int argc, char *argv[])
                                       "ControlMode",StringValue (phyMode),
                                       "NonUnicastMode",StringValue (phyMode));
   NetDeviceContainer devices = wifi80211p.Install (wifiPhy, wifi80211pMac, wifiNodes);
+
+  // metSup_11p->setNodeContainer(wifiNodes);
+  // metSup_11p->startCheckCBR();
 
   // Enable saving to Wireshark PCAP traces
   // wifiPhy.EnablePcap ("v2v-80211p-student-application", devices);

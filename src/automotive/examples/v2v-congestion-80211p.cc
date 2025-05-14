@@ -237,6 +237,7 @@ int main (int argc, char *argv[])
   metSup->setCBRWindowValue(200);
   metSup->setCBRAlphaValue(0.1);
   metSup->setSimulationTimeValue(simTime);
+  metSup->setNodeContainer(c);
   metSup->startCheckCBR();
 
   // Create a new socket for the generation of broadcast interfering traffic

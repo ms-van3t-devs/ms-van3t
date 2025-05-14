@@ -987,5 +987,17 @@ OpenCDAClient::getNextWaypoint(Vector location) {
     return ret_ids;
   }
 
+  std::vector<std::string>
+  OpenCDAClient::getManagedConnectedNodes()
+  {
+    std::vector<std::basic_string<char>> ret_ids;
+
+    for(auto it = m_vehMap.begin (); it != m_vehMap.end (); it++){
+        ret_ids.push_back (std::to_string (it->second->GetId()));
+      }
+
+    return ret_ids;
+  }
+
 }
 
