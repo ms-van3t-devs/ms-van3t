@@ -996,16 +996,17 @@ OpenCDAClient::getNextWaypoint(Vector location) {
     return ret_ids;
   }
 
-  std::vector<std::string>
+  std::map<std::string,std::string>
   OpenCDAClient::getManagedConnectedNodes()
   {
-    std::vector<std::basic_string<char>> ret_ids;
+    std::map<std::string,std::string> ret_map;
 
-    for(auto it = m_vehMap.begin (); it != m_vehMap.end (); it++){
-        ret_ids.push_back (std::to_string (it->second->GetId()));
+    for(auto it = m_vehMap.begin (); it != m_vehMap.end (); it++)
+      {
+        ret_map.insert({std::to_string(it->first), std::to_string (it->second->GetId())});
       }
 
-    return ret_ids;
+    return ret_map;
   }
 
 }

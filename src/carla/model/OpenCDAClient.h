@@ -72,7 +72,7 @@ namespace ns3
       bool InsertObject(carla::ObjectIn object);
 
       std::vector<int> getManagedConnectedIds();
-      std::vector<std::string> getManagedConnectedNodes();
+      std::map<std::string,std::string> getManagedConnectedNodes();
 
       void SetSionnaUp() {m_sionna = true;};
 

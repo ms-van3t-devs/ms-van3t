@@ -453,11 +453,16 @@ storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState sta
       if (start < lastCBRCheck)
         {
           duration -= lastCBRCheck - start;
+          if (duration.IsNegative())
+            {
+              duration = Seconds (0);
+            }
         }
       if (currentBusyCBR.find(node) == currentBusyCBR.end())
         {
           currentBusyCBR[node] = duration;
-        } else
+        }
+      else
         {
           currentBusyCBR[node] += duration;
         }
@@ -487,7 +492,8 @@ storeCBRNr(std::string context, Time duration)
   if (currentBusyCBR.find(node) == currentBusyCBR.end())
     {
       currentBusyCBR[node] = duration;
-    } else
+    }
+  else
     {
       currentBusyCBR[node] += duration;
     }
@@ -554,14 +560,12 @@ MetricSupervisor::checkCBR ()
     }
   else if (m_carla_ptr != nullptr)
     {
-      // std::vector<int> ids = m_carla_ptr->getManagedConnectedIds ();
+      std::map<std::string,std::string> obj_node_map = m_carla_ptr->getManagedConnectedNodes();
 
-      std::vector<std::string> ids = m_carla_ptr->getManagedConnectedNodes();
-
-      for (size_t i = 0; i < ids.size(); ++i)
+      for (const auto& pair : obj_node_map)
         {
-          std::string node_id = ids[i];
-
+          std::string node_id = pair.second;
+          std::string obj_id = pair.first;
           // std::string node_id = std::to_string (item);
 
           if (currentBusyCBR.find (node_id) == currentBusyCBR.end ())
@@ -595,16 +599,16 @@ MetricSupervisor::checkCBR ()
 
           double currentCbr = busyCbr.GetDouble () / (m_cbr_window * 1e6);
 
-          if (m_average_cbr.find (node_id) != m_average_cbr.end ())
+          if (m_average_cbr.find (obj_id) != m_average_cbr.end ())
             {
               // Exponential moving average
               double new_cbr =
-                  m_cbr_alpha * m_average_cbr[node_id].back () + (1 - m_cbr_alpha) * currentCbr;
-              m_average_cbr[node_id].push_back (new_cbr);
+                  m_cbr_alpha * m_average_cbr[obj_id].back () + (1 - m_cbr_alpha) * currentCbr;
+              m_average_cbr[obj_id].push_back (new_cbr);
             }
           else
             {
-              m_average_cbr[node_id].push_back (currentCbr);
+              m_average_cbr[obj_id].push_back (currentCbr);
             }
         }
     }
