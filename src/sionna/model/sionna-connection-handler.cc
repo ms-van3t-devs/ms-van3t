@@ -146,7 +146,7 @@ updateLocationInSionna(std::string obj_id, Vector Position, double Angle, Vector
   // Same for direction angle (heading), applying to objects causes kernel crash.
 
   std::string message_for_Sionna = "LOC_UPDATE:" + obj_id + "," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z) + "," 
-                                                 + std::to_string(Angle) + "," 
+                                                 + std::to_string(Angle) + ","
                                                  + std::to_string(x_speed) + "," + std::to_string(y_speed) + "," + std::to_string(z_speed);
                                                  
   NS_LOG_DEBUG("Sending message to Sionna: " << message_for_Sionna << "...");

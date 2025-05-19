@@ -15,7 +15,7 @@ import argparse
 def manage_location_message(message, sionna_structure):
     try:
         # Handle map_update message
-        data = message[len("map_update:"):]
+        data = message[len("LOC_UPDATE:"):]
         parts = data.split(",")
         car = int(parts[0].replace("veh", ""))
 
@@ -23,6 +23,9 @@ def manage_location_message(message, sionna_structure):
         new_y = float(parts[2])
         new_z = float(parts[3]) + 1
         new_angle = float(parts[4])
+        new_v_x = float(parts[5])
+        new_v_y = float(parts[6])
+        new_v_z = float(parts[7])
 
         # Save in SUMO_live_location_db
         sionna_structure["SUMO_live_location_db"][car] = {"x": new_x, "y": new_y, "z": new_z, "angle": new_angle}
@@ -34,6 +37,7 @@ def manage_location_message(message, sionna_structure):
             old_y = sionna_structure["sionna_location_db"][car]["y"]
             old_z = sionna_structure["sionna_location_db"][car]["z"]
             old_angle = sionna_structure["sionna_location_db"][car]["angle"]
+
 
             # Check if the position or angle has changed by more than the thresholds
             position_changed = (
@@ -316,7 +320,7 @@ def get_path_loss(car1_id, car2_id, sionna_structure):
 
 def manage_path_loss_request(message, sionna_structure):
     try:
-        data = message[len("calc_request:"):]
+        data = message[len("CALC_REQUEST_PATHGAIN:"):]
         parts = data.split(",")
         car_a_str = parts[0].replace("veh", "")
         car_b_str = parts[1].replace("veh", "")
@@ -360,7 +364,7 @@ def get_delay(car1_id, car2_id, sionna_structure):
 
 def manage_delay_request(message, sionna_structure):
     try:
-        data = message[len("get_delay:"):]
+        data = message[len("CALC_REQUEST_DELAY:"):]
         parts = data.split(",")
         car_a_str = parts[0].replace("veh", "")
         car_b_str = parts[1].replace("veh", "")
@@ -384,7 +388,7 @@ def manage_delay_request(message, sionna_structure):
 
 def manage_los_request(message, sionna_structure):
     try:
-        data = message[len("are_they_LOS:"):]
+        data = message[len("CALC_REQUEST_LOS:"):]
         parts = data.split(",")
         car_a_str = parts[0].replace("veh", "")
         car_b_str = parts[1].replace("veh", "")
@@ -397,6 +401,8 @@ def manage_los_request(message, sionna_structure):
             # If any, ignoring path_loss requests from the origin, used for statistical calibration
             los = 0
         else:
+            if car_a_id not in sionna_structure["rays_cache"] or car_b_id not in sionna_structure["rays_cache"][car_a_id]:
+                compute_rays(sionna_structure)
             los = sionna_structure["rays_cache"][car_a_id][car_b_id]["is_los"]
 
         return los
@@ -509,34 +515,34 @@ def main():
         payload, address = udp_socket.recvfrom(1024)
         message = payload.decode()
 
-        if message.startswith("map_update:"):
+        if message.startswith("LOC_UPDATE:"):
             updated_car = manage_location_message(message, sionna_structure)
             if updated_car is not None:
-                response = "UPDATEDveh" + str(updated_car)
+                response = "LOC_CONFIRM:" + "veh" + str(updated_car)
                 udp_socket.sendto(response.encode(), address)
 
-        if message.startswith("calc_request:"):
+        if message.startswith("CALC_REQUEST_PATHGAIN:"):
             pathloss = manage_path_loss_request(message, sionna_structure)
             if pathloss is not None:
                 # Use pathloss + txPower (dBm) for 80211p
                 # response = "CALC_DONE:" + str(pathloss + 23)
-                response = "CALC_DONE:" + str(pathloss)
+                response = "CALC_DONE_PATHGAIN:" + str(pathloss)
                 udp_socket.sendto(response.encode(), address)
 
-        if message.startswith("get_delay:"):
+        if message.startswith("CALC_REQUEST_DELAY:"):
             delay = manage_delay_request(message, sionna_structure)
             if delay is not None:
-                response = "DELAY:" + str(delay)
+                response = "CALC_DONE_DELAY:" + str(delay)
                 udp_socket.sendto(response.encode(), address)
 
-        if message.startswith("are_they_LOS:"):
+        if message.startswith("CALC_REQUEST_LOS:"):
             los = manage_los_request(message, sionna_structure)
             if los is not None:
-                response = "LOS:" + str(los)
+                response = "CALC_DONE_LOS:" + str(los)
                 udp_socket.sendto(response.encode(), address)
 
-        if message.startswith("kill_sionna"):
-            print("Killing Sionna")
+        if message.startswith("SHUTDOWN_SIONNA"):
+            print("Got SHUTDOWN_SIONNA message. Bye!")
             udp_socket.close()
             break
 

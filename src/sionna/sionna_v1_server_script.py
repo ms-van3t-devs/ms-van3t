@@ -410,6 +410,8 @@ def manage_los_request(message, sionna_structure):
             # If any, ignoring path_loss requests from the origin, used for statistical calibration
             los = 0
         else:
+            if car_a_id not in sionna_structure["rays_cache"] or car_b_id not in sionna_structure["rays_cache"][car_a_id]:
+                compute_rays(sionna_structure)
             los = sionna_structure["rays_cache"][car_a_id][car_b_id]["is_los"]
 
         if sionna_structure["time_checker"]:

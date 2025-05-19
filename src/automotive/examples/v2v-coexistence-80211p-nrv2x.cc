@@ -156,7 +156,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
   uint8_t los;
   Vector a_position = {pos.x, pos.y, pos.z};
   Vector b_position = {pos_sender.x, pos_sender.y, 0};
-  /*std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
   if (los_str == "[False]")
     {
       los = 0;
@@ -164,18 +164,18 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
   else
     {
       los = 1;
-    }*/
+    }
 
-  std::ifstream camFileHeader("src/sionna/sinr_final_sionna_i.csv");
+  std::ifstream camFileHeader("src/sinr_ni.csv");
   std::ofstream camFile;
-  camFile.open("src/sionna/sinr_final_sionna_i.csv", std::ios::out | std::ios::app);
+  camFile.open("src/sinr_ni.csv", std::ios::out | std::ios::app);
   if (!camFileHeader.is_open())
     {
       if (camFile.is_open())
       {
-        camFile << "time,rx,tx,technology,distance,sinr" << std::endl;
+        camFile << "time,rx,tx,rx_lat,rx_lon,tx_lat,tx_lon,technology,distance,los,sinr" << std::endl;
       } 
-      else 
+      else
       {
         std::cerr << "Unable to create file .csv" << std::endl;
       }
@@ -191,7 +191,7 @@ void receiveCAM(asn1cpp::Seq<CAM> cam, Address from, StationId_t my_stationID, S
       technology = "NR-V2X";
     }
   
-  camFile << time << "," << my_stationID << "," << std::to_string(cam->header.stationId) << "," << technology << "," << distance << "," << sinr << std::endl;
+  camFile << time << "," << my_stationID << "," << std::to_string(cam->header.stationId) << "," << pos_lat_lon.y << "," << pos_lat_lon.x << "," << lat_sender << "," << lon_sender << "," << technology << "," << distance << "," << std::to_string(los) << "," << sinr << std::endl;
   camFile.close();
 }
 
@@ -228,7 +228,7 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
   uint8_t los;
   Vector a_position = {pos.x, pos.y, pos.z};
   Vector b_position = {pos_sender.x, pos_sender.y, pos_sender.z};
-  /*std::string los_str = getLOSStatusFromSionna(a_position, b_position);
+  std::string los_str = getLOSStatusFromSionna(a_position, b_position);
   if (los_str == "[False]")
     {
       los = 0;
@@ -236,15 +236,15 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
   else
     {
       los = 1;
-    }*/
-  std::ifstream cpmFileHeader("src/sionna/sinr_final_sionna_i.csv");
+    }
+  std::ifstream cpmFileHeader("src/sinr_ni.csv");
   std::ofstream cpmFile;
-  cpmFile.open("src/sionna/sinr_final_sionna_i.csv", std::ios::out | std::ios::app);
+  cpmFile.open("src/sinr_ni.csv", std::ios::out | std::ios::app);
   if (!cpmFileHeader.is_open())
     {
       if (cpmFile.is_open())
         {
-          cpmFile << "time,rx,tx,technology,distance,sinr" << std::endl;
+          cpmFile << "time,rx,tx,rx_lat,rx_lon,tx_lat,tx_lon,technology,distance,los,sinr" << std::endl;
         }
       else
         {
@@ -262,7 +262,7 @@ void receiveCPM(asn1cpp::Seq<CollectivePerceptionMessage> cpm, Address from, Sta
       technology = "NR-V2X";
     }
 
-  cpmFile << time << "," << my_stationID << "," << std::to_string(cpm->header.stationId) << "," << technology << "," << distance << "," << sinr << std::endl;
+  cpmFile << time << "," << my_stationID << "," << std::to_string(cpm->header.stationId) << "," << pos_lat_lon.y << "," << pos_lat_lon.x << "," << lat_sender << "," << lon_sender << "," << technology << "," << distance << "," << std::to_string(los) << "," << sinr << std::endl;
   cpmFile.close();
 }
 
@@ -405,7 +405,7 @@ int main (int argc, char *argv[])
   bool local_machine = false;
   bool verb = false;
 
-  bool interference = true;
+  bool interference = false;
   bool dsrc_interference = false;
   bool nr_interference = false;
 
