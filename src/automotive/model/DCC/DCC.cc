@@ -32,7 +32,13 @@ DCC::GetTypeId ()
 }
 
 DCC::DCC ()
-= default;
+{
+  m_reactive_parameters[ReactiveState::Relaxed] = {0.20, 24.0, 100, -95.0};
+  m_reactive_parameters[ReactiveState::Active1] = {0.30, 18.0, 200, -95.0};
+  m_reactive_parameters[ReactiveState::Active2] = {0.40, 12.0, 400, -95.0};
+  m_reactive_parameters[ReactiveState::Active3] = {0.50, 6.0, 500, -95.0};
+  m_reactive_parameters[ReactiveState::Restrictive] = {1.0, 2.0, 1000, -65.0};
+}
 
 DCC::~DCC()
 = default;
@@ -48,98 +54,46 @@ void DCC::reactiveDCC()
     {
       std::string id = it->first;
       double current_cbr = it->second.back();
-      ReactiveState oldState = ReactiveState::Undefined;
-      ReactiveState state;
-      if (m_states.find(id) != m_states.end())
+      bool found = false;
+      ReactiveState old_state;
+      ReactiveState new_state;
+      if (m_vehicle_state.find(id) != m_vehicle_state.end())
         {
-          oldState = m_states[id];
+          found = true;
+          old_state = m_vehicle_state[id];
         }
 
-      if (current_cbr < m_reactive_parameters_relaxed.m_cbr_threshold)
+      if (found)
         {
-          if (oldState == ReactiveState::Undefined)
+          bool relaxed_flag = true ? old_state == ReactiveState::Relaxed : false;
+          if (current_cbr > m_reactive_parameters[old_state].cbr_threshold)
             {
-              state = ReactiveState::Relaxed;
+              new_state = static_cast<ReactiveState> (old_state + 1);
             }
-          else if (oldState == ReactiveState::Relaxed)
+          else if (relaxed_flag)
             {
-              continue;
+              new_state = ReactiveState::Relaxed;
+            }
+          else if (current_cbr <
+                   m_reactive_parameters[static_cast<ReactiveState> (old_state - 1)].cbr_threshold)
+            {
+              new_state = static_cast<ReactiveState> (old_state - 1);
             }
           else
             {
-              state = static_cast<ReactiveState> (oldState - 1);
-            }
-        }
-      else if (current_cbr < m_reactive_parameters_active1.m_cbr_threshold)
-        {
-          if (oldState == ReactiveState::Undefined)
-            {
-              state = ReactiveState::Active1;
-            }
-          else if (oldState == ReactiveState::Active1)
-            {
-              continue;
-            }
-          else if (oldState - ReactiveState::Active1 > 0)
-            {
-              state = static_cast<ReactiveState> (oldState - 1);
-            }
-          else
-            {
-              state = static_cast<ReactiveState> (oldState + 1);
-            }
-        }
-      else if (current_cbr < m_reactive_parameters_active2.m_cbr_threshold)
-        {
-          if (oldState == ReactiveState::Undefined)
-            {
-              state = ReactiveState::Active2;
-            }
-          else if (oldState == ReactiveState::Active2)
-            {
-              continue;
-            }
-          else if (oldState - ReactiveState::Active2 > 0)
-            {
-              state = static_cast<ReactiveState> (oldState - 1);
-            }
-          else
-            {
-              state = static_cast<ReactiveState> (oldState + 1);
-            }
-        }
-      else if (current_cbr < m_reactive_parameters_active3.m_cbr_threshold)
-        {
-          if (oldState == ReactiveState::Undefined)
-            {
-              state = ReactiveState::Active3;
-            }
-          else if (oldState == ReactiveState::Active3)
-            {
-              continue;
-            }
-          else if (oldState - ReactiveState::Active3 > 0)
-            {
-              state = static_cast<ReactiveState> (oldState - 1);
-            }
-          else
-            {
-              state = static_cast<ReactiveState> (oldState + 1);
+              new_state = old_state;
             }
         }
       else
         {
-          if (oldState == ReactiveState::Undefined)
+          for (int foo_int = ReactiveState::Relaxed; foo_int != ReactiveState::Restrictive; foo_int++)
             {
-              state = ReactiveState::Restrictive;
-            }
-          else if (oldState == ReactiveState::Restrictive)
-            {
-              continue;
-            }
-          else
-            {
-              state = static_cast<ReactiveState> (oldState + 1);
+              ReactiveState foo = static_cast<ReactiveState>(foo_int);
+              if (current_cbr < m_reactive_parameters[foo].cbr_threshold)
+                {
+                  new_state = foo;
+                  break;
+                }
             }
         }
 
@@ -151,192 +105,44 @@ void DCC::reactiveDCC()
 
       Ptr<WifiPhy> phy80211p = nullptr;
 
-      if (m_metric_supervisor->getChannelTechnology() == "80211p")
-        {
-          // Get the WifiNetDevice
-          wifiDevice = DynamicCast<WifiNetDevice> (netDevice);
+      // Get the WifiNetDevice
+      wifiDevice = DynamicCast<WifiNetDevice> (netDevice);
 
-          if (wifiDevice != nullptr)
-            {
-              // Get the PHY layer
-              phy80211p = wifiDevice->GetPhy ();
-            }
+      if (wifiDevice != nullptr)
+        {
+          // Get the PHY layer
+          phy80211p = wifiDevice->GetPhy ();
         }
 
-        switch (state)
+        if (phy80211p != nullptr)
           {
-          case ReactiveState::Relaxed:
-            if (m_metric_supervisor->getChannelTechnology() == "80211p" && phy80211p != nullptr)
-              {
-                phy80211p->SetTxPowerStart (m_reactive_parameters_relaxed.m_tx_power);
-                phy80211p->SetTxPowerEnd (m_reactive_parameters_relaxed.m_tx_power);
-                phy80211p->SetRxSensitivity (m_reactive_parameters_relaxed.m_sensitivity);
-              }
-            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-            //   {
-            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_relaxed.m_tx_power);
-            //   }
-
-            if (m_caService.find(nodeID_str) != m_caService.end())
-              {
-                m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
-              }
-            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
-              {
-                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
-              }
-            if (m_cpService.find(nodeID_str) != m_cpService.end())
-              {
-                m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
-              }
-            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
-              {
-                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
-              }
-            if(m_vruService.find(nodeID_str) != m_vruService.end())
-              {
-                m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters_relaxed.m_tx_inter_packet_time);
-              }
-
-            break;
-
-          case Active1:
-            if (m_metric_supervisor->getChannelTechnology() == "80211p" && phy80211p != nullptr)
-              {
-                phy80211p->SetTxPowerStart (m_reactive_parameters_active1.m_tx_power);
-                phy80211p->SetTxPowerEnd (m_reactive_parameters_active1.m_tx_power);
-                phy80211p->SetRxSensitivity (m_reactive_parameters_active1.m_sensitivity);
-              }
-            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-            //   {
-            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active1.m_tx_power);
-            //   }
-
-            if (m_caService.find(nodeID_str) != m_caService.end())
-              {
-                m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
-              }
-            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
-              {
-                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
-              }
-            if (m_cpService.find(nodeID_str) != m_cpService.end())
-              {
-                m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
-              }
-            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
-              {
-                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
-              }
-            if(m_vruService.find(nodeID_str) != m_vruService.end())
-              {
-                m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters_active1.m_tx_inter_packet_time);
-              }
-            break;
-
-          case Active2:
-            if (m_metric_supervisor->getChannelTechnology() == "80211p" && phy80211p != nullptr)
-              {
-                phy80211p->SetTxPowerStart (m_reactive_parameters_active2.m_tx_power);
-                phy80211p->SetTxPowerEnd (m_reactive_parameters_active2.m_tx_power);
-                phy80211p->SetRxSensitivity (m_reactive_parameters_active2.m_sensitivity);
-              }
-            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-            //   {
-            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active2.m_tx_power);
-            //   }
-
-            if (m_caService.find(nodeID_str) != m_caService.end())
-              {
-                m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
-              }
-            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
-              {
-                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
-              }
-            if (m_cpService.find(nodeID_str) != m_cpService.end())
-              {
-                m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
-              }
-            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
-              {
-                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
-              }
-            if(m_vruService.find(nodeID_str) != m_vruService.end())
-              {
-                m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters_active2.m_tx_inter_packet_time);
-              }
-            break;
-
-          case Active3:
-            if (m_metric_supervisor->getChannelTechnology() == "80211p" && phy80211p != nullptr)
-              {
-                phy80211p->SetTxPowerStart (m_reactive_parameters_active3.m_tx_power);
-                phy80211p->SetTxPowerEnd (m_reactive_parameters_active3.m_tx_power);
-                phy80211p->SetRxSensitivity (m_reactive_parameters_active3.m_sensitivity);
-              }
-            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-            //   {
-            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_active3.m_tx_power);
-            //   }
-
-            if (m_caService.find(nodeID_str) != m_caService.end())
-              {
-                m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
-              }
-            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
-              {
-                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
-              }
-            if (m_cpService.find(nodeID_str) != m_cpService.end())
-              {
-                m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
-              }
-            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
-              {
-                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
-              }
-            if(m_vruService.find(nodeID_str) != m_vruService.end())
-              {
-                m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters_active3.m_tx_inter_packet_time);
-              }
-            break;
-
-          case Restrictive:
-            if (m_metric_supervisor->getChannelTechnology() == "80211p" && phy80211p != nullptr)
-              {
-                phy80211p->SetTxPowerStart (m_reactive_parameters_restricted.m_tx_power);
-                phy80211p->SetTxPowerEnd (m_reactive_parameters_restricted.m_tx_power);
-                phy80211p->SetRxSensitivity (m_reactive_parameters_restricted.m_sensitivity);
-              }
-            // else if (m_metric_supervisor->getChannelTechnology() == "Nr" && m_nr_helper != nullptr)
-            //   {
-            //     m_nr_helper->GetUePhy (netDevice, 0)->SetTxPower (m_reactive_parameters_restricted.m_tx_power);
-            //   }
-
-            if (m_caService.find(nodeID_str) != m_caService.end())
-              {
-                m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
-              }
-            if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
-              {
-                m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
-              }
-            if (m_cpService.find(nodeID_str) != m_cpService.end())
-              {
-                m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
-              }
-            if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
-              {
-                m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
-              }
-            if(m_vruService.find(nodeID_str) != m_vruService.end())
-              {
-                m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters_restricted.m_tx_inter_packet_time);
-              }
-            break;
+            phy80211p->SetTxPowerStart (m_reactive_parameters[new_state].tx_power);
+            phy80211p->SetTxPowerEnd (m_reactive_parameters[new_state].tx_power);
+            phy80211p->SetRxSensitivity (m_reactive_parameters[new_state].sensitivity);
           }
-      m_states[id] = state;
+
+        if (m_caService.find(nodeID_str) != m_caService.end())
+          {
+            m_caService[nodeID_str]->setCheckCamGenMs (m_reactive_parameters[new_state].tx_inter_packet_time);
+          }
+        if (m_caServiceV1.find(nodeID_str) != m_caServiceV1.end())
+          {
+            m_caServiceV1[nodeID_str]->setCheckCamGenMs (m_reactive_parameters[new_state].tx_inter_packet_time);
+          }
+        if (m_cpService.find(nodeID_str) != m_cpService.end())
+          {
+            m_cpService[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters[new_state].tx_inter_packet_time);
+          }
+        if (m_cpServiceV1.find(nodeID_str) != m_cpServiceV1.end())
+          {
+            m_cpServiceV1[nodeID_str]->setCheckCpmGenMs (m_reactive_parameters[new_state].tx_inter_packet_time);
+          }
+        if(m_vruService.find(nodeID_str) != m_vruService.end())
+          {
+            m_vruService[nodeID_str]->setCheckVamGenMs (m_reactive_parameters[new_state].tx_inter_packet_time);
+          }
+
+      m_vehicle_state[id] = new_state;
     }
 
   Simulator::Schedule(m_dcc_interval, &DCC::reactiveDCC, this);
