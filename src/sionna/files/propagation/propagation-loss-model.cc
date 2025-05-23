@@ -115,7 +115,7 @@ PropagationLossModel::CalcRxPower (double txPowerDbm,
               std::cout << "ns3_pathgain: " << - (txPowerDbm - power_ns3) << ", sionna_pathgain: "<< - (txPowerDbm - power_sionna) << ", LOS: " << los << std::endl;
             }
           std::string log_pl = std::to_string(power_ns3) + "," + std::to_string(power_sionna) + "," + los;
-          LogProgress(2, log_pl);
+          logProgress(2, log_pl);
         }
     }
 
