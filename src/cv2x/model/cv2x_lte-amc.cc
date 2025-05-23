@@ -385,7 +385,7 @@ cv2x_LteAmc::CreateCqiFeedbacks (const SpectrumValue& sinr, uint8_t rbgSize)
             cv2x_TbStats_t tbStats;
             while (mcs <= 28)
               {
-                HarqProcessInfoList_t harqInfoList;
+                cv2x_HarqProcessInfoList_t harqInfoList;
                 tbStats = cv2x_LteMiErrorModel::GetTbDecodificationStats (sinr, rbgMap, (uint16_t)GetDlTbSizeFromMcs (mcs, rbgSize) / 8, mcs, harqInfoList);
                 if (tbStats.tbler > 0.1)
                   {

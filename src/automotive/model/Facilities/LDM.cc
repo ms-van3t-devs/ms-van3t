@@ -73,10 +73,6 @@ namespace ns3 {
     m_LDM = std::unordered_map<uint64_t,returnedVehicleData_t> ();
 
     m_event_deleteOlderThan = Simulator::Schedule(Seconds(DB_CLEANER_INTERVAL_SECONDS),&LDM::deleteOlderThan,this);
-
-    std::srand(Simulator::Now().GetNanoSeconds ());
-    double desync = ((double)std::rand()/RAND_MAX);
-    m_event_writeContents = Simulator::Schedule(MilliSeconds(LOG_FREQ+(desync*100)),&LDM::writeAllContents,this);
   }
 
   LDM::~LDM() {

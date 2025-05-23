@@ -172,7 +172,7 @@ cv2x_RadioBearerStatsCalculator::UlRxPdu (uint16_t cellId, uint64_t imsi, uint16
       m_ulRxPackets[p]++;
       m_ulRxData[p] += packetSize;
 
-      Uint64StatsMap::iterator it = m_ulDelay.find (p);
+      cv2x_Uint64StatsMap::iterator it = m_ulDelay.find (p);
       if (it == m_ulDelay.end ())
         {
           NS_LOG_DEBUG (this << " Creating UL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
@@ -196,7 +196,7 @@ cv2x_RadioBearerStatsCalculator::DlRxPdu (uint16_t cellId, uint64_t imsi, uint16
       m_dlRxPackets[p]++;
       m_dlRxData[p] += packetSize;
 
-      Uint64StatsMap::iterator it = m_dlDelay.find (p);
+      cv2x_Uint64StatsMap::iterator it = m_dlDelay.find (p);
       if (it == m_dlDelay.end ())
         {
           NS_LOG_DEBUG (this << " Creating DL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
@@ -274,7 +274,7 @@ cv2x_RadioBearerStatsCalculator::WriteUlResults (std::ofstream& outFile)
 
   // Get the unique IMSI/LCID pairs list
   std::vector < cv2x_ImsiLcidPair_t > pairVector;
-  for (Uint32Map::iterator it = m_ulTxPackets.begin (); it != m_ulTxPackets.end (); ++it)
+  for (cv2x_Uint32Map::iterator it = m_ulTxPackets.begin (); it != m_ulTxPackets.end (); ++it)
     {
       if (find (pairVector.begin (), pairVector.end (), (*it).first) == pairVector.end ())
         {
@@ -282,7 +282,7 @@ cv2x_RadioBearerStatsCalculator::WriteUlResults (std::ofstream& outFile)
         }
     }
 
-  for (Uint32Map::iterator it = m_ulRxPackets.begin (); it != m_ulRxPackets.end (); ++it)
+  for (cv2x_Uint32Map::iterator it = m_ulRxPackets.begin (); it != m_ulRxPackets.end (); ++it)
     {
       if (find (pairVector.begin (), pairVector.end (), (*it).first) == pairVector.end ())
         {
@@ -294,7 +294,7 @@ cv2x_RadioBearerStatsCalculator::WriteUlResults (std::ofstream& outFile)
   for (std::vector<cv2x_ImsiLcidPair_t>::iterator it = pairVector.begin (); it != pairVector.end (); ++it)
     {
       cv2x_ImsiLcidPair_t p = *it;
-      FlowIdMap::const_iterator flowIdIt = m_flowId.find (p);
+      cv2x_FlowIdMap::const_iterator flowIdIt = m_flowId.find (p);
       // \TODO Temporary workaround until traces are connected correctly in cv2x_LteEnbRrc and cv2x_LteUeRrc
       if (flowIdIt == m_flowId.end ()) continue;
 //       NS_ASSERT_MSG (flowIdIt != m_flowId.end (),
@@ -335,7 +335,7 @@ cv2x_RadioBearerStatsCalculator::WriteDlResults (std::ofstream& outFile)
 
   // Get the unique IMSI/LCID pairs list
   std::vector < cv2x_ImsiLcidPair_t > pairVector;
-  for (Uint32Map::iterator it = m_dlTxPackets.begin (); it != m_dlTxPackets.end (); ++it)
+  for (cv2x_Uint32Map::iterator it = m_dlTxPackets.begin (); it != m_dlTxPackets.end (); ++it)
     {
       if (find (pairVector.begin (), pairVector.end (), (*it).first) == pairVector.end ())
         {
@@ -343,7 +343,7 @@ cv2x_RadioBearerStatsCalculator::WriteDlResults (std::ofstream& outFile)
         }
     }
 
-  for (Uint32Map::iterator it = m_dlRxPackets.begin (); it != m_dlRxPackets.end (); ++it)
+  for (cv2x_Uint32Map::iterator it = m_dlRxPackets.begin (); it != m_dlRxPackets.end (); ++it)
     {
       if (find (pairVector.begin (), pairVector.end (), (*it).first) == pairVector.end ())
         {
@@ -355,7 +355,7 @@ cv2x_RadioBearerStatsCalculator::WriteDlResults (std::ofstream& outFile)
   for (std::vector<cv2x_ImsiLcidPair_t>::iterator pair = pairVector.begin (); pair != pairVector.end (); ++pair)
     {
       cv2x_ImsiLcidPair_t p = *pair;
-      FlowIdMap::const_iterator flowIdIt = m_flowId.find (p);
+      cv2x_FlowIdMap::const_iterator flowIdIt = m_flowId.find (p);
       // \TODO Temporary workaround until traces are connected correctly in cv2x_LteEnbRrc and cv2x_LteUeRrc
       if (flowIdIt == m_flowId.end ()) continue;
 //       NS_ASSERT_MSG (flowIdIt != m_flowId.end (),
@@ -465,7 +465,7 @@ cv2x_RadioBearerStatsCalculator::GetUlDelay (uint64_t imsi, uint8_t lcid)
 {
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
-  Uint64StatsMap::iterator it = m_ulDelay.find (p);
+  cv2x_Uint64StatsMap::iterator it = m_ulDelay.find (p);
   if (it == m_ulDelay.end ())
     {
       NS_LOG_ERROR ("UL delay for " << imsi << " - " << (uint16_t) lcid << " not found");
@@ -481,7 +481,7 @@ cv2x_RadioBearerStatsCalculator::GetUlDelayStats (uint64_t imsi, uint8_t lcid)
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
   std::vector<double> stats;
-  Uint64StatsMap::iterator it = m_ulDelay.find (p);
+  cv2x_Uint64StatsMap::iterator it = m_ulDelay.find (p);
   if (it == m_ulDelay.end ())
     {
       stats.push_back (0.0);
@@ -504,7 +504,7 @@ cv2x_RadioBearerStatsCalculator::GetUlPduSizeStats (uint64_t imsi, uint8_t lcid)
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
   std::vector<double> stats;
-  Uint32StatsMap::iterator it = m_ulPduSize.find (p);
+  cv2x_Uint32StatsMap::iterator it = m_ulPduSize.find (p);
   if (it == m_ulPduSize.end ())
     {
       stats.push_back (0.0);
@@ -574,7 +574,7 @@ cv2x_RadioBearerStatsCalculator::GetDlDelay (uint64_t imsi, uint8_t lcid)
 {
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
-  Uint64StatsMap::iterator it = m_dlDelay.find (p);
+  cv2x_Uint64StatsMap::iterator it = m_dlDelay.find (p);
   if (it == m_dlDelay.end ())
     {
       NS_LOG_ERROR ("DL delay for " << imsi << " not found");
@@ -589,7 +589,7 @@ cv2x_RadioBearerStatsCalculator::GetDlDelayStats (uint64_t imsi, uint8_t lcid)
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
   std::vector<double> stats;
-  Uint64StatsMap::iterator it = m_dlDelay.find (p);
+  cv2x_Uint64StatsMap::iterator it = m_dlDelay.find (p);
   if (it == m_dlDelay.end ())
     {
       stats.push_back (0.0);
@@ -612,7 +612,7 @@ cv2x_RadioBearerStatsCalculator::GetDlPduSizeStats (uint64_t imsi, uint8_t lcid)
   NS_LOG_FUNCTION (this << imsi << (uint16_t) lcid);
   cv2x_ImsiLcidPair_t p (imsi, lcid);
   std::vector<double> stats;
-  Uint32StatsMap::iterator it = m_dlPduSize.find (p);
+  cv2x_Uint32StatsMap::iterator it = m_dlPduSize.find (p);
   if (it == m_dlPduSize.end ())
     {
       stats.push_back (0.0);

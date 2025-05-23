@@ -47,7 +47,7 @@ struct cv2x_HarqProcessInfoElement_t
   double m_sinr; //effective mean SINR for the transmission
 };
 
-typedef std::vector <cv2x_HarqProcessInfoElement_t> HarqProcessInfoList_t; ///< HarqProcessInfoList_t typedef 
+typedef std::vector <cv2x_HarqProcessInfoElement_t> cv2x_HarqProcessInfoList_t; ///< HarqProcessInfoList_t typedef
 
 /**
  * \ingroup lte
@@ -86,7 +86,7 @@ public:
   * \param layer layer no. (for MIMO spatial multiplexing)
   * \return the vector of the info related to HARQ proc Id
   */
-  HarqProcessInfoList_t GetHarqProcessInfoDl (uint8_t harqProcId, uint8_t layer);
+  cv2x_HarqProcessInfoList_t GetHarqProcessInfoDl (uint8_t harqProcId, uint8_t layer);
 
   /**
   * \brief Return the cumulated MI of the HARQ procId in case of retransmissions
@@ -103,7 +103,7 @@ public:
   * \param harqProcId the HARQ proc id
   * \return the vector of the info related to HARQ proc Id
   */
-  HarqProcessInfoList_t GetHarqProcessInfoUl (uint16_t rnti, uint8_t harqProcId);
+  cv2x_HarqProcessInfoList_t GetHarqProcessInfoUl (uint16_t rnti, uint8_t harqProcId);
 
   /**
   * \brief Update the Info associated to the decodification of an HARQ process
@@ -174,7 +174,7 @@ public:
   * \param l1dst The layer 1 destination ID 
   * \return the vector of the info related to HARQ proc Id
   */
-  HarqProcessInfoList_t GetHarqProcessInfoSl (uint16_t rnti, uint8_t l1dst);
+  cv2x_HarqProcessInfoList_t GetHarqProcessInfoSl (uint16_t rnti, uint8_t l1dst);
 
   /**
   * \brief Return the info of the HARQ procId in case of retranmissions
@@ -182,7 +182,7 @@ public:
   * \param rnti the RNTI of the transmitter
   * \return the vector of the info related to HARQ proc Id
   */
-  HarqProcessInfoList_t GetHarqProcessInfoSlV2X (uint16_t rnti);
+  cv2x_HarqProcessInfoList_t GetHarqProcessInfoSlV2X (uint16_t rnti);
  
   /**
   * \brief Return the info of the HARQ procId in case of retranmissions
@@ -191,7 +191,7 @@ public:
   * \param resPsdch The resource used
   * \return the vector of the info related to HARQ proc Id
   */
-  HarqProcessInfoList_t GetHarqProcessInfoDisc (uint16_t rnti, uint8_t resPsdch);
+  cv2x_HarqProcessInfoList_t GetHarqProcessInfoDisc (uint16_t rnti, uint8_t resPsdch);
 
   /**
   * \brief Update the MI value associated to the decodification of an HARQ process
@@ -258,11 +258,11 @@ public:
 
 private:
 
-  std::vector <std::vector <HarqProcessInfoList_t> > m_miDlHarqProcessesInfoMap; ///< MI DL HARQ processes info map
-  std::map <uint16_t, std::vector <HarqProcessInfoList_t> > m_miUlHarqProcessesInfoMap; ///< MI UL HARQ processes info map
-  std::map <uint16_t, std::map <uint8_t , HarqProcessInfoList_t> > m_miSlHarqProcessesInfoMap;
-  std::map <uint16_t, HarqProcessInfoList_t> m_miSlV2XHarqProcessesInfoMap;
-  std::map <uint16_t, std::map <uint8_t , HarqProcessInfoList_t> > m_miDiscHarqProcessesInfoMap;  
+  std::vector <std::vector <cv2x_HarqProcessInfoList_t> > m_miDlHarqProcessesInfoMap; ///< MI DL HARQ processes info map
+  std::map <uint16_t, std::vector <cv2x_HarqProcessInfoList_t> > m_miUlHarqProcessesInfoMap; ///< MI UL HARQ processes info map
+  std::map <uint16_t, std::map <uint8_t , cv2x_HarqProcessInfoList_t> > m_miSlHarqProcessesInfoMap;
+  std::map <uint16_t, cv2x_HarqProcessInfoList_t> m_miSlV2XHarqProcessesInfoMap;
+  std::map <uint16_t, std::map <uint8_t , cv2x_HarqProcessInfoList_t> > m_miDiscHarqProcessesInfoMap;
     
   uint8_t m_discNumRetx;
   

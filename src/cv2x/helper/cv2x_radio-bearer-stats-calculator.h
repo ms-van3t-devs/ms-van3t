@@ -35,17 +35,17 @@
 namespace ns3
 {
 /// Container: (IMSI, LCID) pair, uint32_t
-typedef std::map<cv2x_ImsiLcidPair_t, uint32_t> Uint32Map;
+typedef std::map<cv2x_ImsiLcidPair_t, uint32_t> cv2x_Uint32Map;
 /// Container: (IMSI, LCID) pair, uint64_t
-typedef std::map<cv2x_ImsiLcidPair_t, uint64_t> Uint64Map;
+typedef std::map<cv2x_ImsiLcidPair_t, uint64_t> cv2x_Uint64Map;
 /// Container: (IMSI, LCID) pair, uint32_t calculator
-typedef std::map<cv2x_ImsiLcidPair_t, Ptr<MinMaxAvgTotalCalculator<uint32_t> > > Uint32StatsMap;
+typedef std::map<cv2x_ImsiLcidPair_t, Ptr<MinMaxAvgTotalCalculator<uint32_t> > > cv2x_Uint32StatsMap;
 /// Container: (IMSI, LCID) pair, uint64_t calculator
-typedef std::map<cv2x_ImsiLcidPair_t, Ptr<MinMaxAvgTotalCalculator<uint64_t> > > Uint64StatsMap;
+typedef std::map<cv2x_ImsiLcidPair_t, Ptr<MinMaxAvgTotalCalculator<uint64_t> > > cv2x_Uint64StatsMap;
 /// Container: (IMSI, LCID) pair, double
-typedef std::map<cv2x_ImsiLcidPair_t, double> DoubleMap;
+typedef std::map<cv2x_ImsiLcidPair_t, double> cv2x_DoubleMap;
 /// Container: (IMSI, LCID) pair, cv2x_LteFlowId_t
-typedef std::map<cv2x_ImsiLcidPair_t, cv2x_LteFlowId_t> FlowIdMap;
+typedef std::map<cv2x_ImsiLcidPair_t, cv2x_LteFlowId_t> cv2x_FlowIdMap;
 
 /**
  * \ingroup lte
@@ -395,23 +395,23 @@ private:
 
   EventId m_endEpochEvent; //!< Event id for next end epoch event
 
-  FlowIdMap m_flowId; //!< List of FlowIds, ie. (RNTI, LCID) by (IMSI, LCID) pair
+  cv2x_FlowIdMap m_flowId; //!< List of FlowIds, ie. (RNTI, LCID) by (IMSI, LCID) pair
 
-  Uint32Map m_dlCellId; //!< List of DL CellIds by (IMSI, LCID) pair
-  Uint32Map m_dlTxPackets; //!< Number of DL TX Packets by (IMSI, LCID) pair
-  Uint32Map m_dlRxPackets; //!< Number of DL RX Packets by (IMSI, LCID) pair
-  Uint64Map m_dlTxData; //!< Amount of DL TX Data by (IMSI, LCID) pair
-  Uint64Map m_dlRxData; //!< Amount of DL RX Data by (IMSI, LCID) pair
-  Uint64StatsMap m_dlDelay; //!< DL delay by (IMSI, LCID) pair
-  Uint32StatsMap m_dlPduSize; //!< DL PDU Size by (IMSI, LCID) pair
+  cv2x_Uint32Map m_dlCellId; //!< List of DL CellIds by (IMSI, LCID) pair
+  cv2x_Uint32Map m_dlTxPackets; //!< Number of DL TX Packets by (IMSI, LCID) pair
+  cv2x_Uint32Map m_dlRxPackets; //!< Number of DL RX Packets by (IMSI, LCID) pair
+  cv2x_Uint64Map m_dlTxData; //!< Amount of DL TX Data by (IMSI, LCID) pair
+  cv2x_Uint64Map m_dlRxData; //!< Amount of DL RX Data by (IMSI, LCID) pair
+  cv2x_Uint64StatsMap m_dlDelay; //!< DL delay by (IMSI, LCID) pair
+  cv2x_Uint32StatsMap m_dlPduSize; //!< DL PDU Size by (IMSI, LCID) pair
 
-  Uint32Map m_ulCellId; //!< List of UL CellIds by (IMSI, LCID) pair
-  Uint32Map m_ulTxPackets; //!< Number of UL TX Packets by (IMSI, LCID) pair
-  Uint32Map m_ulRxPackets; //!< Number of UL RX Packets by (IMSI, LCID) pair
-  Uint64Map m_ulTxData; //!< Amount of UL TX Data by (IMSI, LCID) pair
-  Uint64Map m_ulRxData; //!< Amount of UL RX Data by (IMSI, LCID) pair
-  Uint64StatsMap m_ulDelay; //!< UL delay by (IMSI, LCID) pair
-  Uint32StatsMap m_ulPduSize; //!< UL PDU Size by (IMSI, LCID) pair
+  cv2x_Uint32Map m_ulCellId; //!< List of UL CellIds by (IMSI, LCID) pair
+  cv2x_Uint32Map m_ulTxPackets; //!< Number of UL TX Packets by (IMSI, LCID) pair
+  cv2x_Uint32Map m_ulRxPackets; //!< Number of UL RX Packets by (IMSI, LCID) pair
+  cv2x_Uint64Map m_ulTxData; //!< Amount of UL TX Data by (IMSI, LCID) pair
+  cv2x_Uint64Map m_ulRxData; //!< Amount of UL RX Data by (IMSI, LCID) pair
+  cv2x_Uint64StatsMap m_ulDelay; //!< UL delay by (IMSI, LCID) pair
+  cv2x_Uint32StatsMap m_ulPduSize; //!< UL PDU Size by (IMSI, LCID) pair
 
   /**
    * Start time of the on going epoch

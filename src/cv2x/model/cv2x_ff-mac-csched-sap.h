@@ -80,7 +80,7 @@ public:
     } m_phichResource; ///< PHICH resource
 
 
-    enum NormalExtended_e m_phichDuration; ///< PHICH duration
+    enum cv2x_NormalExtended_e m_phichDuration; ///< PHICH duration
 
     uint8_t m_initialNrOfPdcchOfdmSymbols; ///< initial number of PDCCH OFDM symbols
 
@@ -89,8 +89,8 @@ public:
     uint8_t m_ulBandwidth; ///< UL bandwidth
     uint8_t m_dlBandwidth; ///< DL badnwidth
 
-    enum NormalExtended_e m_ulCyclicPrefixLength; ///< UL cyclic prefix length
-    enum NormalExtended_e m_dlCyclicPrefixLength; ///< DL cyclic prefix length
+    enum cv2x_NormalExtended_e m_ulCyclicPrefixLength; ///< UL cyclic prefix length
+    enum cv2x_NormalExtended_e m_dlCyclicPrefixLength; ///< DL cyclic prefix length
 
     uint8_t m_antennaPortsCount; ///< antenna port count
 
@@ -333,7 +333,7 @@ public:
    */
   struct CschedCellConfigCnfParameters
   {
-    enum Result_e m_result; ///< result
+    enum cv2x_Result_e m_result; ///< result
 
     std::vector <struct cv2x_VendorSpecificListElement_s> m_vendorSpecificList; ///< vendorSpecificList
   };
@@ -345,7 +345,7 @@ public:
   struct CschedUeConfigCnfParameters
   {
     uint16_t  m_rnti; ///< RNTI
-    enum Result_e m_result; ///< result
+    enum cv2x_Result_e m_result; ///< result
 
     std::vector <struct cv2x_VendorSpecificListElement_s> m_vendorSpecificList; ///< vendorSpecificList
   };
@@ -357,7 +357,7 @@ public:
   struct CschedLcConfigCnfParameters
   {
     uint16_t  m_rnti; ///< RNTI
-    enum Result_e m_result; ///< result
+    enum cv2x_Result_e m_result; ///< result
 
     std::vector <uint8_t> m_logicalChannelIdentity; ///< logical channel identity
 
@@ -371,7 +371,7 @@ public:
   struct CschedLcReleaseCnfParameters
   {
     uint16_t  m_rnti; ///< RNTI
-    enum Result_e m_result; ///< result
+    enum cv2x_Result_e m_result; ///< result
 
     std::vector <uint8_t> m_logicalChannelIdentity; ///< logical channel identity
 
@@ -385,7 +385,7 @@ public:
   struct CschedUeReleaseCnfParameters
   {
     uint16_t  m_rnti; ///< RNTI
-    enum Result_e m_result; ///< result
+    enum cv2x_Result_e m_result; ///< result
 
     std::vector <struct cv2x_VendorSpecificListElement_s> m_vendorSpecificList; ///< vendor specific list
   };

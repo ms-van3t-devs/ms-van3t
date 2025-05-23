@@ -157,3 +157,31 @@ build_lib_example(
  ${libwave}
  ${libtraci}
  )
+
+build_lib_example(
+       NAME v2v-coexistence-80211p-nrv2x
+       SOURCE_FILES v2v-coexistence-80211p-nrv2x.cc
+       LIBRARIES_TO_LINK
+       ${libautomotive}
+)
+
+build_lib_example(
+        NAME v2v-cam-exchange-sionna-80211p
+        SOURCE_FILES v2v-cam-exchange-sionna-80211p.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+)
+
+build_lib_example(
+        NAME v2v-cam-exchange-sionna-nrv2x
+        SOURCE_FILES v2v-cam-exchange-sionna-nrv2x.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+)
+
+build_lib_example(
+        NAME v2v-cam-exchange-sionna-cv2x
+        SOURCE_FILES v2v-cam-exchange-sionna-cv2x.cc
+        LIBRARIES_TO_LINK
+        ${libautomotive}
+)

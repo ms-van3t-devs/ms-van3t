@@ -42,6 +42,8 @@
 
 #include "ns3/StationType.h"
 
+#include "ns3/sionna-connection-handler.h"
+
 #define STARTUP_FCN std::function<Ptr<Node>(std::string,TraciClient::StationTypeTraCI_t)>
 #define SHUTDOWN_FCN std::function<void(Ptr<Node>,std::string)>
 
@@ -82,6 +84,8 @@ public:
   void AddStation(std::string id, float x, float y, float z, Ptr<Node> node);
 
   std::string GetStationId(Ptr<Node> node);
+
+  void SetSionnaUp() {m_sionna = true;};
 
 
 private:
@@ -138,6 +142,8 @@ private:
   Ptr<vehicleVisualizer> m_vehicle_visualizer;
   std::string m_netns_name;
   void terminateVehicleVisualizer (void);
+
+  bool m_sionna = false;
 
 };
 

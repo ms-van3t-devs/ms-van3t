@@ -116,6 +116,19 @@ public:
   double getAverageLatency_overall(void) {return m_avg_latency_ms;}
 
   /**
+   * @brief Get the average SINR for all the messages received in the simulation.
+   * @return  The average SINR [dB]
+   */
+  double getAverageSINR_overall(void) {
+    double sum = 0.0;
+    for (auto item : m_sinr_per_veh)
+      {
+        sum += getAverageSINR_vehicle (item.first);
+      }
+    return sum / m_sinr_per_veh.size();
+  }
+
+  /**
    * @brief Get the total number of packets transmitted in the whole simulation.
    * @return  The total number of packets transmitted.
    */
@@ -231,6 +244,19 @@ public:
    * @param vehicleID  The ID of the vehicle.
    * @return  The average latency [ms]
    */
+  /**
+   * @brief Get the average SINR for all the messages sent and received by a specific vehicle.
+   * @param vehicleID  The ID of the vehicle.
+   * @return  The average SINR [dB]
+   */
+  double getAverageSINR_vehicle(uint64_t vehicleID) {
+    double sum = 0.0;
+    for (auto sinr : m_sinr_per_veh[vehicleID])
+      {
+        sum += sinr;
+      }
+    return sum / m_sinr_per_veh[vehicleID].size();
+  }
   double getAverageLatency_vehicle(uint64_t vehicleID) {return m_avg_latency_ms_per_veh[vehicleID];}
   /**
    * @brief Get the total number of packets transmitted by a specific vehicle.
@@ -447,6 +473,8 @@ public:
     */
     std::vector<double> getBytesPerSecondPerSquareMeter() {return m_bytes_per_second_per_square_meter;};
 
+    void setNodeContainer(NodeContainer nc) {m_node_container = nc;}
+
 private:
   void computePRR(std::string buf);
 
@@ -506,6 +534,8 @@ private:
   std::unordered_map<messageType_e,uint64_t> m_count_nvehbsln_per_messagetype; //! key: message type, value: count for average number of vehicles within the baseline computation
   std::unordered_map<messageType_e,double> m_avg_nvehbsln_per_messagetype;  //! key: message type, value: average number of road users within the baseline used for the PRR computation for that message type
 
+  std::unordered_map<uint64_t, std::vector<double>> m_sinr_per_veh; //! key: vehicle ID, value: SINR
+  
   Ptr<TraciClient> m_traci_ptr = nullptr;
   Ptr<OpenCDAClient> m_carla_ptr = nullptr;
   double m_baseline_m = 150.0;
@@ -526,6 +556,7 @@ private:
   float m_cbr_alpha = -1; //!< The alpha parameter for the exponential moving average
   bool m_cbr_write_to_file = false; //!< True if the CBR values are written to a file, false otherwise
   std::string m_channel_technology = ""; //!< The channel technology used
+  NodeContainer m_node_container;
   float m_simulation_time = -1; //!< The simulation time
   std::unordered_map<std::string, std::vector<double>> m_average_cbr; //!< The exponential moving average CBR for each node
 

@@ -66,7 +66,7 @@ namespace ns3 {
  *  - time-to-trigger check is always performed before the reporting, so there
  *    would still be chance for it to cancel the reporting if necessary.
  */
-static const Time UE_MEASUREMENT_REPORT_DELAY = MicroSeconds (1);
+static const Time cv2x_UE_MEASUREMENT_REPORT_DELAY = MicroSeconds (1);
 
 
 class cv2x_LteRlc;
@@ -368,7 +368,7 @@ class cv2x_LteUeRrc : public Object
   /// allow cv2x_MemberLteUeRrcSapProvider<cv2x_LteUeRrc> class friend access
   friend class cv2x_MemberLteUeRrcSapProvider<cv2x_LteUeRrc>;
   /// allow MemberLteUeCcmRrcSapUser<cv2x_LteUeRrc> class friend access
-  friend class MemberLteUeCcmRrcSapUser<cv2x_LteUeRrc>;
+  friend class cv2x_MemberLteUeCcmRrcSapUser<cv2x_LteUeRrc>;
 
 public:
 

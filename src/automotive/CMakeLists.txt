@@ -3,6 +3,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 link_libraries(${OpenCV_LIBS})
 
 Set(source_files
+    model/LOS-NLOS/los_nlos.cc
     helper/areaSpeedAdvisorClient80211p-helper.cc
     helper/areaSpeedAdvisorServer80211p-helper.cc
     helper/areaSpeedAdvisorClientLTE-helper.cc
@@ -58,6 +59,7 @@ Set(source_files
     model/Facilities/phPoints.cc
     model/utilities/sumo-sensor.cc
     model/DCC/DCC.cc
+    model/TxTracker/txTracker.cc
 
     model/Facilities/caBasicService_v1.cc
     model/Facilities/denBasicService_v1.cc
@@ -1323,6 +1325,7 @@ Set(source_files
     )
 
 set(header_files
+    model/LOS-NLOS/los_nlos.h
     model/Measurements/MetricSupervisor.h
     helper/areaSpeedAdvisorClientLTE-helper.h
     helper/areaSpeedAdvisorServerLTE-helper.h
@@ -1368,6 +1371,7 @@ set(header_files
 
     model/Facilities/signalInfoUtils.h
     model/DCC/DCC.h
+    model/TxTracker/txTracker.h
     
     helper/emergencyVehicleWarningServer80211p-helper.h
     helper/emergencyVehicleWarningClient80211p-helper.h
@@ -3806,9 +3810,12 @@ build_lib(
     ${libstats}
     ${libgps-tc}
     ${libnr}
+    ${libcv2x}
+    ${libwave}
     ${libinternet}
     ${libvehicle-visualizer}
     ${libtraci}
     ${libcarla}
+    ${libsionna}
   TEST_SOURCES ${test_sources}
 )

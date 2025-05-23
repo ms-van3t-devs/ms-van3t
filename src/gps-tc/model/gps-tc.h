@@ -13,7 +13,8 @@
 
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
-#include "ns3/traci-client.h"
+#include "ns3/traci-module.h"
+#include "ns3/sionna-connection-handler.h"
 
 #include "ns3/vehicle-visualizer.h"
 

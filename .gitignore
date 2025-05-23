@@ -197,6 +197,8 @@ CMakeLists.txt
 !/src/automotive/model/SignalInfo/LTE/CMakeLists.txt
 !/src/automotive/model/SignalInfo/NR/CMakeLists.txt
 !/src/automotive/model/SignalInfo/WiFi/CMakeLists.txt
+!/src/sionna/CMakeLists.txt
+!/src/sionna/files/propagation/CMakeLists.txt
 grpc/
 pyproject.toml
 setup.cfg
@@ -1825,3 +1827,5 @@ src/nr/tools/
 /src/automotive/examples/sumo_files_v2v_map/traci_pedestrian_crossing/pedcrossing.tll.xml
 /src/automotive/examples/sumo_files_v2v_map/traci_pedestrian_crossing/run.sumocfg
 /src/automotive/examples/sumo_files_v2v_map/traci_pedestrian_crossing/viewsettings.xml
+src/sionna/sionna_log.csv
+src/sionna/phy_with_sionna_nrv2x.csv

@@ -378,7 +378,8 @@ namespace ns3
 
     if(m_CAReceiveCallback!=nullptr) {
       m_CAReceiveCallback(decoded_cam,from);
-    } else if(m_CAReceiveCallbackExtended!=nullptr) {
+    }
+    if(m_CAReceiveCallbackExtended!=nullptr) {
       m_CAReceiveCallbackExtended(decoded_cam,from,m_station_id,m_stationtype,GetSignalInfo());
     }
   }

@@ -53,7 +53,6 @@ namespace ns3 {
   cv2x_LteSlTft::Matches (Ipv4Address remoteAddress)
   {
     return remoteAddress == m_groupAddress;
-
   }
 
 

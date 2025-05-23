@@ -951,6 +951,7 @@ public:
 
 private:
   ObjectFactory m_bwpManagerFactory;       //!< Bandwidth part manager factory
+  Ptr<PropagationLossModel> m_prop_loss_model = nullptr;
 };
 
 }

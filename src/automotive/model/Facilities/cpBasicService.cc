@@ -524,7 +524,8 @@ namespace ns3 {
 
     if(m_CPReceiveCallback!=nullptr) {
         m_CPReceiveCallback(decoded_cpm,from);
-      } else if(m_CPReceiveCallbackExtended!=nullptr) {
+      }
+    if(m_CPReceiveCallbackExtended!=nullptr) {
         m_CPReceiveCallbackExtended(decoded_cpm,from,m_station_id,m_stationtype,GetSignalInfo());
       }
   }

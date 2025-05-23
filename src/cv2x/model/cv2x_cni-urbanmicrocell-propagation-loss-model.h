@@ -25,6 +25,7 @@
 
 #include <ns3/propagation-loss-model.h>
 #include <ns3/propagation-environment.h>
+#include "ns3/sionna-helper.h"
 
 namespace ns3 {
 

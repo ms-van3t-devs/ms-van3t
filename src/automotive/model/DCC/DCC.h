@@ -29,7 +29,6 @@ public:
 
   typedef enum ReactiveState
   {
-    Undefined = -1,
     Relaxed,
     Active1,
     Active2,
@@ -37,49 +36,12 @@ public:
     Restrictive
   } ReactiveState;
 
-  typedef struct ReactiveParametersRelaxed
-  {
-    double m_cbr_threshold = 0.20;
-    double m_tx_power = 33.0;
-    long m_tx_inter_packet_time = 100;
-    // double m_tx_data_rate = 3.0;
-    double m_sensitivity = -95.0;
-  } ReactiveParametersRelaxed;
-
-  typedef struct ReactiveParametersActive1
-  {
-    double m_cbr_threshold = 0.30;
-    double m_tx_power = 25.0;
-    long m_tx_inter_packet_time = 200;
-    // double m_tx_data_rate = 3.0;
-    double m_sensitivity = -95.0;
-  } ReactiveParametersActive1;
-
-  typedef struct ReactiveParametersActive2
-  {
-    double m_cbr_threshold = 0.40;
-    double m_tx_power = 20.0;
-    long m_tx_inter_packet_time = 400;
-    // double m_tx_data_rate = 3.0;
-    double m_sensitivity = -95.0;
-  } ReactiveParametersActive2;
-
-  typedef struct ReactiveParametersActive3
-  {
-    double m_cbr_threshold = 0.50;
-    double m_tx_power = 15.0;
-    long m_tx_inter_packet_time = 500;
-    // double m_tx_data_rate = 3.0;
-    double m_sensitivity = -95.0;
-  } ReactiveParametersActive3;
-
-  typedef struct ReactiveParametersRestricted
-  {
-    double m_tx_power = -10.0;
-    long m_tx_inter_packet_time = 1000;
-    // double m_tx_data_rate = 12.0;
-    double m_sensitivity = -65.0;
-  } ReactiveParametersRestricted;
+  typedef struct ReactiveParameters {
+    double cbr_threshold;
+    double tx_power;
+    long tx_inter_packet_time;
+    double sensitivity;
+  } ReactiveParameters;
 
   static TypeId GetTypeId(void);
   /**
@@ -107,22 +69,7 @@ public:
     * \param reactive_interval Time interval for DCC
     */
   void SetDCCInterval(Time dcc_interval) {m_dcc_interval = dcc_interval;};
-  /**
-    * \brief Set the NrHelper pointer
-    *
-    * \param nrHelper NRHelper object
-    */
-  // void SetNrHelper(Ptr<NrHelper> nrHelper) {
-  //   if(m_metric_supervisor != nullptr && m_metric_supervisor->getChannelTechnology() == "Nr")
-  //     {
-  //       m_nr_helper = nrHelper;
-  //     }
-  //   else
-  //     {
-  //       NS_FATAL_ERROR ("Metric Supervisor is not set or the channel technology is not Nr");
-  //     }
-  // };
-  /**
+ /**
     * \brief Set the CAM Basic Service
     *
     * \param nodeID id of the node
@@ -188,13 +135,7 @@ private:
   std::unordered_map<std::string, Ptr<VRUBasicService>> m_vruService; //!< Pointer to the VRUBasicService object
   //Ptr<NrHelper> m_nr_helper = nullptr; //!< Pointer to the NRHelper object
 
-  DCC::ReactiveParametersRelaxed m_reactive_parameters_relaxed = DCC::ReactiveParametersRelaxed(); //!< Parameters for the Relaxed state
-  DCC::ReactiveParametersActive1 m_reactive_parameters_active1 = DCC::ReactiveParametersActive1(); //!< Parameters for the Active1 state
-  DCC::ReactiveParametersActive2 m_reactive_parameters_active2 = DCC::ReactiveParametersActive2(); //!< Parameters for the Active2 state
-  DCC::ReactiveParametersActive3 m_reactive_parameters_active3 = DCC::ReactiveParametersActive3(); //!< Parameters for the Active3 state
-  DCC::ReactiveParametersRestricted m_reactive_parameters_restricted = DCC::ReactiveParametersRestricted(); //!< Parameters for the Restricted state
-
-  std::unordered_map<std::string, DCC::ReactiveState> m_states; //!< Map to store the state of each vehicle
+  std::unordered_map<std::string, DCC::ReactiveState> m_vehicle_state; //!< Map to store the state of each vehicle
 
   std::unordered_map<std::string, double> m_CBR_its;
   double m_alpha = 0.016;
@@ -205,6 +146,8 @@ private:
   double m_Gmax = 0.0005;
   double m_Gmin = -0.00025;
   double m_delta = 0;
+
+  std::unordered_map<ReactiveState, ReactiveParameters> m_reactive_parameters;
 
 };
 

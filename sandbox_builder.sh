@@ -162,6 +162,20 @@ cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model
 cp src/automotive/propagation-extended/cni-urbanmicrocell-propagation-loss-model.h src/propagation/model/
 cp src/automotive/propagation-extended/CMakeLists.txt src/propagation/
 
+echo "Copying propagation files for NVIDIA Sionna..."
+sleep 1
+cp src/sionna/files/propagation/CMakeLists.txt src/propagation/
+cp src/sionna/files/propagation/propagation-delay-model.cc src/propagation/model/
+cp src/sionna/files/propagation/propagation-delay-model.h src/propagation/model/
+cp src/sionna/files/propagation/propagation-loss-model.cc src/propagation/model/
+cp src/sionna/files/propagation/propagation-loss-model.h src/propagation/model/
+cp src/sionna/files/propagation/three-gpp-propagation-loss-model.h src/propagation/model
+cp src/sionna/files/propagation/three-gpp-propagation-loss-model.cc src/propagation/model
+cp src/sionna/files/spectrum/CMakeLists.txt src/spectrum/
+cp src/sionna/files/spectrum/three-gpp-spectrum-propagation-loss-model.cc src/spectrum/model
+
+cp src/automotive/model/TxTracker/channel_files/modified/yans-wifi-phy.h src/wifi/model
+
 echo "Extending Signal Info features..."
 sleep 1
 cp src/automotive/model/SignalInfo/rssi-tag.cc src/wifi/model/
@@ -212,6 +226,7 @@ cp src/automotive/model/SignalInfo/WiFi/qos-frame-exchange-manager.cc src/wifi/m
 cp src/automotive/model/SignalInfo/WiFi/CMakeLists.txt src/wifi/
 
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.cc src/cv2x/model/
+cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-spectrum-phy.h src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.h src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/cv2x_lte-ue-mac.cc src/cv2x/model/
 cp src/automotive/model/SignalInfo/CV2X/CMakeLists.txt src/cv2x/

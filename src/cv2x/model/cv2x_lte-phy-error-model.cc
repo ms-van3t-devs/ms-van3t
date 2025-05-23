@@ -494,7 +494,7 @@ cv2x_LtePhyErrorModel::GetBler (const double (*xtable)[XTABLE_SIZE], const doubl
 
 
 TbErrorStats_t
-cv2x_LtePhyErrorModel::GetPsschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, HarqProcessInfoList_t harqHistory)
+cv2x_LtePhyErrorModel::GetPsschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, cv2x_HarqProcessInfoList_t harqHistory)
 {
   //Check mcs values
   if (mcs > 20) 
@@ -537,7 +537,7 @@ cv2x_LtePhyErrorModel::GetPsschBler (LteFadingModel fadingChannel, LteTxMode txm
 }
 
 TbErrorStats_t
-cv2x_LtePhyErrorModel::GetPsdchBler (LteFadingModel fadingChannel, LteTxMode txmode, double sinr, HarqProcessInfoList_t harqHistory)
+cv2x_LtePhyErrorModel::GetPsdchBler (LteFadingModel fadingChannel, LteTxMode txmode, double sinr, cv2x_HarqProcessInfoList_t harqHistory)
 {
   //Find the table to use
   const double (*xtable)[XTABLE_SIZE];
@@ -603,7 +603,7 @@ cv2x_LtePhyErrorModel::GetPscchBler (LteFadingModel fadingChannel, LteTxMode txm
 }
 
 TbErrorStats_t
-cv2x_LtePhyErrorModel::GetPuschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, HarqProcessInfoList_t harqHistory)
+cv2x_LtePhyErrorModel::GetPuschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, cv2x_HarqProcessInfoList_t harqHistory)
 {
   //Check mcs values
   if (mcs > 28) 

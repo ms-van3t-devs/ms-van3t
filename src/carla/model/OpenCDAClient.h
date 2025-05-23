@@ -27,6 +27,7 @@
 #include "grpcpp/grpcpp.h"
 #include <signal.h>
 #include <unistd.h>
+#include "ns3/sionna-connection-handler.h"
 
 
 #include "ns3/carla.grpc.pb.h"
@@ -71,6 +72,9 @@ namespace ns3
       bool InsertObject(carla::ObjectIn object);
 
       std::vector<int> getManagedConnectedIds();
+      std::map<std::string,std::string> getManagedConnectedNodes();
+
+      void SetSionnaUp() {m_sionna = true;};
 
     private:
       void executeOneTimestep();
@@ -128,6 +132,8 @@ namespace ns3
 
       // map every vehicle to an output file
       std::map<std::string, std::ofstream> m_fileMap;
+
+      bool m_sionna = false;
 
     };
 

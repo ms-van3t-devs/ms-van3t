@@ -86,7 +86,7 @@ public:
    * \param sinr The mean sinr of the TB
    * \param harqHistory The HARQ information
    */
-  static TbErrorStats_t GetPsschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, HarqProcessInfoList_t harqHistory);
+  static TbErrorStats_t GetPsschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, cv2x_HarqProcessInfoList_t harqHistory);
 
   /**
    * \brief Lookup the BLER for the given SINR
@@ -95,7 +95,7 @@ public:
    * \param sinr The mean sinr of the TB
    * \param harqHistory The HARQ information
    */
-  static TbErrorStats_t GetPsdchBler (LteFadingModel fadingChannel, LteTxMode txmode, double sinr, HarqProcessInfoList_t harqHistory);
+  static TbErrorStats_t GetPsdchBler (LteFadingModel fadingChannel, LteTxMode txmode, double sinr, cv2x_HarqProcessInfoList_t harqHistory);
 
   /**
    * \brief Lookup the BLER for the given SINR
@@ -113,7 +113,7 @@ public:
    * \param sinr The mean sinr of the TB
    * \param harqHistory The HARQ information
    */
-  static TbErrorStats_t GetPuschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, HarqProcessInfoList_t harqHistory);
+  static TbErrorStats_t GetPuschBler (LteFadingModel fadingChannel, LteTxMode txmode, uint16_t mcs, double sinr, cv2x_HarqProcessInfoList_t harqHistory);
 
   /**
    * \brief Lookup the BLER for the given SINR

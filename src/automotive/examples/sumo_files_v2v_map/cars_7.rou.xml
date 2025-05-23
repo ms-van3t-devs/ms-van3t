@@ -1,0 +1,32 @@
+<!-- number of vehicles:20 -->
+<!-- generated on 2020-04-18 16:49:03.286463 by "cars.rou.xml -m 1 -r 1.4 -t 20" -->
+<routes>
+  <route id="0" edges="ne_to_nw nw_to_sw sw_to_se se_to_ne"/>
+  <route id="1" edges="se_to_sw sw_to_nw nw_to_ne ne_to_se"/>
+  <route id="2" edges="nw_to_sw sw_to_se se_to_ne ne_to_nw"/>
+  <route id="3" edges="sw_to_nw nw_to_ne ne_to_se se_to_sw"/>
+  <route id="4" edges="sw_to_se se_to_ne ne_to_nw nw_to_sw"/>
+  <route id="5" edges="nw_to_ne ne_to_se se_to_sw sw_to_nw"/>
+
+  <vType accel="4" decel="7.5" emergencyDecel="7" minGap="1.0" id="Car1" maxSpeed="6.94"/>
+  <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car2" maxSpeed="8.33"/>
+  <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car3" maxSpeed="9.72"/>
+  <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car4" maxSpeed="12.5"/>
+  <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car5" maxSpeed="13.89"/>
+  <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car6" maxSpeed="15.27"/>
+
+      <vehicle id="veh1" type="Car1" depart="0.0" route="0">
+    </vehicle>
+      <vehicle id="veh2" type="Car1" depart="0.1" route="0">
+    </vehicle>
+      <vehicle id="veh3" type="Car1" depart="0.2" route="0">
+    </vehicle>
+      <vehicle id="veh4" type="Car1" depart="0.3" route="0">
+    </vehicle>
+      <vehicle id="veh5" type="Car1" depart="0.4" route="0">
+    </vehicle>
+      <vehicle id="veh6" type="Car1" depart="0.5" route="0">
+    </vehicle>
+      <vehicle id="veh7" type="Car1" depart="0.8" route="0">
+    </vehicle>
+</routes>

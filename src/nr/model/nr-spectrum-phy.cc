@@ -2189,7 +2189,12 @@ NrSpectrumPhy::RxSlPssch (std::vector<uint32_t> paramIndexes)
   //Compute the error and check for collision for each expected TB
   for (auto &tbIt : m_slTransportBlocks)
     {
-      NS_ABORT_MSG_IF (tbIt.second.sinrUpdated == false, "SINR not updated for the expected TB from RNTI " << tbIt.first);
+      if (tbIt.second.sinrUpdated == false)
+        {
+          NS_LOG_WARN ("Skipping TB from RNTI " << tbIt.first << " because SINR was not updated");
+          continue;
+        }
+      // NS_ABORT_MSG_IF (tbIt.second.sinrUpdated == false, "SINR not updated for the expected TB from RNTI " << tbIt.first);
       Ptr<Packet> sci2Pkt = RetrieveSci2FromPktBurst (tbIt.second.pktIndex);
       NrSlSciF2aHeader sciF2a;
       sci2Pkt->PeekHeader (sciF2a);

@@ -43,14 +43,14 @@
 namespace ns3 {
 
 
-typedef std::vector < uint8_t > DlHarqProcessesStatus_t;
-typedef std::vector < uint8_t > DlHarqProcessesTimer_t;
-typedef std::vector < cv2x_DlDciListElement_s > DlHarqProcessesDciBuffer_t;
-typedef std::vector < std::vector <struct cv2x_RlcPduListElement_s> > RlcPduList_t; // vector of the LCs and layers per UE
-typedef std::vector < RlcPduList_t > DlHarqRlcPduListBuffer_t; // vector of the 8 HARQ processes per UE
+typedef std::vector < uint8_t > cv2x_DlHarqProcessesStatus_t;
+typedef std::vector < uint8_t > cv2x_DlHarqProcessesTimer_t;
+typedef std::vector < cv2x_DlDciListElement_s > cv2x_DlHarqProcessesDciBuffer_t;
+typedef std::vector < std::vector <struct cv2x_RlcPduListElement_s> > cv2x_RlcPduList_t; // vector of the LCs and layers per UE
+typedef std::vector < cv2x_RlcPduList_t > cv2x_DlHarqRlcPduListBuffer_t; // vector of the 8 HARQ processes per UE
 
-typedef std::vector < cv2x_UlDciListElement_s > UlHarqProcessesDciBuffer_t;
-typedef std::vector < uint8_t > UlHarqProcessesStatus_t;
+typedef std::vector < cv2x_UlDciListElement_s > cv2x_UlHarqProcessesDciBuffer_t;
+typedef std::vector < uint8_t > cv2x_UlHarqProcessesStatus_t;
 
 
 /// cv2x_fdbetsFlowPerf_t structure
@@ -374,18 +374,18 @@ private:
   //HARQ status
   // 0: process Id available
   // x>0: process Id equal to `x` transmission count
-  std::map <uint16_t, DlHarqProcessesStatus_t> m_dlHarqProcessesStatus; ///< DL HARQ process status
-  std::map <uint16_t, DlHarqProcessesTimer_t> m_dlHarqProcessesTimer; ///< DL HARQ process timer
-  std::map <uint16_t, DlHarqProcessesDciBuffer_t> m_dlHarqProcessesDciBuffer; ///< DL HARQ process DCI buffer
-  std::map <uint16_t, DlHarqRlcPduListBuffer_t> m_dlHarqProcessesRlcPduListBuffer; ///< DL HARQ process RLC PDU List 
+  std::map <uint16_t, cv2x_DlHarqProcessesStatus_t> m_dlHarqProcessesStatus; ///< DL HARQ process status
+  std::map <uint16_t, cv2x_DlHarqProcessesTimer_t> m_dlHarqProcessesTimer; ///< DL HARQ process timer
+  std::map <uint16_t, cv2x_DlHarqProcessesDciBuffer_t> m_dlHarqProcessesDciBuffer; ///< DL HARQ process DCI buffer
+  std::map <uint16_t, cv2x_DlHarqRlcPduListBuffer_t> m_dlHarqProcessesRlcPduListBuffer; ///< DL HARQ process RLC PDU List
   std::vector <cv2x_DlInfoListElement_s> m_dlInfoListBuffered; ///< DL HARQ retx buffered
 
   std::map <uint16_t, uint8_t> m_ulHarqCurrentProcessId; ///< UL HARQ current process ID
   //HARQ status
   // 0: process Id available
   // x>0: process Id equal to `x` transmission count
-  std::map <uint16_t, UlHarqProcessesStatus_t> m_ulHarqProcessesStatus; ///< UL HARQ process status
-  std::map <uint16_t, UlHarqProcessesDciBuffer_t> m_ulHarqProcessesDciBuffer; ///< UL HARQ process DCI Buffer
+  std::map <uint16_t, cv2x_UlHarqProcessesStatus_t> m_ulHarqProcessesStatus; ///< UL HARQ process status
+  std::map <uint16_t, cv2x_UlHarqProcessesDciBuffer_t> m_ulHarqProcessesDciBuffer; ///< UL HARQ process DCI Buffer
 
 
   // RACH attributes

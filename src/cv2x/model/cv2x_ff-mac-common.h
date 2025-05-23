@@ -63,32 +63,32 @@
 namespace ns3 {
 
 /// Result_e enumeration
-enum Result_e
+enum cv2x_Result_e
 {
-  SUCCESS,
-  FAILURE
+  cv2x_SUCCESS,
+  cv2x_FAILURE
 };
 
 /// SetupRelease_e enumeration
-enum SetupRelease_e
+enum cv2x_SetupRelease_e
 {
-  setup,
-  release
+  cv2x_setup,
+  cv2x_release
 };
 
 /// CeBitmap_e
-enum CeBitmap_e
+enum cv2x_CeBitmap_e
 {
-  TA,
-  DRX,
-  CR
+  cv2x_TA,
+  cv2x_DRX,
+  cv2x_CR
 };
 
 /// NormalExtended_e enumeration
-enum NormalExtended_e
+enum cv2x_NormalExtended_e
 {
-  normal,
-  extended
+  cv2x_normal,
+  cv2x_extended
 };
 
 
@@ -332,7 +332,7 @@ struct cv2x_BuildDataListElement_s
 {
   uint16_t  m_rnti; ///< RNTI
   struct cv2x_DlDciListElement_s m_dci; ///< DCI
-  std::vector <enum CeBitmap_e> m_ceBitmap; ///< CE bitmap
+  std::vector <enum cv2x_CeBitmap_e> m_ceBitmap; ///< CE bitmap
   std::vector < std::vector <struct cv2x_RlcPduListElement_s> > m_rlcPduList; ///< RLC PDU list
 };
 
@@ -457,7 +457,7 @@ struct cv2x_SpsConfig_s
  */
 struct cv2x_SrConfig_s
 {
-  enum SetupRelease_e m_action; ///< action
+  enum cv2x_SetupRelease_e m_action; ///< action
   uint8_t   m_schedInterval; ///< sched interval
   uint8_t   m_dsrTransMax; ///< trans max
 };
@@ -467,7 +467,7 @@ struct cv2x_SrConfig_s
  */
 struct cv2x_CqiConfig_s
 {
-  enum SetupRelease_e m_action; ///< action
+  enum cv2x_SetupRelease_e m_action; ///< action
   uint16_t  m_cqiSchedInterval; ///< CQI schedule interval
   uint8_t   m_riSchedInterval; ///< RI schedule interval
 };

@@ -112,7 +112,7 @@ main (int argc, char *argv[])
       /* NOTE: further actions could be required for a safe shut down! */
     };
 
-  GPS_TC_MAP_ITERATOR(GPSTCMap,GPSTCit) {
+      GPS_TC_MAP_ITERATOR(GPSTCMap,GPSTCit) {
       GPS_TC_IT_OBJECT(GPSTCit)->GPSTraceClientSetup(setupNode,shutdownNode);
       GPS_TC_IT_OBJECT(GPSTCit)->playTrace(Seconds(0));
   }
