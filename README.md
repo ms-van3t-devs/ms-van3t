@@ -77,7 +77,7 @@ The version of CARLA supported by ms-van3t-CARLA is CARLA 0.9.12.
 
 **Installing ms-van3t-CARLA**
 
-To be able to use ms-van3t-CARLA, CARLA and OpenCDA need to be installed. After following the steps detailed above to build the project, from inside the `ns-3-dev` folder execute the `install_carla_opencda.sh` script to install all necessary dependencies. 
+To be able to use ms-van3t-CARLA, CARLA and OpenCDA need to be installed. After following the steps detailed above to build the project, from inside the `ns-3-dev` folder execute the `switch_ms-van3t-CARLA.sh` script to install all necessary dependencies. 
 The script will try to find the path of your CARLA and OpenCDA installation to be defined in the `CARLA-OpenCDA.conf` file. If the user already has an installation of either CARLA or OpenCDA they should specify the path to the installation together with the path to their Python environment in the following way: 
 
 `CARLA_HOME=/path/to/CARLA_0.9.12`
