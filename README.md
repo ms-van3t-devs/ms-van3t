@@ -98,48 +98,82 @@ To run the provided examples:
 
  For further description of the modules provided in this extension please refer to our paper [here](https://www.eurecom.fr/publication/7556/download/comsys-publi-7556.pdf).
 
-# ms-van3t NVIDIA-SIONNA extension
+# ms-van3t NVIDIA-Sionna extension
 
-To integrate SIONNA with the `ms-van3t` framework, you need to install the SIONNA library. This can be done locally or on a remote server using the following command:
+To integrate `NVIDIA Sionna` with the `ms-van3t` framework, you need to install the Python library for Sionna.
+
+This can be done locally or on a remote server using the following command:
 
 ```sh
   pip install sionna
 ```
 
-Once SIONNA is installed, you need to configure the `sionna_server_script.py` script. 
-Set the `--file_name` argument to the path of your SIONNA scenario file. 
-Set the `--local_machine` argument if SIONNA is installed and running on the local machine, or `False` if it is running on a remote server.
-Set the `--verbose` argument if you want to print SIONNA information to the console.
+The supported and tested versions of `Sionna` are v0.19.0 and v1.0.
 
-The `sionna_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `ms-van3t` framework, handling various types of messages such as location updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
+Once SIONNA is installed, you need first to configure the ray tracer simulation through `sionna_server_script.py` or `sionna_v1_server_script.py` scripts.
+The main difference between these two scripts is that the `sionna_server_script.py` simulates a simpler ray tracer simulation, without taking into account the vehicles speed and so the Doppler Effect.
+On the other hand, `sionna_v1_server_script.py` integrates a more complete and rigorous simulation.
 
-If you are running SIONNA on a remote server, you need to specify the IP address of the SIONNA server in your simulation files. 
-For instance, in the `src/automotive/examples/v2v-cam-exchange-sionna-80211p.cc` example, you would add the necessary configuration to enable communication with the SIONNA server.
-Refer to this example to configure the IP address for a remote SIONNA server in your simulation file
+The arguments of both the two Python scripts are:
+- `--file_name`, a string to identify the path of your Sionna scenario file. 
+- `--local_machine`, include this argument if you want Sionna to run on the local machine. If not provided, the script will interpret that Sionna is running on a remote server.
+- `--verbose`, include this argument if you want to print Sionna logs to the console.
 
-By following these steps, you can successfully integrate SIONNA with the `ms-van3t` framework and run simulations that leverage SIONNA's ray tracing capabilities.
+The `sionna_server_script.py`/`sionna_v1_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `ms-van3t` framework, handling various types of messages such as location (and speed in the v1 script) updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
 
-# ms-van3t channel coexistence extension
+Example usage:
 
-To use the channel coexistence extension in `ms-van3t`, it is important to build just your example. Follow these steps:
+```sh
+  python3 sionna_v1_server_script.py --file_name src/sionna/scenarios/SionnaCircleScenario/scene.xml --local-machine --verbose
+```
 
+If you are running Sionna on a remote server, you need to specify the IP address of the SIONNA server in your simulation file inside ms-van3t.
+
+For instance, the `src/automotive/examples/v2v-cam-exchange-sionna-80211p.cc` simulation contains an example of how to configure the communication between ms-van3t and Sionna on the ms-van3t's side.
+Refer to this example to configure the IP address for a remote SIONNA server in your simulation file.
+
+By following these steps, you can successfully integrate `Sionna` with `ms-van3t` framework and run simulations that leverage Sionna's ray tracing capabilities.
+
+# ms-van3t co-channel coexistence extension
+
+`ms-van3t` offers a special module to simulate the coexistence between different CAVS communication technologies.
+Currently, the simulator can integrate scenarios where vehicles use either the `IEEE 802.11p` or `NR-V2X` communication stacks, even when their channels overlap.
+
+The interference management is done by a special module called `TxTracker`.
+
+To enable this specific feature of the simulator, it is important to **follow these steps precisely**:
 1. Run the `./switch_ms-van3t-interference.sh` script with the `on` argument to configure the environment for interference simulation:
    ```sh
     ./switch_ms-van3t-interference.sh on
    ```
 
-2. **Build just your example** rather than building all examples and tests:
+2. **Build just your example** rather than building all examples as in the classical simulator usage:
    ```sh
-    ./ns3 build <specific-file>
+    ./ns3 build <your-example>
+    # Example:
+    ./ns3 build "v2v-coexistence-80211p-nrv2x"
    ```
 
-3. To return to the normal mode of `ms-van3t`, run the `./switch_ms-van3t-interference.sh` script again with the `off` argument:
-   ```sh
-   ./switch_ms-van3t-interference.sh off
+3. Then run your example with:
+    ```sh
+    ./ns3 run <your-example>
+    # Example:
+    ./ns3 run "v2v-coexistence-80211p-nrv2x"
    ```
-    This will allow you to build all files as usual.
+   
+4. To come back to the **normal mode** of `ms-van3t`, run the `./switch_ms-van3t-interference.sh` script again but with the `off` argument:
+   ```sh
+    ./switch_ms-van3t-interference.sh off
+   ```
+   
+5. This will allow you to build and run all files as in the classical simulator usage:
+    ```sh
+    # Example
+    ./ns3 build
+    ./ns3 run "v2v-simple-cam-exchange-80211p"
+    ```
 
-For more details on the channel coexistence extension, you can refer to the example `src/automotive/examples/v2v-cam-exchange-coexistence-80211p-nrv2x-cv2x.cc`.
+For more details on how to manage the co-channel coexistence simulations, such as how to pass the necessaries parameters to the `TxTracker` module, you can refer to the example `src/automotive/examples/v2v-cam-exchange-coexistence-80211p-nrv2x.cc`.
 
 # Working with an IDE
 
