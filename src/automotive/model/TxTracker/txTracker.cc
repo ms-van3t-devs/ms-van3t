@@ -258,22 +258,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
                       if (subBandFreq >= lteLowerFreq && subBandFreq <= lteUpperFreq)
                         {
                           (*interferenceSignal)[j] = (*it2);
-                          j += 1;
                         }
-                    }
-                }
-
-              // Check if the channel of the LTE signal is lower than the NR one
-              // In this case we need to shift the values of the interfering signal
-              if (lteLowerFreq < nrLowerFreq)
-                {
-                  j -= 1;
-                  uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
-                  for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
-                    {
-                      double tmp = (*interferenceSignal)[t];
-                      (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
-                      (*interferenceSignal)[t+shift] = tmp;
+                        j += 1;
                     }
                 }
 
@@ -325,22 +311,8 @@ TxTracker::AddInterferenceFromCV2X (Ptr<NetDevice> netDevice, Ptr<SpectrumValue>
                       if (subBandFreq >= nrLowerFreq && subBandFreq <= nrUpperFreq)
                         {
                           (*interferenceSignal)[j] = (*it2);
-                          j += 1;
                         }
-                    }
-                }
-
-              // Check if the channel of the NR signal is lower than the LTE one
-              // In this case we need to shift the values of the interfering signal
-              if (nrLowerFreq < lteLowerFreq)
-                {
-                  j -= 1;
-                  uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
-                  for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
-                    {
-                      double tmp = (*interferenceSignal)[t];
-                      (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
-                      (*interferenceSignal)[t+shift] = tmp;
+                        j += 1;
                     }
                 }
 
@@ -401,22 +373,8 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                   if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                     {
                       (*interferenceSignal)[j] = noisePowerPerHz * freqPerRb;
-                      j += 1;
                     }
-                }
-
-              // Check if the channel of the NR signal is lower than the 11p one
-              // In this case we need to shift the values of the interfering signal
-              if (nrLowerFreq < wifiLowerFreq)
-                {
-                  j -= 1;
-                  uint8_t shift = interferenceSignal->GetValuesN() - 1 - j;
-                  for (uint8_t t = 0; t != interferenceSignal->GetValuesN(); ++t)
-                    {
-                      double tmp = (*interferenceSignal)[t];
-                      (*interferenceSignal)[t] = (*interferenceSignal)[t+shift];
-                      (*interferenceSignal)[t+shift] = tmp;
-                    }
+                  j += 1;
                 }
 
               // nrPhy->GetNrInterference()->AddSignal (interferenceSignal, interfDuration);
@@ -470,22 +428,8 @@ TxTracker::AddInterferenceFrom11p (Ptr<YansWifiPhy> sender, Ptr<MobilityModel> r
                   if (subBandFreq >= wifiLowerFreq && subBandFreq <= wifiUpperFreq)
                     {
                       (*interferenceSignal)[j] = noisePowerPerHz * freqPerRb;
-                      j += 1;
                     }
-                }
-
-              // Check if the channel of the NR signal is lower than the LTE one
-              // In this case we need to shift the values of the interfering signal
-              if (lteLowerFreq < wifiLowerFreq)
-                {
-                  j -= 1;
-                  uint8_t shift = interferenceSignal->GetValuesN () - 1 - j;
-                  for (uint8_t t = 0; t != interferenceSignal->GetValuesN (); ++t)
-                    {
-                      double tmp = (*interferenceSignal)[t];
-                      (*interferenceSignal)[t] = (*interferenceSignal)[t + shift];
-                      (*interferenceSignal)[t + shift] = tmp;
-                    }
+                    j += 1;
                 }
 
               ltePhy->GetDataInterferencePointer()->AddSignal (interferenceSignal, interfDuration);
