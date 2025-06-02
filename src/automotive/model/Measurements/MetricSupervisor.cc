@@ -154,20 +154,20 @@ MetricSupervisor::signalSentPacket(std::string buf, double lat, double lon, uint
         }
 
 
-      std::vector<int> ids = m_carla_ptr->getManagedConnectedIds ();
-      for (size_t i = 0; i < ids.size(); ++i)
+      std::map<std::basic_string<char>, std::basic_string<char>> ids = m_carla_ptr->getManagedConnectedNodes();
+      for (auto it = ids.begin(); it != ids.end(); ++it)
         {
-          int stationID = ids[i];
+          std::string stationID = it->first;
 
-          carla::Vehicle vehicle = m_carla_ptr->GetManagedActorById(stationID);
+          carla::Vehicle vehicle = m_carla_ptr->GetManagedActorById(std::stoi(stationID));
 
-          if (stationID == nodeID)
+          if (std::stoi(stationID) == nodeID)
             m_stationtype_map[buf] = StationType_passengerCar;
 
-          if(m_excluded_vehID_enabled==false || (m_excluded_vehID_list.find(stationID)==m_excluded_vehID_list.end())) {
+          if(m_excluded_vehID_enabled==false || (m_excluded_vehID_list.find(std::stoi(stationID))==m_excluded_vehID_list.end())) {
               if(MetricSupervisor_haversineDist(lat,lon,vehicle.latitude (),vehicle.longitude ())<=m_baseline_m)
                 {
-                  m_packetbuff_map[buf].nodeList.push_back(stationID);
+                  m_packetbuff_map[buf].nodeList.push_back(std::stoi(stationID));
                 }
             }
         }
@@ -445,7 +445,7 @@ storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState sta
   std::size_t last = context.find ("/", first);
   std::string node = context.substr (first, last - first);
 
-  if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP)
+  if (state != WifiPhyState::IDLE && state != WifiPhyState::SLEEP && state != WifiPhyState::TX)
     {
       // Check if the last measurement for busy state started before the last CBR check
       // In this case we need to consider only the time from the last CBR check
@@ -473,6 +473,11 @@ storeCBR80211p (std::string context, Time start, Time duration, WifiPhyState sta
     }
   else
     {
+      if (currentBusyCBR.find(node) == currentBusyCBR.end())
+        {
+          currentBusyCBR[node] = Time(0);
+        }
+      // Skip the part for the updating of CBR, because doing += Time(0) would be useless
       nodeLastState80211p[node].first = Simulator::Now();
       nodeLastState80211p[node].second = WifiPhyState::IDLE;
     }
@@ -486,17 +491,18 @@ storeCBRNr(std::string context, Time duration)
   std::size_t last = context.find ("/", first);
   std::string node = context.substr (first, last - first);
 
-  // How long the state will last?
-  nodeDurationStateNr[node] = Simulator::Now() + duration;
+  // How long the state will last for the other nodes?
+  // This management will be useful when the CheckCBR function will start (see below)
+  for (auto it = nodeDurationStateNr.begin(); it != nodeDurationStateNr.end(); ++it)
+    {
+      if (it->first != node) nodeDurationStateNr[it->first] = Simulator::Now() + duration;
+    }
 
-  if (currentBusyCBR.find(node) == currentBusyCBR.end())
+  for (auto it = currentBusyCBR.begin(); it != currentBusyCBR.end(); ++it)
     {
-      currentBusyCBR[node] = duration;
+      if (it->first != node) it->second += duration;
     }
-  else
-    {
-      currentBusyCBR[node] += duration;
-    }
+
 }
 
 void
@@ -522,6 +528,7 @@ MetricSupervisor::checkCBR ()
           Time busyCbr = currentBusyCBR[node_id];
 
           // We are in the middle of a busy state
+          /*
           if (m_channel_technology == "80211p" &&
               nodeLastState80211p[node_id].second == WifiPhyState::CCA_BUSY)
             {
@@ -529,12 +536,13 @@ MetricSupervisor::checkCBR ()
               // We need to add the time from the last check if the state is still busy
               busyCbr += Simulator::Now () - nodeLastState80211p[node_id].first;
             }
+            */
 
           if (m_channel_technology == "Nr")
             {
-              // NR duration refers to the future time the channel will be busy
-              // We need to subtract the time that will be busy after this check
-              // This time will be added in the next check (see below)
+              // NR duration refers to the future time the channel will be busy due to resource allocation for a certain node
+              // We need to subtract the time that the channel will be busy for this node after this current check
+              // This time will be added for the next check (see below)
               if (nodeDurationStateNr[node_id] > Simulator::Now ())
                 {
                   Time nextToAdd = nodeDurationStateNr[node_id] - Simulator::Now ();
@@ -576,6 +584,7 @@ MetricSupervisor::checkCBR ()
           Time busyCbr = currentBusyCBR[node_id];
 
           // We are in the middle of a busy state
+          /*
           if (m_channel_technology == "80211p" &&
               nodeLastState80211p[node_id].second == WifiPhyState::CCA_BUSY)
             {
@@ -583,12 +592,13 @@ MetricSupervisor::checkCBR ()
               // We need to add the time from the last check if the state is still busy
               busyCbr += Simulator::Now () - nodeLastState80211p[node_id].first;
             }
+            */
 
           if (m_channel_technology == "Nr")
             {
-              // NR duration refers to the future time the channel will be busy
-              // We need to subtract the time that will be busy after this check
-              // This time will be added in the next check (see below)
+              // NR duration refers to the future time the channel will be busy due to resource allocation for a certain node
+              // We need to subtract the time that the channel will be busy for this node after this current check
+              // This time will be added for the next check (see below)
               if (nodeDurationStateNr[node_id] > Simulator::Now ())
                 {
                   Time nextToAdd = nodeDurationStateNr[node_id] - Simulator::Now ();
@@ -688,6 +698,8 @@ MetricSupervisor::startCheckCBR ()
           oss << "/NodeList/" << node->GetId() << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/ChannelOccupied";
           std::string var = oss.str();
           Config::Connect(var, MakeCallback(&storeCBRNr));
+          currentBusyCBR[std::to_string (node->GetId())] = Time(0);
+          nodeDurationStateNr[std::to_string (node->GetId())] = Time(0);
         }
     }
 
@@ -754,12 +766,12 @@ MetricSupervisor::channelOccupationBytesPerSecondsPerSquareMeter ()
     {
       if (m_total_area == 0)
         {
-          std::vector<int> ids = m_carla_ptr->getManagedConnectedIds ();
+          std::map<std::basic_string<char>, std::basic_string<char>> ids = m_carla_ptr->getManagedConnectedNodes ();
           double totalArea = 0;
-          for (size_t i = 0; i < ids.size(); ++i)
+          for (auto it = ids.begin(); it != ids.end(); ++it)
             {
-              int stationID = ids[i];
-              carla::Vehicle vehicle = m_carla_ptr->GetManagedActorById(stationID);
+              std::string stationID = it->first;
+              carla::Vehicle vehicle = m_carla_ptr->GetManagedActorById(std::stoi (stationID));
               totalArea += vehicle.length () * vehicle.width ();
             }
 
