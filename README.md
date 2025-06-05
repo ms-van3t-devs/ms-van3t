@@ -1,10 +1,10 @@
-# ms-van3t
+# VaN3Twin
 
-![](img/MS-VAN3T_logo-V2_small.png)
+![](img/VaN3Twin_logo_v5_blk.png)
 
 [<img src="img/docs.png" height="40">](https://ms-van3ts-documentation.readthedocs.io/en/master/)
 
------ _ms-van3t is pronounced "em-es vanet"_
+__Looking for ms-van3t? VaN3Twin now integrates the whole ms-van3t framework, and much more, keeping the same functionalities, just under a new name, and with the addition of new functionalities like the integration with a full-fledged ray-tracer!__
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
 
@@ -33,21 +33,21 @@ To build the project:
 
 * Clone this repository in your pc:
 
-`git clone https://github.com/ms-van3t-devs/ms-van3t.git`
+`git clone https://github.com/DriveX-devs/VaN3Twin.git`
 
 * Run, from this repository either:
 
-`./sandbox_builder.sh install-dependencies` -> if this is the first time you install ns-3 or ms-van3t on your system
+`./sandbox_builder.sh install-dependencies` -> if this is the first time you install ns-3 or VaN3Twin on your system
 
 or
 
 `./sandbox_builder.sh` -> if this is **not** the first time you install ns-3 
 
-This script will download the proper version of ns-3-dev and install this framework. The folder `ns-3-dev` will remain linked to this GitHub repository (not to the vanilla ns-3-dev one), allowing you to more easily develop updates and possibile contributions to *ms-van3t*.
+This script will download the proper version of ns-3-dev and install this framework. The folder `ns-3-dev` will remain linked to this GitHub repository (not to the vanilla ns-3-dev one), allowing you to more easily develop updates and possibile contributions to *VaN3Twin*.
     
 * Configure `ns3` to build the framework with `<ns3-folder>./ns3 configure --build-profile=optimized --enable-examples --enable-tests --disable-python (add here what you want to enable)"` - The usage of the optimized profile allows to speed up the simulation time. This command should be launched from inside the `ns-3-dev` folder.
 
-* **Important**: If you are compiling ms-van3t on Ubuntu 22.04 LTS or later, you need to specify, when calling `./ns3 configure`, also the `--disable-werror` flag
+* **Important**: If you are compiling VaN3Twin on Ubuntu 22.04 LTS or later, you need to specify, when calling `./ns3 configure`, also the `--disable-werror` flag
 
 * Build ns3:
 `./ns3 build`
@@ -66,18 +66,18 @@ The user is also encouraged to use the `sumo_files_v2v_map` and `sumo_files_v2i_
 
 **The version of CAM and DENM messages (v1 or v2)** can be easily switched by relying on the `switch_ETSI_version.sh` script. This script relies on the `ns-3-dev/src/automotive/model/ASN1/currmode.txt` file. Please **never** modify it manually or delete it!
 
-# ms-van3t-CARLA extension
+# VaN3Twin-CARLA extension
 
-In addition to SUMO and GPS traces ms-van3t supports the use of CARLA for mobility and sensor perception simulation. This extension leverages the [OpenCDA framework](https://github.com/ucla-mobility/OpenCDA) to develop an LDM module and extend the gRPC adapter devised [here](https://github.com/veins/veins_carla) to be able to extract not only localization information from CARLA but also perception information from the LDM module. The developed client module on ns-3 queries the information to use it for the mobility of each of the ns-3 simulated nodes and to update the LDM module with all perception data sent over the simulated vehicular network. 
+In addition to SUMO and GPS traces VaN3Twin supports the use of CARLA for mobility and sensor perception simulation. This extension leverages the [OpenCDA framework](https://github.com/ucla-mobility/OpenCDA) to develop an LDM module and extend the gRPC adapter devised [here](https://github.com/veins/veins_carla) to be able to extract not only localization information from CARLA but also perception information from the LDM module. The developed client module on ns-3 queries the information to use it for the mobility of each of the ns-3 simulated nodes and to update the LDM module with all perception data sent over the simulated vehicular network. 
 
 **System requirements**
 
-We highly recommend running ms-van3t-CARLA on Ubuntu 20.04 (used for developing the framework) or Ubuntu 18.04, Ubuntu 22.04 is not officially supported by CARLA. If both CARLA and OpenCDA need to be installed we recommend at least 35GB of free space on your system. For smooth execution of simulation (especially if AI/ML models are leveraged for the perception simulation) we recommend using a GPU with at least 8GB of memory.
-The version of CARLA supported by ms-van3t-CARLA is CARLA 0.9.12.
+We highly recommend running VaN3Twin-CARLA on Ubuntu 20.04 (used for developing the framework) or Ubuntu 18.04, Ubuntu 22.04 is not officially supported by CARLA. If both CARLA and OpenCDA need to be installed we recommend at least 35GB of free space on your system. For smooth execution of simulation (especially if AI/ML models are leveraged for the perception simulation) we recommend using a GPU with at least 8GB of memory.
+The version of CARLA supported by VaN3Twin-CARLA is CARLA 0.9.12.
 
-**Installing ms-van3t-CARLA**
+**Installing VaN3Twin-CARLA**
 
-To be able to use ms-van3t-CARLA, CARLA and OpenCDA need to be installed. After following the steps detailed above to build the project, from inside the `ns-3-dev` folder execute the `switch_ms-van3t-CARLA.sh` script to install all necessary dependencies. 
+To be able to use VaN3Twin-CARLA, CARLA and OpenCDA need to be installed. After following the steps detailed above to build the project, from inside the `ns-3-dev` folder execute the `switch_ms-van3t-CARLA.sh` script to install all necessary dependencies. 
 The script will try to find the path of your CARLA and OpenCDA installation to be defined in the `CARLA-OpenCDA.conf` file. If the user already has an installation of either CARLA or OpenCDA they should specify the path to the installation together with the path to their Python environment in the following way: 
 
 `CARLA_HOME=/path/to/CARLA_0.9.12`
@@ -89,7 +89,7 @@ The script will try to find the path of your CARLA and OpenCDA installation to b
 In case this is the first time using either CARLA or OpenCDA the script will install them prompting for confirmation in each case. It is highly recommended to install OpenCDA with conda.
 Once the script finishes its execution the user should build the project again with `./ns3 build`.
 
-**ms-van3t-CARLA examples**
+**VaN3Twin-CARLA examples**
 
 Two examples leveraging CARLA are provided, showcasing how to use the extension with both IEEE 802.11p and NR-V2X as access technologies.
 To run the provided examples: 
@@ -98,9 +98,9 @@ To run the provided examples:
 
  For further description of the modules provided in this extension please refer to our paper [here](https://www.eurecom.fr/publication/7556/download/comsys-publi-7556.pdf).
 
-# ms-van3t NVIDIA-Sionna extension
+# VaN3Twin NVIDIA-Sionna extension
 
-To integrate `NVIDIA Sionna` with the `ms-van3t` framework, you need to install the Python library for Sionna.
+To integrate `NVIDIA Sionna` with the `VaN3Twin` framework, you need to install the Python library for Sionna.
 
 This can be done locally or on a remote server using the following command:
 
@@ -119,7 +119,7 @@ The arguments of both the two Python scripts are:
 - `--local_machine`, include this argument if you want Sionna to run on the local machine. If not provided, the script will interpret that Sionna is running on a remote server.
 - `--verbose`, include this argument if you want to print Sionna logs to the console.
 
-The `sionna_server_script.py`/`sionna_v1_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `ms-van3t` framework, handling various types of messages such as location (and speed in the v1 script) updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
+The `sionna_server_script.py`/`sionna_v1_server_script.py` script automatically identifies the presence of a GPU and configures TensorFlow accordingly. It also sets up a UDP socket to communicate with the `VaN3Twin` framework, handling various types of messages such as location (and speed in the v1 script) updates, path loss requests, delay requests, and line-of-sight (LOS) checks.
 
 Example usage:
 
@@ -127,16 +127,16 @@ Example usage:
   python3 sionna_v1_server_script.py --file_name src/sionna/scenarios/SionnaCircleScenario/scene.xml --local-machine --verbose
 ```
 
-If you are running Sionna on a remote server, you need to specify the IP address of the SIONNA server in your simulation file inside ms-van3t.
+If you are running Sionna on a remote server, you need to specify the IP address of the SIONNA server in your simulation file inside VaN3Twin.
 
-For instance, the `src/automotive/examples/v2v-cam-exchange-sionna-80211p.cc` simulation contains an example of how to configure the communication between ms-van3t and Sionna on the ms-van3t's side.
+For instance, the `src/automotive/examples/v2v-cam-exchange-sionna-80211p.cc` simulation contains an example of how to configure the communication between VaN3Twin and Sionna on the VaN3Twin's side.
 Refer to this example to configure the IP address for a remote SIONNA server in your simulation file.
 
-By following these steps, you can successfully integrate `Sionna` with `ms-van3t` framework and run simulations that leverage Sionna's ray tracing capabilities.
+By following these steps, you can successfully integrate `Sionna` with `VaN3Twin` framework and run simulations that leverage Sionna's ray tracing capabilities.
 
-# ms-van3t co-channel coexistence extension
+# VaN3Twin co-channel coexistence extension
 
-`ms-van3t` offers a special module to simulate the coexistence between different CAVS communication technologies.
+`VaN3Twin` offers a special module to simulate the coexistence between different CAVS communication technologies.
 Currently, the simulator can integrate scenarios where vehicles use either the `IEEE 802.11p` or `NR-V2X` communication stacks, even when their channels overlap.
 
 The interference management is done by a special module called `TxTracker`.
@@ -161,7 +161,7 @@ To enable this specific feature of the simulator, it is important to **follow th
     ./ns3 run "v2v-coexistence-80211p-nrv2x"
    ```
    
-4. To come back to the **normal mode** of `ms-van3t`, run the `./switch_ms-van3t-interference.sh` script again but with the `off` argument:
+4. To come back to the **normal mode** of `VaN3Twin`, run the `./switch_ms-van3t-interference.sh` script again but with the `off` argument:
    ```sh
     ./switch_ms-van3t-interference.sh off
    ```
@@ -177,12 +177,12 @@ For more details on how to manage the co-channel coexistence simulations, such a
 
 # Working with an IDE
 
-Although not necessarily required, you can also configure an IDE in order to more comfortably work with ms-van3t.
-The suggested IDEs, which has also been used for the development of ms-van3t, are _QtCreator_ and _CLion_.
+Although not necessarily required, you can also configure an IDE in order to more comfortably work with VaN3Twin.
+The suggested IDEs, which has also been used for the development of VaN3Twin, are _QtCreator_ and _CLion_.
 
 ## QtCreator
 
-You can find all the instructions for setting up QtCreator with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) on the [official ns-3 Wiki](https://www.nsnam.org/wiki/HOWTO_configure_QtCreator_with_ns-3).
+You can find all the instructions for setting up QtCreator with ns-3 (and the same applies to VaN3Twin, as it is based on ns-3) on the [official ns-3 Wiki](https://www.nsnam.org/wiki/HOWTO_configure_QtCreator_with_ns-3).
 
 QtCreator can be installed on Debian/Ubuntu with:
 `sudo apt install qtcreator`
@@ -198,11 +198,11 @@ Not installing `libclang-common-8-dev` may result in QtCreator wrongly highlight
 
 CLion can be easily installed with the [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/).
 
-You can find all the instructions for setting up CLion with ns-3 (and the same applies to ms-van3t, as it is based on ns-3) on our [documentation](https://ms-van3ts-documentation.readthedocs.io/en/master/IDE.html#clion).
+You can find all the instructions for setting up CLion with ns-3 (and the same applies to VaN3Twin, as it is based on ns-3) on our [documentation](https://ms-van3ts-documentation.readthedocs.io/en/master/IDE.html#clion).
 
 # Supported ETSI C-ITS messages
 
-*ms-van3t* currently supports the following ETSI C-ITS messages:
+*VaN3Twin* currently supports the following ETSI C-ITS messages:
 - CAM
 - DENM
 - IVIM
@@ -214,7 +214,7 @@ For the transmission and reception of IVIMs (from an RSU to vehicles), you can r
 
 # Sample V2I example and V2I/V2N applications
 
-*ms-van3t* currently supports two stacks/communication technologies for V2I/V2N:
+*VaN3Twin* currently supports two stacks/communication technologies for V2I/V2N:
 - 802.11p, communicating, for instance, with a Road Side Unit (sample program name: `v2i-areaSpeedAdvisor-80211p`)
 - LTE, for V2N communications (sample program name: `v2i-areaSpeedAdvisor-lte`)
 
@@ -272,7 +272,7 @@ If using the LTE version in this very simple toy case, it is possible to connect
 
 # Sample V2V example and V2V applications
 
-*ms-van3t* currently supports three stacks/communication technologies for V2V:
+*VaN3Twin* currently supports three stacks/communication technologies for V2V:
 - 802.11p (sample program name: `v2v-emergencyVehicleAlert-80211p`)
 - LTE-V2X Mode 4 (sample program name: `v2v-emergencyVehicleAlert-cv2x`)
 - NR-V2X Mode 2 (sample program name: `v2v-emergencyVehicleAlert-nrv2x`))
@@ -318,7 +318,7 @@ The SUMO map also embeds some re-routers allowing the vehicles to continuously t
 
 # Sample V2X emulator application
 
-*ms-van3t* also includes an example of an emulation application, which is able to send the CAMs and DENMs generated by the vehicles, (virtually) travelling on the SUMO map, over a real network, by relying on a physical interface.
+*VaN3Twin* also includes an example of an emulation application, which is able to send the CAMs and DENMs generated by the vehicles, (virtually) travelling on the SUMO map, over a real network, by relying on a physical interface.
 
 The same application should also be able to receive CAMs and DENMs coming from the external world (i.e. from a certain physical interface of the device running ns-3).
 
@@ -384,11 +384,11 @@ The following screenshot shows a Wireshark capture of the messages sent by the e
 * `--subnet                     [string] To specify the subnet which will  be used to assign the IP addresses of emulated nodes (the .1 address is automatically excluded)`
 *  `--netmask                     [string] To specify the netmask of the network`
 
-# ms-van3t web-based vehicle visualizer
+# VaN3Twin web-based vehicle visualizer
 
 **Requirement:** if you want to use this module, Node.js should be installed (on Ubuntu/Debian you can install it with `sudo apt install nodejs`).
 
-*ms-van3t* also comes with a web-based vehicle visualizer, able to display the vehicles travelling
+*VaN3Twin* also comes with a web-based vehicle visualizer, able to display the vehicles travelling
 during the simulation on a map, rendered directly inside the user's browser.
 
 It can be particularly useful when working with GPS Traces (see the `gps-tc` module), which are not
@@ -400,7 +400,7 @@ relies on Mapbox to draw the street, hybrid and satellite map layers.
 **Once you get it, the mapbox token shall be copied inside the file `mapbox_token` in `src/vehicle-visualizer/js`**
 
 You can find more information on Mapbox [here](https://www.mapbox.com/). They currently have quite good free tier options (allowing, at least in March 2021, up to 200000 free tile requests/month),
-which should be enough to use the ms-van3t vehicle visualizer without the need of paying anything. Please check them before signing up to Mapbox
+which should be enough to use the VaN3Twin vehicle visualizer without the need of paying anything. Please check them before signing up to Mapbox
 and getting a token to be used here. In general, we found out that a normal simulation, in which some sporadic zoom in/zoom out and
 three layer changes are performed, may require around 150/200 tile requests (we advise you to check often the tile request count on the Mapbox website, when you use your token).
 
