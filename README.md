@@ -4,16 +4,19 @@
 
 [<img src="img/docs.png" height="40">](https://ms-van3ts-documentation.readthedocs.io/en/master/)
 
+ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
+
+It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, v1.18.0 on Ubuntu 20.04 and 22.04.
+Back compatibility **is not** ensured with new versions of TraCI and Ubuntu 24.04 is **not** officially supported yet.
+
 ## Looking for ms-van3t?
 __Were you looking for <img src="img/MS-VAN3T_logo-V2_small.png" height="30"> but ended up here?__
 
 VaN3Twin now integrates the whole ms-van3t framework, and much more, keeping the same functionalities, just under a new name, and with the addition of new functionalities like the integration with a full-fledged ray-tracer!
 
-ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
+**Important:** you will still find the name __ms-van3t__ in many parts of the framework. We are in the process of renaming all the references and files, but this may take a bit of time.
 
 ## VaN3Twin installation
-It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, v1.18.0 on Ubuntu 20.04 and 22.04.
-Back compatibility **is not** ensured with new versions of TraCI.
 
 To build the project:
 * Install SUMO following the guide at [https://sumo.dlr.de/wiki/Downloads](https://sumo.dlr.de/wiki/Downloads)
