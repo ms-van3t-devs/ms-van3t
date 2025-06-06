@@ -1,8 +1,14 @@
 # VaN3Twin
 
-<img src="img/VaN3Twin_logo_v5_blk.png" height="150">
+<div align="center">
+<img src="img/VaN3Twin_logo_v5_blk.png" width="400">
+</div>
+
+<br/><br/>
 
 [<img src="img/docs.png" height="40">](https://ms-van3ts-documentation.readthedocs.io/en/master/)
+
+<br/><br/>
 
 ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using SUMO (v-1.6.0+) and ns-3 (ns-3-dev, version supporting the NR-V2X module by CTTC), with the possibility of easily switching stack and communication technology.
 
