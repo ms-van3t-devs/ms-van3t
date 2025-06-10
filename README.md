@@ -15,6 +15,10 @@ ns-3 modules to build and simulate ETSI-compliant VANET (V2X) applications using
 It has been tested with SUMO v1.6.0, v1.7.0, v1.8.0, v1.12.0, v1.18.0 on Ubuntu 20.04 and 22.04.
 Back compatibility **is not** ensured with new versions of TraCI and Ubuntu 24.04 is **not** officially supported yet.
 
+**Contacts, developers, project coordination**: Marco MALINVERNO [marco.malinverno1@gmail.com], Francesco RAVIGLIONE [francescorav.es483@gmail.com], Carlos Mateo RISMA CARLETTI [carlosrisma@gmail.com], Diego GASCO [diego.gasco@polito.it], Roberto PEGURRI [roberto.pegurri@mail.polimi.it], Alessandro GENOVESE [alessandro.genovese@icloud.com], Alessandro GIACCAGLINI [alessandro.giaccaglini@gmail.com], Marco RAPELLI [rapelli.m@libero.it], Francesco LINSALATA [francesco.linsalata@polimi.it], Eugenio MORO [eugenio.moro@polimi.it], Claudio CASETTI [claudio.casetti@polito.it], Carla-Fabiana CHIASSERINI [carla.chiasserini@polito.it]
+
+This project is licensed under a GPL-2.0 License. Please see also the `LICENSE` file for more details.
+
 ## Looking for ms-van3t?
 __Were you looking for <img src="img/MS-VAN3T_logo-V2_small.png" height="30"> but ended up here?__
 
@@ -471,7 +475,9 @@ The visualizer, once a simulation has been started, can be opened inside any bro
 
 ## Acknowledgements
 
-To acknowledge us in your publication(s) please refer to the following publication:
+To acknowledge us in your publication(s) please refer to the following publications:
+
+### Journal publication @ Elsevier Computer Communications (2024)
 
 ```tex
 @article{ms-van3t-journal-2024,
@@ -489,3 +495,22 @@ To acknowledge us in your publication(s) please refer to the following publicati
 ```
 
 Our manuscript is open access and it is available [here](https://doi.org/10.1016/j.comcom.2024.01.022).
+
+### Main VaN3Twin publication (pre-print, 2025)
+
+Our work has been submitted and a pre-print is available [on arXiv](https://arxiv.org/abs/2505.14184):
+```tex
+@misc{pegurri2025van3twinmultitechnologyv2xdigital,
+      title={VaN3Twin: the Multi-Technology V2X Digital Twin with Ray-Tracing in the Loop}, 
+      author={Roberto Pegurri and Diego Gasco and Francesco Linsalata and Marco Rapelli and Eugenio Moro and Francesco Raviglione and Claudio Casetti},
+      year={2025},
+      eprint={2505.14184},
+      archivePrefix={arXiv},
+      primaryClass={cs.NI},
+      url={https://arxiv.org/abs/2505.14184}, 
+}
+```
+
+### Project Acknowledgments
+
+The development of the framework was also carried out within the **MOST – Sustainable Mobility National Research Center** (CN00000023, MOST Spoke 6), and supported by the European Union under the Italian National Recovery and Resilience Plan (NRRP) of NextGenerationEU, partnership on "Telecommunications of the Future" (PE00000001 - program **"RESTART"**).
