@@ -356,7 +356,6 @@ int main (int argc, char *argv[])
               bs_container->getVRUBasicService () ->setK (0.27);
               bs_container->getVRUBasicService () ->setSigma (2.0);
               bs_container->getVRUBasicService () ->setSTCMin (5.0);
-              bs_container->getVRUBasicService () ->setSTCMin (5.0);
               bs_container->getVRUBasicService () ->setTIPThreshold (0.1);
               bs_container->getVRUBasicService () ->setModality ("exp");
             }
