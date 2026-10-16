@@ -156,12 +156,12 @@ namespace ns3
     } else if(btpDataIndication.destPort == VA_PORT) {
       if(m_vam_ReceiveCallback!=nullptr) {
         m_vam_ReceiveCallback(btpDataIndication, address);
+        if(m_station_type == StationType_pedestrian || m_station_type == StationType_cyclist) {
+            if (m_vru_ReceiveCallback_tip != nullptr) {
+                m_vru_ReceiveCallback_tip(btpDataIndication, false);
+            }
+          }
       }
-      if(m_station_type == StationType_pedestrian || m_station_type == StationType_cyclist) {
-				if (m_vru_ReceiveCallback_tip != nullptr) {
-          m_vru_ReceiveCallback_tip(btpDataIndication, false);    
-        }
-			}
     } else if (btpDataIndication.destPort == MC_PORT) {
       if (m_mcm_ReceiveCallback != nullptr) {
           m_mcm_ReceiveCallback(btpDataIndication, address);

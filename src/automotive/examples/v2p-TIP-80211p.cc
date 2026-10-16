@@ -56,10 +56,10 @@ int main (int argc, char *argv[])
   std::string datarate_config;
 
   /*** 0.a App Options ***/
-  std::string sumo_folder = "src/automotive/examples/v2p_tip/";
+  std::string sumo_folder = "src/automotive/examples/sumo_files_v2p_tip/";
   std::string mob_trace_veh = "vehicles.rou.xml";
   std::string mob_trace_ped = "pedestrians.rou.xml";
-  std::string sumo_config = "src/automotive/examples/v2p_tip/v2p_map.sumo.cfg";
+  std::string sumo_config = "src/automotive/examples/sumo_files_v2p_tip/v2p_map.sumo.cfg";
 
   bool verbose = true;
   bool realtime = false;
@@ -341,11 +341,26 @@ int main (int argc, char *argv[])
       double desync = ((double)std::rand()/RAND_MAX);
 
       // Start transmitting CAMs (only vehicles) and VAMs (only pedestrians)
-      if(!station_type_ID.compare("veh"))
-        bs_container->getCABasicService ()->startCamDissemination ();
-      else{
+      if(!station_type_ID.compare("veh")) {
+          bs_container->getCABasicService ()->setStationType (station_type);
+          bs_container->getCABasicService ()->startCamDissemination ();
+        }
+        else {
+          bs_container->getVRUBasicService ()->setStationType (station_type);
           bs_container->getVRUBasicService ()->startAccelerationComputation (computationT_acc);
-          if (nodeID == 1003) bs_container->getVRUBasicService ()->setUseTIP(); // Activate TIP mechanism only for ped1003
+          if (nodeID == 1003)
+            {
+              bs_container->getVRUBasicService ()->setUseTIP(); // Activate TIP mechanism only for ped1003
+              bs_container->getVRUBasicService ()->setTTCMax (4.0);
+              bs_container->getVRUBasicService ()->setTTCMin (1.0);
+              bs_container->getVRUBasicService () ->setK (0.27);
+              bs_container->getVRUBasicService () ->setSigma (2.0);
+              bs_container->getVRUBasicService () ->setSTCMin (5.0);
+              bs_container->getVRUBasicService () ->setSTCMin (5.0);
+              bs_container->getVRUBasicService () ->setTIPThreshold (0.1);
+              bs_container->getVRUBasicService () ->setModality ("exp");
+            }
+
           bs_container->getVRUBasicService ()->startVamDissemination ();
         }
 

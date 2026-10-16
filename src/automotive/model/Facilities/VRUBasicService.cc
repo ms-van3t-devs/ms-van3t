@@ -19,8 +19,6 @@
 
 // TODO make a metric to measure the Age of Information with and without the TIP
 
-// TODO import the example and create a main file in which is possible to set the TIP parameters
-
 namespace ns3
 {
 
@@ -757,16 +755,18 @@ VRUBasicService_error_t VRUBasicService::generateAndEncodeVam(){
   /* Fill the lowFrequencyContainer */
   now = computeTimestampUInt64 ()/NANO_TO_MILLI;
   if(m_last_vam_gen_LF == -1 || now - m_last_vam_gen_LF >= m_T_GenVamLFMin_ms) {
-    if (m_stationtype == StationType_cyclist)
-      asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer->profileAndSubprofile.present, VruProfileAndSubprofile_PR_bicyclistAndLightVruVehicle);
-    else if (m_stationtype == StationType_pedestrian)
-      asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer->profileAndSubprofile.present, VruProfileAndSubprofile_PR_pedestrian);
-    asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer->sizeClass, VruSizeClass_medium);
-    // We do not set the exteriorLights field, as it is not used in the current implementation with pedestrians and cyclists.
-    // If needed, it can be set here using the following line: asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer->exteriorLights);
-
-    // Store the time in which the last VAM LF has been generated and successfully sent
-    m_last_vam_gen_LF = now;
+      auto lowFreqContainer = asn1cpp::makeSeq(VruLowFrequencyContainer);
+      if (m_stationtype == StationType_cyclist) {
+          asn1cpp::setField(lowFreqContainer->profileAndSubprofile.present, VruProfileAndSubprofile_PR_bicyclistAndLightVruVehicle);
+        } else if (m_stationtype == StationType_pedestrian) {
+            asn1cpp::setField(lowFreqContainer->profileAndSubprofile.present, VruProfileAndSubprofile_PR_pedestrian);
+          }
+      asn1cpp::setField(lowFreqContainer->sizeClass, VruSizeClass_medium);
+      // We do not set the exteriorLights field, as it is not used in the current implementation with pedestrians and cyclists.
+      // If needed, it can be set here using the following line: asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer->exteriorLights);
+      asn1cpp::setField(vam->vam.vamParameters.vruLowFrequencyContainer, lowFreqContainer);
+      // Store the time in which the last VAM LF has been generated and successfully sent
+      m_last_vam_gen_LF = now;
   }
 
   long numberOfTIPs = 0;
@@ -779,7 +779,7 @@ VRUBasicService_error_t VRUBasicService::generateAndEncodeVam(){
       double tip = std::get<1>(*it);
       auto TIP = asn1cpp::makeSeq(TrajectoryInterceptionIndication);
       asn1cpp::setField(TIP->subjectStation, stationId);
-      long tip_scaled = std::lround(tip * 50.0);
+      long tip_scaled = std::lround(tip * 50.0); // Scaling as indicated by ETSI
       asn1cpp::setField(TIP->trajectoryInterceptionProbability, tip_scaled);
       asn1cpp::setField(TIP->trajectoryInterceptionConfidence, TrajectoryInterceptionConfidence_above90Percent);
       asn1cpp::sequenceof::pushList(*TIPs, TIP);
@@ -1022,80 +1022,80 @@ void VRUBasicService::VRUreceivedNewMessageForTIP(BTPDataIndication_t dataIndica
 
 std::tuple<double, double> 
 VRUBasicService::compute_ttc_stc(vehicleData_t vehdata) {
-	double ttc = -1.0;
-	double stc = -1.0;
-	// Extract data from the VDP
-	VRUdp_position_latlon_t ped_pos_lat_lon = m_VRUdp->getPedPosition();
+  double ttc = -1.0;
+  double stc = -1.0;
+  // Extract data from the VDP
+  VRUdp_position_latlon_t ped_pos_lat_lon = m_VRUdp->getPedPosition();
   VRUdp::VRUDP_position_cartesian_t ped_pos_xy = m_VRUdp->getXY(ped_pos_lat_lon.lon, ped_pos_lat_lon.lat);
-	double speed_value = m_VRUdp->getPedSpeedValue();
-	double ped_heading = m_VRUdp->getPedHeadingValue();
+  double speed_value = m_VRUdp->getPedSpeedValue();
+  double ped_heading = m_VRUdp->getPedHeadingValue();
 
-	// Remote vehicle position in XYZ
-	double node_lat = vehdata.lat;
-	double node_lon = vehdata.lon;
-	VRUdp::VRUDP_position_cartesian_t node_pos_xy = m_VRUdp->getXY(node_lon, node_lat);
+  // Remote vehicle position in XYZ
+  double node_lat = vehdata.lat;
+  double node_lon = vehdata.lon;
+  VRUdp::VRUDP_position_cartesian_t node_pos_xy = m_VRUdp->getXY(node_lon, node_lat);
   double node_heading = vehdata.heading;
 
-	// Same "no heading available at all" bail-out as get_min_distance
-	if(node_heading == HeadingValue_unavailable && ped_heading == HeadingValue_unavailable) {
-	    return {ttc, stc};
-	  } else {
-		// Same fallback: borrow the ego heading if the remote one is missing and vice versa
-		if(node_heading == HeadingValue_unavailable) {
-			node_heading = ped_heading;
-		} else if (ped_heading == HeadingValue_unavailable) {
-			ped_heading = node_heading;
-		}
+  // Same "no heading available at all" bail-out as get_min_distance
+  if(node_heading == HeadingValue_unavailable && ped_heading == HeadingValue_unavailable) {
+    return {ttc, stc};
+  } else {
+      // Same fallback: borrow the ego heading if the remote one is missing and vice versa
+      if(node_heading == HeadingValue_unavailable) {
+          node_heading = ped_heading;
+      } else if (ped_heading == HeadingValue_unavailable) {
+          ped_heading = node_heading;
+      }
 
-		// Relative position vector, vehicle w.r.t. VRU
-		double dx = node_pos_xy.x - ped_pos_xy.x;
-		double dy = node_pos_xy.y - ped_pos_xy.y;
-		double distance = sqrt(dx*dx + dy*dy);
+    // Relative position vector, vehicle w.r.t. VRU
+    double dx = ped_pos_xy.x - node_pos_xy.x;
+    double dy = ped_pos_xy.y - node_pos_xy.y;
+    double distance = sqrt(dx*dx + dy*dy);
 
-		// Heading -> velocity components on the x=East, y=North axes
-		double ped_heading_rad = ped_heading * (3.14159265358979323846 / 180.0);
+    // Heading -> velocity components on the x=East, y=North axes
+    double ped_heading_rad = ped_heading * (3.14159265358979323846 / 180.0);
     double node_heading_rad = node_heading * (3.14159265358979323846 / 180.0);
 
-		double vx_veh = vehdata.speed_ms * sin(node_heading_rad);
-		double vy_veh = vehdata.speed_ms * cos(node_heading_rad);
+    double vx_node = vehdata.speed_ms * sin(node_heading_rad);
+    double vy_node = vehdata.speed_ms * cos(node_heading_rad);
 
-		double vx_ped = speed_value * sin(ped_heading_rad);
-		double vy_ped = speed_value * cos(ped_heading_rad);
+    double vx_ped = speed_value * sin(ped_heading_rad);
+    double vy_ped = speed_value * cos(ped_heading_rad);
 
-		// Relative velocity of the vehicle w.r.t. the VRU
-		double dvx = vx_veh - vx_ped;
-		double dvy = vy_veh - vy_ped;
+    // Relative velocity of the vehicle w.r.t. the VRU
+    double dvx = vx_ped - vx_node;
+    double dvy = vy_ped - vy_node;
 
-		// Closing speed = -(d/dt) of the distance between the two nodes
-		double closing_speed = (distance > 0) ? -(dx*dvx + dy*dvy)/distance : 0;
+    // Closing speed
+    double closing_speed = (distance > 0.0) ? ((dx * dvx + dy * dvy) / distance) : 0.0;
 
-		if(distance > 0 && closing_speed > 0) {
-			ttc = distance / closing_speed;
-		} else {
-			// Not approaching each other (or already colocated) -> no meaningful TTC
-			ttc = -1.0;
-		}
+    if(distance > 0.0 && closing_speed < 0.0) {
+        ttc = distance / (-closing_speed);
+    } else {
+	// Not approaching each other (or already colocated) -> no meaningful TTC
+	ttc = -1.0;
+    }
 
-		if(ttc >= m_TTC_max || ttc < 0) {
-			// No collision predicted (diverging, parallel courses, or already colocated)
-			return {-1.0, -1.0};
-		}
+    if(ttc >= m_TTC_max || ttc < 0) {
+      // No collision predicted (diverging, parallel courses, or already colocated)
+      return {-1.0, -1.0};
+    }
 
-		// Linearly project the relative position (vehicle - VRU) forward to t = ttc.
-		// This is the SAME linear-motion assumption already baked into the ttc formula,
-		// so this is consistent with it rather than an extra approximation.
-		double dx_at_ttc = dx + dvx * ttc;
-		double dy_at_ttc = dy + dvy * ttc;
+    // Linearly project the relative position (vehicle - VRU) forward to t = ttc.
+    // This is the SAME linear-motion assumption already baked into the ttc formula,
+    // so this is consistent with it rather than an extra approximation.
+    double dx_at_ttc = dx + dvx * ttc;
+    double dy_at_ttc = dy + dvy * ttc;
 
-		stc = sqrt(dx_at_ttc*dx_at_ttc + dy_at_ttc*dy_at_ttc);
+    stc = sqrt(dx_at_ttc*dx_at_ttc + dy_at_ttc*dy_at_ttc);
 
-		if(stc > m_STC_min) {
-			// The projected separation at the predicted collision time is below the minimum threshold -> treat this as a "no collision" case
-			return {-1.0, -1.0};
-		}
+    if(stc > m_STC_min) {
+      // The projected separation at the predicted collision time is below the minimum threshold -> treat this as a "no collision" case
+      return {-1.0, -1.0};
+    }
 
-		return {ttc, stc};
-	}
+    return {ttc, stc};
+  }
 }
 
 }
